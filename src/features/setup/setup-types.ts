@@ -7,6 +7,7 @@ export interface TournamentSetupPlayer {
 
 export interface TournamentSetupValues {
   players: TournamentSetupPlayer[];
+  timingMode: "timed" | "untimed";
   bookingMinutes: number;
   warmupMinutes: number;
   transitionSeconds: number;
@@ -15,6 +16,7 @@ export interface TournamentSetupValues {
 
 export interface TournamentSetupInitialValues {
   players?: Array<{ name: string; rating?: SkillLevel }>;
+  timingMode?: "timed" | "untimed";
   bookingMinutes?: number;
   warmupMinutes?: number;
   transitionSeconds?: number;
@@ -25,6 +27,13 @@ export interface SetupPlayerDraft {
   id: string;
   name: string;
   rating: SkillLevel | "";
+}
+
+export interface SetupNumberDrafts {
+  bookingMinutes: string;
+  warmupMinutes: string;
+  transitionSeconds: string;
+  targetScore: string;
 }
 
 export interface SetupErrors {

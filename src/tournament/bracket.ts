@@ -28,7 +28,7 @@ function makeMatch(input: {
   ordinal: number;
   sourceA: MatchSource;
   sourceB: MatchSource;
-  capMs: number;
+  capMs: number | null;
   targetScore: number;
   matches: Map<string, Match>;
 }): Match {
@@ -76,12 +76,15 @@ export function createTournamentBracket(
   const seeded = seedPlayers(players, config.randomSeed);
   const bracketSize = nextPowerOfTwo(seeded.length);
   const roundCount = Math.log2(bracketSize);
-  const { capMs } = calculateMatchCap({
-    entrantCount: seeded.length,
-    bookingMinutes: config.bookingMinutes,
-    warmupMinutes: config.warmupMinutes,
-    transitionSeconds: config.transitionSeconds,
-  });
+  const capMs =
+    config.timingMode === "timed"
+      ? calculateMatchCap({
+          entrantCount: seeded.length,
+          bookingMinutes: config.bookingMinutes,
+          warmupMinutes: config.warmupMinutes,
+          transitionSeconds: config.transitionSeconds,
+        }).capMs
+      : null;
   const bySeed = new Map(seeded.map((player) => [player.seed, player]));
   let sources: Array<MatchSource | null> = bracketSeedOrder(bracketSize).map(
     (seed) => {
@@ -171,6 +174,7 @@ export function completeMatch(
   scoreA: number,
   scoreB: number,
   completedAt: number,
+  winnerIdOverride?: string,
 ): TournamentBracket {
   const target = bracket.matches.find((match) => match.id === matchId);
   if (!target) throw new Error("Match not found.");
@@ -179,22 +183,23 @@ export function completeMatch(
   if (liveMatch && liveMatch.id !== matchId) {
     throw new Error("Another match is already live on this court.");
   }
-  const earliestRound = Math.min(
-    ...bracket.matches
+  if (target.kind === "elimination") {
+    const unfinishedRounds = bracket.matches
       .filter(
         (match) => match.kind === "elimination" && match.status !== "complete",
       )
-      .map(({ round }) => round),
-  );
-  if (target.round !== earliestRound) {
-    throw new Error("Complete the current round before advancing.");
+      .map(({ round }) => round);
+    const earliestRound = Math.min(...unfinishedRounds);
+    if (target.round !== earliestRound) {
+      throw new Error("Complete the current round before advancing.");
+    }
   }
   const bronze = bracket.matches.find(({ id }) => id === bracket.bronzeMatchId);
   if (matchId === bracket.finalMatchId && bronze?.status !== "complete") {
     throw new Error("Complete the third-place match before the final.");
   }
-  if (!target.sideA || !target.sideB || scoreA === scoreB) {
-    throw new Error("A ready match requires a decisive result.");
+  if (!target.sideA || !target.sideB) {
+    throw new Error("A ready match requires both sides.");
   }
   if (
     !Number.isInteger(scoreA) ||
@@ -205,10 +210,21 @@ export function completeMatch(
   ) {
     throw new Error("Scores and completion time must be valid.");
   }
-  const winnerId =
-    scoreA > scoreB ? target.sideA.memberIds[0] : target.sideB.memberIds[0];
-  const loserId =
-    scoreA > scoreB ? target.sideB.memberIds[0] : target.sideA.memberIds[0];
+  const sideAId = target.sideA.memberIds[0];
+  const sideBId = target.sideB.memberIds[0];
+  const scoreWinnerId =
+    scoreA === scoreB ? null : scoreA > scoreB ? sideAId : sideBId;
+  if (winnerIdOverride && ![sideAId, sideBId].includes(winnerIdOverride)) {
+    throw new Error("Selected winner must be one of the match participants.");
+  }
+  if (scoreWinnerId && winnerIdOverride && scoreWinnerId !== winnerIdOverride) {
+    throw new Error("Selected winner conflicts with the recorded score.");
+  }
+  const winnerId = scoreWinnerId ?? winnerIdOverride;
+  if (!winnerId) {
+    throw new Error("A tied match requires a selected winner.");
+  }
+  const loserId = winnerId === sideAId ? sideBId : sideAId;
   const matches = bracket.matches.map((match) =>
     match.id === matchId
       ? {

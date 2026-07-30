@@ -27,7 +27,7 @@ export function ActionButton({
 }: ActionButtonProps) {
   return (
     <button
-      className={`inline-flex min-h-13 items-center justify-center gap-2 rounded-[18px] px-5 py-3 text-sm font-extrabold tracking-[0.08em] uppercase transition-colors duration-100 disabled:cursor-not-allowed disabled:opacity-45 ${variantClasses[variant]} ${className}`}
+      className={`inline-flex min-h-13 items-center justify-center gap-2 rounded-[18px] px-5 py-3 text-sm font-extrabold tracking-[0.08em] uppercase shadow-[0_5px_0_rgba(0,0,0,0.3)] transition-[color,background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[0_7px_0_rgba(0,0,0,0.32)] active:translate-y-0.5 active:shadow-[0_2px_0_rgba(0,0,0,0.32)] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transform-none motion-reduce:transition-none ${variantClasses[variant]} ${className}`}
       type={type}
       {...props}
     >

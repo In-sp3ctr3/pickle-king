@@ -1,16 +1,10 @@
 import type {
   SetupErrors,
+  SetupNumberDrafts,
   SetupPlayerDraft,
   TournamentSetupValues,
 } from "./setup-types";
 import { calculateMatchCap } from "@/src/tournament";
-
-interface NumericDrafts {
-  bookingMinutes: string;
-  warmupMinutes: string;
-  transitionSeconds: string;
-  targetScore: string;
-}
 
 function integerInRange(
   value: string,
@@ -25,7 +19,8 @@ function integerInRange(
 
 export function validateSetup(
   players: SetupPlayerDraft[],
-  numbers: NumericDrafts,
+  numbers: SetupNumberDrafts,
+  timingMode: "timed" | "untimed",
 ): { errors: SetupErrors; values?: TournamentSetupValues } {
   const errors: SetupErrors = { names: {}, ratings: {} };
   const normalizedNames = players.map((player) =>
@@ -50,29 +45,38 @@ export function validateSetup(
     }
   });
 
-  const bookingMinutes = integerInRange(numbers.bookingMinutes, 30, 480);
-  const warmupMinutes = integerInRange(numbers.warmupMinutes, 0, 60);
-  const transitionSeconds = integerInRange(numbers.transitionSeconds, 0, 600);
+  const parsedBooking = integerInRange(numbers.bookingMinutes, 30, 480);
+  const parsedWarmup = integerInRange(numbers.warmupMinutes, 0, 60);
+  const parsedTransition = integerInRange(numbers.transitionSeconds, 0, 600);
+  const bookingMinutes = parsedBooking ?? 120;
+  const warmupMinutes = parsedWarmup ?? 10;
+  const transitionSeconds = parsedTransition ?? 60;
   const targetScore = integerInRange(numbers.targetScore, 1, 99);
 
-  if (bookingMinutes === null) {
+  if (timingMode === "timed" && parsedBooking === null) {
     errors.bookingMinutes = "Use a whole number from 30 to 480.";
   }
-  if (warmupMinutes === null) {
+  if (timingMode === "timed" && parsedWarmup === null) {
     errors.warmupMinutes = "Use a whole number from 0 to 60.";
-  } else if (bookingMinutes !== null && warmupMinutes >= bookingMinutes) {
+  } else if (
+    timingMode === "timed" &&
+    parsedBooking !== null &&
+    parsedWarmup !== null &&
+    warmupMinutes >= bookingMinutes
+  ) {
     errors.warmupMinutes = "Warmup must be shorter than the booking.";
   }
-  if (transitionSeconds === null) {
+  if (timingMode === "timed" && parsedTransition === null) {
     errors.transitionSeconds = "Use a whole number from 0 to 600.";
   }
   if (targetScore === null) {
     errors.targetScore = "Use a whole number from 1 to 99.";
   }
   if (
-    bookingMinutes !== null &&
-    warmupMinutes !== null &&
-    transitionSeconds !== null &&
+    timingMode === "timed" &&
+    parsedBooking !== null &&
+    parsedWarmup !== null &&
+    parsedTransition !== null &&
     players.length >= 4 &&
     players.length <= 16
   ) {
@@ -100,13 +104,7 @@ export function validateSetup(
       errors.targetScore,
     );
 
-  if (
-    hasErrors ||
-    bookingMinutes === null ||
-    warmupMinutes === null ||
-    transitionSeconds === null ||
-    targetScore === null
-  ) {
+  if (hasErrors || targetScore === null) {
     return { errors };
   }
 
@@ -117,6 +115,7 @@ export function validateSetup(
         name: player.name.trim(),
         rating: player.rating || "2.5",
       })),
+      timingMode,
       bookingMinutes,
       warmupMinutes,
       transitionSeconds,

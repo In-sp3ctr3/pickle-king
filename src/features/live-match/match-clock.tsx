@@ -27,19 +27,25 @@ export function MatchClock({
   const matchMs = remainingMs(scorer, now);
   const sessionMs = sessionDeadline ? Math.max(0, sessionDeadline - now) : 0;
   useEffect(() => {
-    if (scorer.status === "running" && matchMs === 0) onExpire(now);
+    if (scorer.status === "running" && matchMs !== null && matchMs === 0) {
+      onExpire(now);
+    }
   }, [matchMs, now, onExpire, scorer.status]);
-  const match = clockParts(matchMs);
+  const match = matchMs === null ? null : clockParts(matchMs);
   const session = clockParts(sessionMs);
   return (
     <div className="match-clocks" aria-live="polite">
       <div>
         <span className="clock-label">Match clock</span>
-        <strong className="clock-value">
-          <AnimatedNumber value={match.minutes} />
-          <span>:</span>
-          <AnimatedNumber value={match.seconds} />
-        </strong>
+        {match ? (
+          <strong className="clock-value">
+            <AnimatedNumber value={match.minutes} />
+            <span>:</span>
+            <AnimatedNumber value={match.seconds} />
+          </strong>
+        ) : (
+          <strong className="clock-value clock-untimed">Untimed</strong>
+        )}
       </div>
       {sessionDeadline ? (
         <div className="session-clock">

@@ -9,10 +9,12 @@ and crown a winner without sending player data anywhere.
 
 ## What it does
 
-- Standard seeded singles brackets with automatic byes
+- Connected, double-sided singles brackets with automatic byes
 - One-court, round-by-round scheduling with protected rest
 - Mandatory third-place match before the final
-- Touch-first scoring with target, deadline, and golden-point finishes
+- Optional booking timer for tournaments and Quick Match
+- Win-by-two scoring, buzzer finishes, and golden point for timed ties
+- Explicit restart, early-finish, tied-winner, and discard controls
 - Standalone Quick Match for singles or doubles
 - Results, point differential, match history, and upset highlights
 - Offline recovery across refresh, sleep, and network loss
@@ -38,6 +40,9 @@ npm run typecheck
 npm run check:lines
 npm run test
 npm run build
+npm run frontend:test
+npm run frontend:test:workflows
+npm run test:pwa
 ```
 
 See the [product specification](specs/001-offline-tournament-pwa/spec.md),

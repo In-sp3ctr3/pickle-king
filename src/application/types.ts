@@ -25,11 +25,13 @@ export type AppAction =
   | { type: "start-match"; matchId: string; now: number }
   | { type: "score"; action: ScoringAction; now: number }
   | { type: "confirm-result"; now: number }
+  | { type: "discard-match"; now: number }
   | {
       type: "correct-result";
       matchId: string;
       scoreA: number;
       scoreB: number;
+      winnerIdOverride?: string;
       confirmDownstreamReset: boolean;
       now: number;
     }

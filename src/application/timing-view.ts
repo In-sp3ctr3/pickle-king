@@ -18,7 +18,7 @@ export function timingAdjustment(
   tournament: TournamentBracket,
   config: TournamentConfig | undefined,
 ): string | undefined {
-  if (!config) return undefined;
+  if (!config || config.timingMode === "untimed") return undefined;
   const original = calculateMatchCap({
     entrantCount: tournament.players.length,
     bookingMinutes: config.bookingMinutes,

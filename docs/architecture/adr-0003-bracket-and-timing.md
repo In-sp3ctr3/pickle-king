@@ -10,12 +10,16 @@ and deterministically shuffle only equal ratings. Complete rounds before the
 next round, schedule the bronze match before the final, and order other ready
 matches by longest rest.
 
-Persist match deadlines and paused milliseconds. Never persist interval tick
-counts. The target score ends a match immediately; at the deadline the leader
+Tournament and Quick Match clocks are optional. In timed play, persist match
+deadlines and paused milliseconds; never persist interval tick counts. In
+untimed play, persist a null cap and create no artificial deadline. A side wins
+after reaching the target with a two-point lead. At a timed deadline the leader
 wins and a tie enters golden point.
 
 ## Consequences
 
 Seeds are separated fairly, reload/sleep does not freeze time, and the schedule
-is predictable on one court. Ratings remain an input rather than a claim about
-post-tournament skill.
+is predictable on one court. Untimed sessions do not require fake booking data.
+One target applies throughout a tournament to keep rounds competitively
+consistent and scheduling comprehensible. Ratings remain an input rather than
+a claim about post-tournament skill.

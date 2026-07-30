@@ -13,6 +13,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: "3.5",
 }));
 const config: TournamentConfig = {
+  timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
   transitionSeconds: 60,
@@ -64,12 +65,13 @@ describe("application reducer", () => {
     });
     const next = getNextMatch(state.tournament!)!;
     const originalCap = next.config.capMs;
+    expect(originalCap).not.toBeNull();
     state = appReducer(state, {
       type: "start-match",
       matchId: next.id,
       now: state.sessionDeadline! - 5 * 60_000,
     });
-    expect(state.scorer?.durationMs).toBeLessThan(originalCap);
+    expect(state.scorer?.durationMs).toBeLessThan(originalCap!);
     expect(state.scorer?.durationMs).toBe(30_000);
   });
 
@@ -91,5 +93,63 @@ describe("application reducer", () => {
     expect(
       toSnapshot(appReducer(quick, { type: "recover", message: "bad" })),
     ).toBeNull();
+  });
+
+  it("discards a tournament attempt without advancing the bracket", () => {
+    let state = appReducer(initialAppState(0), {
+      type: "create-tournament",
+      players,
+      config,
+      now: 1_000,
+    });
+    const next = getNextMatch(state.tournament!)!;
+    state = appReducer(state, {
+      type: "start-match",
+      matchId: next.id,
+      now: 2_000,
+    });
+    state = appReducer(state, { type: "discard-match", now: 3_000 });
+    expect(state).toMatchObject({
+      screen: "bracket",
+      activeMatchId: null,
+      scorer: null,
+    });
+    expect(getNextMatch(state.tournament!)?.id).toBe(next.id);
+  });
+
+  it("advances the selected winner when a tournament match ends tied", () => {
+    let state = appReducer(initialAppState(0), {
+      type: "create-tournament",
+      players,
+      config,
+      now: 1_000,
+    });
+    const next = getNextMatch(state.tournament!)!;
+    state = appReducer(state, {
+      type: "start-match",
+      matchId: next.id,
+      now: 2_000,
+    });
+    state = appReducer(state, {
+      type: "score",
+      action: { type: "start", now: 2_000 },
+      now: 2_000,
+    });
+    state = appReducer(state, {
+      type: "score",
+      action: { type: "end-early", now: 3_000, winner: "B" },
+      now: 3_000,
+    });
+    state = appReducer(state, { type: "confirm-result", now: 4_000 });
+
+    const completed = state.tournament!.matches.find(
+      ({ id }) => id === next.id,
+    )!;
+    expect(completed).toMatchObject({
+      scoreA: 0,
+      scoreB: 0,
+      status: "complete",
+      winnerId: next.sideB!.memberIds[0],
+    });
   });
 });

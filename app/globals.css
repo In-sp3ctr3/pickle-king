@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./styles/base.css";
+@import "./styles/home-setup.css";
 @import "./styles/match.css";
 @import "./styles/results.css";
 
@@ -30,7 +31,16 @@ body {
   overflow-x: hidden;
   background: var(--court);
   color: var(--chalk);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Manrope", Arial, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.score-number,
+.clock-value,
+.podium-place strong {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
 }
 
 button,

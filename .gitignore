@@ -43,5 +43,10 @@ next-env.d.ts
 /work/
 /test-results/
 /playwright-report/
+/.playwright-cli/
+/output/
 /.specify/cache/
+/.specify/init-options.json
+/.specify/integration.json
+/.specify/integrations/codex.manifest.json
 .agents/

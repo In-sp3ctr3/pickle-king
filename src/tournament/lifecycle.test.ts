@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { completeMatch, createTournamentBracket } from "./bracket";
 import {
+  abandonMatch,
   correctionNeedsConfirmation,
   correctMatchResult,
   startMatch,
@@ -14,6 +15,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: index === 0 ? "5.0" : "3.5",
 }));
 const config: TournamentConfig = {
+  timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
   transitionSeconds: 60,
@@ -33,6 +35,20 @@ describe("match lifecycle", () => {
     expect(() => startMatch(bracket, "r1-m2", 1_000)).toThrow(
       /next scheduled/i,
     );
+  });
+
+  it("discards a live attempt without advancing or losing its schedule slot", () => {
+    const bracket = createTournamentBracket(players, config);
+    const next = getNextMatch(bracket)!;
+    const live = startMatch(bracket, next.id, 1_000);
+    const discarded = abandonMatch(live, next.id);
+    expect(getNextMatch(discarded)?.id).toBe(next.id);
+    expect(discarded.matches.find(({ id }) => id === next.id)).toMatchObject({
+      status: "ready",
+      startedAt: null,
+      scoreA: 0,
+      scoreB: 0,
+    });
   });
 
   it("corrects before dependency play and resets played downstream on confirmation", () => {
@@ -61,5 +77,42 @@ describe("match lifecycle", () => {
       corrected.matches.find(({ id }) => id === corrected.bronzeMatchId)
         ?.status,
     ).toBe("ready");
+  });
+
+  it("corrects tied selected winners and completed bronze results", () => {
+    let bracket = createTournamentBracket(players, config);
+    const first = getNextMatch(bracket)!;
+    const originalWinner = first.sideA!.memberIds[0];
+    const correctedWinner = first.sideB!.memberIds[0];
+    bracket = completeMatch(bracket, first.id, 5, 5, 1_000, originalWinner);
+    bracket = correctMatchResult(
+      bracket,
+      first.id,
+      5,
+      5,
+      2_000,
+      false,
+      correctedWinner,
+    );
+    expect(bracket.matches.find(({ id }) => id === first.id)?.winnerId).toBe(
+      correctedWinner,
+    );
+
+    while (getNextMatch(bracket)) {
+      const match = getNextMatch(bracket)!;
+      bracket = completeMatch(bracket, match.id, 11, 5, 3_000);
+    }
+    const correctedBronze = correctMatchResult(
+      bracket,
+      bracket.bronzeMatchId,
+      4,
+      11,
+      4_000,
+    );
+    expect(
+      correctedBronze.matches.find(
+        ({ id }) => id === correctedBronze.bronzeMatchId,
+      ),
+    ).toMatchObject({ scoreA: 4, scoreB: 11, status: "complete" });
   });
 });

@@ -21,6 +21,30 @@ export function startMatch(
   };
 }
 
+export function abandonMatch(
+  bracket: TournamentBracket,
+  matchId: string,
+): TournamentBracket {
+  const target = bracket.matches.find(({ id }) => id === matchId);
+  if (!target || target.status !== "live") {
+    throw new Error("Only the live match can be discarded.");
+  }
+  return {
+    ...bracket,
+    matches: bracket.matches.map((match) =>
+      match.id === matchId
+        ? {
+            ...match,
+            scoreA: 0,
+            scoreB: 0,
+            status: "ready" as const,
+            startedAt: null,
+          }
+        : match,
+    ),
+  };
+}
+
 function dependentMatchIds(matches: Match[], matchId: string): Set<string> {
   const affected = new Set<string>();
   let changed = true;
@@ -61,6 +85,7 @@ export function correctMatchResult(
   scoreB: number,
   completedAt: number,
   confirmDownstreamReset = false,
+  winnerIdOverride?: string,
 ): TournamentBracket {
   const target = bracket.matches.find(({ id }) => id === matchId);
   if (!target || target.status !== "complete") {
@@ -104,5 +129,6 @@ export function correctMatchResult(
     scoreA,
     scoreB,
     completedAt,
+    winnerIdOverride,
   );
 }

@@ -23,10 +23,11 @@ export interface MatchSide {
 
 export interface MatchConfig {
   targetScore: number;
-  capMs: number;
+  capMs: number | null;
 }
 
 export interface TournamentConfig {
+  timingMode: "timed" | "untimed";
   bookingMinutes: number;
   warmupMinutes: number;
   transitionSeconds: number;
