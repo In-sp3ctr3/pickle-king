@@ -40,8 +40,432 @@
           "expect": { "visible": "[data-qa='quick-match-setup']" }
         }
       ],
-      "motionChecks": ["home-product-sequence"],
-      "reducedMotionChecks": ["home-product-sequence-static"],
+      "motionChecks": [
+        {
+          "name": "home court artwork reveal",
+          "selector": "[data-qa='home-product-sequence']",
+          "stateAttribute": "data-motion-state",
+          "requiredStates": ["droplets", "settled"],
+          "reducedMotionState": "static",
+          "observationMs": 1200
+        }
+      ],
+      "reducedMotionChecks": [
+        {
+          "name": "home product sequence static",
+          "selector": "[data-qa='home-product-sequence']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "setup",
+      "path": "/",
+      "prepare": "tournament-setup",
+      "primaryActionSelector": "[data-qa='build-bracket']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/setup-desktop-source.png",
+          "render": "test-results/frontend-captures/setup-desktop.png",
+          "comparison": "test-results/frontend-comparisons/setup-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/setup-mobile-source.png",
+          "render": "test-results/frontend-captures/setup-mobile.png",
+          "comparison": "test-results/frontend-comparisons/setup-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "setup return home",
+          "selector": "[data-qa='brand-home']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "player names",
+          "selector": ".setup-player-row input",
+          "auditOnly": true,
+          "action": "fill",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "player ratings",
+          "selector": ".setup-player-row select",
+          "auditOnly": true,
+          "action": "select",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "remove players",
+          "selector": ".setup-remove-player",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "add player",
+          "selector": ".setup-add-player",
+          "action": "click",
+          "expect": {
+            "visible": ".setup-player-list > div:nth-child(5) .setup-player-row"
+          }
+        },
+        {
+          "name": "timing options",
+          "selector": ".setup-timing-toggle button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "court number fields",
+          "selector": ".setup-number-input input",
+          "auditOnly": true,
+          "action": "fill",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "target presets",
+          "selector": ".setup-target-presets button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "invalid bracket submit",
+          "selector": "[data-qa='build-bracket']",
+          "action": "click",
+          "expect": { "visible": ".setup-error-summary" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "setup remains available",
+          "selector": "[data-qa='tournament-setup']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "bracket",
+      "path": "/",
+      "prepare": "four-player-bracket",
+      "primaryActionSelector": "[data-qa='start-next']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/bracket-desktop-source.png",
+          "render": "test-results/frontend-captures/bracket-desktop.png",
+          "comparison": "test-results/frontend-comparisons/bracket-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/bracket-mobile-source.png",
+          "render": "test-results/frontend-captures/bracket-mobile.png",
+          "comparison": "test-results/frontend-comparisons/bracket-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "return home",
+          "selector": "[data-qa='brand-home']",
+          "sequence": "bracket-home",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "start next match",
+          "selector": "[data-qa='start-next']",
+          "sequence": "bracket-run-show",
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "start match from tree",
+          "selector": "[data-qa='bracket-node-start']",
+          "sequence": "bracket-tree-start",
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "keyboard pan bracket",
+          "selector": ".bracket-tree-viewport",
+          "sequence": "bracket-keyboard-pan",
+          "action": "press",
+          "value": "ArrowRight",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
+        },
+        {
+          "name": "move bracket left",
+          "selector": "[data-qa='bracket-left']",
+          "viewports": ["mobile"],
+          "sequence": "bracket-pan-left",
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
+        },
+        {
+          "name": "move bracket right",
+          "selector": "[data-qa='bracket-right']",
+          "viewports": ["mobile"],
+          "sequence": "bracket-pan-right",
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "connected bracket remains available",
+          "selector": "[data-qa='bracket-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "quick-setup",
+      "path": "/",
+      "prepare": "quick-setup",
+      "primaryActionSelector": ".quick-submit",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/quick-setup-desktop-source.png",
+          "render": "test-results/frontend-captures/quick-setup-desktop.png",
+          "comparison": "test-results/frontend-comparisons/quick-setup-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/quick-setup-mobile-source.png",
+          "render": "test-results/frontend-captures/quick-setup-mobile.png",
+          "comparison": "test-results/frontend-comparisons/quick-setup-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "quick setup brand home",
+          "selector": "[data-qa='brand-home']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "quick setup back",
+          "selector": ".quick-setup > .text-button",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "quick formats",
+          "selector": ".quick-form > fieldset:first-of-type .segmented-control button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
+        },
+        {
+          "name": "quick player names",
+          "selector": ".quick-player-grid input",
+          "auditOnly": true,
+          "action": "fill",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
+        },
+        {
+          "name": "quick rule fields",
+          "selector": ".quick-rules input",
+          "auditOnly": true,
+          "action": "fill",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
+        },
+        {
+          "name": "quick timing options",
+          "selector": ".quick-timing .segmented-control button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
+        },
+        {
+          "name": "invalid quick submit",
+          "selector": ".quick-submit",
+          "action": "click",
+          "expect": { "visible": ".form-error" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "quick setup remains available",
+          "selector": "[data-qa='quick-match-setup']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "quick-live",
+      "path": "/",
+      "prepare": "quick-live",
+      "primaryActionSelector": "[data-qa='score-a-add']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/quick-live-desktop-source.png",
+          "render": "test-results/frontend-captures/quick-live-desktop.png",
+          "comparison": "test-results/frontend-comparisons/quick-live-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/quick-live-mobile-source.png",
+          "render": "test-results/frontend-captures/quick-live-mobile.png",
+          "comparison": "test-results/frontend-comparisons/quick-live-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "live controls",
+          "selector": ".match-screen button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "exit live match",
+          "selector": ".match-topbar > .text-button",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "add side A",
+          "selector": "[data-qa='score-a-add']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "pause live match",
+          "selector": "[data-qa='match-toggle']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "open restart dialog",
+          "selector": "button:has-text('Restart')",
+          "action": "click",
+          "expect": { "visible": ".match-control-dialog" }
+        },
+        {
+          "name": "open end dialog",
+          "selector": "button:has-text('End match')",
+          "action": "click",
+          "expect": { "visible": ".match-control-dialog" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "live scorer remains available",
+          "selector": "[data-qa='live-match']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "quick-result",
+      "path": "/",
+      "prepare": "quick-result",
+      "primaryActionSelector": "[data-qa='confirm-result']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/quick-result-desktop-source.png",
+          "render": "test-results/frontend-captures/quick-result-desktop.png",
+          "comparison": "test-results/frontend-comparisons/quick-result-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/quick-result-mobile-source.png",
+          "render": "test-results/frontend-captures/quick-result-mobile.png",
+          "comparison": "test-results/frontend-comparisons/quick-result-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "result dialog controls",
+          "selector": ".result-dialog button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".result-dialog" }
+        },
+        {
+          "name": "scorer controls behind result review",
+          "selector": ".match-screen button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "edit result",
+          "selector": "button:has-text('Edit score')",
+          "action": "click",
+          "expect": { "visible": "[data-qa='review-corrected-result']" }
+        },
+        {
+          "name": "confirm quick result",
+          "selector": "[data-qa='confirm-result']",
+          "action": "click",
+          "expect": { "visible": "button:has-text('Done')" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "result dialog remains available",
+          "selector": ".result-dialog",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "results",
+      "path": "/",
+      "prepare": "four-player-results",
+      "primaryActionSelector": ".results-screen > .text-button",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/results-desktop-source.png",
+          "render": "test-results/frontend-captures/results-desktop.png",
+          "comparison": "test-results/frontend-comparisons/results-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/results-mobile-source.png",
+          "render": "test-results/frontend-captures/results-mobile.png",
+          "comparison": "test-results/frontend-comparisons/results-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "results brand home",
+          "selector": "[data-qa='brand-home']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "results home",
+          "selector": ".results-screen > .text-button",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "result corrections",
+          "selector": ".match-history button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "results remain available",
+          "selector": "[data-qa='results']",
+          "expect": "visible"
+        }
+      ],
       "canvasChecks": []
     }
   ]

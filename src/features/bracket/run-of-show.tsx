@@ -91,6 +91,7 @@ export function RunOfShow({
         {isReady ? (
           <ActionButton
             className="mt-6"
+            data-qa="start-next"
             onClick={() => onStartMatch(nextMatch.id)}
             variant="inverse"
           >

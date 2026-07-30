@@ -8,9 +8,9 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
-    "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
-    "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
+    "dev": "NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://127.0.0.1:3000} WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
+    "build": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build && serwist build serwist.config.js",
+    "start": "NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://127.0.0.1:3000} WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "vinext:check": "vinext check",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:render": "npm run build && node --test tests/rendered-html.test.mjs",
+    "test:pwa": "node --test tests/pwa-artifacts.test.mjs",
     "check:lines": "node scripts/check-file-length.mjs",
     "check": "npm run lint && npm run typecheck && npm run check:lines && npm run test && npm run build",
     "frontend:audit:assets": "node scripts/raw-svg-audit.mjs",
@@ -26,6 +27,7 @@
     "frontend:audit:evidence": "node scripts/frontend-evidence-preflight.mjs",
     "frontend:audit:contract": "node scripts/frontend-contract-audit.mjs",
     "frontend:test": "playwright test tests/playwright/frontend-harness.spec.ts",
+    "frontend:test:workflows": "playwright test tests/playwright/product-workflows.spec.ts",
     "frontend:qa": "node scripts/raw-svg-audit.mjs && node scripts/frontend-dead-click-audit.mjs && node scripts/frontend-evidence-preflight.mjs && playwright test tests/playwright/frontend-harness.spec.ts && node scripts/frontend-contract-audit.mjs",
     "frontend:compare": "node scripts/frontend-visual-compare.mjs"
   },
@@ -42,18 +44,22 @@
     "sharp": "0.35.3"
   },
   "dependencies": {
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
     "@number-flow/react": "^0.6.2",
     "lucide-react": "^1.28.0",
     "motion": "^12.43.0",
     "next": "16.2.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "serwist": "^9.5.12",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@cloudflare/vite-plugin": "1.49.0",
     "@playwright/test": "^1.62.1",
+    "@serwist/cli": "^9.5.12",
     "@tailwindcss/postcss": "4.2.1",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
@@ -64,6 +70,7 @@
     "@vitejs/plugin-react": "6.0.5",
     "@vitejs/plugin-rsc": "0.5.32",
     "@vitest/coverage-v8": "^4.1.10",
+    "esbuild": "^0.28.1",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.12",
     "eslint-plugin-boundaries": "^7.1.0",

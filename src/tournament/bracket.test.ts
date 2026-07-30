@@ -17,6 +17,7 @@ import type {
 const levels: SkillLevel[] = ["5.5+", "5.0", "4.5", "4.0", "3.5", "3.0", "2.5"];
 
 const config: TournamentConfig = {
+  timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
   transitionSeconds: 60,
@@ -128,6 +129,16 @@ describe("tournament bracket", () => {
     );
   });
 
+  it("creates an untimed bracket without artificial match caps", () => {
+    const bracket = createTournamentBracket(players(8), {
+      ...config,
+      timingMode: "untimed",
+    });
+    expect(bracket.matches.every(({ config }) => config.capMs === null)).toBe(
+      true,
+    );
+  });
+
   it("preserves bracket invariants across entrant counts and shuffle seeds", () => {
     fc.assert(
       fc.property(
@@ -164,6 +175,22 @@ describe("tournament bracket", () => {
     expect(bracket.matches.every(({ status }) => status === "complete")).toBe(
       true,
     );
+  });
+
+  it("requires an operator-selected participant to resolve a tied early finish", () => {
+    const bracket = createTournamentBracket(players(4), config);
+    const first = getNextMatch(bracket)!;
+    expect(() => completeMatch(bracket, first.id, 5, 5, 1_000)).toThrow(
+      /selected winner/i,
+    );
+    const selected = first.sideB!.memberIds[0];
+    const advanced = completeMatch(bracket, first.id, 5, 5, 1_000, selected);
+    expect(advanced.matches.find(({ id }) => id === first.id)).toMatchObject({
+      scoreA: 5,
+      scoreB: 5,
+      winnerId: selected,
+      status: "complete",
+    });
   });
 
   it("rejects later rounds, the final before bronze, and corrupt scores", () => {

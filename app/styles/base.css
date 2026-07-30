@@ -3,14 +3,21 @@
   background: var(--court);
 }
 
+.brand-mark {
+  width: 84px;
+  height: 84px;
+  margin-bottom: 1.5rem;
+  background: url("/brand/pickle-king-mark.png") center / contain no-repeat;
+  filter: drop-shadow(0 12px 20px rgb(0 0 0 / 45%));
+}
+
 .app-header {
   display: flex;
   min-height: 64px;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--line);
-  padding: 0 2.5rem;
+  padding: 0.75rem 2.5rem 0;
   color: var(--mist);
   font-size: 0.72rem;
   font-weight: 800;
@@ -35,9 +42,16 @@
   text-transform: uppercase;
 }
 
+.brand-button__mark {
+  width: 30px;
+  height: 30px;
+  background: url("/brand/pickle-king-mark.png") center / contain no-repeat;
+}
+
 .primary-button,
 .secondary-button,
 .control-button {
+  position: relative;
   display: inline-flex;
   min-height: 52px;
   align-items: center;
@@ -50,11 +64,26 @@
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+  transition:
+    box-shadow 140ms ease,
+    transform 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease;
 }
 
 .primary-button {
   background: var(--lime);
   color: var(--court);
+  box-shadow: 0 5px 0 #718f1a;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+}
+
+.primary-button:active {
+  box-shadow: 0 1px 0 #718f1a;
+  transform: translateY(3px);
 }
 
 .secondary-button,
@@ -107,14 +136,21 @@
   display: grid;
   gap: 2.25rem;
   margin-top: 3rem;
-  border-top: 1px solid var(--line);
-  padding-top: 2rem;
 }
 
 .quick-form fieldset {
   margin: 0;
   border: 0;
   padding: 0;
+}
+
+.quick-timing {
+  display: grid;
+  gap: 1rem;
+}
+
+.quick-timing label {
+  margin-top: 0.25rem;
 }
 
 .quick-form legend,
@@ -155,12 +191,14 @@
 .quick-player-grid,
 .quick-rules {
   display: grid;
+  align-items: start;
   gap: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .quick-form label {
   display: grid;
+  align-content: start;
 }
 
 .quick-form input {
@@ -171,6 +209,11 @@
   background: var(--court);
   color: var(--chalk);
   padding: 0.8rem 1rem;
+}
+
+.quick-rules > label:first-child input {
+  min-height: 48px;
+  padding-block: 0.5rem;
 }
 
 .form-error {
@@ -196,5 +239,18 @@
   .quick-player-grid,
   .quick-rules {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-button,
+  .secondary-button,
+  .control-button {
+    transition: none;
+  }
+
+  .primary-button:hover,
+  .primary-button:active {
+    transform: none;
   }
 }

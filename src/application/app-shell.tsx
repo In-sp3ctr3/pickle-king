@@ -1,69 +1,37 @@
 "use client";
 
-import { AlertTriangle, Crown } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { BracketScreen } from "../features/bracket";
 import { HomeScreen } from "../features/home";
 import { MatchScreen } from "../features/live-match";
 import { QuickMatchSetup } from "../features/quick-match";
 import { ResultsScreen } from "../features/results";
-import { TournamentSetup, type TournamentSetupValues } from "../features/setup";
+import { TournamentSetup } from "../features/setup";
+import { usePwa } from "../features/pwa";
 import {
   clearSnapshot,
   loadSnapshot,
   saveSnapshot,
 } from "../persistence/storage";
-import type { TournamentSnapshotV1 } from "../persistence/schema";
 import type { ScoringAction } from "../match/types";
-import { correctionNeedsConfirmation, type Player } from "../tournament";
+import { correctionNeedsConfirmation } from "../tournament";
+import {
+  isHistoryScreen,
+  setupPlayers,
+  stateFromSnapshot,
+} from "./app-helpers";
+import { promptForCorrection } from "./correction-prompt";
 import { appReducer, initialAppState, toSnapshot } from "./reducer";
 import { sessionTimeLabel, timingAdjustment } from "./timing-view";
-import type { AppState } from "./types";
-
-const HISTORY_SCREENS = [
-  "home",
-  "setup",
-  "bracket",
-  "live",
-  "quick-setup",
-  "quick-live",
-  "results",
-] satisfies TournamentSnapshotV1["screen"][];
 const noop = () => undefined;
-
-function isHistoryScreen(
-  value: string,
-): value is TournamentSnapshotV1["screen"] {
-  return (HISTORY_SCREENS as string[]).includes(value);
-}
-
-function stateFromSnapshot(
-  snapshot: ReturnType<typeof loadSnapshot>,
-): AppState {
-  if (snapshot.status === "ok") {
-    return { ...snapshot.snapshot, recoveryMessage: null, hydrated: true };
-  }
-  if (snapshot.status === "corrupt") {
-    return {
-      ...initialAppState(0, true),
-      screen: "recovery",
-      recoveryMessage: snapshot.message,
-    };
-  }
-  return initialAppState(0, true);
-}
-
-function setupPlayers(values: TournamentSetupValues): Player[] {
-  return values.players.map((player, index) => ({
-    ...player,
-    id: `player-${index + 1}`,
-  }));
-}
 
 export function AppShell() {
   const [state, dispatch] = useReducer(appReducer, initialAppState(0));
   const [now, setNow] = useState(() => Date.now());
   const previousScreen = useRef(state.screen);
+  const focusedScreen = useRef(state.screen);
+  const pwa = usePwa(state.screen === "live" || state.screen === "quick-live");
 
   useEffect(() => {
     queueMicrotask(() =>
@@ -89,6 +57,18 @@ export function AppShell() {
     previousScreen.current = state.screen;
   }, [state.hydrated, state.screen]);
   useEffect(() => {
+    if (!state.hydrated || focusedScreen.current === state.screen) return;
+    focusedScreen.current = state.screen;
+    window.scrollTo({ behavior: "auto", left: 0, top: 0 });
+    const frame = window.requestAnimationFrame(() => {
+      const heading = document.querySelector<HTMLElement>("main h1");
+      if (!heading) return;
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [state.hydrated, state.screen]);
+  useEffect(() => {
     const syncFromHash = () => {
       const screen = window.location.hash.slice(1);
       if (isHistoryScreen(screen)) {
@@ -109,7 +89,12 @@ export function AppShell() {
     [],
   );
   const correctResult = useCallback(
-    (matchId: string, scoreA: number, scoreB: number) => {
+    (
+      matchId: string,
+      scoreA: number,
+      scoreB: number,
+      winnerIdOverride?: string,
+    ) => {
       if (!state.tournament) return;
       const needsConfirmation = correctionNeedsConfirmation(
         state.tournament,
@@ -128,6 +113,7 @@ export function AppShell() {
         matchId,
         scoreA,
         scoreB,
+        winnerIdOverride,
         confirmDownstreamReset: needsConfirmation,
         now: Date.now(),
       });
@@ -180,16 +166,19 @@ export function AppShell() {
         <header className="app-header">
           <button
             className="brand-button"
+            data-qa="brand-home"
             onClick={() => dispatch({ type: "navigate", screen: "home" })}
             type="button"
           >
-            <Crown aria-hidden="true" size={18} /> Pickle King
+            <span aria-hidden="true" className="brand-button__mark" />
+            Pickle King
           </button>
           <span>Local-only session</span>
         </header>
       ) : null}
       {state.screen === "home" ? (
         <HomeScreen
+          onInstall={pwa.canInstall ? pwa.install : undefined}
           onQuickMatch={() =>
             dispatch({ type: "navigate", screen: "quick-setup" })
           }
@@ -209,11 +198,15 @@ export function AppShell() {
                 }
               : undefined
           }
+          onQuickMatch={() =>
+            dispatch({ type: "navigate", screen: "quick-setup" })
+          }
           onSubmit={(values) =>
             dispatch({
               type: "create-tournament",
               players: setupPlayers(values),
               config: {
+                timingMode: values.timingMode,
                 bookingMinutes: values.bookingMinutes,
                 warmupMinutes: values.warmupMinutes,
                 transitionSeconds: values.transitionSeconds,
@@ -232,21 +225,28 @@ export function AppShell() {
             const match = state.tournament?.matches.find(
               ({ id }) => id === matchId,
             );
-            if (!match) return;
-            const scoreA = Number(
-              window.prompt(
-                "Correct score for the first side",
-                `${match.scoreA}`,
-              ),
+            if (!match?.sideA || !match.sideB || !state.tournament) return;
+            const names = new Map(
+              state.tournament.players.map(({ id, name }) => [id, name]),
             );
-            const scoreB = Number(
-              window.prompt(
-                "Correct score for the second side",
-                `${match.scoreB}`,
-              ),
-            );
-            if (Number.isInteger(scoreA) && Number.isInteger(scoreB)) {
-              correctResult(matchId, scoreA, scoreB);
+            const sideAId = match.sideA.memberIds[0];
+            const sideBId = match.sideB.memberIds[0];
+            const result = promptForCorrection({
+              currentScoreA: match.scoreA,
+              currentScoreB: match.scoreB,
+              currentWinnerId: match.winnerId,
+              prompt: (message, defaultValue) =>
+                window.prompt(message, defaultValue),
+              sideA: { id: sideAId, label: names.get(sideAId) ?? "Side A" },
+              sideB: { id: sideBId, label: names.get(sideBId) ?? "Side B" },
+            });
+            if (result) {
+              correctResult(
+                matchId,
+                result.scoreA,
+                result.scoreB,
+                result.winnerIdOverride,
+              );
             }
           }}
           onStartMatch={(matchId) =>
@@ -269,9 +269,11 @@ export function AppShell() {
           onConfirm={() =>
             dispatch({ type: "confirm-result", now: Date.now() })
           }
+          onDiscard={() => dispatch({ type: "discard-match", now: Date.now() })}
           onExit={() => dispatch({ type: "navigate", screen: "home" })}
           scorer={state.scorer}
           sessionDeadline={state.quickMatch ? null : state.sessionDeadline}
+          standalone={state.screen === "quick-live"}
         />
       ) : null}
       {state.screen === "quick-setup" ? (

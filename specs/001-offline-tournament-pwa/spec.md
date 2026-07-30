@@ -15,7 +15,8 @@ and the final match must finish inside a booked court session.
 - An organizer enters 4–16 unique players and self-ratings from 2.5 to 5.5+.
 - The app creates a standard seeded single-elimination bracket with byes.
 - One court is scheduled round by round with rest-aware ordering.
-- Every match has a touch-first scorekeeper and a wall-clock-safe timer.
+- Every match has a touch-first scorekeeper and an optional wall-clock-safe
+  timer.
 - The app produces a podium, standings, statistics, and upset highlights.
 - A player can run a separate singles or doubles Quick Match.
 
@@ -26,6 +27,8 @@ and the final match must finish inside a booked court session.
 - Ratings seed the bracket only; tied ratings are shuffled by a stored seed.
 - Defaults: 120-minute booking, 10-minute warm-up, 60-second transitions,
   target score 11. Target presets are 7 and 11; custom targets are 1–99.
+- An untimed mode removes booking, warm-up, transition, and match-cap
+  requirements. One target score applies consistently throughout a tournament.
 - The match cap equals available play time divided by all bracket matches,
   including the mandatory third-place match and transitions.
 - Impossible schedules are rejected with a specific correction.
@@ -44,12 +47,20 @@ and the final match must finish inside a booked court session.
 
 - Score controls include large add zones and explicit subtract controls.
 - The operator can pause, resume, or reset.
-- The first side to the target wins, without win-by-two.
+- A side wins only after reaching the target with at least a two-point lead.
 - At the deadline the leader wins; a tie enters golden point.
 - A result is confirmed before advancement.
+- Choosing Edit score enters a dedicated correction state. Score taps remain
+  editable without repeatedly reopening the result dialog; the operator reviews
+  the corrected result once when finished.
+- Restart requires confirmation and resets the score and match clock.
+- Ending early may keep the current score or discard the attempt. A leader wins
+  when the score is kept; a tied score requires the operator to select a
+  winner. Discarding returns the tournament match to ready without advancing.
 - A correction is allowed until a dependent match starts. A later correction
   requires confirmation and clears all affected downstream results.
 - Match and session timers derive from deadlines, not interval counts.
+- Quick Match supports either a time cap or no match clock.
 
 ### Results and recovery
 

@@ -16,12 +16,18 @@
 }
 
 .target-label {
+  display: grid;
   justify-self: end;
   color: var(--mist);
   font-size: 0.7rem;
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.target-label small {
+  color: var(--lime);
+  font-size: 0.58rem;
 }
 
 .match-clocks {
@@ -90,6 +96,7 @@
 
 .score-add {
   display: grid;
+  min-width: 0;
   min-height: 360px;
   align-content: center;
   justify-items: center;
@@ -97,6 +104,7 @@
   background: transparent;
   color: var(--chalk);
   padding: 2rem 1rem 5.5rem;
+  overflow: hidden;
 }
 
 .score-add:disabled {
@@ -119,7 +127,7 @@
   margin-block: 1rem;
   font-size: clamp(10rem, 31vw, 28rem);
   font-weight: 900;
-  letter-spacing: -0.09em;
+  letter-spacing: 0;
   line-height: 0.72;
 }
 
@@ -153,27 +161,94 @@
 
 .match-controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 0.75rem;
   border-top: 1px solid var(--line);
   padding: 0.8rem;
 }
 
-.result-dialog-backdrop {
-  position: fixed;
-  z-index: 20;
-  inset: 0;
-  display: grid;
-  place-items: center;
+.match-controls--editing {
+  align-items: center;
+  justify-content: space-between;
+  background: var(--baseline);
+}
+
+.match-controls--editing > span {
+  color: var(--mist);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.control-button-danger,
+.danger-button {
+  border: 1px solid rgb(255 122 77 / 60%);
+  background: transparent;
+  color: #ff9a78;
+}
+
+.danger-button {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  padding: 0.8rem 1.15rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.match-control-dialog {
+  width: min(92vw, 620px);
+  max-width: none;
+  margin: auto;
+  border: 1px solid #48543e;
+  background: var(--baseline);
+  color: var(--chalk);
+  padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+.match-control-dialog::backdrop {
   background: rgb(9 11 8 / 86%);
-  padding: 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.match-control-dialog h2 {
+  margin: 0;
+  font-size: clamp(2.7rem, 9vw, 5rem);
+  letter-spacing: -0.055em;
+  line-height: 0.88;
+  text-transform: uppercase;
+}
+
+.match-control-dialog > p:not(.eyebrow) {
+  color: var(--mist);
+  line-height: 1.65;
+}
+
+.match-control-actions {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
 }
 
 .result-dialog {
-  width: min(100%, 560px);
+  width: min(92vw, 560px);
+  max-width: none;
+  margin: auto;
   border: 1px solid var(--lime);
   background: var(--baseline);
+  color: var(--chalk);
   padding: clamp(1.5rem, 5vw, 3rem);
+}
+
+.result-dialog::backdrop {
+  background: rgb(9 11 8 / 86%);
+  backdrop-filter: blur(8px);
 }
 
 .result-dialog h2 {
@@ -213,6 +288,11 @@
     grid-template-rows: 1fr 1fr;
   }
 
+  .score-number {
+    max-width: 100%;
+    font-size: clamp(7rem, 31vw, 10rem);
+  }
+
   .score-side {
     border-right: 0;
     border-bottom: 1px solid var(--line);
@@ -247,5 +327,10 @@
 
   .dialog-actions {
     flex-direction: column-reverse;
+  }
+
+  .match-controls--editing {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createScoringState } from "../match/scoring";
-import { createTournamentBracket } from "../tournament";
+import { createTournamentBracket, startMatch } from "../tournament";
 import type { Player, TournamentConfig } from "../tournament";
 import type { TournamentSnapshotV1 } from "./schema";
 import {
@@ -25,6 +25,7 @@ class MemoryStorage implements StorageLike {
 }
 
 const config: TournamentConfig = {
+  timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
   transitionSeconds: 60,
@@ -38,8 +39,10 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
 }));
 
 function snapshot(): TournamentSnapshotV1 {
-  const tournament = createTournamentBracket(players, config);
-  const match = tournament.matches.find(({ status }) => status === "ready")!;
+  let tournament = createTournamentBracket(players, config);
+  let match = tournament.matches.find(({ status }) => status === "ready")!;
+  tournament = startMatch(tournament, match.id, 1_000);
+  match = tournament.matches.find(({ id }) => id === match.id)!;
   return {
     version: 1,
     updatedAt: 1_000,
@@ -77,6 +80,12 @@ describe("snapshot persistence", () => {
     storage.value = JSON.stringify({ version: 1, screen: "live" });
     expect(loadSnapshot(storage)).toMatchObject({ status: "corrupt" });
     expect(storage.value).not.toBeNull();
+  });
+
+  it("rejects shape-valid snapshots with impossible live state", () => {
+    const invalid = snapshot();
+    invalid.scorer = null;
+    expect(() => migrateSnapshot(invalid)).toThrow(/validation/i);
   });
 
   it("rejects unsupported versions and clears only when requested", () => {

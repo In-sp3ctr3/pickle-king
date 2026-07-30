@@ -15,6 +15,7 @@ export function QuickMatchSetup({
   const [doubles, setDoubles] = useState(false);
   const [names, setNames] = useState(["", "", "", ""]);
   const [target, setTarget] = useState(11);
+  const [timed, setTimed] = useState(false);
   const [minutes, setMinutes] = useState(15);
   const [error, setError] = useState("");
   const count = doubles ? 4 : 2;
@@ -30,6 +31,15 @@ export function QuickMatchSetup({
       setError("Player names must be unique.");
       return;
     }
+    if (!Number.isInteger(target) || target < 1 || target > 99) {
+      setError("Play-to score must be a whole number from 1 to 99.");
+      return;
+    }
+    if (timed && (!Number.isInteger(minutes) || minutes < 1 || minutes > 120)) {
+      setError("Time cap must be a whole number from 1 to 120 minutes.");
+      return;
+    }
+    setError("");
     const sideAIds = doubles ? ["quick-a1", "quick-a2"] : ["quick-a1"];
     const sideBIds = doubles ? ["quick-b1", "quick-b2"] : ["quick-b1"];
     onStart(
@@ -39,7 +49,7 @@ export function QuickMatchSetup({
         labelA: active.slice(0, doubles ? 2 : 1).join(" + "),
         labelB: active.slice(doubles ? 2 : 1).join(" + "),
         targetScore: target,
-        durationMs: minutes * 60_000,
+        durationMs: timed ? minutes * 60_000 : null,
       }),
     );
   }
@@ -55,7 +65,7 @@ export function QuickMatchSetup({
       <p className="eyebrow mt-10">Standalone scorer</p>
       <h1>Quick match.</h1>
       <p className="lede">
-        No bracket, no setup marathon. Pick sides, set the cap, and play.
+        No bracket, no setup marathon. Pick sides, choose your rules, and play.
       </p>
       <form className="quick-form" onSubmit={submit}>
         <fieldset>
@@ -114,16 +124,37 @@ export function QuickMatchSetup({
               value={target}
             />
           </label>
-          <label>
-            <span>Time cap · minutes</span>
-            <input
-              max={120}
-              min={1}
-              onChange={(event) => setMinutes(event.target.valueAsNumber)}
-              type="number"
-              value={minutes}
-            />
-          </label>
+          <fieldset className="quick-timing">
+            <legend>Match clock</legend>
+            <div className="segmented-control">
+              <button
+                aria-pressed={!timed}
+                onClick={() => setTimed(false)}
+                type="button"
+              >
+                No time cap
+              </button>
+              <button
+                aria-pressed={timed}
+                onClick={() => setTimed(true)}
+                type="button"
+              >
+                Timed
+              </button>
+            </div>
+            {timed ? (
+              <label>
+                <span>Time cap · minutes</span>
+                <input
+                  max={120}
+                  min={1}
+                  onChange={(event) => setMinutes(event.target.valueAsNumber)}
+                  type="number"
+                  value={minutes}
+                />
+              </label>
+            ) : null}
+          </fieldset>
         </div>
         {error ? (
           <p className="form-error" role="alert">

@@ -1,6 +1,7 @@
 import { scoringReducer } from "../match/scoring";
 import type { TournamentSnapshotV1 } from "../persistence/schema";
 import {
+  abandonMatch,
   completeMatch,
   correctMatchResult,
   createTournamentBracket,
@@ -36,7 +37,7 @@ function rebalanceTournament(state: AppState, now: number) {
     ({ status }) => status !== "complete",
   );
   const currentCapMs = unfinished[0]?.config.capMs;
-  if (!currentCapMs) return bracket;
+  if (currentCapMs === null || currentCapMs === undefined) return bracket;
   let capMs = currentCapMs;
   try {
     capMs = rebalanceRemainingCap({
@@ -105,7 +106,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         tournament,
         activeMatchId: null,
         scorer: null,
-        sessionDeadline: action.now + action.config.bookingMinutes * 60_000,
+        sessionDeadline:
+          action.config.timingMode === "timed"
+            ? action.now + action.config.bookingMinutes * 60_000
+            : null,
         quickMatch: false,
       };
     }
@@ -170,6 +174,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         state.scorer.scoreA,
         state.scorer.scoreB,
         action.now,
+        state.scorer.scoreA === state.scorer.scoreB
+          ? state.scorer.winner === "A"
+            ? state.scorer.sideA.memberIds[0]
+            : state.scorer.winner === "B"
+              ? state.scorer.sideB.memberIds[0]
+              : undefined
+          : undefined,
       );
       const done = tournament.matches.every(
         ({ status }) => status === "complete",
@@ -179,6 +190,26 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         updatedAt: action.now,
         screen: done ? "results" : "bracket",
         tournament,
+        activeMatchId: null,
+        scorer: null,
+      };
+    }
+    case "discard-match": {
+      if (state.quickMatch) {
+        return {
+          ...state,
+          updatedAt: action.now,
+          screen: "quick-setup",
+          scorer: null,
+          quickMatch: false,
+        };
+      }
+      if (!state.tournament || !state.activeMatchId) return state;
+      return {
+        ...state,
+        updatedAt: action.now,
+        screen: "bracket",
+        tournament: abandonMatch(state.tournament, state.activeMatchId),
         activeMatchId: null,
         scorer: null,
       };
@@ -196,6 +227,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           action.scoreB,
           action.now,
           action.confirmDownstreamReset,
+          action.winnerIdOverride,
         ),
         activeMatchId: null,
         scorer: null,

@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Crown, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { promptForCorrection } from "../../application/correction-prompt";
 import { calculateTournamentResult } from "../../tournament";
 import type { TournamentBracket } from "../../tournament";
 
@@ -19,7 +20,12 @@ export function ResultsScreen({
 }: {
   bracket: TournamentBracket;
   onHome: () => void;
-  onCorrect: (matchId: string, scoreA: number, scoreB: number) => void;
+  onCorrect: (
+    matchId: string,
+    scoreA: number,
+    scoreB: number,
+    winnerIdOverride?: string,
+  ) => void;
 }) {
   const reducedMotion = useReducedMotion();
   const result = calculateTournamentResult(bracket);
@@ -31,17 +37,17 @@ export function ResultsScreen({
         <ArrowLeft aria-hidden="true" size={18} /> Home
       </button>
       <motion.header
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ y: 0 }}
         className="results-hero"
-        initial={reducedMotion ? false : { opacity: 0, y: 24 }}
+        initial={reducedMotion ? false : { y: 24 }}
       >
         <motion.div
           animate={reducedMotion ? undefined : { rotate: [0, -8, 6, 0] }}
-          className="champion-crown"
+          aria-label="Crowned pickleball champion mark"
+          className="champion-mark"
+          role="img"
           transition={{ delay: 0.3, duration: 0.7 }}
-        >
-          <Crown aria-hidden="true" />
-        </motion.div>
+        />
         <p className="eyebrow">Tournament complete</p>
         <h1>{name(result.championId)} reigns.</h1>
         <p>
@@ -89,21 +95,34 @@ export function ResultsScreen({
           <h2>Player stats</h2>
           <div className="standings-table" role="table">
             <div className="standings-row standings-head" role="row">
-              <span>Player</span>
-              <span>W–L</span>
-              <span>For</span>
-              <span>Against</span>
-              <span>Diff</span>
+              <span role="columnheader">Player</span>
+              <span role="columnheader">W–L</span>
+              <span role="columnheader">For</span>
+              <span role="columnheader">
+                <span className="results-header-full">Against</span>
+                <abbr className="results-header-short" title="Against">
+                  PA
+                </abbr>
+              </span>
+              <span role="columnheader">
+                <span className="results-header-full">Diff</span>
+                <abbr
+                  className="results-header-short"
+                  title="Point differential"
+                >
+                  +/−
+                </abbr>
+              </span>
             </div>
             {result.standings.map((standing) => (
               <div className="standings-row" key={standing.playerId} role="row">
-                <strong>{name(standing.playerId)}</strong>
-                <span>
+                <strong role="cell">{name(standing.playerId)}</strong>
+                <span role="cell">
                   {standing.wins}–{standing.losses}
                 </span>
-                <span>{standing.pointsFor}</span>
-                <span>{standing.pointsAgainst}</span>
-                <span>
+                <span role="cell">{standing.pointsFor}</span>
+                <span role="cell">{standing.pointsAgainst}</span>
+                <span role="cell">
                   {standing.differential > 0 ? "+" : ""}
                   {standing.differential}
                 </span>
@@ -139,20 +158,24 @@ export function ResultsScreen({
             <button
               className="text-button"
               onClick={() => {
-                const scoreA = Number(
-                  window.prompt(
-                    "Correct score for the first side",
-                    `${match.scoreA}`,
-                  ),
-                );
-                const scoreB = Number(
-                  window.prompt(
-                    "Correct score for the second side",
-                    `${match.scoreB}`,
-                  ),
-                );
-                if (Number.isInteger(scoreA) && Number.isInteger(scoreB)) {
-                  onCorrect(match.id, scoreA, scoreB);
+                const sideAId = match.sideA!.memberIds[0];
+                const sideBId = match.sideB!.memberIds[0];
+                const corrected = promptForCorrection({
+                  currentScoreA: match.scoreA,
+                  currentScoreB: match.scoreB,
+                  currentWinnerId: match.winnerId,
+                  prompt: (message, defaultValue) =>
+                    window.prompt(message, defaultValue),
+                  sideA: { id: sideAId, label: name(sideAId) },
+                  sideB: { id: sideBId, label: name(sideBId) },
+                });
+                if (corrected) {
+                  onCorrect(
+                    match.id,
+                    corrected.scoreA,
+                    corrected.scoreB,
+                    corrected.winnerIdOverride,
+                  );
                 }
               }}
               type="button"

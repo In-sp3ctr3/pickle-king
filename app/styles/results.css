@@ -11,15 +11,12 @@
   text-align: center;
 }
 
-.champion-crown {
-  display: grid;
-  width: 72px;
-  height: 72px;
-  place-items: center;
+.champion-mark {
+  width: 104px;
+  height: 104px;
   margin-bottom: 1.5rem;
-  border-radius: 50%;
-  background: var(--lime);
-  color: var(--court);
+  background: url("/brand/pickle-king-mark.png") center / contain no-repeat;
+  filter: drop-shadow(0 16px 28px rgb(0 0 0 / 60%));
 }
 
 .results-hero h1 {
@@ -101,6 +98,10 @@
   margin-top: 4rem;
 }
 
+.results-grid > * {
+  min-width: 0;
+}
+
 .results-grid h2,
 .match-history h2 {
   font-size: 1rem;
@@ -128,6 +129,11 @@
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.results-header-short {
+  display: none;
+  text-decoration: none;
 }
 
 .elimination-groups {
@@ -180,12 +186,18 @@
     grid-template-columns: 1fr;
   }
 
-  .standings-table {
-    overflow-x: auto;
+  .standings-row {
+    min-width: 0;
+    grid-template-columns: minmax(6rem, 1fr) repeat(4, minmax(2.5rem, auto));
+    font-size: 0.75rem;
   }
 
-  .standings-row {
-    min-width: 580px;
+  .results-header-full {
+    display: none;
+  }
+
+  .results-header-short {
+    display: inline;
   }
 
   .history-row {
