@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a focused product improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Court-side problem
+      description: What becomes easier or fairer for the organizer or players?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundaries
+      options:
+        - label: This can work without transmitting player data.
+        - label: I checked that this is not already requested.

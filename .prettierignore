@@ -1,0 +1,7 @@
+dist
+.next
+.vinext
+coverage
+node_modules
+package-lock.json
+test-results
