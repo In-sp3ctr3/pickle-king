@@ -1,4 +1,5 @@
 export * from "./bracket";
+export * from "./lifecycle";
 export * from "./results";
 export * from "./schedule";
 export * from "./seeding";

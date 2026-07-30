@@ -21,6 +21,7 @@ test("server-renders the public landing shell", async () => {
   const html = await response.text();
   assert.match(html, /<title>Pickle King/);
   assert.match(html, /One court/);
-  assert.match(html, /Product foundation ready/);
+  assert.match(html, /Start tournament/);
+  assert.match(html, /Private by default/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/);
 });
