@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "baseUrl": "http://127.0.0.1:3000",
+  "viewports": [
+    { "name": "desktop", "width": 1440, "height": 1000 },
+    { "name": "mobile", "width": 390, "height": 844 }
+  ],
+  "routes": [
+    {
+      "name": "home",
+      "path": "/",
+      "primaryActionSelector": "[data-qa='start-tournament']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/home-desktop-source.png",
+          "render": "test-results/frontend-captures/home-desktop.png",
+          "comparison": "test-results/frontend-comparisons/home-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/home-mobile-source.png",
+          "render": "test-results/frontend-captures/home-mobile.png",
+          "comparison": "test-results/frontend-comparisons/home-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "start tournament",
+          "selector": "[data-qa='start-tournament']",
+          "viewports": ["desktop", "mobile"],
+          "sequence": "home-to-setup",
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "quick match",
+          "selector": "[data-qa='quick-match']",
+          "viewports": ["desktop", "mobile"],
+          "sequence": "home-to-quick-match",
+          "action": "click",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
+        }
+      ],
+      "motionChecks": ["home-product-sequence"],
+      "reducedMotionChecks": ["home-product-sequence-static"],
+      "canvasChecks": []
+    }
+  ]
+}

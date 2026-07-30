@@ -1,1 +1,62 @@
-# pickle-king
+# Pickle King
+
+An offline-first tournament director and scorekeeper for a weekly pickleball
+crew. Seed 4–16 players, finish a fair one-court knockout inside the booking,
+and crown a winner without sending player data anywhere.
+
+> Pickle King is under active v1 development. Ratings are used only for bracket
+> seeding; the app does not calculate an official pickleball rating.
+
+## What it does
+
+- Standard seeded singles brackets with automatic byes
+- One-court, round-by-round scheduling with protected rest
+- Mandatory third-place match before the final
+- Touch-first scoring with target, deadline, and golden-point finishes
+- Standalone Quick Match for singles or doubles
+- Results, point differential, match history, and upset highlights
+- Offline recovery across refresh, sleep, and network loss
+- Local-only storage: names and scores never leave the device
+
+## Local development
+
+Requirements: Node.js 22.13 or newer.
+
+```bash
+npm ci
+npm run dev
+```
+
+Open `http://127.0.0.1:3000`.
+
+## Quality checks
+
+```bash
+npm run vinext:check
+npm run lint
+npm run typecheck
+npm run check:lines
+npm run test
+npm run build
+```
+
+See the [product specification](specs/001-offline-tournament-pwa/spec.md),
+[architecture decisions](docs/architecture), and
+[verification record](specs/001-offline-tournament-pwa/verification.md).
+
+## Privacy
+
+Tournament data is stored only in your browser. There is no account, analytics,
+cloud database, or server API. Clearing site storage deletes local sessions.
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md). Please report vulnerabilities privately
+as described in [SECURITY.md](SECURITY.md).
+
+## License
+
+Pickle King is available under the [MIT License](LICENSE). Third-party software
+and design acknowledgements are listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
