@@ -1,0 +1,43 @@
+import type { ScoringAction, ScoringState } from "../match/types";
+import type { TournamentSnapshotV1 } from "../persistence/schema";
+import type { Player, TournamentConfig } from "../tournament";
+
+export type AppState = Omit<TournamentSnapshotV1, "screen"> & {
+  screen: TournamentSnapshotV1["screen"] | "recovery";
+  recoveryMessage: string | null;
+  hydrated: boolean;
+};
+
+export type AppAction =
+  | { type: "navigate"; screen: TournamentSnapshotV1["screen"] }
+  | {
+      type: "update-draft";
+      players: Player[];
+      config: TournamentConfig;
+      now: number;
+    }
+  | {
+      type: "create-tournament";
+      players: Player[];
+      config: TournamentConfig;
+      now: number;
+    }
+  | { type: "start-match"; matchId: string; now: number }
+  | { type: "score"; action: ScoringAction; now: number }
+  | { type: "confirm-result"; now: number }
+  | {
+      type: "correct-result";
+      matchId: string;
+      scoreA: number;
+      scoreB: number;
+      confirmDownstreamReset: boolean;
+      now: number;
+    }
+  | {
+      type: "start-quick";
+      scorer: ScoringState;
+      now: number;
+    }
+  | { type: "hydrate"; state: AppState }
+  | { type: "recover"; message: string }
+  | { type: "reset"; now: number };
