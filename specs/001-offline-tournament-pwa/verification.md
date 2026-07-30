@@ -2,20 +2,21 @@
 
 Status: in progress
 
-| Check                  | Evidence                                   | Result  |
-| ---------------------- | ------------------------------------------ | ------- |
-| Vinext compatibility   | 100% compatible, no partial APIs           | passed  |
-| Lint and format        | ESLint + Prettier local run                | passed  |
-| TypeScript strict      | `tsc --noEmit`                             | passed  |
-| Domain/component tests | Vitest report                              | pending |
-| Production build       | Vinext output and server render            | passed  |
-| Browser workflows      | Playwright report                          | pending |
-| Accessibility          | Axe + keyboard review                      | pending |
-| PWA/offline            | manifest/SW/offline smoke                  | pending |
-| Security               | runtime `npm audit --omit=dev`: 0 findings | passed  |
-| File length            | hand-authored source checked               | passed  |
-| Design review          | `docs/frontend/reviews/design-review.md`   | pending |
-| Deployment             | merged commit + Sites version              | pending |
+| Check                | Evidence                                   | Result  |
+| -------------------- | ------------------------------------------ | ------- |
+| Vinext compatibility | 100% compatible, no partial APIs           | passed  |
+| Lint and format      | ESLint + Prettier local run                | passed  |
+| TypeScript strict    | `tsc --noEmit`                             | passed  |
+| Domain tests         | 38 examples/properties across 4–16         | passed  |
+| Component tests      | Vitest report                              | pending |
+| Production build     | Vinext output and server render            | passed  |
+| Browser workflows    | Playwright report                          | pending |
+| Accessibility        | Axe + keyboard review                      | pending |
+| PWA/offline          | manifest/SW/offline smoke                  | pending |
+| Security             | runtime `npm audit --omit=dev`: 0 findings | passed  |
+| File length          | hand-authored source checked               | passed  |
+| Design review        | `docs/frontend/reviews/design-review.md`   | pending |
+| Deployment           | merged commit + Sites version              | pending |
 
 ## Foundation exception
 
