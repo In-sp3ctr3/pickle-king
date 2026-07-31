@@ -15,5 +15,5 @@
 - [x] P001 Add brand assets, number motion, reduced-motion behavior, and responsive polish.
 - [x] P002 Add manifest, Serwist build, offline fallback, update deferral, and Wake Lock.
 - [x] P003 Run browser, accessibility, console, dead-control, and visual checks.
-- [ ] R001 Complete four squash PRs and repository settings.
-- [ ] R002 Verify merged `main`, save a Sites version, and deploy exact source.
+- [x] R001 Complete four squash PRs and repository settings.
+- [x] R002 Verify merged `main`, save a Sites version, and deploy exact source.
