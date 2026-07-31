@@ -89,9 +89,17 @@ async function fillFourPlayerSetup(page: Page, target = 11) {
   const ratings = ["5.5+", "4.5", "3.5", "2.5"];
   for (let index = 0; index < names.length; index += 1) {
     await page.getByLabel("Player name").nth(index).fill(names[index]);
-    await page.getByLabel("Rating").nth(index).selectOption(ratings[index]);
+    await page.getByLabel("Rating").nth(index).click();
+    await page.keyboard.type(ratings[index]);
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("listbox")).toBeHidden();
   }
-  await page.getByLabel("Every match plays to").fill(String(target));
+  await page
+    .getByRole("spinbutton", {
+      name: "Every match plays to",
+      exact: true,
+    })
+    .fill(String(target));
   await page.locator("[data-qa='build-bracket']").click();
 }
 

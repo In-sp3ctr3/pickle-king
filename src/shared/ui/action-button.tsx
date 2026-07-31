@@ -9,13 +9,11 @@ export interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const variantClasses: Record<ActionButtonVariant, string> = {
-  primary: "bg-[#c8ff3d] text-[#090b08] hover:bg-[#d5ff6d] active:bg-[#95c721]",
-  secondary:
-    "border border-[#3b4436] bg-[#11150f] text-[#f5f3e9] hover:border-[#9da494] hover:bg-[#171d14] active:bg-[#20281b]",
-  quiet: "bg-transparent text-[#f5f3e9] hover:bg-[#1a2017] active:bg-[#242c20]",
-  danger:
-    "border border-[#ff7a4d]/60 bg-transparent text-[#ff9a78] hover:bg-[#ff7a4d]/10 active:bg-[#ff7a4d]/20",
-  inverse: "bg-[#090b08] text-[#f5f3e9] hover:bg-[#20281b] active:bg-[#2b3227]",
+  primary: "action-button--primary bg-[#c8ff3d] text-[#090b08]",
+  secondary: "action-button--secondary bg-[#171d14] text-[#f5f3e9]",
+  quiet: "action-button--quiet bg-transparent text-[#f5f3e9]",
+  danger: "action-button--danger bg-transparent text-[#ff9a78]",
+  inverse: "action-button--inverse bg-[#090b08] text-[#f5f3e9]",
 };
 
 export function ActionButton({
@@ -27,11 +25,11 @@ export function ActionButton({
 }: ActionButtonProps) {
   return (
     <button
-      className={`inline-flex min-h-13 items-center justify-center gap-2 rounded-[18px] px-5 py-3 text-sm font-extrabold tracking-[0.08em] uppercase shadow-[0_5px_0_rgba(0,0,0,0.3)] transition-[color,background-color,border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:shadow-[0_7px_0_rgba(0,0,0,0.32)] active:translate-y-0.5 active:shadow-[0_2px_0_rgba(0,0,0,0.32)] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transform-none motion-reduce:transition-none ${variantClasses[variant]} ${className}`}
+      className={`action-button inline-flex min-h-13 items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold tracking-[0.045em] uppercase transition-[color,background-color,transform] duration-200 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-45 motion-reduce:transform-none motion-reduce:transition-none ${variantClasses[variant]} ${className}`}
       type={type}
       {...props}
     >
-      {children}
+      <span className="action-button__content">{children}</span>
     </button>
   );
 }

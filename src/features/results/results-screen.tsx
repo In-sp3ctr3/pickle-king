@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Crown, Sparkles } from "lucide-react";
+import { Crown, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { promptForCorrection } from "../../application/correction-prompt";
 import { calculateTournamentResult } from "../../tournament";
@@ -15,11 +15,9 @@ function roundName(round: number, total: number) {
 
 export function ResultsScreen({
   bracket,
-  onHome,
   onCorrect,
 }: {
   bracket: TournamentBracket;
-  onHome: () => void;
   onCorrect: (
     matchId: string,
     scoreA: number,
@@ -33,9 +31,6 @@ export function ResultsScreen({
   const name = (id: string) => player.get(id)?.name ?? "Player";
   return (
     <main className="results-screen" data-qa="results">
-      <button className="text-button" onClick={onHome} type="button">
-        <ArrowLeft aria-hidden="true" size={18} /> Home
-      </button>
       <motion.header
         animate={{ y: 0 }}
         className="results-hero"

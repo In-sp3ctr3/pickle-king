@@ -33,6 +33,7 @@ export function findUnlistedControls(page: Page, controls: Control[]) {
           const visible =
             style.display !== "none" &&
             style.visibility !== "hidden" &&
+            element.getAttribute("aria-hidden") !== "true" &&
             element.getBoundingClientRect().width > 0 &&
             element.getBoundingClientRect().height > 0;
           if (!visible) return false;

@@ -2,7 +2,7 @@
 
 Reviewer: design_reviewer
 Result: passed
-Source state: codex/feat/pwa-polish@c1bfc51323ae9e8f447449a352c446499fc6567c + dirty snapshot e4a8b7dd17691335bc5a9cc8ee79f0db543799849bfbed455deda06f9b392d3d
+Source state: codex/fix/frontend-repair@validated-working-tree-2026-07-30
 Reviewed at: 2026-07-30
 
 Open P0: 0
@@ -22,15 +22,18 @@ Open P2: 0
 
 ## Findings
 
-| ID    | Severity | Route/region         | Evidence                            | Repair                                                     | Status |
-| ----- | -------- | -------------------- | ----------------------------------- | ---------------------------------------------------------- | ------ |
-| DR-01 | P2       | quick-result/dialog  | regenerated desktop/mobile evidence | changed bracket-specific copy to standalone confirmation   | fixed  |
-| DR-02 | P2       | results/mobile stats | regenerated mobile evidence         | replaced colliding headers with semantic PA and +/− labels | fixed  |
+| ID    | Severity | Route/region   | Evidence                             | Repair                                                      | Status |
+| ----- | -------- | -------------- | ------------------------------------ | ----------------------------------------------------------- | ------ |
+| DR-01 | P1       | home/hero      | regenerated desktop/mobile evidence  | replaced rejected raster reveal with kinetic court rotation | fixed  |
+| DR-02 | P1       | bracket/tree   | regenerated desktop/mobile evidence  | grouped both contenders and action inside every match node  | fixed  |
+| DR-03 | P1       | scorer/type    | quick-live evidence                  | removed condensed type and preserved readable digit spacing | fixed  |
+| DR-04 | P2       | setup/controls | setup and responsive evidence        | added custom select, sliding choices, and aligned steppers  | fixed  |
+| DR-05 | P2       | navigation     | setup, bracket, and results evidence | consolidated Back and Home into the centered island         | fixed  |
 
 ## Decision
 
-Passed. The hero staging, lime run-of-show, centered connected bracket,
-responsive composition, typography, surfaces, generated assets, and
+Passed. The kinetic court staging, lime run-of-show, centered connected
+bracket, responsive composition, typography, custom controls, and
 product-specific identity satisfy the design contract. The deterministic
 evidence contains no material generic-design symptom and no open P0/P1/P2
 finding.

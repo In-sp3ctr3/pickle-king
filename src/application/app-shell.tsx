@@ -23,6 +23,7 @@ import {
 } from "./app-helpers";
 import { promptForCorrection } from "./correction-prompt";
 import { appReducer, initialAppState, toSnapshot } from "./reducer";
+import { AppNavigation } from "./app-navigation";
 import { sessionTimeLabel, timingAdjustment } from "./timing-view";
 const noop = () => undefined;
 
@@ -160,22 +161,10 @@ export function AppShell() {
   };
   return (
     <div className="app-shell">
-      {state.screen !== "home" &&
-      state.screen !== "live" &&
-      state.screen !== "quick-live" ? (
-        <header className="app-header">
-          <button
-            className="brand-button"
-            data-qa="brand-home"
-            onClick={() => dispatch({ type: "navigate", screen: "home" })}
-            type="button"
-          >
-            <span aria-hidden="true" className="brand-button__mark" />
-            Pickle King
-          </button>
-          <span>Local-only session</span>
-        </header>
-      ) : null}
+      <AppNavigation
+        onNavigate={(screen) => dispatch({ type: "navigate", screen })}
+        screen={state.screen}
+      />
       {state.screen === "home" ? (
         <HomeScreen
           onInstall={pwa.canInstall ? pwa.install : undefined}
@@ -278,18 +267,13 @@ export function AppShell() {
       ) : null}
       {state.screen === "quick-setup" ? (
         <QuickMatchSetup
-          onBack={() => dispatch({ type: "navigate", screen: "home" })}
           onStart={(scorer) =>
             dispatch({ type: "start-quick", scorer, now: Date.now() })
           }
         />
       ) : null}
       {state.screen === "results" && state.tournament ? (
-        <ResultsScreen
-          bracket={state.tournament}
-          onCorrect={correctResult}
-          onHome={() => dispatch({ type: "navigate", screen: "home" })}
-        />
+        <ResultsScreen bracket={state.tournament} onCorrect={correctResult} />
       ) : null}
     </div>
   );

@@ -22,6 +22,7 @@ export function MatchCard({
   sideBLabel,
 }: MatchCardProps) {
   const isReady = match.status === "ready";
+  const complete = match.status === "complete";
   return (
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
@@ -35,21 +36,27 @@ export function MatchCard({
 
       <div className="tree-match-card__sides">
         <MatchSideRow
+          isLoser={complete && match.loserId === match.sideA?.memberIds[0]}
           isWinner={match.winnerId === match.sideA?.memberIds[0]}
           label={sideALabel}
           score={match.scoreA}
+          showScore={match.status === "live" || complete}
         />
         <MatchSideRow
+          isLoser={complete && match.loserId === match.sideB?.memberIds[0]}
           isWinner={match.winnerId === match.sideB?.memberIds[0]}
           label={sideBLabel}
           score={match.scoreB}
+          showScore={match.status === "live" || complete}
         />
       </div>
 
       {isReady && canStart ? (
         <ActionButton
           className="tree-match-card__action"
+          data-qa="bracket-node-start"
           onClick={() => onStartMatch(match.id)}
+          variant="inverse"
         >
           <Play aria-hidden="true" fill="currentColor" size={17} />
           Start
@@ -69,19 +76,31 @@ export function MatchCard({
 }
 
 function MatchSideRow({
+  isLoser,
   isWinner,
   label,
   score,
+  showScore,
 }: {
+  isLoser: boolean;
   isWinner: boolean;
   label: string;
   score: number;
+  showScore: boolean;
 }) {
   return (
-    <div className="tree-match-side">
+    <div
+      className={`tree-match-side ${
+        isWinner
+          ? "tree-match-side--winner"
+          : isLoser
+            ? "tree-match-side--loser"
+            : ""
+      }`}
+    >
       <span
         className={`tree-match-side__name ${
-          label === "To be decided" ? "text-[#818a7a]" : "text-[#f5f3e9]"
+          label === "To be decided" ? "text-[#9da494]" : "text-[#f5f3e9]"
         }`}
       >
         {isWinner ? (
@@ -93,7 +112,7 @@ function MatchSideRow({
         ) : null}
         <span className="truncate">{label}</span>
       </span>
-      <strong>{score}</strong>
+      <strong>{showScore ? score : "—"}</strong>
     </div>
   );
 }
@@ -118,14 +137,15 @@ export function ByeCard({
         </span>
       </header>
       <div className="tree-match-card__sides">
-        <div className="tree-match-side">
+        <div className="tree-match-side tree-match-side--winner">
           <span className="tree-match-side__name text-[#f5f3e9]">
             {playerName}
           </span>
-          <strong aria-label="Advanced">A</strong>
+          <strong aria-label="Advanced">✓</strong>
         </div>
         <div className="tree-match-side tree-match-side--bye">
-          <span>Advances automatically</span>
+          <span>Bye</span>
+          <strong>—</strong>
         </div>
       </div>
     </article>

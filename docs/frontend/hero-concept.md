@@ -1,10 +1,10 @@
-# Home Hero Artwork
+# Home Kinetic Court
 
 Status: ready  
 Research required: yes  
 Motion required: yes  
-Motion reason: a staged impact makes the generated image feel painted into the
-court surface instead of placed inside a rectangular hero card.
+Motion reason: player positions visibly rotate between court and rest while the
+crown resolves above the active court.
 
 ## Product Story
 
@@ -16,44 +16,41 @@ court surface instead of placed inside a rectangular hero card.
 
 ## Direction
 
-The hero uses original, text-free editorial artwork: one acid-lime pickleball
-crosses a worn night court toward a gold crown. The same aligned image sits
-behind several alpha masks. A large organic blot lands first, a smaller splash
-follows, and detached droplets finish the reveal. Because only the masked pixels
-appear, there is never a rectangular image edge against the near-black page.
+The hero is an open DOM composition rather than an image. An angled pickleball
+court sits behind four player names. Two names move into the active matchup,
+two shift into a visible rest lane, a ball travels across the court, and the
+crown resolves above the composition. The movement demonstrates the product's
+fairness mechanism rather than decorating the page.
 
-This visual is not a bracket, scoreboard, stock sports photograph, dashboard
-panel, or UI mockup. It reduces the product promise to one courtside idea: play
-through the draw and claim the crown.
+The previous night-court artwork and paint mask are rejected because the user
+did not accept the image or the hero composition.
 
 ## Storyboard
 
-| Stage    | Time       | Visual state                                        | Product meaning                   | QA signal                      |
-| -------- | ---------- | --------------------------------------------------- | --------------------------------- | ------------------------------ |
-| Impact   | 0–150ms    | Small central paint contact and soft impact bloom   | The challenge lands on court      | `data-motion-state="impact"`   |
-| Spread   | 150–430ms  | Main wet-paint silhouette expands and settles       | The session takes shape           | `data-motion-state="spread"`   |
-| Droplets | 430–1050ms | Secondary splash and detached drops arrive          | Energy without a decorative loop  | `data-motion-state="droplets"` |
-| Settled  | 1050ms+    | One continuous image remains inside irregular edges | The primary actions stay readable | `data-motion-state="settled"`  |
+| Stage   | Time       | Visual state                                  | Product meaning                  | QA signal                     |
+| ------- | ---------- | --------------------------------------------- | -------------------------------- | ----------------------------- |
+| Seeded  | 0–180ms    | Four names enter around an empty court        | Everyone starts in the draw      | `data-motion-state="seeded"`  |
+| Rotate  | 180–620ms  | Two names move on court; two move to rest     | One match, protected recovery    | `data-motion-state="rotate"`  |
+| Serve   | 620–1050ms | Ball travels and the active matchup brightens | The next match is ready          | `data-motion-state="serve"`   |
+| Settled | 1050ms+    | Crown and court state remain legible          | Run the court and crown a winner | `data-motion-state="settled"` |
 
 ## Implementation
 
-- Selected rung: locally hosted raster artwork, one generated alpha matte,
-  CSS mask layers, and Motion for the impact pulse.
-- Why this rung is necessary: CSS `mask-image` switching is discrete, while
-  animating the size and opacity of separate mask layers creates a continuous
-  spread without canvas or video.
+- Selected rung: semantic DOM/CSS plus Motion layout and spring transitions.
+- Why this rung is necessary: it shows court rotation and protected rest as a
+  spatial sequence without adding a decorative asset or heavy renderer.
+- No bitmap, canvas, video, or artificial loading delay.
 - Desktop: asymmetric 7/5 composition with copy and actions first.
-- Mobile: stacked copy and actions followed by a full-width masked image that
-  retains the ball and crown in the crop.
+- Mobile: stacked copy and actions followed by the same responsive court
+  composition; short landscape screens switch to two columns.
 - `prefers-reduced-motion` behavior: skip every impact stage and render the
-  settled masked artwork immediately.
-- Static fallback: the final alpha-masked composition remains understandable
-  without animation support.
-- Measurement: route harness observes the droplet and settled states and
-  captures 1440×1000 and 390×844 conditions.
+  settled court immediately.
+- Static fallback: the settled court/rest composition remains understandable.
+- Measurement: route harness observes rotate/serve/settled states at desktop,
+  tablet, phone portrait, and phone landscape viewports.
 
 ## Performance Budget
 
-- WebP, 1536×1024, about 272KB.
-- Indexed alpha mask, 1536×1024, about 16KB.
-- Local requests only; no video, remote font, canvas renderer, or idle loop.
+- Existing Motion dependency only.
+- No hero raster download.
+- One bounded entrance sequence; no idle loop.

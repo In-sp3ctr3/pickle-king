@@ -4,6 +4,7 @@ import type {
   TournamentSetupValues,
 } from "./setup-types";
 import { NumberField } from "./number-field";
+import { SlidingChoice } from "@/src/shared/ui";
 
 interface CourtPlanProps {
   errors?: SetupErrors;
@@ -38,18 +39,16 @@ export function CourtPlan({
             Timed sessions share the available court time across every match.
           </span>
         </div>
-        <div className="setup-timing-toggle" aria-label="Tournament timing">
-          {(["timed", "untimed"] as const).map((mode) => (
-            <button
-              aria-pressed={timingMode === mode}
-              key={mode}
-              onClick={() => onTimingModeChange(mode)}
-              type="button"
-            >
-              {mode === "timed" ? "Timed booking" : "No time limit"}
-            </button>
-          ))}
-        </div>
+        <SlidingChoice
+          ariaLabel="Tournament timing"
+          className="setup-timing-toggle"
+          onChange={onTimingModeChange}
+          options={[
+            { label: "Timed booking", value: "timed" },
+            { label: "No time limit", value: "untimed" },
+          ]}
+          value={timingMode}
+        />
       </div>
 
       <div className="setup-court-grid">

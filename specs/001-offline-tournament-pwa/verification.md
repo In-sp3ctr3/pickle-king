@@ -10,7 +10,7 @@ Status: in progress
 | Domain/state tests   | 72 examples/properties across 4–16         | passed  |
 | Component tests      | 11 Vitest files, 72 tests                  | passed  |
 | Production build     | Vinext output and server render            | passed  |
-| Browser workflows    | 21 route checks + 5 product workflows      | passed  |
+| Browser workflows    | 21 route + 5 product + 9 responsive checks | passed  |
 | Accessibility        | Axe, keyboard, focus, reduced motion       | passed  |
 | PWA/offline          | artifacts plus controlled offline reopen   | passed  |
 | Security             | runtime `npm audit --omit=dev`: 0 findings | passed  |
@@ -31,13 +31,16 @@ Status: in progress
 - Confirmed restart, discard, leader-at-early-end, and tied early-end winner
   selection without silently advancing an ambiguous tournament result.
 - Reopened the installed shell offline under an active service worker.
-- Observed the staged hero impact, spread, droplets, and settled mask states;
-  reduced motion renders the settled artwork immediately.
+- Observed the kinetic court’s rotate, serve, and settled states; reduced
+  motion renders the settled court immediately.
+- Verified home, setup, and centered bracket behavior at 1180×820, 820×1180,
+  and 844×390 without page-level overflow.
 
 ## Foundation exception
 
-The development audit reports the brace-expansion advisory through ESLint 9’s
-minimatch dependency. The fixed dependency line requires ESLint 10, which is not
-yet compatible with eslint-config-next’s React plugin. It is build-time only,
-receives no product input, and is tracked through automated dependency updates.
-The deployed dependency audit has zero findings.
+The full development audit reports nine high findings along ESLint’s
+`minimatch`/`brace-expansion` toolchain. `npm audit fix --dry-run` offers no
+compatible remediation for the current ESLint 9 / eslint-config-next stack.
+These packages run only during local/CI linting, receive no product input, and
+remain tracked by weekly dependency updates. The deployed dependency audit has
+zero findings.

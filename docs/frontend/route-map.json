@@ -42,10 +42,10 @@
       ],
       "motionChecks": [
         {
-          "name": "home court artwork reveal",
+          "name": "home court rotation",
           "selector": "[data-qa='home-product-sequence']",
           "stateAttribute": "data-motion-state",
-          "requiredStates": ["droplets", "settled"],
+          "requiredStates": ["rotate", "serve", "settled"],
           "reducedMotionState": "static",
           "observationMs": 1200
         }
@@ -84,6 +84,12 @@
           "expect": { "visible": "[data-qa='start-tournament']" }
         },
         {
+          "name": "setup back",
+          "selector": "[data-qa='app-back']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
           "name": "player names",
           "selector": ".setup-player-row input",
           "auditOnly": true,
@@ -92,9 +98,9 @@
         },
         {
           "name": "player ratings",
-          "selector": ".setup-player-row select",
+          "selector": "[data-qa='rating-select']",
           "auditOnly": true,
-          "action": "select",
+          "action": "click",
           "expect": { "visible": "[data-qa='tournament-setup']" }
         },
         {
@@ -124,6 +130,13 @@
           "selector": ".setup-number-input input",
           "auditOnly": true,
           "action": "fill",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "court number steppers",
+          "selector": ".setup-number-input button",
+          "auditOnly": true,
+          "action": "click",
           "expect": { "visible": "[data-qa='tournament-setup']" }
         },
         {
@@ -176,6 +189,13 @@
           "expect": { "visible": "[data-qa='start-tournament']" }
         },
         {
+          "name": "back to setup",
+          "selector": "[data-qa='app-back']",
+          "sequence": "bracket-back",
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
           "name": "start next match",
           "selector": "[data-qa='start-next']",
           "sequence": "bracket-run-show",
@@ -198,17 +218,22 @@
           "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
-          "name": "move bracket left",
-          "selector": "[data-qa='bracket-left']",
-          "viewports": ["mobile"],
+          "name": "show left draw",
+          "selector": ".bracket-tree-nav button:nth-child(1)",
           "sequence": "bracket-pan-left",
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
-          "name": "move bracket right",
-          "selector": "[data-qa='bracket-right']",
-          "viewports": ["mobile"],
+          "name": "show final",
+          "selector": ".bracket-tree-nav button:nth-child(2)",
+          "sequence": "bracket-pan-final",
+          "action": "click",
+          "expect": { "visible": "[data-qa='final-match']" }
+        },
+        {
+          "name": "show right draw",
+          "selector": ".bracket-tree-nav button:nth-child(3)",
           "sequence": "bracket-pan-right",
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
@@ -250,13 +275,13 @@
         },
         {
           "name": "quick setup back",
-          "selector": ".quick-setup > .text-button",
+          "selector": "[data-qa='app-back']",
           "action": "click",
           "expect": { "visible": "[data-qa='start-tournament']" }
         },
         {
           "name": "quick formats",
-          "selector": ".quick-form > fieldset:first-of-type .segmented-control button",
+          "selector": ".quick-form > fieldset:first-of-type .sliding-choice button",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='quick-match-setup']" }
@@ -277,7 +302,7 @@
         },
         {
           "name": "quick timing options",
-          "selector": ".quick-timing .segmented-control button",
+          "selector": ".quick-timing .sliding-choice button",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='quick-match-setup']" }
@@ -424,7 +449,7 @@
       "name": "results",
       "path": "/",
       "prepare": "four-player-results",
-      "primaryActionSelector": ".results-screen > .text-button",
+      "primaryActionNotApplicableReason": "Results is a read-only summary; navigation lives in the floating app island.",
       "visualEvidence": {
         "desktop": {
           "source": "docs/frontend/evidence/results-desktop-source.png",
@@ -445,10 +470,10 @@
           "expect": { "visible": "[data-qa='start-tournament']" }
         },
         {
-          "name": "results home",
-          "selector": ".results-screen > .text-button",
+          "name": "results back to bracket",
+          "selector": "[data-qa='app-back']",
           "action": "click",
-          "expect": { "visible": "[data-qa='start-tournament']" }
+          "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
           "name": "result corrections",

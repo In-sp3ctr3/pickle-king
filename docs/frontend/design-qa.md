@@ -5,13 +5,15 @@ Last updated: 2026-07-30
 
 ## Environment
 
-- Commit/source state: codex/feat/pwa-polish@c1bfc51323ae9e8f447449a352c446499fc6567c + dirty snapshot e4a8b7dd17691335bc5a9cc8ee79f0db543799849bfbed455deda06f9b392d3d
+- Commit/source state: codex/fix/frontend-repair@validated-working-tree-2026-07-30
 - Browser: Playwright Chromium 1.62.1
 - Base URL: http://127.0.0.1:3000 production Vinext server
 - DPR: Playwright default at 1440×1000 and 390×844
 - Stable-data/animation setup: distinct fixed ratings, cleared localStorage,
-  blurred focus before capture, awaited hero settled state, and reduced-motion
-  checks isolated from animated captures
+  blurred focus before capture, awaited the kinetic court state, and
+  reduced-motion checks isolated from animated captures
+- Responsive verification: 1180×820 iPad landscape, 820×1180 iPad portrait,
+  and 844×390 phone landscape
 
 ## Evidence
 
@@ -34,23 +36,27 @@ Last updated: 2026-07-30
 
 ## Iteration History
 
-| Iteration | Region        | Pixel signal           | Human finding                                                  | Change                                                                | Result |
-| --------- | ------------- | ---------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------- | ------ |
-| 1         | Home hero     | reference mismatch     | rectangular/static artwork felt pasted on                      | staged multi-mask paint impact and text reveal                        | passed |
-| 2         | Setup shell   | excessive framing      | divider bars and repeated outlines flattened hierarchy         | removed rules; added numbered editorial sections and tonal court slab | passed |
-| 3         | Bracket       | geometry mismatch      | round cards did not read as one connected draw                 | centered double-sided tree with functional convergence lines          | passed |
-| 4         | Result review | interaction regression | score edits repeatedly reopened confirmation                   | dedicated edit state and one review action                            | passed |
-| 5         | Final QA      | targeted visual review | Quick Match mentioned a bracket; mobile stats headers collided | contextual copy and compact semantic headers                          | passed |
+| Iteration | Region        | Pixel signal           | Human finding                                                | Change                                                                | Result |
+| --------- | ------------- | ---------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- | ------ |
+| 1         | Typography    | glyph crowding         | condensed display face joined double-digit scores            | replaced display usage with Manrope and non-negative tracking         | passed |
+| 2         | Home hero     | concept rejection      | static image and paint mask did not explain the product      | replaced both with a kinetic DOM court/rest rotation                  | passed |
+| 3         | Navigation    | misplaced controls     | corner navigation lacked a reliable bracket-to-setup path    | added one centered floating island with explicit Back and Home        | passed |
+| 4         | Setup         | control imbalance      | native rating popup and uneven timing fields felt unfinished | added Radix popup, animated choices, steppers, and aligned field rows | passed |
+| 5         | Bracket       | node-model mismatch    | players and actions occupied separate nodes                  | rebuilt each node as a two-contender match converging on center final | passed |
+| 6         | Responsive QA | missing target screens | tablet and phone landscape behavior had not been proven      | added executable layout tests for all three target viewports          | passed |
 
 Pixel difference is an iteration signal, not a universal pass threshold. The
 final deterministic source/render pairs are byte-identical.
 
 ## Findings
 
-| ID     | Severity | Route/region         | Evidence                                 | Contract/user impact                          | Owner    | Status |
-| ------ | -------- | -------------------- | ---------------------------------------- | --------------------------------------------- | -------- | ------ |
-| DQA-01 | P2       | quick-result/dialog  | quick-result desktop and mobile captures | standalone flow mentioned nonexistent bracket | frontend | fixed  |
-| DQA-02 | P2       | results/mobile table | results mobile capture                   | Against and Diff labels collided              | frontend | fixed  |
+| ID     | Severity | Route/region   | Evidence                                 | Contract/user impact                                     | Owner    | Status |
+| ------ | -------- | -------------- | ---------------------------------------- | -------------------------------------------------------- | -------- | ------ |
+| DQA-01 | P1       | home/hero      | desktop, mobile, and responsive captures | rejected static artwork remained visible                 | frontend | fixed  |
+| DQA-02 | P1       | bracket/tree   | bracket desktop and mobile captures      | node anatomy did not match a tournament bracket          | frontend | fixed  |
+| DQA-03 | P1       | scorer/type    | quick-live desktop and mobile captures   | condensed double digits reduced score legibility         | frontend | fixed  |
+| DQA-04 | P2       | setup/controls | setup desktop and mobile captures        | native dropdown and vertical misalignment reduced polish | frontend | fixed  |
+| DQA-05 | P2       | app/navigation | setup, bracket, and results captures     | back path was absent or duplicated outside navigation    | frontend | fixed  |
 
 ## Harness Results
 
@@ -58,6 +64,7 @@ final deterministic source/render pairs are byte-identical.
 - [x] Dead-control audit passed.
 - [x] Raw-asset policy passed or exceptions are documented.
 - [x] Desktop and mobile screenshots captured.
+- [x] iPad portrait, iPad landscape, and phone landscape layouts passed.
 - [x] Console checks passed.
 - [x] Keyboard/focus checks passed.
 - [x] Reduced-motion behavior passed.
@@ -72,6 +79,7 @@ Reviewer evidence: docs/frontend/reviews/design-review.md
 
 Result: passed
 
-Rationale: the generated hero, editorial setup hierarchy, restored lime
-run-of-show, centered connected bracket, scorer, dialogs, and results all meet
-the contract across the required viewports with no open P0/P1/P2 findings.
+Rationale: the kinetic court hero, centered navigation island, balanced custom
+controls, lime run-of-show, two-contender bracket nodes, scorer, dialogs, and
+results meet the contract across the required orientations with no open
+P0/P1/P2 findings.

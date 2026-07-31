@@ -21,7 +21,7 @@ export function RunOfShow({
     return (
       <section
         aria-labelledby="run-of-show-title"
-        className="border border-[#2b3227] bg-[#11150f] p-6 sm:p-8"
+        className="rounded-[28px] bg-[#11150f] p-6 sm:p-8"
       >
         <p className="text-xs font-extrabold tracking-[0.16em] text-[#c8ff3d] uppercase">
           Run of show
@@ -48,9 +48,7 @@ export function RunOfShow({
     <section
       aria-labelledby="run-of-show-title"
       className={`grid gap-7 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.75fr)] ${
-        isReady
-          ? "bg-[#c8ff3d] text-[#090b08]"
-          : "border border-[#2b3227] bg-[#11150f]"
+        isReady ? "bg-[#c8ff3d] text-[#090b08]" : "rounded-[28px] bg-[#11150f]"
       }`}
     >
       <div>
@@ -75,7 +73,7 @@ export function RunOfShow({
         </div>
         <h2
           aria-label={`${sideA} versus ${sideB}`}
-          className="mt-4 text-[clamp(2.25rem,6vw,4.5rem)] leading-[0.88] font-black tracking-[-0.045em] uppercase"
+          className="mt-4 text-[clamp(2.1rem,5.4vw,4.2rem)] leading-[0.95] font-extrabold tracking-normal uppercase"
           id="run-of-show-title"
         >
           {sideA}
