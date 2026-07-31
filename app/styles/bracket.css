@@ -133,6 +133,7 @@
 }
 
 .tree-match-card {
+  position: relative;
   display: grid;
   height: 100%;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -270,32 +271,48 @@
   align-items: center;
   gap: 0.25rem;
   color: var(--lime);
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.tree-match-side--bye {
-  color: #818a7a;
-  font-size: 0.74rem;
-  font-weight: 800;
-  text-transform: uppercase;
+.tree-match-card__automatic {
+  display: grid;
+  min-height: 76px;
+  align-content: center;
+  gap: 0.3rem;
+  padding: 0 0.8rem 0.45rem;
+}
+
+.tree-match-card__automatic strong {
+  overflow: hidden;
+  color: var(--chalk);
+  font-size: 0.86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-match-card__automatic span {
+  color: #a0a897;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 .final-match-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: block;
   padding: 0.25rem;
   background: #20271c;
 }
 
-.final-match-card header > p {
-  color: #aeb5a8;
+.final-match-card > header {
+  min-height: 32px;
+  justify-content: flex-end;
+  padding: 0.1rem 0.55rem 0;
 }
 
-.final-match-card > header {
-  grid-column: 1;
+.final-match-card > header > span {
+  min-height: 0;
 }
 
 .final-match-card__faceoff {
@@ -304,7 +321,7 @@
   grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr);
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.45rem 0.5rem;
+  padding: 0.15rem 3.5rem 0.5rem;
 }
 
 .final-match-card__faceoff > svg {
@@ -344,6 +361,119 @@
 
 .final-match-side.is-right {
   text-align: left;
+}
+
+.final-match-card > .tree-match-card__action {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.45rem;
+  margin: 0;
+}
+
+.tree-match-card--editing {
+  z-index: 5;
+  display: block;
+  height: 156px;
+  margin-top: -16px;
+  overflow: visible;
+  background: #20271c;
+  color: var(--chalk);
+}
+
+.inline-score-editor {
+  display: grid;
+  height: 100%;
+  grid-template-rows: 48px 48px 48px;
+  gap: 0.1rem;
+  padding: 0.25rem;
+}
+
+.inline-score-editor header {
+  min-height: 0;
+  padding: 0 0.15rem 0 0.5rem;
+}
+
+.inline-score-editor header > p {
+  color: var(--lime);
+  font-size: 0.58rem;
+}
+
+.inline-score-editor__actions {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.inline-score-editor__actions button {
+  display: inline-flex;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 10px;
+  background: #30382c;
+  color: var(--chalk);
+}
+
+.inline-score-editor__actions button:last-child {
+  background: var(--lime);
+  color: var(--court);
+}
+
+.inline-score-editor__actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.inline-score-editor__row {
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: minmax(0, 1fr) 3.2rem;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 10px;
+  background: #282f24;
+  padding: 0 0.35rem 0 0.55rem;
+}
+
+.inline-score-editor__row[data-winner-choice="true"] {
+  grid-template-columns: 48px minmax(0, 1fr) 3.2rem;
+  padding-left: 0;
+}
+
+.inline-score-editor__row > span {
+  overflow: hidden;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-score-editor__winner {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  place-items: center;
+}
+
+.inline-score-editor__winner > input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--lime);
+}
+
+.inline-score-editor__row > input[type="number"] {
+  width: 100%;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: #0e110d;
+  color: var(--chalk);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
 }
 
 .bracket-tree-link i {

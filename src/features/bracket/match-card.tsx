@@ -1,12 +1,23 @@
+"use client";
+
 import { ActionButton, StatusLabel } from "@/src/shared/ui";
 import type { Match } from "@/src/tournament";
 import { Crown, FastForward, PencilLine, Play, Trophy } from "lucide-react";
+import { useState } from "react";
+import { InlineScoreEditor } from "./inline-score-editor";
+
+export type CorrectMatch = (
+  matchId: string,
+  scoreA: number,
+  scoreB: number,
+  winnerIdOverride?: string,
+) => boolean;
 
 export interface MatchCardProps {
   canStart: boolean;
   label: string;
   match: Match;
-  onCorrectMatch: (matchId: string) => void;
+  onCorrectMatch: CorrectMatch;
   onStartMatch: (matchId: string) => void;
   sideALabel: string;
   sideBLabel: string;
@@ -14,7 +25,25 @@ export interface MatchCardProps {
 
 export function MatchCard(props: MatchCardProps) {
   const { canStart, label, match, sideALabel, sideBLabel } = props;
+  const [editing, setEditing] = useState(false);
   const complete = match.status === "complete";
+  if (editing) {
+    return (
+      <article
+        aria-label={`Editing ${label}: ${sideALabel} versus ${sideBLabel}`}
+        className="tree-match-card tree-match-card--editing"
+        data-match-status={match.status}
+      >
+        <InlineScoreEditor
+          match={match}
+          onCancel={() => setEditing(false)}
+          onSave={props.onCorrectMatch}
+          sideALabel={sideALabel}
+          sideBLabel={sideBLabel}
+        />
+      </article>
+    );
+  }
   return (
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
@@ -45,14 +74,32 @@ export function MatchCard(props: MatchCardProps) {
           />
         </div>
       </div>
-      <MatchAction {...props} />
+      <MatchAction {...props} onEdit={() => setEditing(true)} />
     </article>
   );
 }
 
 export function FinalMatchCard(props: MatchCardProps) {
   const { canStart, label, match, sideALabel, sideBLabel } = props;
+  const [editing, setEditing] = useState(false);
   const complete = match.status === "complete";
+  if (editing) {
+    return (
+      <article
+        aria-label={`Editing ${label}: ${sideALabel} versus ${sideBLabel}`}
+        className="tree-match-card final-match-card tree-match-card--editing"
+        data-match-status={match.status}
+      >
+        <InlineScoreEditor
+          match={match}
+          onCancel={() => setEditing(false)}
+          onSave={props.onCorrectMatch}
+          sideALabel={sideALabel}
+          sideBLabel={sideBLabel}
+        />
+      </article>
+    );
+  }
   return (
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
@@ -65,14 +112,15 @@ export function FinalMatchCard(props: MatchCardProps) {
       data-match-status={match.status}
     >
       <header>
-        <p>{label}</p>
-        <StatusLabel
-          status={
-            match.status === "ready" && !canStart ? "queued" : match.status
-          }
-        />
+        <span data-qa="final-status">
+          <StatusLabel
+            status={
+              match.status === "ready" && !canStart ? "queued" : match.status
+            }
+          />
+        </span>
       </header>
-      <div className="final-match-card__faceoff">
+      <div className="final-match-card__faceoff" data-qa="final-faceoff">
         <FinalSide
           align="left"
           isLoser={complete && match.loserId === match.sideA?.memberIds[0]}
@@ -81,7 +129,7 @@ export function FinalMatchCard(props: MatchCardProps) {
           score={match.scoreA}
           showScore={match.status === "live" || complete}
         />
-        <Trophy aria-label="Championship trophy" size={28} strokeWidth={1.8} />
+        <Trophy aria-label="Final trophy" size={28} strokeWidth={1.8} />
         <FinalSide
           align="right"
           isLoser={complete && match.loserId === match.sideB?.memberIds[0]}
@@ -91,7 +139,7 @@ export function FinalMatchCard(props: MatchCardProps) {
           showScore={match.status === "live" || complete}
         />
       </div>
-      <MatchAction {...props} />
+      <MatchAction {...props} onEdit={() => setEditing(true)} />
     </article>
   );
 }
@@ -114,9 +162,11 @@ function MatchHeader({
 function MatchAction({
   canStart,
   match,
-  onCorrectMatch,
   onStartMatch,
-}: MatchCardProps) {
+  onEdit,
+  sideALabel,
+  sideBLabel,
+}: MatchCardProps & { onEdit: () => void }) {
   if (match.status === "ready" && canStart) {
     return (
       <ActionButton
@@ -134,9 +184,10 @@ function MatchAction({
   if (match.status === "complete") {
     return (
       <ActionButton
-        aria-label={`Correct ${match.id}`}
+        aria-label={`Edit score for ${sideALabel} versus ${sideBLabel}`}
         className="tree-match-card__action"
-        onClick={() => onCorrectMatch(match.id)}
+        data-qa="edit-bracket-score"
+        onClick={onEdit}
         variant="quiet"
       >
         <PencilLine aria-hidden="true" size={16} />
@@ -215,26 +266,21 @@ export function ByeCard({
 }) {
   return (
     <article
-      aria-label={`${label}: ${playerName} advances with a bye`}
+      aria-label={`${label}: ${playerName} advances automatically`}
       className="tree-match-card tree-match-card--bye"
+      data-qa="automatic-advance"
     >
       <div className="tree-match-card__body">
         <header>
           <p>{label}</p>
           <span className="tree-match-card__bye-status">
             <FastForward aria-hidden="true" size={13} />
-            Bye
+            Automatic advance
           </span>
         </header>
-        <div className="tree-match-card__sides">
-          <div className="tree-match-side tree-match-side--winner">
-            <span className="tree-match-side__name">{playerName}</span>
-            <strong aria-label="Advanced">✓</strong>
-          </div>
-          <div className="tree-match-side tree-match-side--bye">
-            <span>Bye</span>
-            <strong>—</strong>
-          </div>
+        <div className="tree-match-card__automatic">
+          <strong>{playerName}</strong>
+          <span>No opponent this round</span>
         </div>
       </div>
     </article>
