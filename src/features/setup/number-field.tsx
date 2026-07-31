@@ -1,3 +1,5 @@
+import { Minus, Plus } from "lucide-react";
+
 interface NumberFieldProps {
   error?: string;
   help: string;
@@ -23,11 +25,24 @@ export function NumberField({
 }: NumberFieldProps) {
   const helpId = `${id}-help`;
   const errorId = `${id}-error`;
+  const numericValue = Number(value);
+  const step = (direction: -1 | 1) => {
+    const current = Number.isFinite(numericValue) ? numericValue : min;
+    onChange(String(Math.min(max, Math.max(min, current + direction))));
+  };
 
   return (
-    <label className="setup-number-field">
-      <span>{label}</span>
+    <div className="setup-number-field">
+      <label htmlFor={id}>{label}</label>
       <span className="setup-number-input">
+        <button
+          aria-label={`Decrease ${label.toLowerCase()}`}
+          disabled={numericValue <= min}
+          onClick={() => step(-1)}
+          type="button"
+        >
+          <Minus aria-hidden="true" size={16} />
+        </button>
         <input
           aria-describedby={`${helpId}${error ? ` ${errorId}` : ""}`}
           aria-invalid={Boolean(error)}
@@ -41,6 +56,14 @@ export function NumberField({
           value={value}
         />
         <span className="setup-number-suffix">{suffix}</span>
+        <button
+          aria-label={`Increase ${label.toLowerCase()}`}
+          disabled={numericValue >= max}
+          onClick={() => step(1)}
+          type="button"
+        >
+          <Plus aria-hidden="true" size={16} />
+        </button>
       </span>
       <span className="setup-number-help" id={helpId}>
         {help}
@@ -50,6 +73,6 @@ export function NumberField({
           {error}
         </span>
       ) : null}
-    </label>
+    </div>
   );
 }

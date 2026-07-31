@@ -34,15 +34,6 @@ body {
   font-family: "Manrope", Arial, sans-serif;
 }
 
-h1,
-h2,
-h3,
-.score-number,
-.clock-value,
-.podium-place strong {
-  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
-}
-
 button,
 input,
 select {

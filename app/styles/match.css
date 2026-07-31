@@ -220,7 +220,7 @@
 .match-control-dialog h2 {
   margin: 0;
   font-size: clamp(2.7rem, 9vw, 5rem);
-  letter-spacing: -0.055em;
+  letter-spacing: 0.025em;
   line-height: 0.88;
   text-transform: uppercase;
 }
@@ -254,7 +254,7 @@
 .result-dialog h2 {
   margin: 0;
   font-size: clamp(2.5rem, 8vw, 5rem);
-  letter-spacing: -0.055em;
+  letter-spacing: 0.025em;
   line-height: 0.9;
   text-transform: uppercase;
 }

@@ -1,7 +1,7 @@
-import { SKILL_LEVELS, type SkillLevel } from "@/src/tournament";
 import { ActionButton } from "@/src/shared/ui";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import type { SetupPlayerDraft } from "./setup-types";
+import { RatingSelect } from "./rating-select";
 
 interface PlayerRowProps {
   index: number;
@@ -50,36 +50,21 @@ export function PlayerRow({
         ) : null}
       </label>
 
-      <label className="setup-field">
-        <span>Rating</span>
-        <span className="setup-select-wrap">
-          <select
-            aria-describedby={ratingError ? ratingErrorId : undefined}
-            aria-invalid={Boolean(ratingError)}
-            onChange={(event) =>
-              onChange({
-                ...player,
-                rating: event.currentTarget.value as SkillLevel | "",
-              })
-            }
-            required
-            value={player.rating}
-          >
-            <option value="">Select</option>
-            {SKILL_LEVELS.map((level) => (
-              <option key={level} value={level}>
-                {level}
-              </option>
-            ))}
-          </select>
-          <ChevronDown aria-hidden="true" size={18} strokeWidth={2.4} />
-        </span>
+      <div className="setup-field">
+        <span id={`player-${player.id}-rating-label`}>Rating</span>
+        <RatingSelect
+          describedBy={ratingError ? ratingErrorId : undefined}
+          id={`player-${player.id}-rating`}
+          invalid={Boolean(ratingError)}
+          onChange={(rating) => onChange({ ...player, rating })}
+          value={player.rating}
+        />
         {ratingError ? (
           <span className="setup-field-error" id={ratingErrorId}>
             {ratingError}
           </span>
         ) : null}
-      </label>
+      </div>
 
       <ActionButton
         aria-label={`Remove player ${index + 1}`}

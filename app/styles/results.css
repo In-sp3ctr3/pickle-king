@@ -23,7 +23,7 @@
   max-width: 12ch;
   margin: 0;
   font-size: clamp(4rem, 11vw, 9rem);
-  letter-spacing: -0.07em;
+  letter-spacing: 0;
   line-height: 0.8;
   text-transform: uppercase;
 }

@@ -1,15 +1,14 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Users } from "lucide-react";
+import { ArrowRight, Users } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { SlidingChoice } from "@/src/shared/ui";
 import { createScoringState } from "../../match/scoring";
 import type { ScoringState } from "../../match/types";
 
 export function QuickMatchSetup({
-  onBack,
   onStart,
 }: {
-  onBack: () => void;
   onStart: (scorer: ScoringState) => void;
 }) {
   const [doubles, setDoubles] = useState(false);
@@ -59,10 +58,7 @@ export function QuickMatchSetup({
       className="quick-setup mx-auto w-full max-w-[900px] px-5 py-10 sm:px-10 sm:py-16"
       data-qa="quick-match-setup"
     >
-      <button className="text-button" onClick={onBack} type="button">
-        <ArrowLeft aria-hidden="true" size={18} /> Home
-      </button>
-      <p className="eyebrow mt-10">Standalone scorer</p>
+      <p className="eyebrow mt-6">Standalone scorer</p>
       <h1>Quick match.</h1>
       <p className="lede">
         No bracket, no setup marathon. Pick sides, choose your rules, and play.
@@ -70,22 +66,19 @@ export function QuickMatchSetup({
       <form className="quick-form" onSubmit={submit}>
         <fieldset>
           <legend>Format</legend>
-          <div className="segmented-control">
-            <button
-              aria-pressed={!doubles}
-              onClick={() => setDoubles(false)}
-              type="button"
-            >
-              Singles
-            </button>
-            <button
-              aria-pressed={doubles}
-              onClick={() => setDoubles(true)}
-              type="button"
-            >
-              <Users aria-hidden="true" size={18} /> Doubles
-            </button>
-          </div>
+          <SlidingChoice
+            ariaLabel="Match format"
+            onChange={(format) => setDoubles(format === "doubles")}
+            options={[
+              { label: "Singles", value: "singles" },
+              {
+                icon: <Users aria-hidden="true" size={18} />,
+                label: "Doubles",
+                value: "doubles",
+              },
+            ]}
+            value={doubles ? "doubles" : "singles"}
+          />
         </fieldset>
         <fieldset>
           <legend>Players</legend>
@@ -126,22 +119,15 @@ export function QuickMatchSetup({
           </label>
           <fieldset className="quick-timing">
             <legend>Match clock</legend>
-            <div className="segmented-control">
-              <button
-                aria-pressed={!timed}
-                onClick={() => setTimed(false)}
-                type="button"
-              >
-                No time cap
-              </button>
-              <button
-                aria-pressed={timed}
-                onClick={() => setTimed(true)}
-                type="button"
-              >
-                Timed
-              </button>
-            </div>
+            <SlidingChoice
+              ariaLabel="Match clock"
+              onChange={(mode) => setTimed(mode === "timed")}
+              options={[
+                { label: "No time cap", value: "untimed" },
+                { label: "Timed", value: "timed" },
+              ]}
+              value={timed ? "timed" : "untimed"}
+            />
             {timed ? (
               <label>
                 <span>Time cap · minutes</span>

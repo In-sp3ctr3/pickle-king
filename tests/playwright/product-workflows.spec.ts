@@ -103,16 +103,22 @@ test("setup explains the four-player minimum and builds an untimed centered draw
       .getByLabel("Player name")
       .nth(index)
       .fill(["Maya", "Rae", "Kai", "Noah"][index]);
-    await page.getByLabel("Rating").nth(index).selectOption("3.5");
+    await page.getByLabel("Rating").nth(index).click();
+    await page.getByRole("option", { name: "3.5" }).click();
   }
   await page.getByRole("button", { name: "Build bracket" }).click();
   await expect(
     page.getByRole("heading", { name: "Road to the crown." }),
   ).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
-  await expect(page.locator("[data-qa='champion-slot']")).toBeVisible();
-  await expect(page.getByText("Crown awaits")).toBeVisible();
-  await expect(page.getByText("Opening pairings").first()).toBeVisible();
+  await expect(page.locator("[data-qa='final-match']")).toBeVisible();
+  await expect(page.locator(".bracket-match-node")).toHaveCount(3);
+  await expect(
+    page.locator(".bracket-match-node").first().locator(".tree-match-side"),
+  ).toHaveCount(2);
+  await page.getByRole("button", { name: "Back to setup" }).click();
+  await expect(page.locator("[data-qa='tournament-setup']")).toBeVisible();
+  await expect(page.getByLabel("Player name").first()).toHaveValue("Maya");
 });
 
 test("the installed shell reopens offline", async ({ context, page }) => {

@@ -2,7 +2,7 @@
 
 import { ActionButton } from "@/src/shared/ui";
 import { ArrowRight, Download, Play, RotateCcw } from "lucide-react";
-import { HomeCourtArt } from "./home-court-art";
+import { HomeCourtRotation } from "./home-court-rotation";
 import { HomeTitle } from "./home-title";
 
 export interface HomeScreenProps {
@@ -30,8 +30,8 @@ export function HomeScreen({
         <p className="home-eyebrow">One court · One crown</p>
         <HomeTitle />
         <p className="home-lede">
-          Seed the crew. Run one match at a time. Give every winner a breather.
-          Then crown the player who actually earned it.
+          Build the draw, run the score, and give every player time to recover.
+          One court. No guesswork.
         </p>
 
         <div className="home-actions">
@@ -77,7 +77,7 @@ export function HomeScreen({
       </section>
 
       <section className="home-mechanism" aria-label="How Pickle King works">
-        <HomeCourtArt />
+        <HomeCourtRotation />
       </section>
     </main>
   );

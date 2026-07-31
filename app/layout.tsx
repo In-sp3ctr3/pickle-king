@@ -1,7 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource/barlow-condensed/latin-700.css";
-import "@fontsource/barlow-condensed/latin-800.css";
-import "@fontsource/barlow-condensed/latin-900.css";
 import "@fontsource/manrope/latin-400.css";
 import "@fontsource/manrope/latin-700.css";
 import "@fontsource/manrope/latin-800.css";

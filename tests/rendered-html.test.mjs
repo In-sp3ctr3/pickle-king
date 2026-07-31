@@ -24,6 +24,6 @@ test("server-renders the public landing shell", async () => {
   assert.match(html, /Start tournament/);
   assert.match(html, /Your names and scores stay on this device/);
   assert.match(html, /data-qa="home-product-sequence"/);
-  assert.match(html, /\/brand\/pickle-king-hero\.webp/);
+  assert.doesNotMatch(html, /pickle-king-hero|splatter-mask/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/);
 });
