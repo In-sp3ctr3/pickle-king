@@ -1,6 +1,6 @@
 # Verification Record
 
-Status: release candidate
+Status: passed
 
 | Check                | Evidence                                   | Result  |
 | -------------------- | ------------------------------------------ | ------- |
@@ -16,7 +16,7 @@ Status: release candidate
 | Security             | runtime `npm audit --omit=dev`: 0 findings | passed  |
 | File length          | hand-authored source checked               | passed  |
 | Design review        | P0/P1/P2/P3 = 0; deterministic evidence    | passed  |
-| Deployment           | exact merged `main` Sites release          | pending |
+| Deployment           | exact merged `main` Sites release          | passed |
 
 ## Live product evidence
 
@@ -41,12 +41,12 @@ Status: release candidate
 - Verified home, setup, and centered bracket behavior at 1180×820, 820×1180,
   and 844×390 without page-level overflow.
 - Verified the public root, canonical URL, manifest, service worker, four PWA
-  icons, and zero recent production worker errors.
+  icons, and zero recent production worker errors after the interface release.
 
 ## Repository delivery
 
-- The foundation, tournament engine, live-match, PWA polish, and frontend
-  repair changes were squash-merged through pull requests.
+- The foundation, tournament engine, live-match, PWA polish, frontend repair,
+  and interface-identity changes were squash-merged through pull requests.
 - `main` requires the quality, analysis, and dependency-review checks; blocks
   deletion and force-pushes; requires linear history and resolved
   conversations; and permits owner bypass for the solo-maintainer workflow.
