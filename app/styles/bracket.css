@@ -29,8 +29,9 @@
   max-width: 12ch;
   margin: 0;
   font-size: clamp(2.8rem, 7vw, 5.5rem);
-  font-weight: 800;
-  letter-spacing: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.005em;
   line-height: 0.94;
   text-transform: uppercase;
 }
@@ -79,7 +80,8 @@
 .bracket-screen__bronze h2 {
   margin: 0.35rem 0 0;
   font-size: 2rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-weight: 400;
   line-height: 1;
 }
 
@@ -94,9 +96,7 @@
   top: 84px;
   width: min(100%, 430px);
   margin: 0 auto 0.75rem;
-  box-shadow:
-    0 14px 32px rgb(0 0 0 / 38%),
-    inset 0 0 0 1px #30392b;
+  box-shadow: 0 14px 32px rgb(0 0 0 / 38%);
 }
 
 .bracket-tree-viewport {
@@ -133,18 +133,17 @@
 }
 
 .tree-match-card {
-  display: flex;
+  display: grid;
   height: 100%;
-  flex-direction: column;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
   overflow: hidden;
-  border-radius: 20px;
-  background: #171d14;
-  box-shadow:
-    0 15px 28px rgb(0 0 0 / 28%),
-    inset 0 0 0 1px #30392b;
+  border-radius: 16px;
+  background: #1a2017;
+  box-shadow: 0 14px 26px rgb(0 0 0 / 30%);
 }
 
-.tree-match-card--ready {
+.tree-match-card--next {
   background: var(--lime);
   color: var(--court);
   box-shadow: 0 18px 34px rgb(0 0 0 / 35%);
@@ -152,25 +151,27 @@
 
 .tree-match-card--live {
   background: #2a1711;
-  box-shadow:
-    0 18px 34px rgb(0 0 0 / 35%),
-    inset 0 0 0 1px rgb(255 122 77 / 65%);
+  box-shadow: 0 18px 34px rgb(0 0 0 / 35%);
 }
 
-.tree-match-card > header {
+.tree-match-card__body {
+  min-width: 0;
+}
+
+.tree-match-card header {
   display: flex;
-  min-height: 38px;
+  min-height: 30px;
   align-items: center;
   justify-content: space-between;
   gap: 0.35rem;
-  padding: 0.3rem 0.7rem 0.15rem;
+  padding: 0.3rem 0.65rem 0;
 }
 
-.tree-match-card > header > p {
+.tree-match-card header > p {
   overflow: hidden;
   margin: 0;
   color: #818a7a;
-  font-size: 0.66rem;
+  font-size: 0.6rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-overflow: ellipsis;
@@ -178,35 +179,35 @@
   white-space: nowrap;
 }
 
-.tree-match-card--ready > header > p,
-.tree-match-card--ready > header > span {
+.tree-match-card--next header > p,
+.tree-match-card--next header > span {
   color: var(--court) !important;
 }
 
-.tree-match-card > header > span {
-  min-height: 30px;
-  font-size: 0.64rem;
+.tree-match-card header > span {
+  min-height: 26px;
+  font-size: 0.58rem;
   letter-spacing: 0.05em;
 }
 
 .tree-match-card__sides {
   display: grid;
-  gap: 0.2rem;
-  padding: 0.2rem 0.45rem;
+  gap: 0.1rem;
+  padding: 0 0.4rem 0.35rem;
 }
 
 .tree-match-side {
   display: grid;
-  min-height: 42px;
+  min-height: 35px;
   grid-template-columns: minmax(0, 1fr) 2.2rem;
   align-items: center;
   gap: 0.35rem;
-  border-radius: 12px;
-  padding: 0 0.55rem;
-  background: rgb(245 243 233 / 4%);
+  border-radius: 10px;
+  padding: 0 0.5rem;
+  background: #22291f;
 }
 
-.tree-match-card--ready .tree-match-side {
+.tree-match-card--next .tree-match-side {
   background: rgb(9 11 8 / 9%);
 }
 
@@ -216,18 +217,20 @@
   align-items: center;
   gap: 0.35rem;
   overflow: hidden;
-  font-size: 0.77rem;
+  color: var(--chalk);
+  font-size: 0.76rem;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tree-match-card--ready .tree-match-side__name {
+.tree-match-card--next .tree-match-side__name {
   color: var(--court) !important;
 }
 
 .tree-match-side strong {
-  font-size: 1.35rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
@@ -236,23 +239,26 @@
 }
 
 .tree-match-side--winner {
-  background: rgb(200 255 61 / 11%);
+  background: #28351c;
 }
 
 .tree-match-side--loser {
-  color: var(--mist);
+  color: #b8beb2;
   text-decoration: line-through;
 }
 
 .tree-match-side--loser .tree-match-side__name {
-  color: var(--mist) !important;
+  color: #b8beb2 !important;
 }
 
 .tree-match-card__action {
-  min-height: 40px;
-  margin: auto 0.45rem 0.45rem;
-  padding-block: 0.35rem;
-  font-size: 0.68rem;
+  align-self: center;
+  width: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0 0.45rem 0 0.2rem;
+  border-radius: 50%;
+  padding: 0;
 }
 
 .tree-match-card--bye {
@@ -274,6 +280,70 @@
   font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.final-match-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 0.25rem;
+  background: #20271c;
+}
+
+.final-match-card header > p {
+  color: #aeb5a8;
+}
+
+.final-match-card > header {
+  grid-column: 1;
+}
+
+.final-match-card__faceoff {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem 0.5rem;
+}
+
+.final-match-card__faceoff > svg {
+  color: var(--lime);
+  justify-self: center;
+}
+
+.final-match-side {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: 1fr;
+  gap: 0.15rem;
+  background: transparent;
+  padding: 0;
+}
+
+.final-match-side > span {
+  overflow: hidden;
+  color: var(--chalk);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.final-match-side > strong {
+  font-family: var(--font-display);
+  color: var(--mist);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.final-match-side.is-left {
+  text-align: right;
+}
+
+.final-match-side.is-right {
+  text-align: left;
 }
 
 .bracket-tree-link i {
@@ -306,8 +376,8 @@
 }
 
 .bracket-screen__bronze .tree-match-card {
-  width: min(100%, 250px);
-  height: 174px;
+  width: min(100%, 276px);
+  height: 124px;
 }
 
 @media (max-width: 780px) {

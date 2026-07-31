@@ -1,22 +1,22 @@
 # Verification Record
 
-Status: passed
+Status: release candidate
 
-| Check                | Evidence                                   | Result |
-| -------------------- | ------------------------------------------ | ------ |
-| Vinext compatibility | 100% compatible, no partial APIs           | passed |
-| Lint and format      | ESLint + Prettier local run                | passed |
-| TypeScript strict    | `tsc --noEmit`                             | passed |
-| Domain/state tests   | 72 examples/properties across 4–16         | passed |
-| Component tests      | 11 Vitest files, 72 tests                  | passed |
-| Production build     | Vinext output and server render            | passed |
-| Browser workflows    | 21 route + 5 product + 9 responsive checks | passed |
-| Accessibility        | Axe, keyboard, focus, reduced motion       | passed |
-| PWA/offline          | artifacts plus controlled offline reopen   | passed |
-| Security             | runtime `npm audit --omit=dev`: 0 findings | passed |
-| File length          | hand-authored source checked               | passed |
-| Design review        | P0/P1/P2/P3 = 0; deterministic evidence    | passed |
-| Deployment           | merged `main` + public Sites smoke check   | passed |
+| Check                | Evidence                                   | Result  |
+| -------------------- | ------------------------------------------ | ------- |
+| Vinext compatibility | 100% compatible, no partial APIs           | passed  |
+| Lint and format      | ESLint + Prettier local run                | passed  |
+| TypeScript strict    | `tsc --noEmit`                             | passed  |
+| Domain/state tests   | 72 examples/properties across 4–16         | passed  |
+| Component tests      | 11 Vitest files, 72 tests                  | passed  |
+| Production build     | Vinext output and server render            | passed  |
+| Browser workflows    | 21 route + 9 product + 9 responsive checks | passed  |
+| Accessibility        | Axe, keyboard, focus, reduced motion       | passed  |
+| PWA/offline          | artifacts plus controlled offline reopen   | passed  |
+| Security             | runtime `npm audit --omit=dev`: 0 findings | passed  |
+| File length          | hand-authored source checked               | passed  |
+| Design review        | P0/P1/P2/P3 = 0; deterministic evidence    | passed  |
+| Deployment           | exact merged `main` Sites release          | pending |
 
 ## Live product evidence
 
@@ -31,8 +31,13 @@ Status: passed
 - Confirmed restart, discard, leader-at-early-end, and tied early-end winner
   selection without silently advancing an ambiguous tournament result.
 - Reopened the installed shell offline under an active service worker.
-- Observed the kinetic court’s rotate, serve, and settled states; reduced
-  motion renders the settled court immediately.
+- Observed the mascot arrival and blink; reduced motion renders the mascot
+  without animation.
+- Verified a 10–10 Quick Match on the primary tablet viewport with separated,
+  legible numerals.
+- Verified a six-player draw stays connected, labels only one match `Next`,
+  labels the other ready pairing `Queued`, and scrolls to the left, final, and
+  right draw controls.
 - Verified home, setup, and centered bracket behavior at 1180×820, 820×1180,
   and 844×390 without page-level overflow.
 - Verified the public root, canonical URL, manifest, service worker, four PWA

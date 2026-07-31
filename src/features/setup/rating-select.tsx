@@ -4,16 +4,6 @@ import * as Select from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { SKILL_LEVELS, type SkillLevel } from "@/src/tournament";
 
-const ratingNotes: Record<SkillLevel, string> = {
-  "2.5": "Developing",
-  "3.0": "Steady",
-  "3.5": "Competitive",
-  "4.0": "Advanced",
-  "4.5": "Strong advanced",
-  "5.0": "Expert",
-  "5.5+": "Elite",
-};
-
 export function RatingSelect({
   describedBy,
   id,
@@ -53,6 +43,7 @@ export function RatingSelect({
             <ChevronUp aria-hidden="true" size={17} />
           </Select.ScrollUpButton>
           <Select.Viewport className="rating-select-viewport">
+            <p className="rating-select-heading">Self-rating</p>
             {SKILL_LEVELS.map((level) => (
               <Select.Item
                 aria-label={level}
@@ -60,10 +51,7 @@ export function RatingSelect({
                 key={level}
                 value={level}
               >
-                <Select.ItemText className="rating-select-item-text">
-                  <strong>{level}</strong>
-                  <span aria-hidden="true">{ratingNotes[level]}</span>
-                </Select.ItemText>
+                <Select.ItemText>{level}</Select.ItemText>
                 <Select.ItemIndicator className="rating-select-check">
                   <Check aria-hidden="true" size={17} strokeWidth={2.7} />
                 </Select.ItemIndicator>

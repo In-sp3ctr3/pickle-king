@@ -11,7 +11,7 @@ import {
   type PositionedNode,
 } from "./bracket-tree-layout";
 import { matchSideLabel, roundLabel } from "./bracket-utils";
-import { ByeCard, MatchCard } from "./match-card";
+import { ByeCard, FinalMatchCard, MatchCard } from "./match-card";
 
 interface BracketTreeProps {
   bracket: TournamentBracket;
@@ -172,8 +172,9 @@ function TreeNode({
   if (node.kind === "bye") {
     return <ByeCard label={label} playerName={node.player.name} />;
   }
+  const Card = node.kind === "final" ? FinalMatchCard : MatchCard;
   return (
-    <MatchCard
+    <Card
       canStart={canStart}
       label={label}
       match={node.match}

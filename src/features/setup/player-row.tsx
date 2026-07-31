@@ -24,7 +24,10 @@ export function PlayerRow({
   const ratingErrorId = `player-${player.id}-rating-error`;
 
   return (
-    <div className="setup-player-row">
+    <div
+      className="setup-player-row"
+      data-invalid={Boolean(nameError || ratingError)}
+    >
       <span className="setup-player-seed">
         {String(index + 1).padStart(2, "0")}
       </span>
@@ -74,7 +77,7 @@ export function PlayerRow({
         variant="quiet"
       >
         <Trash2 aria-hidden="true" size={19} />
-        <span className="sm:sr-only">Remove player</span>
+        <span className="sr-only">Remove player</span>
       </ActionButton>
     </div>
   );

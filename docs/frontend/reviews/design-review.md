@@ -1,9 +1,9 @@
 # Frontend Design Review
 
-Reviewer: design_reviewer
+Reviewer: local adversarial frontend review
 Result: passed
-Source state: codex/fix/frontend-repair@validated-working-tree-2026-07-30
-Reviewed at: 2026-07-30
+Source state: codex/fix/interface-identity@validated-working-tree-2026-07-31
+Reviewed at: 2026-07-31
 
 Open P0: 0
 Open P1: 0
@@ -22,18 +22,19 @@ Open P2: 0
 
 ## Findings
 
-| ID    | Severity | Route/region   | Evidence                             | Repair                                                      | Status |
-| ----- | -------- | -------------- | ------------------------------------ | ----------------------------------------------------------- | ------ |
-| DR-01 | P1       | home/hero      | regenerated desktop/mobile evidence  | replaced rejected raster reveal with kinetic court rotation | fixed  |
-| DR-02 | P1       | bracket/tree   | regenerated desktop/mobile evidence  | grouped both contenders and action inside every match node  | fixed  |
-| DR-03 | P1       | scorer/type    | quick-live evidence                  | removed condensed type and preserved readable digit spacing | fixed  |
-| DR-04 | P2       | setup/controls | setup and responsive evidence        | added custom select, sliding choices, and aligned steppers  | fixed  |
-| DR-05 | P2       | navigation     | setup, bracket, and results evidence | consolidated Back and Home into the centered island         | fixed  |
+| ID    | Severity | Route/region   | Evidence                             | Repair                                                                           | Status |
+| ----- | -------- | -------------- | ------------------------------------ | -------------------------------------------------------------------------------- | ------ |
+| DR-01 | P1       | home/hero      | regenerated desktop/mobile evidence  | replaced the rejected product demo with the crowned mascot and blink             | fixed  |
+| DR-02 | P1       | bracket/tree   | four- and six-player evidence        | grouped two contenders, scores, and a compact action inside every connected node | fixed  |
+| DR-03 | P1       | scorer/type    | 10–10 tablet evidence                | replaced joined condensed numerals with separated Archivo Black figures          | fixed  |
+| DR-04 | P2       | setup/controls | setup and responsive evidence        | added custom select, animated choices, field-local errors, and aligned fields    | fixed  |
+| DR-05 | P2       | navigation     | setup, bracket, and results evidence | consolidated Back and Home into a solid centered island                          | fixed  |
+| DR-06 | P2       | bracket/queue  | four- and six-player evidence        | limited `Next` and lime treatment to the one-court eligible match                | fixed  |
 
 ## Decision
 
-Passed. The kinetic court staging, lime run-of-show, centered connected
-bracket, responsive composition, typography, custom controls, and
-product-specific identity satisfy the design contract. The deterministic
+Passed. The mascot-led home, lime run-of-show, centered connected bracket,
+trophy final, responsive composition, readable typography, custom controls,
+and field-level validation satisfy the design contract. The deterministic
 evidence contains no material generic-design symptom and no open P0/P1/P2
 finding.

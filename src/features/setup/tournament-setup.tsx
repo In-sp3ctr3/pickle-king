@@ -52,8 +52,10 @@ export function TournamentSetup({
     targetScore: String(initialValues?.targetScore ?? 11),
   });
   const [showErrors, setShowErrors] = useState(false);
+  const [validationAttempt, setValidationAttempt] = useState(0);
   const [showMinimumDialog, setShowMinimumDialog] = useState(false);
   const nextPlayerId = useRef(players.length + 1);
+  const formRef = useRef<HTMLFormElement>(null);
   const validation = validateSetup(players, numbers, timingMode);
   const errors = showErrors ? validation.errors : undefined;
 
@@ -83,8 +85,17 @@ export function TournamentSetup({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setShowErrors(true);
+    setValidationAttempt((attempt) => attempt + 1);
     const result = validateSetup(players, numbers, timingMode);
-    if (result.values) onSubmit(result.values);
+    if (result.values) {
+      onSubmit(result.values);
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      formRef.current
+        ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+        ?.focus();
+    });
   }
 
   const errorCount = errors
@@ -110,13 +121,19 @@ export function TournamentSetup({
         </span>
       </header>
 
-      <form className="setup-form" noValidate onSubmit={handleSubmit}>
+      <form
+        className="setup-form"
+        noValidate
+        onSubmit={handleSubmit}
+        ref={formRef}
+      >
         {showErrors && errorCount > 0 ? (
           <div aria-live="polite" className="setup-error-summary" role="alert">
-            <p>
-              Fix {errorCount} {errorCount === 1 ? "detail" : "details"} before
-              building the bracket.
-            </p>
+            <p>A few details need your attention.</p>
+            <span>
+              {errorCount} {errorCount === 1 ? "field is" : "fields are"}{" "}
+              highlighted below.
+            </span>
             {errors?.form ? <span>{errors.form}</span> : null}
           </div>
         ) : null}
@@ -146,14 +163,24 @@ export function TournamentSetup({
                       : { duration: 0.24, ease: "easeOut" }
                   }
                 >
-                  <PlayerRow
-                    index={index}
-                    nameError={errors?.names[player.id]}
-                    onChange={updatePlayer}
-                    onRemove={() => removePlayer(player.id)}
-                    player={player}
-                    ratingError={errors?.ratings[player.id]}
-                  />
+                  <motion.div
+                    animate={
+                      errors?.names[player.id] || errors?.ratings[player.id]
+                        ? { x: [0, -7, 6, -3, 0] }
+                        : { x: 0 }
+                    }
+                    key={`validation-${validationAttempt}`}
+                    transition={{ duration: reducedMotion ? 0 : 0.32 }}
+                  >
+                    <PlayerRow
+                      index={index}
+                      nameError={errors?.names[player.id]}
+                      onChange={updatePlayer}
+                      onRemove={() => removePlayer(player.id)}
+                      player={player}
+                      ratingError={errors?.ratings[player.id]}
+                    />
+                  </motion.div>
                 </motion.div>
               ))}
             </AnimatePresence>

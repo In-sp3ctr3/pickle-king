@@ -54,12 +54,9 @@
   align-items: center;
   gap: 0.35rem;
   border-radius: 999px;
-  padding: 0.3rem;
-  background: #12170f;
-  box-shadow:
-    0 18px 50px rgb(0 0 0 / 42%),
-    inset 0 0 0 1px rgb(245 243 233 / 9%);
-  backdrop-filter: blur(18px);
+  padding: 0.35rem;
+  background: #1a2017;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 48%);
   pointer-events: auto;
 }
 
@@ -78,7 +75,7 @@
 }
 
 .floating-app-nav button:hover {
-  background: rgb(245 243 233 / 7%);
+  background: #293124;
   color: var(--chalk);
 }
 
@@ -92,7 +89,11 @@
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  color: var(--chalk);
+  min-height: 42px;
+  border-radius: 999px;
+  padding: 0 0.9rem;
+  background: var(--lime);
+  color: var(--court);
   font-size: 0.72rem;
   font-weight: 800;
   white-space: nowrap;
@@ -116,6 +117,7 @@
   isolation: isolate;
   overflow: hidden;
   border: 0;
+  box-shadow: 0 5px 0 transparent;
 }
 
 .action-button__content {
@@ -130,14 +132,12 @@
 .action-button::before {
   position: absolute;
   z-index: 0;
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 999px;
+  inset: 0;
   content: "";
   opacity: 0;
-  transform: translateX(-3.8rem) scale(0.3);
+  transform: translateX(-105%);
   transition:
-    opacity 180ms ease,
+    opacity 160ms ease,
     transform 360ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -147,12 +147,14 @@
 
 .action-button--primary:hover::before,
 .action-button--primary:focus-visible::before {
-  opacity: 0.24;
-  transform: translateX(0) scale(12);
+  opacity: 0.2;
+  transform: translateX(0);
 }
 
 .action-button--secondary {
-  box-shadow: inset 0 0 0 1px #364030;
+  background: var(--chalk) !important;
+  color: var(--court) !important;
+  box-shadow: 0 5px 0 #a8a69d;
 }
 
 .action-button--secondary::before,
@@ -164,12 +166,27 @@
 .action-button--secondary:focus-visible::before,
 .action-button--quiet:hover::before,
 .action-button--quiet:focus-visible::before {
-  opacity: 0.1;
-  transform: translateX(0) scale(12);
+  opacity: 0.12;
+  transform: translateX(0);
 }
 
 .action-button--danger {
-  box-shadow: inset 0 0 0 1px rgb(255 122 77 / 55%);
+  background: #321912 !important;
+  box-shadow: 0 5px 0 #6e2c1a;
+}
+
+.action-button--primary {
+  box-shadow: 0 5px 0 #769817;
+}
+
+.action-button--quiet {
+  background: #1a2017 !important;
+  box-shadow: 0 5px 0 #080a07;
+}
+
+.action-button:active {
+  box-shadow: 0 1px 0 transparent;
+  transform: translateY(4px) scale(0.99);
 }
 
 .action-button--inverse:hover {
@@ -182,8 +199,7 @@
   gap: 0.25rem;
   padding: 0.3rem;
   border-radius: 999px;
-  background: #171d14;
-  box-shadow: inset 0 0 0 1px #30392b;
+  background: #1a2017;
 }
 
 .sliding-choice button {
@@ -206,8 +222,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: #30392b;
-  box-shadow: inset 0 0 0 1px #596452;
+  background: #303a28;
 }
 
 .sliding-choice__label {
@@ -259,9 +274,9 @@
 
 .secondary-button,
 .control-button {
-  border: 1px solid #3b4436;
-  background: var(--baseline);
+  background: #1d241a;
   color: var(--chalk);
+  box-shadow: 0 5px 0 #080a07;
 }
 
 .eyebrow {
@@ -297,8 +312,10 @@
 .recovery-screen h1,
 .quick-setup h1 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(3.5rem, 12vw, 8rem);
-  letter-spacing: 0;
+  font-weight: 400;
+  letter-spacing: 0.005em;
   line-height: 0.94;
   text-transform: uppercase;
 }
@@ -321,6 +338,7 @@
 }
 
 .quick-timing label {
+  overflow: hidden;
   margin-top: 0.25rem;
 }
 
@@ -350,11 +368,32 @@
 .quick-form input {
   min-height: 52px;
   width: 100%;
-  border: 1px solid #3b4436;
-  border-radius: 18px;
-  background: var(--court);
+  border: 0;
+  border-radius: 14px;
+  background: #1a2017;
   color: var(--chalk);
   padding: 0.8rem 1rem;
+}
+
+.quick-form input[type="number"] {
+  appearance: textfield;
+}
+
+.quick-form input[type="number"]::-webkit-inner-spin-button,
+.quick-form input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.quick-form label.is-invalid input {
+  background: #321912;
+}
+
+.quick-field-error {
+  margin-top: 0.45rem;
+  color: #ff9a78;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .quick-rules > label:first-child input {
@@ -364,8 +403,9 @@
 
 .form-error {
   margin: 0;
-  border-left: 4px solid var(--clay);
-  padding: 1rem;
+  border-radius: 12px;
+  background: #321912;
+  padding: 0.85rem 1rem;
   color: #ffb097;
 }
 

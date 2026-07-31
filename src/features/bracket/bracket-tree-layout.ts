@@ -45,10 +45,10 @@ export interface TreeLayout {
 }
 
 const EDGE_PADDING = 24;
-const COLUMN_GAP = 52;
-const NODE_WIDTH = 236;
-const NODE_HEIGHT = 156;
-const FINAL_WIDTH = 268;
+const COLUMN_GAP = 56;
+const NODE_WIDTH = 276;
+const NODE_HEIGHT = 124;
+const FINAL_WIDTH = 370;
 const TREE_TOP = 34;
 
 function createByeNodes(bracket: TournamentBracket): ByeNode[] {
@@ -137,39 +137,41 @@ function sidePosition(node: BracketNode, bracket: TournamentBracket) {
 export function createTreeLayout(bracket: TournamentBracket): TreeLayout {
   const nodes = createNodes(bracket);
   const sideColumns = bracket.roundCount - 1;
-  const columnCount = sideColumns * 2 + 1;
   const boardWidth =
     EDGE_PADDING * 2 +
-    columnCount * NODE_WIDTH +
-    (columnCount - 1) * COLUMN_GAP +
-    (FINAL_WIDTH - NODE_WIDTH);
+    sideColumns * 2 * NODE_WIDTH +
+    sideColumns * 2 * COLUMN_GAP +
+    FINAL_WIDTH;
   const openingPerSide = Math.max(1, bracket.bracketSize / 4);
-  const treeHeight = Math.max(400, openingPerSide * (NODE_HEIGHT + 44));
+  const treeHeight = Math.max(250, openingPerSide * (NODE_HEIGHT + 34));
   const boardHeight = TREE_TOP + treeHeight + 36;
-  const columnX = (column: number) =>
-    EDGE_PADDING + column * (NODE_WIDTH + COLUMN_GAP);
+  const finalX = EDGE_PADDING + sideColumns * (NODE_WIDTH + COLUMN_GAP);
+  const sideX = (round: number, right: boolean) =>
+    right
+      ? finalX +
+        FINAL_WIDTH +
+        COLUMN_GAP +
+        (sideColumns - round) * (NODE_WIDTH + COLUMN_GAP)
+      : EDGE_PADDING + (round - 1) * (NODE_WIDTH + COLUMN_GAP);
   const sideY = (index: number, count: number) =>
     TREE_TOP + ((index + 0.5) / count) * treeHeight;
 
   const positioned = nodes.map((node): PositionedNode => {
     if (node.kind === "final") {
       return {
-        height: NODE_HEIGHT + 18,
+        height: NODE_HEIGHT + 12,
         node,
         width: FINAL_WIDTH,
-        x: boardWidth / 2 - FINAL_WIDTH / 2,
+        x: finalX,
         y: TREE_TOP + treeHeight / 2,
       };
     }
     const { index, right, sideCount } = sidePosition(node, bracket);
-    const column = right
-      ? columnCount - node.round
-      : Math.max(0, node.round - 1);
     return {
       height: NODE_HEIGHT,
       node,
       width: NODE_WIDTH,
-      x: columnX(column),
+      x: sideX(node.round, right),
       y: sideY(index, sideCount),
     };
   });

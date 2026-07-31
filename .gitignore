@@ -50,3 +50,5 @@ next-env.d.ts
 /.specify/integration.json
 /.specify/integrations/codex.manifest.json
 .agents/
+/.claude/
+/.codex/

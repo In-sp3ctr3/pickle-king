@@ -1,8 +1,9 @@
 "use client";
 
 import { ArrowRight, Users } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState, type FormEvent } from "react";
-import { SlidingChoice } from "@/src/shared/ui";
+import { ActionButton, SlidingChoice } from "@/src/shared/ui";
 import { createScoringState } from "../../match/scoring";
 import type { ScoringState } from "../../match/types";
 
@@ -16,29 +17,61 @@ export function QuickMatchSetup({
   const [target, setTarget] = useState(11);
   const [timed, setTimed] = useState(false);
   const [minutes, setMinutes] = useState(15);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<{
+    minutes?: string;
+    names: Record<number, string>;
+    target?: string;
+  }>({ names: {} });
+  const [validationAttempt, setValidationAttempt] = useState(0);
+  const reducedMotion = useReducedMotion();
   const count = doubles ? 4 : 2;
+
+  function clearFieldError(field: "minutes" | "target") {
+    setErrors((current) =>
+      current[field] ? { ...current, [field]: undefined } : current,
+    );
+  }
+
+  function clearNameError(index: number) {
+    setErrors((current) => {
+      if (!current.names[index]) return current;
+      const nextNames = { ...current.names };
+      delete nextNames[index];
+      return { ...current, names: nextNames };
+    });
+  }
 
   function submit(event: FormEvent) {
     event.preventDefault();
     const active = names.slice(0, count).map((name) => name.trim());
-    if (active.some((name) => !name)) {
-      setError("Add a name for every player.");
-      return;
-    }
-    if (new Set(active.map((name) => name.toLowerCase())).size !== count) {
-      setError("Player names must be unique.");
-      return;
-    }
+    const nextErrors: typeof errors = { names: {} };
+    active.forEach((name, index) => {
+      if (!name) nextErrors.names[index] = "Enter a player name.";
+    });
+    const normalized = active.map((name) => name.toLowerCase());
+    normalized.forEach((name, index) => {
+      if (
+        name &&
+        normalized.filter((candidate) => candidate === name).length > 1
+      ) {
+        nextErrors.names[index] = "Use a unique player name.";
+      }
+    });
     if (!Number.isInteger(target) || target < 1 || target > 99) {
-      setError("Play-to score must be a whole number from 1 to 99.");
-      return;
+      nextErrors.target = "Use a whole number from 1 to 99.";
     }
     if (timed && (!Number.isInteger(minutes) || minutes < 1 || minutes > 120)) {
-      setError("Time cap must be a whole number from 1 to 120 minutes.");
+      nextErrors.minutes = "Use a whole number from 1 to 120.";
+    }
+    setValidationAttempt((attempt) => attempt + 1);
+    setErrors(nextErrors);
+    if (
+      Object.keys(nextErrors.names).length ||
+      nextErrors.target ||
+      nextErrors.minutes
+    ) {
       return;
     }
-    setError("");
     const sideAIds = doubles ? ["quick-a1", "quick-a2"] : ["quick-a1"];
     const sideBIds = doubles ? ["quick-b1", "quick-b2"] : ["quick-b1"];
     onStart(
@@ -68,7 +101,10 @@ export function QuickMatchSetup({
           <legend>Format</legend>
           <SlidingChoice
             ariaLabel="Match format"
-            onChange={(format) => setDoubles(format === "doubles")}
+            onChange={(format) => {
+              setDoubles(format === "doubles");
+              setErrors({ names: {} });
+            }}
             options={[
               { label: "Singles", value: "singles" },
               {
@@ -84,72 +120,149 @@ export function QuickMatchSetup({
           <legend>Players</legend>
           <div className="quick-player-grid">
             {Array.from({ length: count }, (_, index) => (
-              <label key={index}>
+              <motion.label
+                animate={
+                  errors.names[index] && validationAttempt
+                    ? { x: [0, -7, 6, -3, 0] }
+                    : { x: 0 }
+                }
+                className={errors.names[index] ? "is-invalid" : undefined}
+                key={`${index}-${errors.names[index] ? validationAttempt : 0}`}
+                transition={{ duration: reducedMotion ? 0 : 0.32 }}
+              >
                 <span>
                   {doubles
                     ? `Team ${index < 2 ? "A" : "B"} · Player ${(index % 2) + 1}`
                     : `Side ${index === 0 ? "A" : "B"}`}
                 </span>
                 <input
+                  aria-describedby={
+                    errors.names[index]
+                      ? `quick-name-${index}-error`
+                      : undefined
+                  }
+                  aria-invalid={Boolean(errors.names[index])}
                   autoComplete="off"
                   maxLength={40}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setNames((current) =>
                       current.map((name, nameIndex) =>
                         nameIndex === index ? event.target.value : name,
                       ),
-                    )
-                  }
+                    );
+                    clearNameError(index);
+                  }}
                   value={names[index]}
                 />
-              </label>
+                {errors.names[index] ? (
+                  <small
+                    className="quick-field-error"
+                    id={`quick-name-${index}-error`}
+                  >
+                    {errors.names[index]}
+                  </small>
+                ) : null}
+              </motion.label>
             ))}
           </div>
         </fieldset>
         <div className="quick-rules">
-          <label>
+          <motion.label
+            animate={
+              errors.target && validationAttempt
+                ? { x: [0, -7, 6, -3, 0] }
+                : { x: 0 }
+            }
+            className={errors.target ? "is-invalid" : undefined}
+            key={`target-${errors.target ? validationAttempt : 0}`}
+            transition={{ duration: reducedMotion ? 0 : 0.32 }}
+          >
             <span>Play to</span>
             <input
+              aria-describedby={
+                errors.target ? "quick-target-error" : undefined
+              }
+              aria-invalid={Boolean(errors.target)}
               max={99}
               min={1}
-              onChange={(event) => setTarget(event.target.valueAsNumber)}
+              onChange={(event) => {
+                setTarget(event.target.valueAsNumber);
+                clearFieldError("target");
+              }}
               type="number"
               value={target}
             />
-          </label>
+            {errors.target ? (
+              <small className="quick-field-error" id="quick-target-error">
+                {errors.target}
+              </small>
+            ) : null}
+          </motion.label>
           <fieldset className="quick-timing">
             <legend>Match clock</legend>
             <SlidingChoice
               ariaLabel="Match clock"
-              onChange={(mode) => setTimed(mode === "timed")}
+              onChange={(mode) => {
+                setTimed(mode === "timed");
+                if (mode === "untimed") clearFieldError("minutes");
+              }}
               options={[
                 { label: "No time cap", value: "untimed" },
                 { label: "Timed", value: "timed" },
               ]}
               value={timed ? "timed" : "untimed"}
             />
-            {timed ? (
-              <label>
-                <span>Time cap · minutes</span>
-                <input
-                  max={120}
-                  min={1}
-                  onChange={(event) => setMinutes(event.target.valueAsNumber)}
-                  type="number"
-                  value={minutes}
-                />
-              </label>
-            ) : null}
+            <AnimatePresence initial={false}>
+              {timed ? (
+                <motion.label
+                  animate={{ height: "auto", opacity: 1, y: 0 }}
+                  className={errors.minutes ? "is-invalid" : undefined}
+                  data-motion-state="open"
+                  exit={{ height: 0, opacity: 0, y: -8 }}
+                  initial={{ height: 0, opacity: 0, y: -10 }}
+                  key={`time-cap-${errors.minutes ? validationAttempt : 0}`}
+                  transition={
+                    reducedMotion
+                      ? { duration: 0 }
+                      : { bounce: 0.18, duration: 0.42, type: "spring" }
+                  }
+                >
+                  <span>Time cap · minutes</span>
+                  <input
+                    aria-describedby={
+                      errors.minutes ? "quick-minutes-error" : undefined
+                    }
+                    aria-invalid={Boolean(errors.minutes)}
+                    max={120}
+                    min={1}
+                    onChange={(event) => {
+                      setMinutes(event.target.valueAsNumber);
+                      clearFieldError("minutes");
+                    }}
+                    type="number"
+                    value={minutes}
+                  />
+                  {errors.minutes ? (
+                    <small
+                      className="quick-field-error"
+                      id="quick-minutes-error"
+                    >
+                      {errors.minutes}
+                    </small>
+                  ) : null}
+                </motion.label>
+              ) : null}
+            </AnimatePresence>
           </fieldset>
         </div>
-        {error ? (
-          <p className="form-error" role="alert">
-            {error}
-          </p>
-        ) : null}
-        <button className="primary-button quick-submit" type="submit">
+        <p className="sr-only" role="alert">
+          {Object.keys(errors.names).length || errors.target || errors.minutes
+            ? "Fix the highlighted match details."
+            : ""}
+        </p>
+        <ActionButton className="quick-submit" type="submit">
           Open scorer <ArrowRight aria-hidden="true" size={19} />
-        </button>
+        </ActionButton>
       </form>
     </main>
   );

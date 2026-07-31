@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, Home } from "lucide-react";
 
 export function FloatingAppNav({
@@ -28,19 +28,16 @@ export function FloatingAppNav({
           <ArrowLeft aria-hidden="true" size={17} />
           <span>{backLabel}</span>
         </button>
-        <AnimatePresence initial={false} mode="popLayout">
-          <motion.span
-            animate={{ y: 0 }}
-            className="floating-app-nav__current"
-            exit={reducedMotion ? undefined : { y: -8 }}
-            initial={reducedMotion ? false : { y: 8 }}
-            key={currentLabel}
-            transition={{ duration: reducedMotion ? 0 : 0.2 }}
-          >
-            <span aria-hidden="true" className="floating-app-nav__mark" />
-            {currentLabel}
-          </motion.span>
-        </AnimatePresence>
+        <motion.span
+          animate={{ y: 0 }}
+          className="floating-app-nav__current"
+          initial={reducedMotion ? false : { y: 5 }}
+          key={currentLabel}
+          transition={{ duration: reducedMotion ? 0 : 0.18 }}
+        >
+          <span aria-hidden="true" className="floating-app-nav__mark" />
+          {currentLabel}
+        </motion.span>
         <button
           aria-label="Go home"
           className="floating-app-nav__home"

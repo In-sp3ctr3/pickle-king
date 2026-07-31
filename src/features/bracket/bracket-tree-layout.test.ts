@@ -41,6 +41,16 @@ describe("connected bracket tree layout", () => {
         throw new Error("Final node missing.");
       }
       expect(final.x).toBe(layout.boardWidth / 2 - final.width / 2);
+      const sideNodes = layout.nodes.filter(
+        ({ node }) => node.kind !== "final",
+      );
+      expect(
+        sideNodes.every(
+          (positioned) =>
+            positioned.x + positioned.width <= final.x ||
+            positioned.x >= final.x + final.width,
+        ),
+      ).toBe(true);
       expect(final.node.match.sourceA).toBeTruthy();
       expect(final.node.match.sourceB).toBeTruthy();
       expect(layout.links.every(({ fromId, toId }) => fromId !== toId)).toBe(

@@ -118,7 +118,11 @@ export function RunOfShow({
               {matchSideLabel(match.sideB?.memberIds, players)}
             </span>
             <span className="text-[0.65rem] font-extrabold tracking-[0.1em] uppercase">
-              {match.status}
+              {index === 0 && match.status === "ready"
+                ? "next"
+                : match.status === "ready"
+                  ? "queued"
+                  : match.status}
             </span>
           </li>
         ))}
