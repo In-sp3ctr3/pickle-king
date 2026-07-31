@@ -45,6 +45,7 @@
     "sharp": "0.35.3"
   },
   "dependencies": {
+    "@fontsource/archivo-black": "^5.2.8",
     "@fontsource/manrope": "^5.3.0",
     "@number-flow/react": "^0.6.2",
     "@radix-ui/react-select": "^2.3.7",

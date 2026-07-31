@@ -1,5 +1,11 @@
 import type { MatchStatus } from "@/src/tournament";
-import { CircleCheck, CircleDashed, Radio, TimerReset } from "lucide-react";
+import {
+  CircleCheck,
+  CircleDashed,
+  Clock3,
+  Radio,
+  TimerReset,
+} from "lucide-react";
 
 const statusDetails = {
   waiting: {
@@ -8,9 +14,14 @@ const statusDetails = {
     className: "text-[#9da494]",
   },
   ready: {
-    label: "Ready",
+    label: "Next",
     icon: TimerReset,
     className: "text-[#c8ff3d]",
+  },
+  queued: {
+    label: "Queued",
+    icon: Clock3,
+    className: "text-[#9da494]",
   },
   live: {
     label: "Live",
@@ -23,11 +34,11 @@ const statusDetails = {
     className: "text-[#f5f3e9]",
   },
 } satisfies Record<
-  MatchStatus,
+  MatchStatus | "queued",
   { label: string; icon: typeof CircleCheck; className: string }
 >;
 
-export function StatusLabel({ status }: { status: MatchStatus }) {
+export function StatusLabel({ status }: { status: MatchStatus | "queued" }) {
   const detail = statusDetails[status];
   const Icon = detail.icon;
 

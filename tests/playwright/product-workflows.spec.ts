@@ -18,6 +18,53 @@ async function openQuickMatch(page: Page, target = 11) {
   await page.getByRole("button", { name: "Start", exact: true }).click();
 }
 
+test("quick setup points to each invalid field and animates the timed rule", async ({
+  page,
+}) => {
+  await openFresh(page);
+  await page.getByRole("button", { name: "Quick match" }).click();
+  await page.getByRole("button", { name: "Open scorer" }).click();
+  await expect(page.getByLabel("Side A")).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await expect(page.getByLabel("Side B")).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await expect(page.getByText("Enter a player name.")).toHaveCount(2);
+  await page.getByLabel("Side A").fill("Alex");
+  await expect(page.getByLabel("Side A")).toHaveAttribute(
+    "aria-invalid",
+    "false",
+  );
+  await expect(page.getByText("Enter a player name.")).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Timed" }).click();
+  await expect(page.getByLabel("Time cap · minutes")).toBeVisible();
+  await expect(
+    page.getByLabel("Time cap · minutes").locator(".."),
+  ).toHaveAttribute("data-motion-state", "open");
+});
+
+test("tournament setup focuses and marks the first invalid player row", async ({
+  page,
+}) => {
+  await openFresh(page);
+  await page.getByRole("button", { name: "Start tournament" }).click();
+  await page.getByRole("button", { name: "Build bracket" }).click();
+  await expect(page.getByLabel("Player name").first()).toBeFocused();
+  await expect(page.getByLabel("Player name").first()).toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await expect(page.locator(".setup-player-row").first()).toHaveAttribute(
+    "data-invalid",
+    "true",
+  );
+  await expect(page.getByText("Enter a player name.")).toHaveCount(4);
+});
+
 test("play-to-seven continues through a tie and one-point lead", async ({
   page,
 }) => {
@@ -43,6 +90,28 @@ test("play-to-seven continues through a tie and one-point lead", async ({
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button", { name: "Review corrected result" }).click();
   await expect(page.getByRole("heading", { name: "Blair wins" })).toBeVisible();
+});
+
+test("double-digit scores stay legible at tablet size", async ({ page }) => {
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await openQuickMatch(page, 11);
+  const addA = page.locator("[data-qa='score-a-add']");
+  const addB = page.locator("[data-qa='score-b-add']");
+  for (let point = 0; point < 10; point += 1) {
+    await addA.click();
+    await addB.click();
+  }
+  await expect(
+    page.locator("section[aria-label='Alex, 10 points']"),
+  ).toBeVisible();
+  await expect(
+    page.locator("section[aria-label='Blair, 10 points']"),
+  ).toBeVisible();
+  await page.screenshot({
+    animations: "disabled",
+    fullPage: true,
+    path: "output/playwright/double-digit-score.png",
+  });
 });
 
 test("restart, tied early finish, and operator-selected winner are explicit", async ({
@@ -113,12 +182,53 @@ test("setup explains the four-player minimum and builds an untimed centered draw
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
   await expect(page.locator("[data-qa='final-match']")).toBeVisible();
   await expect(page.locator(".bracket-match-node")).toHaveCount(3);
+  await expect(page.locator("[data-match-queue-state='next']")).toHaveCount(1);
+  await expect(page.locator("[data-match-queue-state='queued']")).toHaveCount(
+    1,
+  );
   await expect(
     page.locator(".bracket-match-node").first().locator(".tree-match-side"),
   ).toHaveCount(2);
   await page.getByRole("button", { name: "Back to setup" }).click();
   await expect(page.locator("[data-qa='tournament-setup']")).toBeVisible();
   await expect(page.getByLabel("Player name").first()).toHaveValue("Maya");
+});
+
+test("a six-player draw stays connected and queues one court at a time", async ({
+  page,
+}) => {
+  await openFresh(page);
+  await page.getByRole("button", { name: "Start tournament" }).click();
+  await page.getByRole("button", { name: "No time limit" }).click();
+  await page.getByRole("button", { name: "Add another player" }).click();
+  await page.getByRole("button", { name: "Add another player" }).click();
+  const names = ["Maya", "Rae", "Kai", "Noah", "Luis", "Trent"];
+  for (let index = 0; index < names.length; index += 1) {
+    await page.getByLabel("Player name").nth(index).fill(names[index]);
+    await page.getByLabel("Rating").nth(index).click();
+    await page.getByRole("option", { name: "3.5" }).click();
+  }
+  await page.getByRole("button", { name: "Build bracket" }).click();
+  await expect(page.locator(".bracket-match-node")).toHaveCount(7);
+  await expect(page.locator("[data-match-queue-state='next']")).toHaveCount(1);
+  await expect(page.locator("[data-match-queue-state='queued']")).toHaveCount(
+    1,
+  );
+  const viewport = page.locator(".bracket-tree-viewport");
+  await page.getByRole("button", { name: "Left draw" }).click();
+  await expect
+    .poll(() => viewport.evaluate((element) => element.scrollLeft))
+    .toBe(0);
+  await page.getByRole("button", { name: "Right draw" }).click();
+  await expect
+    .poll(() => viewport.evaluate((element) => element.scrollLeft))
+    .toBeGreaterThan(0);
+  await page.getByRole("button", { name: "Final" }).click();
+  await page.screenshot({
+    animations: "disabled",
+    fullPage: true,
+    path: "output/playwright/six-player-bracket.png",
+  });
 });
 
 test("the installed shell reopens offline", async ({ context, page }) => {

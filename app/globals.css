@@ -14,6 +14,7 @@
   --clay: #ff7a4d;
   --mist: #9da494;
   --line: #2b3227;
+  --font-display: "Archivo Black", "Arial Black", sans-serif;
 }
 
 * {
@@ -32,6 +33,7 @@ body {
   background: var(--court);
   color: var(--chalk);
   font-family: "Manrope", Arial, sans-serif;
+  font-weight: 700;
 }
 
 button,

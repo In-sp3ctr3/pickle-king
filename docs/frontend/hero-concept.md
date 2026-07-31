@@ -1,56 +1,56 @@
-# Home Kinetic Court
+# Home Mascot Hero
 
-Status: ready  
-Research required: yes  
-Motion required: yes  
-Motion reason: player positions visibly rotate between court and rest while the
-crown resolves above the active court.
+Status: ready
+Research required: yes
+Motion required: yes
+Motion reason: the existing Pickle King mascot arrives as the product identity
+and blinks without introducing a separate product-demo illustration.
 
 ## Product Story
 
-- Input: a friend group that still has an unresolved “best player” argument.
-- Transformation: players become a seeded, rested, one-court tournament.
-- Output: one completed draw and one crowned winner.
-- User value demonstrated: the app turns informal court time into a fair result
-  without sending names or scores off the device.
+- Input: a friend group needs to settle who runs the court.
+- Transformation: the crowned mascot arrives and comes alive with one
+  restrained blink.
+- Output: a clear choice to start a tournament or open a quick scorer.
+- User value demonstrated: Pickle King turns friendly competition into a
+  decisive, courtside-ready session.
 
 ## Direction
 
-The hero is an open DOM composition rather than an image. An angled pickleball
-court sits behind four player names. Two names move into the active matchup,
-two shift into a visible rest lane, a ball travels across the court, and the
-crown resolves above the composition. The movement demonstrates the product's
-fairness mechanism rather than decorating the page.
+The hero uses the existing text-free Pickle King mark at large scale beside a
+short, direct headline. The mascot lands with one bounded entrance and blinks
+at an idle interval. The art is not placed inside a card, frame, glow, or
+decorative hero panel. Filled, tactile actions sit directly beneath the copy.
 
-The previous night-court artwork and paint mask are rejected because the user
-did not accept the image or the hero composition.
+The previous court-rotation composition, paint reveal, and night-court image
+are rejected because the user explicitly rejected product-demo art in the
+hero.
 
 ## Storyboard
 
-| Stage   | Time       | Visual state                                  | Product meaning                  | QA signal                     |
-| ------- | ---------- | --------------------------------------------- | -------------------------------- | ----------------------------- |
-| Seeded  | 0–180ms    | Four names enter around an empty court        | Everyone starts in the draw      | `data-motion-state="seeded"`  |
-| Rotate  | 180–620ms  | Two names move on court; two move to rest     | One match, protected recovery    | `data-motion-state="rotate"`  |
-| Serve   | 620–1050ms | Ball travels and the active matchup brightens | The next match is ready          | `data-motion-state="serve"`   |
-| Settled | 1050ms+    | Crown and court state remain legible          | Run the court and crown a winner | `data-motion-state="settled"` |
+| Stage   | Time       | Visual state                              | QA signal                     | Reduced motion |
+| ------- | ---------- | ----------------------------------------- | ----------------------------- | -------------- |
+| Enter   | 0–420ms    | Mascot rises and settles at full opacity  | `data-motion-state="enter"`   | static         |
+| Awake   | 420–1050ms | Mascot holds while the blink loop is live | `data-motion-state="awake"`   | static         |
+| Settled | 1050ms+    | Static readable hero with periodic blink  | `data-motion-state="settled"` | static         |
 
 ## Implementation
 
-- Selected rung: semantic DOM/CSS plus Motion layout and spring transitions.
-- Why this rung is necessary: it shows court rotation and protected rest as a
-  spatial sequence without adding a decorative asset or heavy renderer.
-- No bitmap, canvas, video, or artificial loading delay.
-- Desktop: asymmetric 7/5 composition with copy and actions first.
-- Mobile: stacked copy and actions followed by the same responsive court
-  composition; short landscape screens switch to two columns.
-- `prefers-reduced-motion` behavior: skip every impact stage and render the
-  settled court immediately.
-- Static fallback: the settled court/rest composition remains understandable.
-- Measurement: route harness observes rotate/serve/settled states at desktop,
-  tablet, phone portrait, and phone landscape viewports.
+- Selected rung: semantic HTML, the supplied raster mark, and CSS animation.
+- Why this rung is necessary: it animates the requested existing logo without
+  adding canvas, WebGL, video, or another generated asset.
+- Desktop: copy and mascot share the viewport.
+- Mobile: actions remain before the mascot in a single reading column.
+- `prefers-reduced-motion` behavior: no entrance or blink.
+- Static fallback: the mascot remains visible with state `static`.
+- Measurement: `data-motion-state` exposes enter, awake, settled, and static
+  states to the frontend harness.
+- Existing asset: `public/brand/pickle-king-mark.png`.
+- Blink: two positioned eyelids; no altered duplicate raster or generated
+  sprite.
 
 ## Performance Budget
 
-- Existing Motion dependency only.
-- No hero raster download.
-- One bounded entrance sequence; no idle loop.
+- One already-cached 512px PNG.
+- No new animation runtime or dependency.
+- One bounded entrance plus a low-frequency CSS blink.

@@ -6,7 +6,7 @@ Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-07-30
+Last updated: 2026-07-31
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -24,13 +24,13 @@ Last updated: 2026-07-30
 
 ## Sources
 
-| Source                              | Authority           | Use                                             | Status                    |
-| ----------------------------------- | ------------------- | ----------------------------------------------- | ------------------------- |
-| User-supplied tournament screenshot | layout reference    | Outer rounds visibly converge on a center final | accepted                  |
-| Skiper v37                          | measured reference  | Number transition tempo and legibility          | accepted with attribution |
-| Skiper v107                         | rejection reference | Confirms Pro source must not be copied          | rejected as source        |
-| Product specification               | product authority   | Flow, content, constraints, and accessibility   | accepted                  |
-| Product plan                        | immutable           | Flows, controls, content, accessibility         |
+| Source                              | Authority           | Use                                           | Status                    |
+| ----------------------------------- | ------------------- | --------------------------------------------- | ------------------------- |
+| User-supplied tournament screenshot | layout reference    | Wide two-contender match nodes with scores    | accepted                  |
+| Skiper v37                          | measured reference  | Number transition tempo and legibility        | accepted with attribution |
+| Skiper v107                         | rejection reference | Confirms Pro source must not be copied        | rejected as source        |
+| Product specification               | product authority   | Flow, content, constraints, and accessibility | accepted                  |
+| Product plan                        | immutable           | Flows, controls, content, accessibility       |
 
 ## Product and UX
 
@@ -41,14 +41,14 @@ Last updated: 2026-07-30
 
 ## Page Regions
 
-| Region       | Purpose                    | Geometry                             | Responsive behavior                          | Interaction                  |
-| ------------ | -------------------------- | ------------------------------------ | -------------------------------------------- | ---------------------------- |
-| Court header | explicit app navigation    | centered floating island             | labels contract, actions remain available    | back and home                |
-| Home hero    | explain fairness and begin | asymmetric copy + kinetic court      | stacked; CTA first                           | one-shot court rotation      |
-| Run of show  | next match and time risk   | lime court slab + ordered queue      | horizontal queue becomes list                | start the one eligible match |
-| Bracket      | advancement overview       | connected two-sided elimination tree | full tree desktop; preserved overflow mobile | scroll, start, and correct   |
-| Scorekeeper  | no-look scoring            | split screen with oversized zones    | portrait two halves; landscape two columns   | add, subtract, pause, reset  |
-| Results      | podium and evidence        | crown focal point + grouped tables   | stacked podium then cards                    | correct or return home       |
+| Region       | Purpose                      | Geometry                             | Responsive behavior                          | Interaction                  |
+| ------------ | ---------------------------- | ------------------------------------ | -------------------------------------------- | ---------------------------- |
+| Court header | explicit app navigation      | centered floating island             | labels contract, actions remain available    | back and home                |
+| Home hero    | establish identity and begin | asymmetric copy + crowned mascot     | stacked; CTA first                           | mascot arrival and blink     |
+| Run of show  | next match and time risk     | lime court slab + ordered queue      | horizontal queue becomes list                | start the one eligible match |
+| Bracket      | advancement overview         | connected two-sided elimination tree | full tree desktop; preserved overflow mobile | scroll, start, and correct   |
+| Scorekeeper  | no-look scoring              | split screen with oversized zones    | portrait two halves; landscape two columns   | add, subtract, pause, reset  |
+| Results      | podium and evidence          | crown focal point + grouped tables   | stacked podium then cards                    | correct or return home       |
 
 ## Geometry
 
@@ -59,10 +59,10 @@ Last updated: 2026-07-30
 
 ## Typography
 
-| Role    | Family  | Weight  | Size           | Line height | Use                                |
-| ------- | ------- | ------- | -------------- | ----------- | ---------------------------------- |
-| Display | Manrope | 700–800 | fluid 44–112px | 0.9–1.02    | hero, scoreboard, results          |
-| UI/body | Manrope | 400–800 | 12–18px        | 1.4–1.7     | labels, controls, explanatory copy |
+| Role    | Family        | Weight  | Size           | Line height | Use                                |
+| ------- | ------------- | ------- | -------------- | ----------- | ---------------------------------- |
+| Display | Archivo Black | 400     | fluid 44–112px | 0.88–1.02   | hero, scoreboard, results          |
+| UI/body | Manrope       | 400–800 | 12–18px        | 1.4–1.7     | labels, controls, explanatory copy |
 
 ## Color
 
@@ -89,41 +89,44 @@ Last updated: 2026-07-30
 
 ## Components
 
-| Component         | States                          | Rules                                         |
-| ----------------- | ------------------------------- | --------------------------------------------- |
-| PrimaryButton     | default, pressed, disabled      | 52px minimum, lime fill, black text           |
-| PlayerRow         | editing, invalid, complete      | inline name/React select; error text adjacent |
-| RatingSelect      | closed, open, selected, invalid | portal listbox; keyboard and touch operable   |
-| MatchCard         | waiting, ready, live, complete  | two contender rows; action remains inside     |
-| FloatingNav       | setup, bracket, results, quick  | centered island; explicit Back and Home       |
-| ScoreSide         | normal, leader, golden          | whole large zone adds; explicit minus button  |
-| NumberFlow        | changing, reduced motion        | numbers only; no ornamental looping           |
-| Dialog            | confirm, destructive            | initial focus, escape, focus return           |
-| Toast/live region | neutral, warning                | concise and announced politely                |
+| Component         | States                                | Rules                                           |
+| ----------------- | ------------------------------------- | ----------------------------------------------- |
+| PrimaryButton     | default, pressed, disabled            | 52px minimum, filled tactile surface, no stroke |
+| PlayerRow         | editing, invalid, complete            | inline name/React select; error text adjacent   |
+| RatingSelect      | closed, open, selected, invalid       | portal listbox; keyboard and touch operable     |
+| MatchCard         | waiting, queued, next, live, complete | wide two-contender rows; circle action at right |
+| FinalMatchCard    | waiting, queued, next, complete       | finalist left/right with trophy in the center   |
+| FloatingNav       | setup, bracket, results, quick        | solid centered island; explicit Back and Home   |
+| ScoreSide         | normal, leader, golden                | whole large zone adds; explicit minus button    |
+| NumberFlow        | changing, reduced motion              | numbers only; no ornamental looping             |
+| Dialog            | confirm, destructive                  | initial focus, escape, focus return             |
+| Toast/live region | neutral, warning                      | concise and announced politely                  |
 
 ## Motion
 
-| Motion              | Purpose                    | Trigger             | Timing               | Reduced motion |
-| ------------------- | -------------------------- | ------------------- | -------------------- | -------------- |
-| score digit flow    | preserve number location   | score/time update   | spring, about 320ms  | immediate text |
-| headline reveal     | establish hierarchy        | home entry          | 620ms clipped rise   | static text    |
-| court rotation      | explain play/rest fairness | home entry          | 1100ms staged spring | settled court  |
-| selected choice     | preserve toggle context    | option change       | 240ms spring         | immediate fill |
-| rating popup        | connect trigger and menu   | open/select         | 180ms ease-out       | immediate menu |
-| bracket advancement | show dependency            | result confirmation | 420ms ease-out       | crossfade      |
-| connector reveal    | show advancement path      | result confirmation | 280ms ease-out       | immediate      |
-| crown arrival       | celebrate winner           | results entry       | 700ms spring         | static crown   |
-| press response      | confirm touch              | pointer/keyboard    | 90ms                 | color only     |
+| Motion              | Purpose                       | Trigger             | Timing              | Reduced motion |
+| ------------------- | ----------------------------- | ------------------- | ------------------- | -------------- |
+| score digit flow    | preserve number location      | score/time update   | spring, about 320ms | immediate text |
+| mascot arrival      | establish product identity    | home entry          | 720ms ease-out      | static mascot  |
+| mascot blink        | give the mark restrained life | idle                | 100ms every 5.2s    | no blink       |
+| selected choice     | preserve toggle context       | option change       | 240ms spring        | immediate fill |
+| rating popup        | connect trigger and menu      | open/select         | 180ms ease-out      | immediate menu |
+| bracket advancement | show dependency               | result confirmation | 420ms ease-out      | crossfade      |
+| connector reveal    | show advancement path         | result confirmation | 280ms ease-out      | immediate      |
+| crown arrival       | celebrate winner              | results entry       | 700ms spring        | static crown   |
+| press response      | confirm touch                 | pointer/keyboard    | 90ms                | color only     |
 
 ## Anti-generic constraints
 
-- Court lines and bracket connectors provide structure; decorative cards do not.
+- Bracket connectors and spacing provide structure; decorative strokes do not.
 - Full-width separator rules are reserved for data tables and scorer anatomy,
   not page navigation or section decoration.
 - Lime is reserved for current/ready/primary state, never sprayed across all copy.
-- The home visual demonstrates one-court rotation and rest; it is not a
-  bracket, a static image, or a generic dashboard panel.
+- The home visual is the existing crowned mascot without a frame, product-demo
+  diagram, fake dashboard, or unrelated hero effect.
 - Match nodes contain both contenders. Separate player cards are prohibited.
+- Only the one-court eligible match may read `Next` or use the lime node state;
+  other dependency-ready matches read `Queued`.
 - Native select popups are prohibited for visible product controls.
 - No gradients, glassmorphism, WebGL, stock sports photos, or dashboard tile grids.
 

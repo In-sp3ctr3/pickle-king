@@ -2,8 +2,7 @@
 
 import { ActionButton } from "@/src/shared/ui";
 import { ArrowRight, Download, Play, RotateCcw } from "lucide-react";
-import { HomeCourtRotation } from "./home-court-rotation";
-import { HomeTitle } from "./home-title";
+import { HomeMascot } from "./home-mascot";
 
 export interface HomeScreenProps {
   onStartTournament: () => void;
@@ -23,15 +22,14 @@ export function HomeScreen({
   return (
     <main className="home-screen">
       <section className="home-copy">
-        <div className="home-brand-lockup" aria-hidden="true">
-          <span className="brand-mark" />
-          <span>Pickle King</span>
-        </div>
+        <p className="home-brand-lockup">Pickle King</p>
         <p className="home-eyebrow">One court · One crown</p>
-        <HomeTitle />
+        <h1>
+          Settle it.
+          <span>On court.</span>
+        </h1>
         <p className="home-lede">
-          Build the draw, run the score, and give every player time to recover.
-          One court. No guesswork.
+          Build the bracket. Keep the score. Crown the winner.
         </p>
 
         <div className="home-actions">
@@ -76,8 +74,8 @@ export function HomeScreen({
         <p className="home-proof">Your names and scores stay on this device</p>
       </section>
 
-      <section className="home-mechanism" aria-label="How Pickle King works">
-        <HomeCourtRotation />
+      <section className="home-mechanism" aria-label="Pickle King mascot">
+        <HomeMascot />
       </section>
     </main>
   );

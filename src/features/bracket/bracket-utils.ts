@@ -10,7 +10,7 @@ export function matchSideLabel(
   memberIds: string[] | undefined,
   players: Player[],
 ): string {
-  if (!memberIds?.length) return "To be decided";
+  if (!memberIds?.length) return "TBD";
   const names = memberIds.map(
     (memberId) =>
       players.find((player) => player.id === memberId)?.name ??

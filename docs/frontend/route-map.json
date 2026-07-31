@@ -42,18 +42,18 @@
       ],
       "motionChecks": [
         {
-          "name": "home court rotation",
-          "selector": "[data-qa='home-product-sequence']",
+          "name": "mascot arrival",
+          "selector": "[data-qa='home-mascot']",
           "stateAttribute": "data-motion-state",
-          "requiredStates": ["rotate", "serve", "settled"],
+          "requiredStates": ["awake", "settled"],
           "reducedMotionState": "static",
-          "observationMs": 1200
+          "observationMs": 1300
         }
       ],
       "reducedMotionChecks": [
         {
-          "name": "home product sequence static",
-          "selector": "[data-qa='home-product-sequence']",
+          "name": "home mascot static",
+          "selector": "[data-qa='home-mascot']",
           "expect": "visible"
         }
       ],
@@ -311,7 +311,7 @@
           "name": "invalid quick submit",
           "selector": ".quick-submit",
           "action": "click",
-          "expect": { "visible": ".form-error" }
+          "expect": { "visible": "#quick-name-0-error" }
         }
       ],
       "motionChecks": [],

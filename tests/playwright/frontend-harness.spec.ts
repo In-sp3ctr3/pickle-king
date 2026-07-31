@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   findUnlistedControls,
   observeMotion,
@@ -13,6 +13,16 @@ import {
   type Control,
 } from "./frontend-harness-support";
 
+async function installDeterministicBrowserState(page: Page) {
+  await page.addInitScript(() => {
+    window.localStorage.clear();
+    Object.defineProperty(window.crypto, "randomUUID", {
+      configurable: true,
+      value: () => "11111111-1111-4111-8111-111111111111",
+    });
+  });
+}
+
 for (const viewport of routeMap.viewports) {
   test.describe(viewport.name, () => {
     test.use({ viewport: { width: viewport.width, height: viewport.height } });
@@ -21,7 +31,7 @@ for (const viewport of routeMap.viewports) {
       test(`${route.name}: route, controls, console, focus, axe, and screenshot`, async ({
         page,
       }) => {
-        await page.addInitScript(() => window.localStorage.clear());
+        await installDeterministicBrowserState(page);
         const consoleErrors: string[] = [];
         page.on("console", (message) => {
           if (message.type() === "error") consoleErrors.push(message.text());
@@ -164,7 +174,7 @@ test.describe("reduced motion", () => {
     test(`${route.name}: remains usable with reduced motion`, async ({
       page,
     }) => {
-      await page.addInitScript(() => window.localStorage.clear());
+      await installDeterministicBrowserState(page);
       const consoleErrors: string[] = [];
       page.on("console", (message) => {
         if (message.type() === "error") consoleErrors.push(message.text());

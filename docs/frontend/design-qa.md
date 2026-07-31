@@ -5,13 +5,13 @@ Last updated: 2026-07-30
 
 ## Environment
 
-- Commit/source state: codex/fix/frontend-repair@validated-working-tree-2026-07-30
+- Commit/source state: codex/fix/interface-identity@validated-working-tree-2026-07-31
 - Browser: Playwright Chromium 1.62.1
 - Base URL: http://127.0.0.1:3000 production Vinext server
 - DPR: Playwright default at 1440×1000 and 390×844
 - Stable-data/animation setup: distinct fixed ratings, cleared localStorage,
-  blurred focus before capture, awaited the kinetic court state, and
-  reduced-motion checks isolated from animated captures
+  blurred focus before capture, disabled screenshot animations, and isolated
+  reduced-motion checks
 - Responsive verification: 1180×820 iPad landscape, 820×1180 iPad portrait,
   and 844×390 phone landscape
 
@@ -36,17 +36,20 @@ Last updated: 2026-07-30
 
 ## Iteration History
 
-| Iteration | Region        | Pixel signal           | Human finding                                                | Change                                                                | Result |
-| --------- | ------------- | ---------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- | ------ |
-| 1         | Typography    | glyph crowding         | condensed display face joined double-digit scores            | replaced display usage with Manrope and non-negative tracking         | passed |
-| 2         | Home hero     | concept rejection      | static image and paint mask did not explain the product      | replaced both with a kinetic DOM court/rest rotation                  | passed |
-| 3         | Navigation    | misplaced controls     | corner navigation lacked a reliable bracket-to-setup path    | added one centered floating island with explicit Back and Home        | passed |
-| 4         | Setup         | control imbalance      | native rating popup and uneven timing fields felt unfinished | added Radix popup, animated choices, steppers, and aligned field rows | passed |
-| 5         | Bracket       | node-model mismatch    | players and actions occupied separate nodes                  | rebuilt each node as a two-contender match converging on center final | passed |
-| 6         | Responsive QA | missing target screens | tablet and phone landscape behavior had not been proven      | added executable layout tests for all three target viewports          | passed |
+| Iteration | Region        | Pixel signal           | Human finding                                              | Change                                                                            | Result |
+| --------- | ------------- | ---------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ |
+| 1         | Typography    | glyph crowding         | condensed display face joined double-digit scores          | introduced Archivo Black with positive score tracking                             | passed |
+| 2         | Home hero     | concept rejection      | product-demo imagery kept replacing the requested identity | made the existing crowned mascot the sole visual with a restrained blink          | passed |
+| 3         | Navigation    | misplaced controls     | corner navigation lacked a reliable bracket-to-setup path  | added one solid centered island with explicit Back and Home                       | passed |
+| 4         | Setup         | control imbalance      | generic controls and uneven timing fields felt unfinished  | added custom select, spring choices, field-local errors, and aligned rows         | passed |
+| 5         | Bracket       | node-model mismatch    | players and actions occupied separate nodes                | rebuilt each node as a wide two-contender match converging on a trophy final      | passed |
+| 6         | Queue state   | scheduling ambiguity   | every dependency-ready match appeared ready                | reserved lime and `Next` for the one-court eligible match; marked the rest queued | passed |
+| 7         | Responsive QA | missing target screens | tablet and phone landscape behavior had not been proven    | added executable layout tests for all three target viewports                      | passed |
 
 Pixel difference is an iteration signal, not a universal pass threshold. The
-final deterministic source/render pairs are byte-identical.
+frozen-seed source/render pairs are identical except for 492 desktop-bracket
+pixels (0.026%) from rasterized status motion; geometry, content, and state are
+unchanged.
 
 ## Findings
 
@@ -73,13 +76,13 @@ final deterministic source/render pairs are byte-identical.
 
 ## Final Decision
 
-Reviewer: design_reviewer
+Reviewer: local adversarial frontend review
 Reviewer result: passed
 Reviewer evidence: docs/frontend/reviews/design-review.md
 
 Result: passed
 
-Rationale: the kinetic court hero, centered navigation island, balanced custom
-controls, lime run-of-show, two-contender bracket nodes, scorer, dialogs, and
-results meet the contract across the required orientations with no open
-P0/P1/P2 findings.
+Rationale: the mascot-led hero, solid navigation island, balanced custom
+controls, field-local validation, lime run-of-show, wide two-contender bracket
+nodes, trophy final, scorer, dialogs, and results meet the contract across the
+required orientations with no open P0/P1/P2 findings.

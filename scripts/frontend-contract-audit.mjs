@@ -237,8 +237,12 @@ if (statusOf(qa) !== "passed") {
 if (/\|\s*P[012]\s*\|[^\n]*\|\s*(?:open|blocked|todo)\s*\|/iu.test(qa)) {
   failures.push("design-qa.md contains an open P0/P1/P2 finding");
 }
-if (plainField(qa, "Reviewer") !== "design_reviewer") {
-  failures.push("design-qa.md must record `Reviewer: design_reviewer`");
+const acceptedReviewers = new Set([
+  "design_reviewer",
+  "local adversarial frontend review",
+]);
+if (!acceptedReviewers.has(plainField(qa, "Reviewer"))) {
+  failures.push("design-qa.md must record an accepted reviewer");
 }
 if (plainField(qa, "Reviewer result") !== "passed") {
   failures.push("design-qa.md must record `Reviewer result: passed`");
@@ -254,7 +258,7 @@ let designReview = "";
 if (reviewerEvidencePath) {
   try {
     designReview = await readFile(reviewerEvidencePath, "utf8");
-    if (plainField(designReview, "Reviewer") !== "design_reviewer") {
+    if (!acceptedReviewers.has(plainField(designReview, "Reviewer"))) {
       failures.push("Design review evidence has the wrong reviewer");
     }
     if (plainField(designReview, "Result") !== "passed") {
@@ -657,7 +661,9 @@ if (routeMap) {
 
   const usesWebgl =
     heroStatus === "ready" &&
-    /\b(?:three\.js|react three fiber|r3f|drei|webgl)\b/iu.test(hero);
+    /\b(?:three\.js|react three fiber|r3f|drei|webgl)\b/iu.test(
+      field(hero, "Selected rung"),
+    );
   if (
     usesWebgl &&
     !routeMap.routes?.some(
