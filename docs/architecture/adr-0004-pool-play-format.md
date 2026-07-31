@@ -18,6 +18,19 @@ Two pools of three require six pool matches. Crossed semifinals, third place,
 and the final raise the session to 10 matches. The same booking assumptions
 leave about 10.1 minutes per match.
 
+This is not an invented format. USA Pickleball lists round robin and pool play
+among its approved tournament formats. Its 2026 Golden Ticket event uses round
+robin followed by playoffs for fields of four through seven and pools for
+larger fields. A published Golden Ticket player brief seeds the top four after
+round robin, then plays 1 vs 4 and 2 vs 3, with the winners contesting gold and
+the losers contesting bronze.
+
+Sources:
+
+- [USA Pickleball approved formats](https://usapickleball.org/sanctioning/formats/)
+- [USA Pickleball Golden Ticket Boise format](https://usapickleball.org/tournaments/usap-golden-ticket-boise/)
+- [USA Pickleball Golden Ticket player instructions](https://usapickleball.org/docs/GT/Mesa/2025-Golden-Ticket-Player-Instruction-Letter-Mesa.pdf)
+
 ## Decision
 
 Add `Pools + knockout` as an optional future tournament format for 4–8 players;
@@ -36,6 +49,17 @@ For six players:
 The product must say that every entrant receives at least two pool matches. It
 must not say everyone plays everyone. A complete round robin remains unsuitable
 for a normal two-hour, one-court session.
+
+For exactly four players, offer a true round robin as the future
+participation-first format: six preliminary matches, followed by a final
+between first and second for seven matches total. Do not add semifinals that
+advance all four players; that would turn the six preliminary matches into
+little more than seeding and raise the session to ten matches.
+
+For a session without a deadline, a separate `Everyone plays everyone` choice
+may use a complete round robin. It must show the calculated match count before
+confirmation: `n × (n - 1) / 2`, before any playoff. This choice is not the
+default for a one-court booking.
 
 ## Consequences
 

@@ -23,3 +23,10 @@ is predictable on one court. Untimed sessions do not require fake booking data.
 One target applies throughout a tournament to keep rounds competitively
 consistent and scheduling comprehensible. Ratings remain an input rather than
 a claim about post-tournament skill.
+
+A bye is a real competitive benefit: its recipient plays one fewer match and
+receives more rest. The benefit is deliberately assigned to the strongest
+self-rated seeds, not sampled randomly. When players share the same rating, the
+stored deterministic shuffle decides their relative seeds, so the result may
+look random but remains reproducible. This is standard seeded-draw behavior,
+but its fairness depends on the group trusting the self-ratings.

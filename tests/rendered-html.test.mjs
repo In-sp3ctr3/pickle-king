@@ -23,7 +23,10 @@ test("server-renders the public landing shell", async () => {
   assert.match(html, /One court/);
   assert.match(html, /Start tournament/);
   assert.match(html, /Your names and scores stay on this device/);
-  assert.match(html, /data-qa="home-product-sequence"/);
-  assert.doesNotMatch(html, /pickle-king-hero|splatter-mask/);
+  assert.match(html, /data-qa="home-mascot"/);
+  assert.doesNotMatch(
+    html,
+    /home-product-sequence|pickle-king-hero|splatter-mask/,
+  );
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/);
 });

@@ -5,6 +5,9 @@ import { remainingMs } from "../../match/scoring";
 import type { ScoringState } from "../../match/types";
 import { AnimatedNumber } from "./animated-number";
 
+const twoDigitFormat = { minimumIntegerDigits: 2 } as const;
+const secondsDigits = { 1: { max: 5 } } as const;
+
 function clockParts(milliseconds: number) {
   const seconds = Math.ceil(milliseconds / 1_000);
   return { minutes: Math.floor(seconds / 60), seconds: seconds % 60 };
@@ -39,9 +42,18 @@ export function MatchClock({
         <span className="clock-label">Match clock</span>
         {match ? (
           <strong className="clock-value">
-            <AnimatedNumber value={match.minutes} />
+            <AnimatedNumber
+              format={twoDigitFormat}
+              trend={-1}
+              value={match.minutes}
+            />
             <span>:</span>
-            <AnimatedNumber value={match.seconds} />
+            <AnimatedNumber
+              digits={secondsDigits}
+              format={twoDigitFormat}
+              trend={-1}
+              value={match.seconds}
+            />
           </strong>
         ) : (
           <strong className="clock-value clock-untimed">Untimed</strong>
