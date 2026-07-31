@@ -92,6 +92,23 @@ test("play-to-seven continues through a tie and one-point lead", async ({
   await expect(page.getByRole("heading", { name: "Blair wins" })).toBeVisible();
 });
 
+test("a burst of score taps locks at the winning point", async ({ page }) => {
+  await openQuickMatch(page, 7);
+  const addA = page.locator("[data-qa='score-a-add']");
+
+  await addA.evaluate((button) => {
+    for (let tap = 0; tap < 12; tap += 1) {
+      (button as HTMLButtonElement).click();
+    }
+  });
+
+  await expect(page.getByRole("heading", { name: "Alex wins" })).toBeVisible();
+  await expect(page.getByRole("dialog")).toContainText("7–0");
+  await expect(
+    page.locator("section[aria-label='Alex, 7 points']"),
+  ).toBeVisible();
+});
+
 test("double-digit scores stay legible at tablet size", async ({ page }) => {
   await page.setViewportSize({ width: 1180, height: 820 });
   await openQuickMatch(page, 11);

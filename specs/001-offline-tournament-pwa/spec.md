@@ -46,6 +46,9 @@ and the final match must finish inside a booked court session.
 ### Live match
 
 - Score controls include large add zones and explicit subtract controls.
+- A burst of taps cannot move the persisted score beyond the first legal
+  winning point. Number motion follows the value direction; countdown digits
+  move downward without cycling through unrelated values.
 - The operator can pause, resume, or reset.
 - A side wins only after reaching the target with at least a two-point lead.
 - At the deadline the leader wins; a tie enters golden point.

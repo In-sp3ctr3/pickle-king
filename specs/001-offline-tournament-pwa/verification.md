@@ -7,10 +7,10 @@ Status: passed
 | Vinext compatibility | 100% compatible, no partial APIs            | passed |
 | Lint and format      | ESLint + Prettier local run                 | passed |
 | TypeScript strict    | `tsc --noEmit`                              | passed |
-| Domain/state tests   | 74 examples/properties across 4–16          | passed |
-| Component tests      | 12 Vitest files, 74 tests                   | passed |
+| Domain/state tests   | examples/properties across entrants 4–16    | passed |
+| Component tests      | 13 Vitest files, 76 tests                   | passed |
 | Production build     | Vinext output and server render             | passed |
-| Browser workflows    | 21 route + 11 product + 9 responsive checks | passed |
+| Browser workflows    | 21 route + 10 product + 9 responsive checks | passed |
 | Accessibility        | Axe, keyboard, focus, reduced motion        | passed |
 | PWA/offline          | artifacts plus controlled offline reopen    | passed |
 | Security             | runtime `npm audit --omit=dev`: 0 findings  | passed |
@@ -28,6 +28,9 @@ Status: passed
 - Confirmed both clocks remain visible on mobile and that only the scheduler’s
   next one-court match exposes a start control.
 - Confirmed 7–7 and 11–11 continue until a two-point lead.
+- Confirmed a synchronous 12-tap burst in a play-to-7 match locks at 7–0;
+  score corrections follow their actual direction and the clock uses a bounded
+  downward reel at the 59→00 boundary.
 - Confirmed restart, discard, leader-at-early-end, and tied early-end winner
   selection without silently advancing an ambiguous tournament result.
 - Reopened the installed shell offline under an active service worker.

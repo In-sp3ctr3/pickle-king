@@ -1,6 +1,6 @@
 "use client";
 
-import NumberFlow, { continuous } from "@number-flow/react";
+import NumberFlow, { type NumberFlowProps } from "@number-flow/react";
 
 /**
  * Motion behavior adapted from Skiper UI v1 / Skiper37 AnimatedNumber_004:
@@ -12,17 +12,21 @@ import NumberFlow, { continuous } from "@number-flow/react";
 export function AnimatedNumber({
   value,
   className,
+  digits,
+  format,
+  trend,
 }: {
   value: number;
   className?: string;
-}) {
+} & Pick<NumberFlowProps, "digits" | "format" | "trend">) {
   return (
     <NumberFlow
       aria-label={String(value)}
       className={className}
-      plugins={[continuous]}
+      {...(digits === undefined ? {} : { digits })}
+      {...(format === undefined ? {} : { format })}
       respectMotionPreference
-      trend={1}
+      {...(trend === undefined ? {} : { trend })}
       value={value}
     />
   );
