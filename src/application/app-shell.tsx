@@ -21,7 +21,6 @@ import {
   setupPlayers,
   stateFromSnapshot,
 } from "./app-helpers";
-import { promptForCorrection } from "./correction-prompt";
 import { appReducer, initialAppState, toSnapshot } from "./reducer";
 import { AppNavigation } from "./app-navigation";
 import { sessionTimeLabel, timingAdjustment } from "./timing-view";
@@ -96,7 +95,7 @@ export function AppShell() {
       scoreB: number,
       winnerIdOverride?: string,
     ) => {
-      if (!state.tournament) return;
+      if (!state.tournament) return false;
       const needsConfirmation = correctionNeedsConfirmation(
         state.tournament,
         matchId,
@@ -107,7 +106,7 @@ export function AppShell() {
           "A later match has started. Correcting this result will reset every affected downstream result. Continue?",
         )
       ) {
-        return;
+        return false;
       }
       dispatch({
         type: "correct-result",
@@ -118,6 +117,7 @@ export function AppShell() {
         confirmDownstreamReset: needsConfirmation,
         now: Date.now(),
       });
+      return true;
     },
     [state.tournament],
   );
@@ -210,34 +210,7 @@ export function AppShell() {
       {state.screen === "bracket" && state.tournament ? (
         <BracketScreen
           bracket={state.tournament}
-          onCorrectMatch={(matchId) => {
-            const match = state.tournament?.matches.find(
-              ({ id }) => id === matchId,
-            );
-            if (!match?.sideA || !match.sideB || !state.tournament) return;
-            const names = new Map(
-              state.tournament.players.map(({ id, name }) => [id, name]),
-            );
-            const sideAId = match.sideA.memberIds[0];
-            const sideBId = match.sideB.memberIds[0];
-            const result = promptForCorrection({
-              currentScoreA: match.scoreA,
-              currentScoreB: match.scoreB,
-              currentWinnerId: match.winnerId,
-              prompt: (message, defaultValue) =>
-                window.prompt(message, defaultValue),
-              sideA: { id: sideAId, label: names.get(sideAId) ?? "Side A" },
-              sideB: { id: sideBId, label: names.get(sideBId) ?? "Side B" },
-            });
-            if (result) {
-              correctResult(
-                matchId,
-                result.scoreA,
-                result.scoreB,
-                result.winnerIdOverride,
-              );
-            }
-          }}
+          onCorrectMatch={correctResult}
           onStartMatch={(matchId) =>
             dispatch({ type: "start-match", matchId, now: Date.now() })
           }

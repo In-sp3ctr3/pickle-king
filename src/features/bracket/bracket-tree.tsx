@@ -11,12 +11,17 @@ import {
   type PositionedNode,
 } from "./bracket-tree-layout";
 import { matchSideLabel, roundLabel } from "./bracket-utils";
-import { ByeCard, FinalMatchCard, MatchCard } from "./match-card";
+import {
+  ByeCard,
+  type CorrectMatch,
+  FinalMatchCard,
+  MatchCard,
+} from "./match-card";
 
 interface BracketTreeProps {
   bracket: TournamentBracket;
   nextMatchId?: string;
-  onCorrectMatch: (matchId: string) => void;
+  onCorrectMatch: CorrectMatch;
   onStartMatch: (matchId: string) => void;
 }
 
@@ -162,12 +167,12 @@ function TreeNode({
   bracket: TournamentBracket;
   canStart: boolean;
   node: PositionedNode["node"];
-  onCorrectMatch: (matchId: string) => void;
+  onCorrectMatch: CorrectMatch;
   onStartMatch: (matchId: string) => void;
 }) {
   const label =
     node.kind === "final"
-      ? "Championship"
+      ? "Final"
       : `${roundLabel(node.round, bracket.roundCount)} · ${node.ordinal}`;
   if (node.kind === "bye") {
     return <ByeCard label={label} playerName={node.player.name} />;

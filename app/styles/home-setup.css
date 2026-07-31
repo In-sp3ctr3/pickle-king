@@ -32,7 +32,7 @@
   max-width: 9ch;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(4.2rem, 9vw, 8.6rem);
+  font-size: clamp(4rem, 7.7vw, 7.4rem);
   font-weight: 400;
   letter-spacing: 0.005em;
   line-height: 0.88;
@@ -619,6 +619,15 @@
   font-size: 0.75rem;
 }
 
+.setup-submit-row > div {
+  margin-right: auto;
+}
+
+.setup-advance-note {
+  margin-top: 0.4rem !important;
+  color: var(--lime) !important;
+}
+
 .minimum-players-dialog {
   width: min(92vw, 520px);
   max-width: none;
@@ -741,7 +750,7 @@
 
   .home-copy h1 {
     max-width: none;
-    font-size: clamp(3.5rem, 15.5vw, 4.25rem);
+    font-size: clamp(3.15rem, 13.5vw, 3.85rem);
   }
 
   .home-actions {
@@ -827,7 +836,7 @@
 
   .home-copy h1 {
     max-width: none;
-    font-size: clamp(3rem, 7vw, 4rem);
+    font-size: clamp(2.7rem, 6.3vw, 3.6rem);
   }
 
   .home-lede {

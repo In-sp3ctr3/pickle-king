@@ -2,7 +2,8 @@
 
 Reviewer: local adversarial frontend review
 Result: passed
-Source state: codex/fix/interface-identity@validated-working-tree-2026-07-31
+Source state:
+codex/fix/bracket-clarity-corrections@validated-working-tree-2026-07-31
 Reviewed at: 2026-07-31
 
 Open P0: 0
@@ -30,11 +31,14 @@ Open P2: 0
 | DR-04 | P2       | setup/controls | setup and responsive evidence        | added custom select, animated choices, field-local errors, and aligned fields    | fixed  |
 | DR-05 | P2       | navigation     | setup, bracket, and results evidence | consolidated Back and Home into a solid centered island                          | fixed  |
 | DR-06 | P2       | bracket/queue  | four- and six-player evidence        | limited `Next` and lime treatment to the one-court eligible match                | fixed  |
+| DR-07 | P1       | bracket/byes   | six-player workflow and evidence     | replaced fake-looking `BYE` rows with explicit automatic-advance nodes           | fixed  |
+| DR-08 | P1       | bracket/final  | desktop and mobile evidence          | moved `Waiting` top-right and centered both finalists around the trophy          | fixed  |
+| DR-09 | P2       | bracket/edit   | correction workflow and evidence     | embedded score inputs, tie selection, save, and cancel in completed nodes        | fixed  |
 
 ## Decision
 
-Passed. The mascot-led home, lime run-of-show, centered connected bracket,
-trophy final, responsive composition, readable typography, custom controls,
-and field-level validation satisfy the design contract. The deterministic
-evidence contains no material generic-design symptom and no open P0/P1/P2
-finding.
+Passed. The reduced mascot-led home, lime run-of-show, centered connected
+bracket, explicit automatic advances, centered trophy final, inline result
+correction, responsive composition, readable typography, custom controls, and
+field-level validation satisfy the design contract. The deterministic evidence
+contains no material generic-design symptom and no open P0/P1/P2 finding.

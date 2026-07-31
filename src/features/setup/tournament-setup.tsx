@@ -1,6 +1,7 @@
 "use client";
 
 import { ActionButton } from "@/src/shared/ui";
+import { nextPowerOfTwo } from "@/src/tournament";
 import { ArrowRight, Plus } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRef, useState, type FormEvent } from "react";
@@ -58,6 +59,7 @@ export function TournamentSetup({
   const formRef = useRef<HTMLFormElement>(null);
   const validation = validateSetup(players, numbers, timingMode);
   const errors = showErrors ? validation.errors : undefined;
+  const automaticAdvanceCount = nextPowerOfTwo(players.length) - players.length;
 
   function updatePlayer(updatedPlayer: SetupPlayerDraft) {
     setPlayers((current) =>
@@ -216,11 +218,25 @@ export function TournamentSetup({
         />
 
         <div className="setup-submit-row">
-          <p>
-            {timingMode === "timed"
-              ? "Match caps are calculated when the bracket is built."
-              : "Untimed matches still use your selected score target."}
-          </p>
+          <div>
+            <p>
+              {timingMode === "timed"
+                ? "Match caps are calculated when the bracket is built."
+                : "Untimed matches still use your selected score target."}
+            </p>
+            {automaticAdvanceCount > 0 ? (
+              <p
+                className="setup-advance-note"
+                data-qa="automatic-advance-note"
+              >
+                With {players.length} players, {automaticAdvanceCount} top{" "}
+                {automaticAdvanceCount === 1
+                  ? "seed advances"
+                  : "seeds advance"}{" "}
+                automatically through round one.
+              </p>
+            ) : null}
+          </div>
           <ActionButton data-qa="build-bracket" type="submit">
             Build bracket
             <ArrowRight aria-hidden="true" size={19} />

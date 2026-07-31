@@ -59,14 +59,14 @@ describe("connected bracket tree layout", () => {
     },
   );
 
-  it("keeps bye paths connected without separate player cards", () => {
-    const tournament = bracket(5);
+  it("keeps six-player automatic-advance paths connected", () => {
+    const tournament = bracket(6);
     const layout = createTreeLayout(tournament);
     const byes = layout.nodes
       .map(({ node }) => node)
       .filter((node) => node.kind === "bye");
 
-    expect(byes).toHaveLength(3);
+    expect(byes).toHaveLength(2);
     expect(byes.every(({ player }) => player)).toBe(true);
     expect(layout.nodes.map(({ node }) => node.kind)).not.toContain("entry");
   });

@@ -2,21 +2,21 @@
 
 Status: passed
 
-| Check                | Evidence                                   | Result |
-| -------------------- | ------------------------------------------ | ------ |
-| Vinext compatibility | 100% compatible, no partial APIs           | passed |
-| Lint and format      | ESLint + Prettier local run                | passed |
-| TypeScript strict    | `tsc --noEmit`                             | passed |
-| Domain/state tests   | 72 examples/properties across 4–16         | passed |
-| Component tests      | 11 Vitest files, 72 tests                  | passed |
-| Production build     | Vinext output and server render            | passed |
-| Browser workflows    | 21 route + 9 product + 9 responsive checks | passed |
-| Accessibility        | Axe, keyboard, focus, reduced motion       | passed |
-| PWA/offline          | artifacts plus controlled offline reopen   | passed |
-| Security             | runtime `npm audit --omit=dev`: 0 findings | passed |
-| File length          | hand-authored source checked               | passed |
-| Design review        | P0/P1/P2/P3 = 0; deterministic evidence    | passed |
-| Deployment           | exact merged `main` Sites release          | passed |
+| Check                | Evidence                                    | Result |
+| -------------------- | ------------------------------------------- | ------ |
+| Vinext compatibility | 100% compatible, no partial APIs            | passed |
+| Lint and format      | ESLint + Prettier local run                 | passed |
+| TypeScript strict    | `tsc --noEmit`                              | passed |
+| Domain/state tests   | 74 examples/properties across 4–16          | passed |
+| Component tests      | 12 Vitest files, 74 tests                   | passed |
+| Production build     | Vinext output and server render             | passed |
+| Browser workflows    | 21 route + 11 product + 9 responsive checks | passed |
+| Accessibility        | Axe, keyboard, focus, reduced motion        | passed |
+| PWA/offline          | artifacts plus controlled offline reopen    | passed |
+| Security             | runtime `npm audit --omit=dev`: 0 findings  | passed |
+| File length          | hand-authored source checked                | passed |
+| Design review        | P0/P1/P2/P3 = 0; deterministic evidence     | passed |
+| Deployment           | exact merged `main` Sites release           | passed |
 
 ## Live product evidence
 
@@ -38,6 +38,12 @@ Status: passed
 - Verified a six-player draw stays connected, labels only one match `Next`,
   labels the other ready pairing `Queued`, and scrolls to the left, final, and
   right draw controls.
+- Verified six entrants produce two clearly labeled automatic advances without
+  rendering `BYE` as an opponent or adding any unregistered player.
+- Verified completed scores are corrected inside their bracket node, including
+  tied-score winner selection and downstream participant recalculation.
+- Verified the final keeps `Waiting` in the top-right and centers both finalist
+  slots around the trophy without a stray championship label.
 - Verified home, setup, and centered bracket behavior at 1180×820, 820×1180,
   and 844×390 without page-level overflow.
 - Verified the public root, canonical URL, manifest, service worker, four PWA

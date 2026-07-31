@@ -9,12 +9,12 @@ import {
 import { Trophy } from "lucide-react";
 import { BracketTree } from "./bracket-tree";
 import { matchSideLabel, orderedRunOfShow } from "./bracket-utils";
-import { MatchCard } from "./match-card";
+import { type CorrectMatch, MatchCard } from "./match-card";
 import { RunOfShow } from "./run-of-show";
 
 export interface BracketScreenProps {
   bracket: TournamentBracket;
-  onCorrectMatch: (matchId: string) => void;
+  onCorrectMatch: CorrectMatch;
   onStartMatch: (matchId: string) => void;
   sessionLabel?: string;
   timingWarning?: string;
@@ -41,6 +41,7 @@ export function BracketScreen({
   const bronze = bracket.matches.find(
     (match) => match.id === bracket.bronzeMatchId,
   );
+  const automaticAdvanceCount = bracket.bracketSize - bracket.players.length;
 
   return (
     <main className="bracket-screen" data-qa="bracket-screen">
@@ -78,7 +79,13 @@ export function BracketScreen({
             <p>Bracket view</p>
             <h2 id="full-bracket-title">Full draw</h2>
           </div>
-          <p>Follow each line from the opening round to the championship.</p>
+          <p>
+            {automaticAdvanceCount > 0
+              ? `${bracket.players.length} players · ${automaticAdvanceCount} automatic ${
+                  automaticAdvanceCount === 1 ? "advance" : "advances"
+                }`
+              : "Follow each line from the opening round to the final."}
+          </p>
         </div>
         <BracketTree
           bracket={bracket}

@@ -1,11 +1,12 @@
 # Frontend Design QA
 
 Status: passed
-Last updated: 2026-07-30
+Last updated: 2026-07-31
 
 ## Environment
 
-- Commit/source state: codex/fix/interface-identity@validated-working-tree-2026-07-31
+- Commit/source state:
+  codex/fix/bracket-clarity-corrections@validated-working-tree-2026-07-31
 - Browser: Playwright Chromium 1.62.1
 - Base URL: http://127.0.0.1:3000 production Vinext server
 - DPR: Playwright default at 1440×1000 and 390×844
@@ -36,30 +37,35 @@ Last updated: 2026-07-30
 
 ## Iteration History
 
-| Iteration | Region        | Pixel signal           | Human finding                                              | Change                                                                            | Result |
-| --------- | ------------- | ---------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ |
-| 1         | Typography    | glyph crowding         | condensed display face joined double-digit scores          | introduced Archivo Black with positive score tracking                             | passed |
-| 2         | Home hero     | concept rejection      | product-demo imagery kept replacing the requested identity | made the existing crowned mascot the sole visual with a restrained blink          | passed |
-| 3         | Navigation    | misplaced controls     | corner navigation lacked a reliable bracket-to-setup path  | added one solid centered island with explicit Back and Home                       | passed |
-| 4         | Setup         | control imbalance      | generic controls and uneven timing fields felt unfinished  | added custom select, spring choices, field-local errors, and aligned rows         | passed |
-| 5         | Bracket       | node-model mismatch    | players and actions occupied separate nodes                | rebuilt each node as a wide two-contender match converging on a trophy final      | passed |
-| 6         | Queue state   | scheduling ambiguity   | every dependency-ready match appeared ready                | reserved lime and `Next` for the one-court eligible match; marked the rest queued | passed |
-| 7         | Responsive QA | missing target screens | tablet and phone landscape behavior had not been proven    | added executable layout tests for all three target viewports                      | passed |
+| Iteration | Region         | Pixel signal            | Human finding                                              | Change                                                                            | Result |
+| --------- | -------------- | ----------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------- | ------ |
+| 1         | Typography     | glyph crowding          | condensed display face joined double-digit scores          | introduced Archivo Black with positive score tracking                             | passed |
+| 2         | Home hero      | concept rejection       | product-demo imagery kept replacing the requested identity | made the existing crowned mascot the sole visual with a restrained blink          | passed |
+| 3         | Navigation     | misplaced controls      | corner navigation lacked a reliable bracket-to-setup path  | added one solid centered island with explicit Back and Home                       | passed |
+| 4         | Setup          | control imbalance       | generic controls and uneven timing fields felt unfinished  | added custom select, spring choices, field-local errors, and aligned rows         | passed |
+| 5         | Bracket        | node-model mismatch     | players and actions occupied separate nodes                | rebuilt each node as a wide two-contender match converging on a trophy final      | passed |
+| 6         | Queue state    | scheduling ambiguity    | every dependency-ready match appeared ready                | reserved lime and `Next` for the one-court eligible match; marked the rest queued | passed |
+| 7         | Responsive QA  | missing target screens  | tablet and phone landscape behavior had not been proven    | added executable layout tests for all three target viewports                      | passed |
+| 8         | Bracket repair | unclear six-player draw | `BYE` looked like an unregistered participant              | named automatic advances in setup/draw and removed the fake contender row         | passed |
+| 9         | Result repair  | correction interruption | completed scores opened browser prompts                    | added compact in-node score editing with explicit tied-result winner selection    | passed |
 
 Pixel difference is an iteration signal, not a universal pass threshold. The
-frozen-seed source/render pairs are identical except for 492 desktop-bracket
-pixels (0.026%) from rasterized status motion; geometry, content, and state are
-unchanged.
+intentional hero-scale and final-card repairs were visually reviewed and
+promoted as the new frozen baselines. Source/render pairs are identical for the
+home, setup, and bracket states.
 
 ## Findings
 
-| ID     | Severity | Route/region   | Evidence                                 | Contract/user impact                                     | Owner    | Status |
-| ------ | -------- | -------------- | ---------------------------------------- | -------------------------------------------------------- | -------- | ------ |
-| DQA-01 | P1       | home/hero      | desktop, mobile, and responsive captures | rejected static artwork remained visible                 | frontend | fixed  |
-| DQA-02 | P1       | bracket/tree   | bracket desktop and mobile captures      | node anatomy did not match a tournament bracket          | frontend | fixed  |
-| DQA-03 | P1       | scorer/type    | quick-live desktop and mobile captures   | condensed double digits reduced score legibility         | frontend | fixed  |
-| DQA-04 | P2       | setup/controls | setup desktop and mobile captures        | native dropdown and vertical misalignment reduced polish | frontend | fixed  |
-| DQA-05 | P2       | app/navigation | setup, bracket, and results captures     | back path was absent or duplicated outside navigation    | frontend | fixed  |
+| ID     | Severity | Route/region   | Evidence                                 | Contract/user impact                                       | Owner    | Status |
+| ------ | -------- | -------------- | ---------------------------------------- | ---------------------------------------------------------- | -------- | ------ |
+| DQA-01 | P1       | home/hero      | desktop, mobile, and responsive captures | rejected static artwork remained visible                   | frontend | fixed  |
+| DQA-02 | P1       | bracket/tree   | bracket desktop and mobile captures      | node anatomy did not match a tournament bracket            | frontend | fixed  |
+| DQA-03 | P1       | scorer/type    | quick-live desktop and mobile captures   | condensed double digits reduced score legibility           | frontend | fixed  |
+| DQA-04 | P2       | setup/controls | setup desktop and mobile captures        | native dropdown and vertical misalignment reduced polish   | frontend | fixed  |
+| DQA-05 | P2       | app/navigation | setup, bracket, and results captures     | back path was absent or duplicated outside navigation      | frontend | fixed  |
+| DQA-06 | P1       | bracket/byes   | six-player workflow and capture          | `BYE` appeared to be an unregistered player                | frontend | fixed  |
+| DQA-07 | P1       | bracket/final  | desktop and mobile bracket captures      | final label displaced its waiting state and faceoff        | frontend | fixed  |
+| DQA-08 | P2       | bracket/edit   | inline correction workflow and capture   | completed scores could not be edited in their bracket node | frontend | fixed  |
 
 ## Harness Results
 
@@ -82,7 +88,8 @@ Reviewer evidence: docs/frontend/reviews/design-review.md
 
 Result: passed
 
-Rationale: the mascot-led hero, solid navigation island, balanced custom
-controls, field-local validation, lime run-of-show, wide two-contender bracket
-nodes, trophy final, scorer, dialogs, and results meet the contract across the
-required orientations with no open P0/P1/P2 findings.
+Rationale: the reduced mascot-led hero, solid navigation island, balanced
+custom controls, field-local validation, lime run-of-show, explicit automatic
+advances, centered trophy final, in-node corrections, scorer, dialogs, and
+results meet the contract across the required orientations with no open
+P0/P1/P2 findings.
