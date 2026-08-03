@@ -18,7 +18,7 @@ export function RatingSelect({
   value: SkillLevel | "";
 }) {
   return (
-    <Select.Root onValueChange={onChange} value={value || undefined}>
+    <Select.Root onValueChange={onChange} value={value}>
       <Select.Trigger
         aria-describedby={describedBy}
         aria-invalid={invalid}

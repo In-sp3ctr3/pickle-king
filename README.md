@@ -16,6 +16,10 @@ and crown a winner without sending player data anywhere.
 - Win-by-two scoring, buzzer finishes, and golden point for timed ties
 - Explicit restart, early-finish, tied-winner, and discard controls
 - Standalone Quick Match for singles or doubles
+- Recent Quick Match and tournament history, stored only on this device
+- Remembered-name suggestions for faster rematches
+- Safe player-name corrections and explicit draw rebuilds for roster changes
+- Branded, shareable PNGs for individual results and completed brackets
 - Results, point differential, match history, and upset highlights
 - Offline recovery across refresh, sleep, and network loss
 - Local-only storage: names and scores never leave the device
@@ -45,14 +49,17 @@ npm run frontend:test:workflows
 npm run test:pwa
 ```
 
-See the [product specification](specs/001-offline-tournament-pwa/spec.md),
-[architecture decisions](docs/architecture), and
-[verification record](specs/001-offline-tournament-pwa/verification.md).
+See the [v1 product specification](specs/001-offline-tournament-pwa/spec.md),
+[session continuity specification](specs/002-session-continuity-sharing/spec.md),
+[architecture decisions](docs/architecture), and the
+[verification records](specs).
 
 ## Privacy
 
-Tournament data is stored only in your browser. There is no account, analytics,
-cloud database, or server API. Clearing site storage deletes local sessions.
+Tournament data and the bounded recent-history ledger are stored only in your
+browser. There is no account, analytics, cloud database, or server API. Share
+images are rendered on the device and leave it only when you use the Share
+control. Clearing site storage deletes local sessions and history.
 
 ## Contributing
 

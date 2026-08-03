@@ -36,7 +36,7 @@ const matchSchema = z.object({
   startedAt: z.number().nullable(),
   completedAt: z.number().nullable(),
 });
-const bracketSchema = z.object({
+export const tournamentBracketSchema = z.object({
   bracketSize: z.number().int().positive(),
   roundCount: z.number().int().positive(),
   players: z.array(playerSchema).min(4).max(16),
@@ -57,6 +57,12 @@ const scoringSchema = z.object({
   sideB: matchSideSchema,
   labelA: z.string().min(1).max(90),
   labelB: z.string().min(1).max(90),
+  participantNames: z
+    .object({
+      sideA: z.array(z.string().trim().min(1).max(40)).min(1).max(2),
+      sideB: z.array(z.string().trim().min(1).max(40)).min(1).max(2),
+    })
+    .optional(),
   scoreA: z.number().int().nonnegative(),
   scoreB: z.number().int().nonnegative(),
   targetScore: z.number().int().min(1).max(99),
@@ -96,6 +102,7 @@ export const snapshotV1Schema = z
       "quick-setup",
       "quick-live",
       "results",
+      "history",
     ]),
     setupDraft: z
       .object({
@@ -103,7 +110,7 @@ export const snapshotV1Schema = z
         config: tournamentConfigSchema,
       })
       .nullable(),
-    tournament: bracketSchema.nullable(),
+    tournament: tournamentBracketSchema.nullable(),
     activeMatchId: z.string().nullable(),
     scorer: scoringSchema.nullable(),
     sessionDeadline: z.number().nullable(),

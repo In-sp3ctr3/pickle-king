@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Crown, Share2 } from "lucide-react";
 import type { ScoringState } from "../../match/types";
 
 export function ResultConfirmationDialog({
   onConfirm,
   onEdit,
+  onShare,
   scorer,
   standalone,
 }: {
   onConfirm: () => void;
   onEdit: () => void;
+  onShare: () => void;
   scorer: ScoringState;
   standalone: boolean;
 }) {
@@ -61,14 +64,35 @@ export function ResultConfirmationDialog({
       }}
       ref={dialogRef}
     >
+      <Crown aria-hidden="true" className="result-dialog__crown" size={52} />
       <p className="eyebrow">{scorer.finishReason?.replaceAll("-", " ")}</p>
       <h2 id="result-title">
         {scorer.winner === "A" ? scorer.labelA : scorer.labelB} wins
       </h2>
+      <div
+        className="result-dialog__score"
+        aria-label={`${scorer.scoreA} to ${scorer.scoreB}`}
+      >
+        <strong>{scorer.scoreA}</strong>
+        <span>–</span>
+        <strong>{scorer.scoreB}</strong>
+      </div>
+      <div className="result-dialog__names">
+        <span>{scorer.labelA}</span>
+        <span>{scorer.labelB}</span>
+      </div>
       <ResultExplanation scorer={scorer} standalone={standalone} />
       <div className="dialog-actions">
         <button className="secondary-button" onClick={onEdit} type="button">
           Edit score
+        </button>
+        <button
+          className="secondary-button"
+          data-qa="share-result"
+          onClick={onShare}
+          type="button"
+        >
+          <Share2 aria-hidden="true" size={18} /> Share result
         </button>
         <button
           className="primary-button"

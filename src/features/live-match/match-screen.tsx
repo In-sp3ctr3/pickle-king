@@ -2,6 +2,7 @@
 
 import { Check, Flag, Pause, Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { quickShareCanvas, shareCanvas } from "../share";
 import type { ScoringAction, ScoringState } from "../../match/types";
 import {
   MatchControlDialog,
@@ -31,6 +32,7 @@ export function MatchScreen({
   standalone?: boolean;
 }) {
   const [controlMode, setControlMode] = useState<MatchControlMode | null>(null);
+  const [shareStatus, setShareStatus] = useState("");
   const send = useCallback(
     (action: ScoringAction) => onAction(action),
     [onAction],
@@ -203,10 +205,32 @@ export function MatchScreen({
         <ResultConfirmationDialog
           onConfirm={onConfirm}
           onEdit={() => send({ type: "edit-result" })}
+          onShare={() => {
+            void shareCanvas(
+              quickShareCanvas(scorer),
+              `pickle-king-score-${Date.now()}.png`,
+              "Pickle King final score",
+            )
+              .then((outcome) =>
+                setShareStatus(
+                  outcome === "shared"
+                    ? "Share sheet opened."
+                    : outcome === "downloaded"
+                      ? "Score image downloaded."
+                      : "Sharing cancelled.",
+                ),
+              )
+              .catch(() =>
+                setShareStatus("The score image could not be shared."),
+              );
+          }}
           scorer={scorer}
           standalone={standalone}
         />
       ) : null}
+      <p aria-live="polite" className="share-status">
+        {shareStatus}
+      </p>
     </main>
   );
 }

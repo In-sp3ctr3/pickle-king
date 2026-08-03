@@ -95,6 +95,109 @@ describe("application reducer", () => {
     ).toBeNull();
   });
 
+  it("archives a confirmed Quick Match once", () => {
+    let scorer = createScoringState({
+      sideA: { memberIds: ["a"] },
+      sideB: { memberIds: ["b"] },
+      labelA: "Robbie",
+      labelB: "Maya",
+      participantNames: { sideA: ["Robbie"], sideB: ["Maya"] },
+      targetScore: 2,
+      durationMs: null,
+    });
+    let state = appReducer(initialAppState(0), {
+      type: "start-quick",
+      scorer,
+      now: 1,
+    });
+    state = appReducer(state, {
+      type: "score",
+      action: { type: "start", now: 1 },
+      now: 1,
+    });
+    for (let point = 0; point < 2; point += 1) {
+      state = appReducer(state, {
+        type: "score",
+        action: { type: "adjust", team: "A", delta: 1, now: point + 2 },
+        now: point + 2,
+      });
+    }
+    state = appReducer(state, { type: "confirm-result", now: 10 });
+    state = appReducer(state, { type: "confirm-result", now: 11 });
+    expect(state.history.quickMatches).toHaveLength(1);
+    expect(state.history.quickMatches[0].participants.sideA).toEqual([
+      "Robbie",
+    ]);
+    scorer = state.scorer!;
+    expect(scorer.status).toBe("complete");
+  });
+
+  it("keeps results for a rename and clears them for a field rebuild", () => {
+    let state = appReducer(initialAppState(0), {
+      type: "create-tournament",
+      players,
+      config,
+      now: 1_000,
+    });
+    const deadline = state.sessionDeadline;
+    const next = getNextMatch(state.tournament!)!;
+    state = appReducer(state, {
+      type: "start-match",
+      matchId: next.id,
+      now: 2_000,
+    });
+    state = appReducer(state, {
+      type: "score",
+      action: { type: "start", now: 2_000 },
+      now: 2_000,
+    });
+    for (let point = 0; point < 2; point += 1) {
+      state = appReducer(state, {
+        type: "score",
+        action: { type: "adjust", team: "A", delta: 1, now: 3_000 + point },
+        now: 3_000 + point,
+      });
+    }
+    state = appReducer(state, { type: "confirm-result", now: 4_000 });
+    const winnerId = state.tournament!.matches.find(
+      ({ id }) => id === next.id,
+    )!.winnerId!;
+    state = appReducer(state, {
+      type: "rename-player",
+      playerId: winnerId,
+      name: "Patrick",
+      now: 5_000,
+    });
+    expect(
+      state.tournament!.matches.find(({ id }) => id === next.id),
+    ).toMatchObject({ status: "complete", scoreA: 2 });
+    expect(
+      state.tournament!.players.find(({ id }) => id === winnerId)?.name,
+    ).toBe("Patrick");
+
+    const expanded = [
+      ...state.tournament!.players.map(({ id, name, rating }) => ({
+        id,
+        name,
+        rating,
+      })),
+      { id: "late", name: "Late player", rating: "3.5" as const },
+    ];
+    state = appReducer(state, {
+      type: "rebuild-tournament",
+      players: expanded,
+      now: 6_000,
+    });
+    expect(state.tournament?.players).toHaveLength(5);
+    expect(
+      state.tournament?.matches.every(
+        ({ scoreA, scoreB, status }) =>
+          scoreA === 0 && scoreB === 0 && status !== "complete",
+      ),
+    ).toBe(true);
+    expect(state.sessionDeadline).toBe(deadline);
+  });
+
   it("discards a tournament attempt without advancing the bracket", () => {
     let state = appReducer(initialAppState(0), {
       type: "create-tournament",

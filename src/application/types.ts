@@ -1,10 +1,13 @@
 import type { ScoringAction, ScoringState } from "../match/types";
+import type { SessionHistoryV1 } from "../history";
 import type { TournamentSnapshotV1 } from "../persistence/schema";
 import type { Player, TournamentConfig } from "../tournament";
 
 export type AppState = Omit<TournamentSnapshotV1, "screen"> & {
   screen: TournamentSnapshotV1["screen"] | "recovery";
   recoveryMessage: string | null;
+  history: SessionHistoryV1;
+  historyRecoveryMessage: string | null;
   hydrated: boolean;
 };
 
@@ -25,6 +28,8 @@ export type AppAction =
   | { type: "start-match"; matchId: string; now: number }
   | { type: "score"; action: ScoringAction; now: number }
   | { type: "confirm-result"; now: number }
+  | { type: "rename-player"; playerId: string; name: string; now: number }
+  | { type: "rebuild-tournament"; players: Player[]; now: number }
   | { type: "discard-match"; now: number }
   | {
       type: "correct-result";
@@ -42,4 +47,11 @@ export type AppAction =
     }
   | { type: "hydrate"; state: AppState }
   | { type: "recover"; message: string }
+  | { type: "reset-history"; now: number }
+  | {
+      type: "remove-history";
+      id: string;
+      kind: "quick" | "tournament";
+      now: number;
+    }
   | { type: "reset"; now: number };

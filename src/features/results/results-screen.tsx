@@ -1,10 +1,12 @@
 "use client";
 
-import { Crown, Sparkles } from "lucide-react";
+import { Crown, Share2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { promptForCorrection } from "../../application/correction-prompt";
 import { calculateTournamentResult } from "../../tournament";
 import type { TournamentBracket } from "../../tournament";
+import { useState } from "react";
+import { bracketShareCanvas, shareCanvas } from "../share";
 
 function roundName(round: number, total: number) {
   if (round === total) return "Final";
@@ -26,6 +28,7 @@ export function ResultsScreen({
   ) => void;
 }) {
   const reducedMotion = useReducedMotion();
+  const [shareStatus, setShareStatus] = useState("");
   const result = calculateTournamentResult(bracket);
   const player = new Map(bracket.players.map((item) => [item.id, item]));
   const name = (id: string) => player.get(id)?.name ?? "Player";
@@ -49,6 +52,32 @@ export function ResultsScreen({
           Champion of the court—not a new official skill rating. The numbers
           below describe this tournament only.
         </p>
+        <button
+          className="primary-button results-share"
+          data-qa="share-final-bracket"
+          onClick={() =>
+            void shareCanvas(
+              bracketShareCanvas(bracket),
+              "pickle-king-final-bracket.png",
+              "Pickle King final bracket",
+            )
+              .then((outcome) =>
+                setShareStatus(
+                  outcome === "shared"
+                    ? "Share sheet opened."
+                    : outcome === "downloaded"
+                      ? "Bracket image downloaded."
+                      : "Sharing cancelled.",
+                ),
+              )
+              .catch(() =>
+                setShareStatus("The bracket image could not be shared."),
+              )
+          }
+          type="button"
+        >
+          <Share2 aria-hidden="true" size={18} /> Share final bracket
+        </button>
       </motion.header>
       <section aria-label="Podium" className="podium">
         <div className="podium-place second">
@@ -67,6 +96,9 @@ export function ResultsScreen({
           <small>Third place</small>
         </div>
       </section>
+      <p aria-live="polite" className="share-status">
+        {shareStatus}
+      </p>
       {result.upsetWins.length ? (
         <section className="upset-strip" aria-labelledby="upsets-title">
           <Sparkles aria-hidden="true" />

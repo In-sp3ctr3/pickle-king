@@ -6,7 +6,7 @@ Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-07-31
+Last updated: 2026-08-02
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -49,6 +49,9 @@ Last updated: 2026-07-31
 | Bracket      | advancement overview         | connected two-sided elimination tree | full tree desktop; preserved overflow mobile | scroll, start, and correct   |
 | Scorekeeper  | no-look scoring              | split screen with oversized zones    | portrait two halves; landscape two columns   | add, subtract, pause, reset  |
 | Results      | podium and evidence          | crown focal point + grouped tables   | stacked podium then cards                    | correct or return home       |
+| History      | recall a social session      | editorial ledger + strong score rail | table becomes stacked match rows             | share or remove one record   |
+| Draw editor  | repair the field safely      | focused sheet with consequence copy  | full-height mobile dialog                    | rename or guarded rebuild    |
+| Share result | create a brag artifact       | portrait score poster                | preview scales without cropping              | share file or download       |
 
 ## Geometry
 
@@ -101,6 +104,9 @@ Last updated: 2026-07-31
 | NumberFlow        | changing, reduced motion              | numbers only; no ornamental looping             |
 | Dialog            | confirm, destructive                  | initial focus, escape, focus return             |
 | Toast/live region | neutral, warning                      | concise and announced politely                  |
+| NameCombobox      | empty, filtering, selected, invalid   | custom listbox; excludes already selected names |
+| HistoryRow        | quick match, tournament               | score-led ledger row; never dashboard-card grid |
+| ShareCard         | quick result, bracket                 | Canvas PNG using local data and brand tokens    |
 
 ## Motion
 
@@ -114,6 +120,8 @@ Last updated: 2026-07-31
 | bracket advancement | show dependency               | result confirmation | 420ms ease-out      | crossfade      |
 | connector reveal    | show advancement path         | result confirmation | 280ms ease-out      | immediate      |
 | crown arrival       | celebrate winner              | results entry       | 700ms spring        | static crown   |
+| result celebration  | mark confirmed performance    | result review       | 520ms spring        | static crown   |
+| suggestion reveal   | retain typing context         | input filtering     | 160ms ease-out      | immediate list |
 | press response      | confirm touch                 | pointer/keyboard    | 90ms                | color only     |
 
 ## Anti-generic constraints
@@ -129,6 +137,9 @@ Last updated: 2026-07-31
   other dependency-ready matches read `Queued`.
 - Native select popups are prohibited for visible product controls.
 - No gradients, glassmorphism, WebGL, stock sports photos, or dashboard tile grids.
+- History reads as a courtside score ledger, not an admin dashboard.
+- Result sharing is opt-in and generated locally; no automatic social prompts.
+- Structural draw edits must visually separate safe renames from destructive reseeding.
 
 ## Acceptance criteria
 

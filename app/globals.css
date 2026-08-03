@@ -3,6 +3,7 @@
 @import "./styles/home-setup.css";
 @import "./styles/match.css";
 @import "./styles/results.css";
+@import "./styles/history.css";
 
 :root {
   color-scheme: dark;

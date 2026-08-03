@@ -1,87 +1,34 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useReducer } from "react";
 import { BracketScreen } from "../features/bracket";
 import { HomeScreen } from "../features/home";
+import { HistoryScreen } from "../features/history";
 import { MatchScreen } from "../features/live-match";
 import { QuickMatchSetup } from "../features/quick-match";
 import { ResultsScreen } from "../features/results";
 import { TournamentSetup } from "../features/setup";
 import { usePwa } from "../features/pwa";
-import {
-  clearSnapshot,
-  loadSnapshot,
-  saveSnapshot,
-} from "../persistence/storage";
+import { clearSnapshot } from "../persistence/storage";
+import { clearHistory } from "../persistence/history-storage";
+import { rememberedPlayerNames } from "../history";
 import type { ScoringAction } from "../match/types";
-import { correctionNeedsConfirmation } from "../tournament";
 import {
-  isHistoryScreen,
-  setupPlayers,
-  stateFromSnapshot,
-} from "./app-helpers";
-import { appReducer, initialAppState, toSnapshot } from "./reducer";
+  correctionNeedsConfirmation,
+  tournamentHasStarted,
+} from "../tournament";
+import { setupPlayers } from "./app-helpers";
+import { appReducer, initialAppState } from "./reducer";
 import { AppNavigation } from "./app-navigation";
 import { sessionTimeLabel, timingAdjustment } from "./timing-view";
+import { useAppLifecycle } from "./use-app-lifecycle";
 const noop = () => undefined;
 
 export function AppShell() {
   const [state, dispatch] = useReducer(appReducer, initialAppState(0));
-  const [now, setNow] = useState(() => Date.now());
-  const previousScreen = useRef(state.screen);
-  const focusedScreen = useRef(state.screen);
+  const now = useAppLifecycle(state, dispatch);
   const pwa = usePwa(state.screen === "live" || state.screen === "quick-live");
-
-  useEffect(() => {
-    queueMicrotask(() =>
-      dispatch({
-        type: "hydrate",
-        state: stateFromSnapshot(loadSnapshot(window.localStorage)),
-      }),
-    );
-  }, []);
-  useEffect(() => {
-    if (!state.hydrated) return;
-    const snapshot = toSnapshot(state);
-    if (snapshot) saveSnapshot(window.localStorage, snapshot);
-  }, [state]);
-  useEffect(() => {
-    if (!state.hydrated || state.screen === "recovery") return;
-    const hash = `#${state.screen}`;
-    if (window.location.hash !== hash) {
-      const method =
-        previousScreen.current === state.screen ? "replaceState" : "pushState";
-      window.history[method](null, "", hash);
-    }
-    previousScreen.current = state.screen;
-  }, [state.hydrated, state.screen]);
-  useEffect(() => {
-    if (!state.hydrated || focusedScreen.current === state.screen) return;
-    focusedScreen.current = state.screen;
-    window.scrollTo({ behavior: "auto", left: 0, top: 0 });
-    const frame = window.requestAnimationFrame(() => {
-      const heading = document.querySelector<HTMLElement>("main h1");
-      if (!heading) return;
-      heading.tabIndex = -1;
-      heading.focus({ preventScroll: true });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [state.hydrated, state.screen]);
-  useEffect(() => {
-    const syncFromHash = () => {
-      const screen = window.location.hash.slice(1);
-      if (isHistoryScreen(screen)) {
-        dispatch({ type: "navigate", screen });
-      }
-    };
-    window.addEventListener("popstate", syncFromHash);
-    return () => window.removeEventListener("popstate", syncFromHash);
-  }, []);
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(interval);
-  }, []);
 
   const score = useCallback(
     (action: ScoringAction) =>
@@ -171,6 +118,7 @@ export function AppShell() {
           onQuickMatch={() =>
             dispatch({ type: "navigate", screen: "quick-setup" })
           }
+          onHistory={() => dispatch({ type: "navigate", screen: "history" })}
           onResume={state.tournament ? resume : undefined}
           onStartTournament={() =>
             dispatch({ type: "navigate", screen: "setup" })
@@ -210,6 +158,38 @@ export function AppShell() {
       {state.screen === "bracket" && state.tournament ? (
         <BracketScreen
           bracket={state.tournament}
+          onEditDraw={(players, structural) => {
+            if (structural) {
+              if (
+                tournamentHasStarted(state.tournament!) &&
+                !window.confirm(
+                  "Changing the player field now will clear every score and result, then reseed the entire bracket. The original court deadline will stay in place. Continue?",
+                )
+              ) {
+                return false;
+              }
+              dispatch({
+                type: "rebuild-tournament",
+                players,
+                now: Date.now(),
+              });
+              return true;
+            }
+            const currentNames = new Map(
+              state.tournament!.players.map(({ id, name }) => [id, name]),
+            );
+            players.forEach((player) => {
+              if (currentNames.get(player.id) !== player.name) {
+                dispatch({
+                  type: "rename-player",
+                  playerId: player.id,
+                  name: player.name,
+                  now: Date.now(),
+                });
+              }
+            });
+            return true;
+          }}
           onCorrectMatch={correctResult}
           onStartMatch={(matchId) =>
             dispatch({ type: "start-match", matchId, now: Date.now() })
@@ -243,10 +223,29 @@ export function AppShell() {
           onStart={(scorer) =>
             dispatch({ type: "start-quick", scorer, now: Date.now() })
           }
+          suggestions={rememberedPlayerNames(
+            state.history,
+            (state.tournament?.players ?? state.setupDraft?.players ?? []).map(
+              ({ name }) => name,
+            ),
+          )}
         />
       ) : null}
       {state.screen === "results" && state.tournament ? (
         <ResultsScreen bracket={state.tournament} onCorrect={correctResult} />
+      ) : null}
+      {state.screen === "history" ? (
+        <HistoryScreen
+          history={state.history}
+          onRemove={(id, kind) =>
+            dispatch({ type: "remove-history", id, kind, now: Date.now() })
+          }
+          onReset={() => {
+            clearHistory(window.localStorage);
+            dispatch({ type: "reset-history", now: Date.now() });
+          }}
+          recoveryMessage={state.historyRecoveryMessage}
+        />
       ) : null}
     </div>
   );
