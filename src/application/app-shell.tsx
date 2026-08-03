@@ -70,7 +70,9 @@ export function AppShell() {
   );
 
   if (!state.hydrated) {
-    return <HomeScreen onQuickMatch={noop} onStartTournament={noop} />;
+    return (
+      <HomeScreen hydrating onQuickMatch={noop} onStartTournament={noop} />
+    );
   }
   if (state.screen === "recovery") {
     return (
