@@ -1,6 +1,7 @@
 export * from "./bracket";
 export * from "./editing";
 export * from "./lifecycle";
+export * from "./highlights";
 export * from "./late-entry";
 export * from "./late-entry-plan";
 export * from "./results";

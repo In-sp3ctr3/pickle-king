@@ -50,6 +50,16 @@ describe("SharePreviewActions", () => {
     expect(markup).not.toContain("Download started");
   });
 
+  it("uses neutral Done copy after native sharing completes", () => {
+    const markup = renderToStaticMarkup(
+      <SharePreviewActions
+        preview={preview({ lastAction: "share", status: "success" })}
+      />,
+    );
+    expect(markup).toContain("Done");
+    expect(markup).not.toContain("Shared");
+  });
+
   it("announces only genuine failures", () => {
     const markup = renderToStaticMarkup(
       <SharePreviewActions

@@ -6,7 +6,7 @@ Last updated: 2026-08-03
 ## Environment
 
 - Commit/source state:
-  codex/fix/responsive-bracket-premium-sharing@validated-PR-head
+  codex/fix/share-flow-ipad-polish@base-7c2cdb0 + reviewed working tree
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -24,10 +24,14 @@ Last updated: 2026-08-03
 | ----------------- | -------- | ----------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------- | --------------- | ---------- |
 | home              | desktop  | docs/frontend/evidence/home-desktop-source.png              | test-results/frontend-captures/home-desktop.png              | test-results/frontend-comparisons/home-desktop.png              | passed          | passed     |
 | home              | mobile   | docs/frontend/evidence/home-mobile-source.png               | test-results/frontend-captures/home-mobile.png               | test-results/frontend-comparisons/home-mobile.png               | passed          | passed     |
+| home-completed    | desktop  | docs/frontend/evidence/home-completed-desktop-source.png    | test-results/frontend-captures/home-completed-desktop.png    | test-results/frontend-comparisons/home-completed-desktop.png    | passed          | passed     |
+| home-completed    | mobile   | docs/frontend/evidence/home-completed-mobile-source.png     | test-results/frontend-captures/home-completed-mobile.png     | test-results/frontend-comparisons/home-completed-mobile.png     | passed          | passed     |
 | setup             | desktop  | docs/frontend/evidence/setup-desktop-source.png             | test-results/frontend-captures/setup-desktop.png             | test-results/frontend-comparisons/setup-desktop.png             | passed          | passed     |
 | setup             | mobile   | docs/frontend/evidence/setup-mobile-source.png              | test-results/frontend-captures/setup-mobile.png              | test-results/frontend-comparisons/setup-mobile.png              | passed          | passed     |
 | bracket           | desktop  | docs/frontend/evidence/bracket-desktop-source.png           | test-results/frontend-captures/bracket-desktop.png           | test-results/frontend-comparisons/bracket-desktop.png           | passed          | passed     |
 | bracket           | mobile   | docs/frontend/evidence/bracket-mobile-source.png            | test-results/frontend-captures/bracket-mobile.png            | test-results/frontend-comparisons/bracket-mobile.png            | passed          | passed     |
+| bracket-completed | desktop  | docs/frontend/evidence/bracket-completed-desktop-source.png | test-results/frontend-captures/bracket-completed-desktop.png | test-results/frontend-comparisons/bracket-completed-desktop.png | passed          | passed     |
+| bracket-completed | mobile   | docs/frontend/evidence/bracket-completed-mobile-source.png  | test-results/frontend-captures/bracket-completed-mobile.png  | test-results/frontend-comparisons/bracket-completed-mobile.png  | passed          | passed     |
 | quick-setup       | desktop  | docs/frontend/evidence/quick-setup-desktop-source.png       | test-results/frontend-captures/quick-setup-desktop.png       | test-results/frontend-comparisons/quick-setup-desktop.png       | passed          | passed     |
 | quick-setup       | mobile   | docs/frontend/evidence/quick-setup-mobile-source.png        | test-results/frontend-captures/quick-setup-mobile.png        | test-results/frontend-comparisons/quick-setup-mobile.png        | passed          | passed     |
 | quick-idle        | desktop  | docs/frontend/evidence/quick-idle-desktop-source.png        | test-results/frontend-captures/quick-idle-desktop.png        | test-results/frontend-comparisons/quick-idle-desktop.png        | passed          | passed     |
@@ -87,16 +91,24 @@ are authority for hierarchy, atmosphere, and score emphasis—not templates to
 pixel-copy. Dynamic names, scores, statistics, and bracket geometry remain
 code-rendered.
 
-| Export comparison         | Current artifact                                            |
-| ------------------------- | ----------------------------------------------------------- |
-| Quick result · Feed       | `docs/frontend/evidence/share-comparisons/quick-feed.webp`  |
-| Quick result · Story      | `docs/frontend/evidence/share-comparisons/quick-story.webp` |
-| Tournament recap · Feed   | `docs/frontend/evidence/share-comparisons/recap-feed.webp`  |
-| Tournament recap · Story  | `docs/frontend/evidence/share-comparisons/recap-story.webp` |
-| Tournament statistics     | `docs/frontend/evidence/share-comparisons/stats-feed.webp`  |
-| Full bracket · 4 players  | `docs/frontend/evidence/share-comparisons/bracket-4.webp`   |
-| Full bracket · 8 players  | `docs/frontend/evidence/share-comparisons/bracket-8.webp`   |
-| Full bracket · 16 players | `docs/frontend/evidence/share-comparisons/bracket-16.webp`  |
+| Export comparison                 | Current artifact                                                             |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| Quick result · Feed               | `docs/frontend/evidence/share-comparisons/quick-feed.webp`                   |
+| Quick result · Story              | `docs/frontend/evidence/share-comparisons/quick-story.webp`                  |
+| Tournament recap · Feed           | `docs/frontend/evidence/share-comparisons/recap-feed.webp`                   |
+| Tournament recap · Story          | `docs/frontend/evidence/share-comparisons/recap-story.webp`                  |
+| Tournament statistics             | `docs/frontend/evidence/share-comparisons/stats-feed.webp`                   |
+| Full bracket · 4 players          | `docs/frontend/evidence/share-comparisons/bracket-4.webp`                    |
+| Full bracket · 8 players          | `docs/frontend/evidence/share-comparisons/bracket-8.webp`                    |
+| Full bracket · 16 players         | `docs/frontend/evidence/share-comparisons/bracket-16.webp`                   |
+| Quick result · source/render/diff | `docs/frontend/evidence/share-comparisons/quick-feed-source-render-diff.png` |
+
+The supplied Jack 5–3 Post source was normalized to the product's exact
+1080×1350 output before the source/render/diff sheet was created. Story,
+tournament recap, statistics, and bracket exports have no matching supplied
+source geometry; they are reference-derived extensions reviewed against the
+documented safe-area, content, typography, and complete-draw invariants rather
+than a misleading pixel-difference threshold.
 
 The supplied source hashes are
 `01d5f043e631ff2f7d7e5fe054ff9441582e3cba4483011331ad7ecad7f6d51f` and
@@ -104,46 +116,55 @@ The supplied source hashes are
 
 ## Findings
 
-| ID     | Severity | Route/region     | Evidence                                      | Contract/user impact                                                     | Owner    | Status |
-| ------ | -------- | ---------------- | --------------------------------------------- | ------------------------------------------------------------------------ | -------- | ------ |
-| DQA-01 | P1       | home/hero        | desktop, mobile, and responsive captures      | rejected static artwork remained visible                                 | frontend | fixed  |
-| DQA-02 | P1       | bracket/tree     | bracket desktop and mobile captures           | node anatomy did not match a tournament bracket                          | frontend | fixed  |
-| DQA-03 | P1       | scorer/type      | quick-live desktop and mobile captures        | condensed double digits reduced score legibility                         | frontend | fixed  |
-| DQA-04 | P2       | setup/controls   | setup desktop and mobile captures             | native dropdown and vertical misalignment reduced polish                 | frontend | fixed  |
-| DQA-05 | P2       | app/navigation   | setup, bracket, and results captures          | back path was absent or duplicated outside navigation                    | frontend | fixed  |
-| DQA-06 | P1       | bracket/byes     | six-player workflow and capture               | `BYE` appeared to be an unregistered player                              | frontend | fixed  |
-| DQA-07 | P1       | bracket/final    | desktop and mobile bracket captures           | final label displaced its waiting state and faceoff                      | frontend | fixed  |
-| DQA-08 | P2       | bracket/edit     | inline correction workflow and capture        | completed scores could not be edited in their bracket node               | frontend | fixed  |
-| DQA-09 | P1       | scorer/motion    | burst-tap workflow and NumberFlow contract    | visual reel could imply points beyond the locked result                  | frontend | fixed  |
-| DQA-10 | P1       | bracket/edit     | completed and structural-edit workflows       | late entrants had no fair, comprehensible recovery path                  | product  | fixed  |
-| DQA-11 | P1       | bracket/edit     | iPad late-entry review and challenge lane     | live insertion previously required a destructive full reset              | product  | fixed  |
-| DQA-14 | P1       | result/share     | desktop/mobile result and PNG evidence        | victory review and exports lacked the approved branded hierarchy         | frontend | fixed  |
-| DQA-12 | P2       | history          | empty/populated ledger and iPad evidence      | a social session had no device-local record                              | frontend | fixed  |
-| DQA-13 | P2       | quick/setup      | keyboard suggestion workflow                  | recurring players required repeated name entry                           | frontend | fixed  |
-| DQA-15 | P1       | scorer/layout    | four target viewport assertions               | scorer controls could clip or require page scrolling                     | frontend | fixed  |
-| DQA-16 | P2       | scorer/start     | idle scorer focus and inert-score workflow    | users could tap inert scoring zones before discovering Start             | frontend | fixed  |
-| DQA-17 | P2       | bracket/tools    | bracket desktop and mobile captures           | draw utilities appeared outside the Full draw context                    | frontend | fixed  |
-| DQA-18 | P1       | scorer/controls  | iPad and phone workflow captures              | point subtraction was not self-explanatory                               | frontend | fixed  |
-| DQA-19 | P1       | bracket/schedule | four/six-player workflow captures             | only the recommended opening match could start                           | product  | fixed  |
-| DQA-20 | P2       | results/share    | recap, stats, and result captures             | final data lacked focused social formats                                 | frontend | fixed  |
-| DQA-21 | P2       | bracket/edit     | inline stable-name workflow                   | bracket nodes could correct scores but not player identity               | product  | fixed  |
-| DQA-22 | P1       | result/share     | desktop result and download workflow          | native sharing offered no dependable desktop save path                   | frontend | fixed  |
-| DQA-23 | P1       | result/type      | supplied reference and 4 to 11 export         | combined score text allowed glyph and separator collisions               | frontend | fixed  |
-| DQA-24 | P2       | scorer/start     | four centered-overlay viewport assertions     | the idle action was too large and not centered on the full screen        | frontend | fixed  |
-| DQA-25 | P2       | scorer/clock     | untimed Quick Match workflow                  | an empty timing concept remained visible as “Untimed”                    | frontend | fixed  |
-| DQA-26 | P1       | result/share     | supplied portrait and landscape cards         | winner scale, score hierarchy, and court atmosphere missed the authority | frontend | fixed  |
-| DQA-27 | P1       | share/QA         | identical source and render hashes            | visual QA could report a false pass                                      | frontend | fixed  |
-| DQA-28 | P1       | results/tablet   | missing 820×1180 and 1180×820 evidence        | primary target layouts were unproven                                     | frontend | fixed  |
-| DQA-29 | P2       | bracket/export   | cropped tree and weak champion state          | completed draw was not legible or brag-worthy                            | frontend | fixed  |
-| DQA-30 | P2       | setup/rhythm     | section 02 collision and compressed suffixes  | setup appeared unfinished                                                | frontend | fixed  |
-| DQA-31 | P2       | share/actions    | preview and action captures                   | icon-only controls reduced Share and Download discoverability            | frontend | fixed  |
-| DQA-32 | P1       | bracket/names    | 40-character name containment matrix          | opponent names collided in run-of-show and node layouts                  | frontend | fixed  |
-| DQA-33 | P2       | bracket/final    | iPad final capture and 4/8/16 exports         | final node spacing, status, and tools weakened championship hierarchy    | frontend | fixed  |
-| DQA-34 | P2       | setup/draw       | migration, reroll, and responsive controls    | draw intent and timing controls were unclear or clipped                  | product  | fixed  |
-| DQA-35 | P1       | share/exports    | eight supplied-reference comparison sheets    | recap, stats, and bracket artifacts lacked premium visual evidence       | frontend | fixed  |
-| DQA-36 | P2       | history/results  | populated ledger and archived result captures | completed tournament results could not be reopened                       | product  | fixed  |
-| DQA-37 | P2       | input/touch      | explicit component bounding-box assertions    | multiple court-side actions were below the 48px touch-target contract    | frontend | fixed  |
-| DQA-38 | P2       | share/fallback   | mocked Apple unsupported-share state          | iPad copy promised a download action that was hidden                     | frontend | fixed  |
+| ID     | Severity | Route/region     | Evidence                                          | Contract/user impact                                                     | Owner    | Status |
+| ------ | -------- | ---------------- | ------------------------------------------------- | ------------------------------------------------------------------------ | -------- | ------ |
+| DQA-01 | P1       | home/hero        | desktop, mobile, and responsive captures          | rejected static artwork remained visible                                 | frontend | fixed  |
+| DQA-02 | P1       | bracket/tree     | bracket desktop and mobile captures               | node anatomy did not match a tournament bracket                          | frontend | fixed  |
+| DQA-03 | P1       | scorer/type      | quick-live desktop and mobile captures            | condensed double digits reduced score legibility                         | frontend | fixed  |
+| DQA-04 | P2       | setup/controls   | setup desktop and mobile captures                 | native dropdown and vertical misalignment reduced polish                 | frontend | fixed  |
+| DQA-05 | P2       | app/navigation   | setup, bracket, and results captures              | back path was absent or duplicated outside navigation                    | frontend | fixed  |
+| DQA-06 | P1       | bracket/byes     | six-player workflow and capture                   | `BYE` appeared to be an unregistered player                              | frontend | fixed  |
+| DQA-07 | P1       | bracket/final    | desktop and mobile bracket captures               | final label displaced its waiting state and faceoff                      | frontend | fixed  |
+| DQA-08 | P2       | bracket/edit     | inline correction workflow and capture            | completed scores could not be edited in their bracket node               | frontend | fixed  |
+| DQA-09 | P1       | scorer/motion    | burst-tap workflow and NumberFlow contract        | visual reel could imply points beyond the locked result                  | frontend | fixed  |
+| DQA-10 | P1       | bracket/edit     | completed and structural-edit workflows           | late entrants had no fair, comprehensible recovery path                  | product  | fixed  |
+| DQA-11 | P1       | bracket/edit     | iPad late-entry review and challenge lane         | live insertion previously required a destructive full reset              | product  | fixed  |
+| DQA-14 | P1       | result/share     | desktop/mobile result and PNG evidence            | victory review and exports lacked the approved branded hierarchy         | frontend | fixed  |
+| DQA-12 | P2       | history          | empty/populated ledger and iPad evidence          | a social session had no device-local record                              | frontend | fixed  |
+| DQA-13 | P2       | quick/setup      | keyboard suggestion workflow                      | recurring players required repeated name entry                           | frontend | fixed  |
+| DQA-15 | P1       | scorer/layout    | four target viewport assertions                   | scorer controls could clip or require page scrolling                     | frontend | fixed  |
+| DQA-16 | P2       | scorer/start     | idle scorer focus and inert-score workflow        | users could tap inert scoring zones before discovering Start             | frontend | fixed  |
+| DQA-17 | P2       | bracket/tools    | bracket desktop and mobile captures               | draw utilities appeared outside the Full draw context                    | frontend | fixed  |
+| DQA-18 | P1       | scorer/controls  | iPad and phone workflow captures                  | point subtraction was not self-explanatory                               | frontend | fixed  |
+| DQA-19 | P1       | bracket/schedule | four/six-player workflow captures                 | only the recommended opening match could start                           | product  | fixed  |
+| DQA-20 | P2       | results/share    | recap, stats, and result captures                 | final data lacked focused social formats                                 | frontend | fixed  |
+| DQA-21 | P2       | bracket/edit     | inline stable-name workflow                       | bracket nodes could correct scores but not player identity               | product  | fixed  |
+| DQA-22 | P1       | result/share     | desktop result and download workflow              | native sharing offered no dependable desktop save path                   | frontend | fixed  |
+| DQA-23 | P1       | result/type      | supplied reference and 4 to 11 export             | combined score text allowed glyph and separator collisions               | frontend | fixed  |
+| DQA-24 | P2       | scorer/start     | four centered-overlay viewport assertions         | the idle action was too large and not centered on the full screen        | frontend | fixed  |
+| DQA-25 | P2       | scorer/clock     | untimed Quick Match workflow                      | an empty timing concept remained visible as “Untimed”                    | frontend | fixed  |
+| DQA-26 | P1       | result/share     | supplied portrait and landscape cards             | winner scale, score hierarchy, and court atmosphere missed the authority | frontend | fixed  |
+| DQA-27 | P1       | share/QA         | identical source and render hashes                | visual QA could report a false pass                                      | frontend | fixed  |
+| DQA-28 | P1       | results/tablet   | missing 820×1180 and 1180×820 evidence            | primary target layouts were unproven                                     | frontend | fixed  |
+| DQA-29 | P2       | bracket/export   | cropped tree and weak champion state              | completed draw was not legible or brag-worthy                            | frontend | fixed  |
+| DQA-30 | P2       | setup/rhythm     | section 02 collision and compressed suffixes      | setup appeared unfinished                                                | frontend | fixed  |
+| DQA-31 | P2       | share/actions    | preview and action captures                       | icon-only controls reduced Share and Download discoverability            | frontend | fixed  |
+| DQA-32 | P1       | bracket/names    | 40-character name containment matrix              | opponent names collided in run-of-show and node layouts                  | frontend | fixed  |
+| DQA-33 | P2       | bracket/final    | iPad final capture and 4/8/16 exports             | final node spacing, status, and tools weakened championship hierarchy    | frontend | fixed  |
+| DQA-34 | P2       | setup/draw       | migration, reroll, and responsive controls        | draw intent and timing controls were unclear or clipped                  | product  | fixed  |
+| DQA-35 | P1       | share/exports    | eight supplied-reference comparison sheets        | recap, stats, and bracket artifacts lacked premium visual evidence       | frontend | fixed  |
+| DQA-36 | P2       | history/results  | populated ledger and archived result captures     | completed tournament results could not be reopened                       | product  | fixed  |
+| DQA-37 | P2       | input/touch      | explicit component bounding-box assertions        | multiple court-side actions were below the 48px touch-target contract    | frontend | fixed  |
+| DQA-38 | P2       | share/fallback   | mocked Apple unsupported-share state              | iPad copy promised a download action that was hidden                     | frontend | fixed  |
+| DQA-39 | P1       | share/result     | delayed canvas and format-switch workflow         | stale score artwork flashed before the requested image was ready         | frontend | fixed  |
+| DQA-40 | P1       | bracket/iPad     | 768/820 portrait and 1024/1180 landscape matrix   | names wrapped mid-word and final scores drifted out of alignment         | frontend | fixed  |
+| DQA-41 | P1       | bracket/export   | 4/8-player Post, Story / Reel, and Full draw PNGs | portrait sharing previously reused cropped landscape geometry            | frontend | fixed  |
+| DQA-42 | P2       | quick/result     | confirmation and history workflow                 | operators had to dismiss a redundant completed-score screen              | product  | fixed  |
+| DQA-43 | P2       | results/access   | bracket, home, and history reopen workflows       | completed tournament results were difficult to revisit                   | product  | fixed  |
+| DQA-44 | P1       | share/dialog     | 820×1180 bracket preview geometry                 | concatenated modifier classes collapsed the format selector and preview  | frontend | fixed  |
+| DQA-45 | P2       | share/story      | Story safe-area geometry tests and current PNG    | podium and result context entered destination chrome territory           | frontend | fixed  |
+| DQA-46 | P2       | bracket/portrait | eight-player Story render                         | the bronze node interrupted the lower finalist's progression connector   | frontend | fixed  |
+| DQA-47 | P2       | share/evidence   | supplied Jack 5–3 source/render/diff sheet        | prior evidence boards omitted an explicit pixel-difference panel         | frontend | fixed  |
 
 ## Harness Results
 
@@ -166,9 +187,10 @@ Reviewer evidence: docs/frontend/reviews/design-review.md
 
 Result: passed
 
-Rationale: exact contained previews, native share/download fallbacks, plain draw
-copy, measured name fitting, 48px court-side controls, and the current quick,
-recap, stats, and 4/8/16-player bracket comparison sheets were reviewed. Pixel
-regions and browser geometry prove the distinct final, centered third place,
-connectors, medals, long names, and full 1600×1200 frame. No P0/P1/P2 design
-finding remains open.
+Rationale: exact contained previews, native share/download fallbacks, measured
+name fitting, 48px court-side controls, safe-area geometry, and the current
+quick, recap, stats, and 4/8/16-player bracket artifacts were reviewed. The
+supplied Jack 5–3 source/render/diff sheet records the reference delta; browser
+and pure geometry checks prove the compact final, isolated third place,
+connectors, medals, long names, and complete frames. No P0/P1/P2 design finding
+remains open.

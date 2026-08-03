@@ -359,55 +359,43 @@
 }
 
 .result-dialog__preview img,
-.result-dialog__preview-fallback {
+.result-dialog__preview-skeleton {
   display: block;
   width: 100%;
   max-height: min(70dvh, 585px);
-  aspect-ratio: 4 / 5;
   object-fit: contain;
   background: var(--court);
 }
 
-.result-dialog__preview-fallback {
+@keyframes share-skeleton {
+  to {
+    background-position: -140% 0;
+  }
+}
+
+.result-dialog__preview--feed img,
+.result-dialog__preview--feed .result-dialog__preview-skeleton {
+  aspect-ratio: 4 / 5;
+}
+
+.result-dialog__preview--story img,
+.result-dialog__preview--story .result-dialog__preview-skeleton {
+  aspect-ratio: 9 / 16;
+}
+
+.result-dialog__preview-skeleton {
   display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 1rem;
-  border: 1px solid var(--line);
-  padding: 2rem;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.result-dialog__preview-fallback span {
-  color: var(--lime);
-  font-size: 0.7rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-}
-
-.result-dialog__preview-fallback strong {
-  max-width: 100%;
-  font-family: var(--font-display);
-  font-size: clamp(1.4rem, 5vw, 3.4rem);
-  line-height: 0.95;
-  overflow-wrap: anywhere;
-  text-wrap: balance;
-}
-
-.result-dialog__preview-fallback b {
-  color: var(--lime);
-  font-family: var(--font-display);
-  font-size: clamp(4rem, 14vw, 8rem);
-  font-style: normal;
-  line-height: 0.8;
-}
-
-.result-dialog__preview-fallback i {
-  color: var(--mist);
-  font-family: "Manrope", sans-serif;
-  font-size: 0.16em;
-  font-style: normal;
+  place-items: center;
+  background:
+    linear-gradient(
+      110deg,
+      transparent 30%,
+      rgb(200 255 61 / 8%) 48%,
+      transparent 66%
+    ),
+    #0d100c;
+  background-size: 240% 100%;
+  animation: share-skeleton 1.2s ease-in-out infinite;
 }
 
 .result-dialog__preview figcaption {
@@ -622,7 +610,7 @@ html[data-visual-freeze="true"] .victory-confetti__static {
   }
 
   .result-dialog__preview img,
-  .result-dialog__preview-fallback {
+  .result-dialog__preview-skeleton {
     max-height: 72dvh;
   }
 

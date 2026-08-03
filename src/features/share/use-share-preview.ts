@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { canShareFile, downloadFile, pngFile, shareFile } from "./share-file";
+import { canShareFile, downloadFile, shareFile } from "./share-file";
+import { sharePreviewFile } from "./share-preview-cache";
 
 export type SharePreviewStatus = "idle" | "working" | "success" | "error";
 export type SharePreviewAction = "share" | "download";
@@ -50,11 +51,7 @@ export function useSharePreview(
     let active = true;
     let objectUrl: string | null = null;
     fileRef.current = null;
-    const buildPreview = async () => {
-      const canvas = await buildRef.current();
-      return pngFile(canvas, fileName);
-    };
-    void buildPreview()
+    void sharePreviewFile(cacheKey, fileName, () => buildRef.current())
       .then((file) => {
         if (!active) return;
         fileRef.current = file;

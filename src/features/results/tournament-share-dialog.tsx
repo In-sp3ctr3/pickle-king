@@ -1,13 +1,24 @@
 "use client";
 
-import { BarChart3, GitFork, Trophy, X } from "lucide-react";
+import {
+  BarChart3,
+  GitFork,
+  Maximize2,
+  Minimize2,
+  Trophy,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { TournamentBracket } from "../../tournament";
 import {
   bracketShareCanvas,
+  bracketShareFormatLabel,
   shareFormatLabel,
   SharePreviewActions,
+  SharePreviewSkeleton,
+  type BracketShareFormat,
   type ShareFormat,
+  tournamentShareContentKey,
   tournamentRecapCanvas,
   tournamentStatsCanvas,
   useSharePreview,
@@ -31,16 +42,20 @@ export function TournamentShareDialog({
   const ref = useRef<HTMLDialogElement>(null);
   const [kind, setKind] = useState<TournamentShareKind>("recap");
   const [format, setFormat] = useState<ShareFormat>("feed");
-  const imageFormat = kind === "bracket" ? "feed" : format;
+  const [bracketFormat, setBracketFormat] =
+    useState<BracketShareFormat>("landscape");
+  const [expanded, setExpanded] = useState(false);
+  const imageFormat = kind === "bracket" ? bracketFormat : format;
+  const contentKey = tournamentShareContentKey(bracket);
   const preview = useSharePreview(
     () =>
       kind === "recap"
-        ? tournamentRecapCanvas(bracket, imageFormat)
+        ? tournamentRecapCanvas(bracket, format)
         : kind === "stats"
-          ? tournamentStatsCanvas(bracket, imageFormat)
-          : bracketShareCanvas(bracket),
-    `pickle-king-tournament-${kind}${kind === "bracket" ? "" : `-${imageFormat}`}.png`,
-    `${kind}:${imageFormat}:${bracket.finalMatchId}`,
+          ? tournamentStatsCanvas(bracket, format)
+          : bracketShareCanvas(bracket, bracketFormat),
+    `pickle-king-tournament-${kind}-${imageFormat}.png`,
+    `${kind}:${imageFormat}:${contentKey}`,
   );
 
   useEffect(() => {
@@ -50,7 +65,7 @@ export function TournamentShareDialog({
   return (
     <dialog
       aria-label="Share tournament"
-      className={`tournament-share-dialog tournament-share-dialog--preview${kind !== "bracket" ? "tournament-share-dialog--has-formats" : ""}`}
+      className="tournament-share-dialog tournament-share-dialog--preview tournament-share-dialog--has-formats"
       onCancel={onClose}
       ref={ref}
     >
@@ -80,28 +95,58 @@ export function TournamentShareDialog({
           </button>
         ))}
       </div>
-      {kind !== "bracket" ? (
-        <div
-          aria-label="Image format"
-          className="share-format-choice"
-          role="group"
-        >
-          {(["feed", "story"] as const).map((value) => (
-            <button
-              aria-pressed={format === value}
-              key={value}
-              onClick={() => setFormat(value)}
-              type="button"
-            >
-              {shareFormatLabel(value)}
-            </button>
-          ))}
-        </div>
-      ) : null}
+      <div
+        aria-label="Image format"
+        className="share-format-choice"
+        role="group"
+      >
+        {(kind === "bracket"
+          ? (["landscape", "feed", "story"] as const)
+          : (["feed", "story"] as const)
+        ).map((value) => (
+          <button
+            aria-pressed={imageFormat === value}
+            key={value}
+            onClick={() => {
+              setExpanded(false);
+              if (kind === "bracket") setBracketFormat(value);
+              else setFormat(value as ShareFormat);
+            }}
+            type="button"
+          >
+            {kind === "bracket"
+              ? bracketShareFormatLabel(value)
+              : shareFormatLabel(value as ShareFormat)}
+          </button>
+        ))}
+      </div>
       <figure
         aria-busy={!preview.ready}
-        className={`tournament-share-preview tournament-share-preview--${kind} tournament-share-preview--${imageFormat}`}
+        className={[
+          "tournament-share-preview",
+          `tournament-share-preview--${kind}`,
+          `tournament-share-preview--${imageFormat}`,
+          expanded ? "tournament-share-preview--expanded" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
+        {kind === "bracket" && preview.ready ? (
+          <button
+            aria-label={
+              expanded ? "Fit bracket preview" : "Expand bracket preview"
+            }
+            className="tournament-share-preview__fit"
+            onClick={() => setExpanded((value) => !value)}
+            type="button"
+          >
+            {expanded ? (
+              <Minimize2 aria-hidden="true" />
+            ) : (
+              <Maximize2 aria-hidden="true" />
+            )}
+          </button>
+        ) : null}
         {preview.previewUrl ? (
           // Blob URL for a locally generated canvas preview.
           // eslint-disable-next-line @next/next/no-img-element
@@ -109,13 +154,23 @@ export function TournamentShareDialog({
             alt={`${options.find(([value]) => value === kind)?.[2]} preview`}
             data-qa="share-preview"
             src={preview.previewUrl}
+            style={
+              expanded
+                ? {
+                    maxHeight: "none",
+                    maxWidth: "none",
+                    minWidth: imageFormat === "landscape" ? 1600 : 1080,
+                    position: "static",
+                  }
+                : undefined
+            }
           />
         ) : preview.error ? (
           <div className="share-preview-dialog__error" role="alert">
             {preview.error}
           </div>
         ) : (
-          <div aria-hidden="true" className="share-preview-dialog__loading" />
+          <SharePreviewSkeleton className="share-preview-dialog__loading" />
         )}
       </figure>
       <footer>

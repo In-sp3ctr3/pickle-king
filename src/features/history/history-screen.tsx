@@ -8,6 +8,7 @@ import {
   quickShareCanvas,
   ShareImageDialog,
   type ShareImageRequest,
+  tournamentShareContentKey,
 } from "../share";
 
 function dateLabel(timestamp: number) {
@@ -98,7 +99,11 @@ export function HistoryScreen({
                     setShareRequest({
                       alt: `${match.labels.sideA} versus ${match.labels.sideB} final score`,
                       aspect: "portrait",
-                      build: (format) => quickShareCanvas(match, format),
+                      build: (format) =>
+                        quickShareCanvas(
+                          match,
+                          format === "landscape" ? "feed" : format,
+                        ),
                       fileName: `pickle-king-${match.completedAt}.png`,
                       formats: ["feed", "story"],
                       key: `quick:${match.id}`,
@@ -159,9 +164,13 @@ export function HistoryScreen({
                       setShareRequest({
                         alt: `${champion} tournament bracket`,
                         aspect: "landscape",
-                        build: () => bracketShareCanvas(item.bracket),
+                        build: (format) =>
+                          bracketShareCanvas(item.bracket, format),
                         fileName: `pickle-king-bracket-${item.completedAt}.png`,
-                        key: `tournament:${item.id}`,
+                        formats: ["landscape", "feed", "story"],
+                        initialFormat: "landscape",
+                        inspectable: true,
+                        key: `tournament:${item.id}:${tournamentShareContentKey(item.bracket)}`,
                         title: "Tournament bracket",
                       })
                     }

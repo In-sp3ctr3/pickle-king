@@ -54,6 +54,14 @@ function arenaBackground() {
   return arenaPromise;
 }
 
+export function prewarmShareAssets() {
+  void Promise.all([
+    brandMark(),
+    arenaBackground(),
+    document.fonts.ready,
+  ]).catch(() => undefined);
+}
+
 export async function shareCanvasSurface(width: number, height: number) {
   const [mark, arena] = await Promise.all([
     brandMark(),
@@ -131,6 +139,45 @@ export function shareFittedText(
     color: options.color,
     font: `${weight} ${size}px ${family}`,
   });
+  return size;
+}
+
+export function shareDimensionalFittedText(
+  context: CanvasRenderingContext2D,
+  value: string,
+  x: number,
+  y: number,
+  options: {
+    align?: CanvasTextAlign;
+    color: string;
+    family?: string;
+    maxSize: number;
+    maxWidth: number;
+    minSize?: number;
+    weight?: number;
+  },
+) {
+  const family = options.family ?? "'Archivo Black', sans-serif";
+  const weight = options.weight ?? 900;
+  const minSize = options.minSize ?? 24;
+  let size = options.maxSize;
+  context.font = `${weight} ${size}px ${family}`;
+  while (
+    size > minSize &&
+    context.measureText(value).width > options.maxWidth
+  ) {
+    size -= 2;
+    context.font = `${weight} ${size}px ${family}`;
+  }
+  const label = fitCanvasText(context, value, options.maxWidth);
+  context.textAlign = options.align ?? "left";
+  context.fillStyle = "#030403";
+  context.fillText(label, x + 4, y + 7);
+  context.fillStyle = options.color;
+  context.fillText(label, x, y);
+  context.strokeStyle = "rgba(255, 255, 255, 0.28)";
+  context.lineWidth = 1;
+  context.strokeText(label, x, y - 1);
   return size;
 }
 

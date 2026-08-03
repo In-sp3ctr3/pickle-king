@@ -6,17 +6,22 @@ import {
   getReadySchedule,
   type DrawStyle,
   type LateEntryPlan,
+  type Player,
   type TournamentBracket,
 } from "@/src/tournament";
-import { Dices, Pencil, Share2, Trophy } from "lucide-react";
+import { Dices, Pencil, Trophy } from "lucide-react";
 import { useState } from "react";
-import type { Player } from "@/src/tournament";
 import {
   bracketShareCanvas,
   ShareImageDialog,
   type ShareImageRequest,
+  tournamentShareContentKey,
 } from "../share";
 import { BracketEditorDialog } from "./bracket-editor-dialog";
+import {
+  BracketResultsAction,
+  BracketShareAction,
+} from "./bracket-results-action";
 import { BracketTree } from "./bracket-tree";
 import { LateEntryDialog } from "./late-entry-dialog";
 import { LateEntryLane } from "./late-entry-lane";
@@ -30,6 +35,7 @@ export interface BracketScreenProps {
   onRenamePlayer: RenamePlayer;
   drawStyle?: DrawStyle;
   onRerollRandomDraw?: () => void;
+  onViewResults?: () => void;
   onStartMatch: (matchId: string) => void;
   sessionLabel?: string;
   timingWarning?: string;
@@ -72,6 +78,7 @@ export function BracketScreen({
   onRebuildWithPlayer,
   onReplanLateEntry,
   onUndoLateEntry,
+  onViewResults,
 }: BracketScreenProps) {
   const [editing, setEditing] = useState(false);
   const [lateReview, setLateReview] = useState<
@@ -117,11 +124,9 @@ export function BracketScreen({
           </p>
           <h1>Road to the crown.</h1>
         </div>
-        <div className="bracket-screen__header-actions">
-          <p className="bracket-screen__progress">
-            {completeCount} of {bracket.matches.length} matches complete
-          </p>
-        </div>
+        <p className="bracket-screen__header-actions bracket-screen__progress">
+          {completeCount} of {bracket.matches.length} matches complete
+        </p>
       </header>
 
       <RunOfShow
@@ -161,6 +166,9 @@ export function BracketScreen({
                 : "Follow each line from the opening round to the final."}
             </p>
             <div className="bracket-screen__draw-tools" aria-label="Draw tools">
+              {completeCount === bracket.matches.length && onViewResults ? (
+                <BracketResultsAction onView={onViewResults} />
+              ) : null}
               {drawStyle === "random" &&
               onRerollRandomDraw &&
               !drawHasStarted ? (
@@ -182,23 +190,21 @@ export function BracketScreen({
               >
                 <Pencil aria-hidden="true" size={18} /> Edit draw
               </button>
-              <button
-                data-qa="share-bracket"
-                onClick={() => {
+              <BracketShareAction
+                onShare={() => {
                   setShareRequest({
                     alt: "Tournament bracket share image",
                     aspect: "landscape",
-                    build: () => bracketShareCanvas(bracket),
+                    build: (format) => bracketShareCanvas(bracket, format),
                     fileName: "pickle-king-bracket.png",
-                    key: `bracket:${bracket.finalMatchId}:${completeCount}`,
+                    formats: ["landscape", "feed", "story"],
+                    initialFormat: "landscape",
+                    inspectable: true,
+                    key: `bracket:${tournamentShareContentKey(bracket)}`,
                     title: "Share bracket",
                   });
                 }}
-                type="button"
-              >
-                <Share2 aria-hidden="true" size={18} />
-                Share bracket
-              </button>
+              />
             </div>
           </div>
         </div>

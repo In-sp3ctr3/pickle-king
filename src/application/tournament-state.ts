@@ -100,7 +100,9 @@ export function confirmAppResult(
     return {
       ...state,
       updatedAt: action.now,
-      scorer,
+      screen: "quick-setup",
+      scorer: null,
+      quickMatch: false,
       history: recordQuickMatch(
         state.history,
         quickMatchRecord(scorer, action.now),

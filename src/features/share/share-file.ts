@@ -26,7 +26,7 @@ export async function shareFile(file: File, title: string) {
   }
   try {
     await navigator.share({ files: [file], title });
-    return "shared" as const;
+    return "completed" as const;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
       return "cancelled" as const;

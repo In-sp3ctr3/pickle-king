@@ -1,6 +1,7 @@
 import {
   calculateTournamentResult,
-  type Match,
+  tournamentHighlights,
+  type TournamentHighlight,
   type TournamentBracket,
 } from "../../tournament";
 import {
@@ -16,9 +17,6 @@ import { shareDimensions, type ShareFormat } from "./share-format";
 import { drawExportBackdrop } from "./share-scene";
 import {
   championStanding,
-  closestCompletedMatch,
-  finalMatchData,
-  matchPlayerId,
   playerName,
   tournamentNames,
 } from "./tournament-share-data";
@@ -30,8 +28,7 @@ export async function tournamentStatsCanvas(
   const result = calculateTournamentResult(bracket);
   const names = tournamentNames(bracket);
   const champion = championStanding(result);
-  const final = finalMatchData(bracket, result);
-  const closest = closestCompletedMatch(result);
+  const highlights = tournamentHighlights(bracket, result);
   const { height, width } = shareDimensions(format);
   const { arena, element, context, mark } = await shareCanvasSurface(
     width,
@@ -69,14 +66,12 @@ export async function tournamentStatsCanvas(
   );
 
   const tableEnd = drawStandings(context, result.standings, names);
-  drawFacts(context, height, {
-    top: Math.min(930, Math.max(680, tableEnd + 40)),
-    final: `${playerName(names, result.championId)} ${final.championScore}–${final.opponentScore} ${playerName(names, final.opponentId)}`,
-    closest: closest ? matchSummary(closest, names) : "No completed match",
-    upsets: result.upsetWins.length,
-    championRecord: `${champion.wins} wins · ${champion.losses} loss${champion.losses === 1 ? "" : "es"}`,
-    differential: `${signed(champion.differential)} points`,
-  });
+  drawHighlights(
+    context,
+    highlights,
+    Math.min(height - 430, Math.max(680, tableEnd + 40)),
+    height - 122,
+  );
   drawShareFooter(context, width, height - 60);
   return element;
 }
@@ -154,57 +149,45 @@ function drawStandings(
   return top + 32 + standings.length * rowHeight;
 }
 
-function drawFacts(
+function drawHighlights(
   context: CanvasRenderingContext2D,
-  canvasHeight: number,
-  data: {
-    top: number;
-    final: string;
-    closest: string;
-    upsets: number;
-    championRecord: string;
-    differential: string;
-  },
+  highlights: TournamentHighlight[],
+  top: number,
+  bottom: number,
 ) {
-  const bottom = canvasHeight - 122;
-  const height = bottom - data.top;
-  context.fillStyle = "rgba(17, 21, 15, 0.97)";
-  context.fillRect(56, data.top, 968, height);
-  const facts = [
-    ["FINAL", data.final],
-    ["CLOSEST MATCH", data.closest],
-    ["UPSET WINS", String(data.upsets)],
-    ["CHAMPION RECORD", `${data.championRecord} · ${data.differential}`],
-  ];
-  const rowHeight = height / facts.length;
-  facts.forEach(([label, value], index) => {
-    const rowTop = data.top + index * rowHeight;
-    if (index > 0) {
-      context.strokeStyle = shareColors.line;
-      context.lineWidth = 2;
-      context.beginPath();
-      context.moveTo(80, rowTop);
-      context.lineTo(1000, rowTop);
-      context.stroke();
-    }
-    shareText(context, label, 84, rowTop + rowHeight * 0.58, {
+  const gap = 16;
+  const cardWidth = (968 - gap) / 2;
+  const cardHeight = (bottom - top - gap) / 2;
+  highlights.forEach((highlight, index) => {
+    const column = index % 2;
+    const row = Math.floor(index / 2);
+    const x = 56 + column * (cardWidth + gap);
+    const y = top + row * (cardHeight + gap);
+    const wash = context.createLinearGradient(
+      x,
+      y,
+      x + cardWidth,
+      y + cardHeight,
+    );
+    wash.addColorStop(0, "rgba(32, 42, 28, 0.97)");
+    wash.addColorStop(1, "rgba(13, 17, 12, 0.97)");
+    context.fillStyle = wash;
+    context.fillRect(x, y, cardWidth, cardHeight);
+    context.fillStyle = index === 0 ? shareColors.lime : shareColors.gold;
+    context.fillRect(x, y, 6, cardHeight);
+    shareText(context, highlight.label.toUpperCase(), x + 28, y + 40, {
       color: shareColors.mist,
       font: "900 14px Manrope, sans-serif",
     });
-    shareFittedText(context, value, 990, rowTop + rowHeight * 0.62, {
-      align: "right",
+    shareFittedText(context, highlight.value, x + 28, y + cardHeight * 0.7, {
       color: index === 0 ? shareColors.lime : shareColors.chalk,
       family: "Manrope, sans-serif",
       weight: 900,
-      maxSize: 24,
-      minSize: 15,
-      maxWidth: 690,
+      maxSize: 27,
+      minSize: 16,
+      maxWidth: cardWidth - 54,
     });
   });
-}
-
-function matchSummary(match: Match, names: Map<string, string>) {
-  return `${playerName(names, matchPlayerId(match, "A"))} ${match.scoreA}–${match.scoreB} ${playerName(names, matchPlayerId(match, "B"))}`;
 }
 
 function signed(value: number) {

@@ -3,6 +3,7 @@
 import { Check, Flag, Pause, Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ScoringAction, ScoringState } from "../../match/types";
+import { prewarmShareAssets } from "../share";
 import {
   MatchControlDialog,
   type MatchControlMode,
@@ -34,6 +35,9 @@ export function MatchScreen({
     (action: ScoringAction) => onAction(action),
     [onAction],
   );
+  useEffect(() => {
+    prewarmShareAssets();
+  }, []);
   useEffect(() => {
     if (scorer.status !== "awaiting-confirmation") return;
     navigator.vibrate?.([120, 80, 240]);

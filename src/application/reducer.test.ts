@@ -98,7 +98,7 @@ describe("application reducer", () => {
   });
 
   it("archives a confirmed Quick Match once", () => {
-    let scorer = createScoringState({
+    const scorer = createScoringState({
       sideA: { memberIds: ["a"] },
       sideB: { memberIds: ["b"] },
       labelA: "Robbie",
@@ -130,8 +130,11 @@ describe("application reducer", () => {
     expect(state.history.quickMatches[0].participants.sideA).toEqual([
       "Robbie",
     ]);
-    scorer = state.scorer!;
-    expect(scorer.status).toBe("complete");
+    expect(state).toMatchObject({
+      screen: "quick-setup",
+      scorer: null,
+      quickMatch: false,
+    });
   });
 
   it("keeps results for a rename and clears them for a field rebuild", () => {

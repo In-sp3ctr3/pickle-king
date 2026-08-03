@@ -36,7 +36,7 @@ export function SharePreviewActions({
           )}
           <span>
             {shareSucceeded
-              ? "Shared"
+              ? "Done"
               : preview.appleMobile
                 ? "Share / Save"
                 : "Share"}
@@ -72,7 +72,7 @@ export function SharePreviewActions({
         </span>
       ) : null}
       <span aria-live="polite" className="sr-only" role="status">
-        {shareSucceeded ? "Shared" : downloadSucceeded ? "Saved" : ""}
+        {shareSucceeded ? "Done" : downloadSucceeded ? "Saved" : ""}
       </span>
     </div>
   );

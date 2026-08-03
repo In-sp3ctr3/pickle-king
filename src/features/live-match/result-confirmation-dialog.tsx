@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import type { ScoringState } from "../../match/types";
 import {
   quickShareCanvas,
+  prewarmSharePreview,
   shareFormatLabel,
   SharePreviewActions,
+  SharePreviewSkeleton,
   type ShareFormat,
   useSharePreview,
 } from "../share";
@@ -43,10 +45,19 @@ export function ResultConfirmationDialog({
 
   const winnerName = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
   const [format, setFormat] = useState<ShareFormat>("feed");
+  useEffect(() => {
+    for (const value of ["feed", "story"] as const) {
+      prewarmSharePreview(
+        resultPreviewKey(scorer, value),
+        `pickle-king-score-result-${value}.png`,
+        () => quickShareCanvas(scorer, value),
+      );
+    }
+  }, [scorer]);
   const share = useSharePreview(
     () => quickShareCanvas(scorer, format),
     `pickle-king-score-result-${format}.png`,
-    `${scorer.labelA}:${scorer.labelB}:${scorer.scoreA}:${scorer.scoreB}:${scorer.finishReason}:${format}`,
+    resultPreviewKey(scorer, format),
   );
 
   return (
@@ -96,7 +107,10 @@ export function ResultConfirmationDialog({
           </button>
         ))}
       </div>
-      <figure aria-busy={!share.ready} className="result-dialog__preview">
+      <figure
+        aria-busy={!share.ready}
+        className={`result-dialog__preview result-dialog__preview--${format}`}
+      >
         {share.previewUrl ? (
           // Blob previews are already-local generated images and cannot use an image optimizer.
           // eslint-disable-next-line @next/next/no-img-element
@@ -106,13 +120,7 @@ export function ResultConfirmationDialog({
             src={share.previewUrl}
           />
         ) : (
-          <div className="result-dialog__preview-fallback">
-            <span>{scorer.stageLabel ?? "Final score"}</span>
-            <strong>{winnerName} wins</strong>
-            <b>
-              {scorer.scoreA} <i>to</i> {scorer.scoreB}
-            </b>
-          </div>
+          <SharePreviewSkeleton className="result-dialog__preview-skeleton" />
         )}
         <figcaption>Share preview</figcaption>
       </figure>
@@ -139,6 +147,20 @@ export function ResultConfirmationDialog({
       ) : null}
     </dialog>
   );
+}
+
+export function resultPreviewKey(scorer: ScoringState, format: ShareFormat) {
+  return JSON.stringify([
+    scorer.labelA,
+    scorer.labelB,
+    scorer.scoreA,
+    scorer.scoreB,
+    scorer.winner,
+    scorer.finishReason,
+    scorer.targetScore,
+    scorer.stageLabel ?? null,
+    format,
+  ]);
 }
 
 function ResultExplanation({ scorer }: { scorer: ScoringState }) {
