@@ -1,9 +1,4 @@
-import {
-  bracketSeedOrder,
-  type Match,
-  type Player,
-  type TournamentBracket,
-} from "../../tournament";
+import type { Match, Player, TournamentBracket } from "../../tournament";
 
 export interface MatchNode {
   id: string;
@@ -48,20 +43,12 @@ const EDGE_PADDING = 24;
 const COLUMN_GAP = 56;
 const NODE_WIDTH = 276;
 const NODE_HEIGHT = 124;
-const FINAL_WIDTH = 370;
+const FINAL_WIDTH = 340;
 const TREE_TOP = 34;
 
 function createByeNodes(bracket: TournamentBracket): ByeNode[] {
-  const playersBySeed = new Map(
-    bracket.players.map((player) => [player.seed, player]),
-  );
-  const entries = bracketSeedOrder(bracket.bracketSize).map(
-    (seed) => playersBySeed.get(seed) ?? null,
-  );
-  const played = new Set(
-    bracket.matches
-      .filter(({ kind, round }) => kind === "elimination" && round === 1)
-      .map(({ ordinal }) => ordinal),
+  const playersById = new Map(
+    bracket.players.map((player) => [player.id, player]),
   );
   const reopened = new Set(
     bracket.amendments
@@ -69,20 +56,26 @@ function createByeNodes(bracket: TournamentBracket): ByeNode[] {
       .map(({ protectedPlayerId }) => protectedPlayerId),
   );
 
-  return Array.from({ length: bracket.bracketSize / 2 }, (_, index) => {
-    const ordinal = index + 1;
-    if (played.has(ordinal)) return null;
-    const player = entries[index * 2] ?? entries[index * 2 + 1];
-    return player && !reopened.has(player.id)
-      ? {
-          id: `bye-${ordinal}`,
-          kind: "bye" as const,
-          ordinal,
-          player,
-          round: 1 as const,
-        }
-      : null;
-  }).filter((node): node is ByeNode => node !== null);
+  return bracket.matches
+    .filter(({ kind, round }) => kind === "elimination" && round === 2)
+    .flatMap((match) =>
+      ([match.sourceA, match.sourceB] as const).flatMap((source, index) => {
+        if (source.type !== "player" || reopened.has(source.playerId))
+          return [];
+        const player = playersById.get(source.playerId);
+        if (!player) return [];
+        const ordinal = (match.ordinal - 1) * 2 + index + 1;
+        return [
+          {
+            id: `bye-${ordinal}`,
+            kind: "bye" as const,
+            ordinal,
+            player,
+            round: 1 as const,
+          },
+        ];
+      }),
+    );
 }
 
 function createNodes(bracket: TournamentBracket): BracketNode[] {
@@ -176,7 +169,7 @@ export function createTreeLayout(bracket: TournamentBracket): TreeLayout {
   const positioned = nodes.map((node): PositionedNode => {
     if (node.kind === "final") {
       return {
-        height: NODE_HEIGHT + 12,
+        height: NODE_HEIGHT,
         node,
         width: FINAL_WIDTH,
         x: finalX,

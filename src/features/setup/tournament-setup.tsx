@@ -49,7 +49,7 @@ export function TournamentSetup({
   >(initialValues?.timingMode ?? "timed");
   const [drawStyle, setDrawStyle] = useState<
     TournamentSetupValues["drawStyle"]
-  >(initialValues?.drawStyle ?? "competitive");
+  >(initialValues?.drawStyle ?? "ranked");
   const [numbers, setNumbers] = useState<SetupNumberDrafts>({
     bookingMinutes: String(initialValues?.bookingMinutes ?? 120),
     warmupMinutes: String(initialValues?.warmupMinutes ?? 10),
@@ -122,8 +122,8 @@ export function TournamentSetup({
         <p>Tournament setup</p>
         <h1>Build the field.</h1>
         <span>
-          Add the crew and a rough skill level. Ratings shape the draw, but not
-          to hand out new ratings after one Saturday.
+          Add the crew and a rough skill level. Ratings affect placement only
+          when you choose a ranked draw.
         </span>
       </header>
 
@@ -236,12 +236,11 @@ export function TournamentSetup({
                 data-qa="automatic-advance-note"
               >
                 With {players.length} players, {automaticAdvanceCount}{" "}
-                {drawStyle === "competitive" ? "top " : ""}
-                {automaticAdvanceCount === 1
-                  ? "seed advances"
-                  : "seeds advance"}{" "}
+                {drawStyle === "ranked" ? "top-ranked " : ""}
+                {automaticAdvanceCount === 1 ? "player" : "players"}{" "}
+                {automaticAdvanceCount === 1 ? "advances" : "advance"}{" "}
                 automatically through round one
-                {drawStyle === "social" ? " after a deterministic draw" : ""}.
+                {drawStyle === "random" ? " after the shuffle" : ""}.
               </p>
             ) : null}
           </div>

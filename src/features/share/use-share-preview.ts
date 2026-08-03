@@ -3,15 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import { canShareFile, downloadFile, pngFile, shareFile } from "./share-file";
 
+export type SharePreviewStatus = "idle" | "working" | "success" | "error";
+export type SharePreviewAction = "share" | "download";
+
 export interface SharePreviewState {
+  appleMobile: boolean;
   busy: boolean;
   download: () => void;
   error: string | null;
+  lastAction: SharePreviewAction | null;
   previewUrl: string | null;
   ready: boolean;
   share: () => Promise<void>;
   shareAvailable: boolean;
-  status: string;
+  status: SharePreviewStatus;
 }
 
 export function useSharePreview(
@@ -25,9 +30,17 @@ export function useSharePreview(
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [shareAvailable, setShareAvailable] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<SharePreviewStatus>("idle");
+  const [lastAction, setLastAction] = useState<SharePreviewAction | null>(null);
+  const [appleMobile] = useState(isAppleMobilePlatform);
   const [resolvedKey, setResolvedKey] = useState("");
+  const successTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (successTimer.current) window.clearTimeout(successTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     buildRef.current = build;
@@ -49,11 +62,13 @@ export function useSharePreview(
         setPreviewUrl(objectUrl);
         setShareAvailable(canShareFile(file));
         setReady(true);
+        setStatus("idle");
         setResolvedKey(cacheKey);
       })
       .catch(() => {
         if (active) {
           setError("The image preview could not be created.");
+          setStatus("error");
           setResolvedKey(cacheKey);
         }
       });
@@ -66,35 +81,64 @@ export function useSharePreview(
 
   async function share() {
     const file = fileRef.current;
-    if (!file || busy || !shareAvailable) return;
-    setBusy(true);
+    if (!file || status === "working" || !shareAvailable) return;
+    setStatus("working");
+    setLastAction("share");
     try {
       const outcome = await shareFile(file, "Pickle King scorecard");
-      setStatus(
-        outcome === "shared" ? "Share sheet opened" : "Share cancelled",
-      );
+      if (outcome === "cancelled") {
+        setStatus("idle");
+        setLastAction(null);
+        return;
+      }
+      showSuccess();
     } catch {
-      setStatus("Sharing is unavailable. Download the image instead.");
-    } finally {
-      setBusy(false);
+      setError("Sharing is unavailable on this device.");
+      setStatus("error");
     }
   }
 
   function download() {
     const file = fileRef.current;
-    if (!file || busy) return;
-    downloadFile(file);
-    setStatus("Download started");
+    if (!file || status === "working") return;
+    setStatus("working");
+    setLastAction("download");
+    try {
+      downloadFile(file);
+      showSuccess();
+    } catch {
+      setError("The image could not be saved.");
+      setStatus("error");
+    }
+  }
+
+  function showSuccess() {
+    setError(null);
+    setStatus("success");
+    if (successTimer.current) window.clearTimeout(successTimer.current);
+    successTimer.current = window.setTimeout(() => {
+      setStatus("idle");
+      setLastAction(null);
+    }, 1_600);
   }
 
   return {
-    busy,
+    appleMobile,
+    busy: status === "working",
     download,
     error: resolvedKey === cacheKey ? error : null,
+    lastAction,
     previewUrl: resolvedKey === cacheKey ? previewUrl : null,
     ready: resolvedKey === cacheKey && ready,
     share,
     shareAvailable: resolvedKey === cacheKey && shareAvailable,
-    status: resolvedKey === cacheKey ? status : "",
+    status: resolvedKey === cacheKey ? status : "working",
   };
+}
+
+function isAppleMobilePlatform() {
+  if (typeof navigator === "undefined") return false;
+  const touchMac =
+    navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent) || touchMac;
 }

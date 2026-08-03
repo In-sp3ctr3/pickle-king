@@ -32,6 +32,8 @@ export type AppAction =
   | { type: "rebuild-tournament"; players: Player[]; now: number }
   | { type: "replay-same-draw"; now: number }
   | { type: "prepare-new-draw"; now: number }
+  | { type: "reroll-random-draw"; randomSeed: string; now: number }
+  | { type: "view-history-tournament"; id: string; now: number }
   | {
       type: "apply-late-entry";
       player: Player;

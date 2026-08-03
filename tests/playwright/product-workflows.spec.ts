@@ -235,15 +235,15 @@ test("a six-player draw stays connected and exposes the ready opening courts", a
     page.locator("[data-match-queue-state='available']"),
   ).toHaveCount(1);
   const viewport = page.locator(".bracket-tree-viewport");
-  await page.getByRole("button", { name: "Left draw" }).click();
+  await page.getByRole("button", { name: "Show left draw" }).click();
   await expect
     .poll(() => viewport.evaluate((element) => element.scrollLeft))
     .toBe(0);
-  await page.getByRole("button", { name: "Right draw" }).click();
+  await page.getByRole("button", { name: "Show right draw" }).click();
   await expect
     .poll(() => viewport.evaluate((element) => element.scrollLeft))
     .toBeGreaterThan(0);
-  await page.getByRole("button", { name: "Final" }).click();
+  await page.getByRole("button", { name: "Show championship match" }).click();
   await page.screenshot({
     animations: "disabled",
     fullPage: true,

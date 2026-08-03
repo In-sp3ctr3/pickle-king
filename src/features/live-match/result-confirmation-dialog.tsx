@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ScoringState } from "../../match/types";
 import {
   quickShareCanvas,
+  shareFormatLabel,
   SharePreviewActions,
+  type ShareFormat,
   useSharePreview,
 } from "../share";
 import { VictoryConfetti } from "./victory-confetti";
@@ -40,10 +42,11 @@ export function ResultConfirmationDialog({
   }, []);
 
   const winnerName = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
+  const [format, setFormat] = useState<ShareFormat>("feed");
   const share = useSharePreview(
-    () => quickShareCanvas(scorer),
-    "pickle-king-score-result.png",
-    `${scorer.labelA}:${scorer.labelB}:${scorer.scoreA}:${scorer.scoreB}:${scorer.finishReason}`,
+    () => quickShareCanvas(scorer, format),
+    `pickle-king-score-result-${format}.png`,
+    `${scorer.labelA}:${scorer.labelB}:${scorer.scoreA}:${scorer.scoreB}:${scorer.finishReason}:${format}`,
   );
 
   return (
@@ -77,6 +80,22 @@ export function ResultConfirmationDialog({
         {winnerName} wins
       </h2>
       <span className="sr-only">{scorer.stageLabel ?? "Final score"}</span>
+      <div
+        aria-label="Image format"
+        className="share-format-choice"
+        role="group"
+      >
+        {(["feed", "story"] as const).map((value) => (
+          <button
+            aria-pressed={format === value}
+            key={value}
+            onClick={() => setFormat(value)}
+            type="button"
+          >
+            {shareFormatLabel(value)}
+          </button>
+        ))}
+      </div>
       <figure aria-busy={!share.ready} className="result-dialog__preview">
         {share.previewUrl ? (
           // Blob previews are already-local generated images and cannot use an image optimizer.
@@ -95,7 +114,7 @@ export function ResultConfirmationDialog({
             </b>
           </div>
         )}
-        <figcaption>Preview of the image you can share or download</figcaption>
+        <figcaption>Share preview</figcaption>
       </figure>
       <ResultExplanation scorer={scorer} />
       <div className="dialog-actions result-dialog__actions">

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Share2, Trash2, Trophy } from "lucide-react";
+import { AlertTriangle, Eye, Share2, Trash2, Trophy } from "lucide-react";
 import { useState } from "react";
 import type { SessionHistoryV1 } from "../../history";
 import {
@@ -22,11 +22,13 @@ export function HistoryScreen({
   recoveryMessage,
   onRemove,
   onReset,
+  onViewResults,
 }: {
   history: SessionHistoryV1;
   recoveryMessage: string | null;
   onRemove: (id: string, kind: "quick" | "tournament") => void;
   onReset: () => void;
+  onViewResults?: (id: string) => void;
 }) {
   const [shareRequest, setShareRequest] = useState<ShareImageRequest | null>(
     null,
@@ -96,11 +98,11 @@ export function HistoryScreen({
                     setShareRequest({
                       alt: `${match.labels.sideA} versus ${match.labels.sideB} final score`,
                       aspect: "portrait",
-                      build: () => quickShareCanvas(match),
-                      description: "Check the final score before sharing it.",
+                      build: (format) => quickShareCanvas(match, format),
                       fileName: `pickle-king-${match.completedAt}.png`,
+                      formats: ["feed", "story"],
                       key: `quick:${match.id}`,
-                      title: "Result preview",
+                      title: "Final score",
                     })
                   }
                   type="button"
@@ -142,22 +144,30 @@ export function HistoryScreen({
                   <strong>{champion} took the crown</strong>
                 </div>
                 <div className="session-ledger__actions">
+                  {onViewResults ? (
+                    <button
+                      className="session-ledger__view"
+                      onClick={() => onViewResults(item.id)}
+                      type="button"
+                    >
+                      <Eye aria-hidden="true" size={18} /> View results
+                    </button>
+                  ) : null}
                   <button
+                    data-qa="share-archived-bracket"
                     onClick={() =>
                       setShareRequest({
                         alt: `${champion} tournament bracket`,
                         aspect: "landscape",
                         build: () => bracketShareCanvas(item.bracket),
-                        description:
-                          "Check the completed draw before sharing it.",
                         fileName: `pickle-king-bracket-${item.completedAt}.png`,
                         key: `tournament:${item.id}`,
-                        title: "Bracket preview",
+                        title: "Tournament bracket",
                       })
                     }
                     type="button"
                   >
-                    <Share2 aria-hidden="true" size={18} /> Share
+                    <Share2 aria-hidden="true" size={18} /> Share bracket
                   </button>
                   <button
                     aria-label="Remove tournament from history"

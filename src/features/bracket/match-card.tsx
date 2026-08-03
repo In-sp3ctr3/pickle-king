@@ -138,13 +138,17 @@ export function FinalMatchCard(props: MatchCardProps) {
       data-match-status={match.status}
     >
       <header>
-        <span data-qa="final-status">
-          <StatusLabel
-            status={
-              match.status === "ready" && !canStart ? "queued" : match.status
-            }
-          />
-        </span>
+        <p data-qa="final-title">{label}</p>
+        <div className="final-match-card__tools">
+          <span data-qa="final-status">
+            <StatusLabel
+              status={
+                match.status === "ready" && !canStart ? "queued" : match.status
+              }
+            />
+          </span>
+          <MatchCardAction {...props} compact onEdit={() => setEditing(true)} />
+        </div>
       </header>
       <div className="final-match-card__faceoff" data-qa="final-faceoff">
         <FinalSide
@@ -165,7 +169,6 @@ export function FinalMatchCard(props: MatchCardProps) {
           showScore={match.status === "live" || complete}
         />
       </div>
-      <MatchCardAction {...props} onEdit={() => setEditing(true)} />
     </article>
   );
 }

@@ -73,18 +73,22 @@ export function RunOfShow({
         </div>
         <h2
           aria-label={`${sideA} versus ${sideB}`}
-          className="mt-4 text-[clamp(2.1rem,5.4vw,4.2rem)] leading-[0.95] font-extrabold tracking-normal uppercase"
+          className="run-of-show__faceoff"
           id="run-of-show-title"
         >
-          {sideA}
+          <span className="run-of-show__player" data-side="a">
+            {sideA}
+          </span>
           <span
-            className={`mx-2 align-middle text-base tracking-normal ${
+            className={`run-of-show__versus ${
               isReady ? "text-[#536b16]" : "text-[#737b6c]"
             }`}
           >
             vs
           </span>
-          {sideB}
+          <span className="run-of-show__player" data-side="b">
+            {sideB}
+          </span>
         </h2>
         {isReady ? (
           <ActionButton

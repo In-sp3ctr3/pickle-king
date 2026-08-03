@@ -12,10 +12,7 @@ import {
 } from "./bracket-share-layout";
 import {
   drawBrandMark,
-  drawExportBackdrop,
-  drawLimeGlow,
   drawShareFooter,
-  drawStaticConfetti,
   drawTrophy,
   fitCanvasText,
   shareCanvasSurface,
@@ -23,11 +20,15 @@ import {
   shareFittedText,
   shareText,
 } from "./share-canvas";
+import { drawEdgeFragments, drawExportBackdrop } from "./share-scene";
 
 export async function bracketShareCanvas(
   bracket: TournamentBracket,
 ): Promise<HTMLCanvasElement> {
-  const { element, context, mark } = await shareCanvasSurface(1600, 1200);
+  const { arena, element, context, mark } = await shareCanvasSurface(
+    1600,
+    1200,
+  );
   const names = new Map(bracket.players.map(({ id, name }) => [id, name]));
   const matchLookup = new Map(
     bracket.matches.map((match) => [match.id, match]),
@@ -39,16 +40,8 @@ export async function bracketShareCanvas(
   const bronze = matchLookup.get(bracket.bronzeMatchId);
   const champion = final?.winnerId ? names.get(final.winnerId) : null;
 
-  drawExportBackdrop(context, 1600, 1200, 310);
-  drawLimeGlow(context, 800, 190, 360);
-  if (champion) {
-    drawStaticConfetti(
-      context,
-      { x: 470, y: 16, width: 660, height: 320 },
-      29,
-      42,
-    );
-  }
+  drawExportBackdrop(context, 1600, 1200, arena, 310);
+  if (champion) drawEdgeFragments(context, 1600, 280, 29);
   drawHeader(context, mark, bracket, champion ?? null, final, names);
 
   const positions = eliminationSharePositions(bracket, elimination);
@@ -68,14 +61,10 @@ export async function bracketShareCanvas(
   }
 
   if (bronze) {
-    shareText(context, "THIRD PLACE", 54, 834, {
-      color: shareColors.mist,
-      font: "900 15px Manrope, sans-serif",
-    });
     drawMatch(
       context,
       bronze,
-      { x: 54, y: 850, width: 300, height: 96 },
+      { x: 650, y: 800, width: 300, height: 96 },
       names,
       matchLookup,
       false,
@@ -104,12 +93,12 @@ function drawHeader(
     color: shareColors.mist,
     font: "800 18px Manrope, sans-serif",
   });
-  drawBrandMark(context, mark, 800, 28, 132);
+  drawBrandMark(context, mark, 800, 2, 150);
   shareText(
     context,
     champion ? "TOURNAMENT CHAMPION" : "ROAD TO THE CROWN",
     800,
-    192,
+    158,
     {
       align: "center",
       color: champion ? shareColors.gold : shareColors.lime,
@@ -117,20 +106,20 @@ function drawHeader(
     },
   );
   if (champion) {
-    shareFittedText(context, champion.toUpperCase(), 800, 254, {
+    shareFittedText(context, champion.toUpperCase(), 800, 220, {
       align: "center",
       color: shareColors.chalk,
       maxSize: 54,
       minSize: 32,
       maxWidth: 520,
     });
-    drawTrophy(context, 800, 301, 60);
+    drawTrophy(context, 800, 273, 52);
   } else {
     shareText(
       context,
       `${bracket.matches.filter(({ status }) => status === "complete").length} MATCHES COMPLETE`,
       800,
-      242,
+      214,
       {
         align: "center",
         color: shareColors.mist,
@@ -145,7 +134,7 @@ function drawHeader(
       context,
       `${names.get(sideA ?? "") ?? "Finalist"} ${final.scoreA}–${final.scoreB} ${names.get(sideB ?? "") ?? "Finalist"}`,
       800,
-      365,
+      322,
       {
         align: "center",
         color: shareColors.mist,
@@ -199,10 +188,29 @@ function drawMatch(
   matches: Map<string, Match>,
   isFinal: boolean,
 ) {
-  context.fillStyle = "rgba(21, 27, 19, 0.97)";
+  const panel = context.createLinearGradient(
+    0,
+    position.y,
+    0,
+    position.y + position.height,
+  );
+  panel.addColorStop(
+    0,
+    isFinal ? "rgba(64, 51, 12, 0.98)" : "rgba(28, 36, 25, 0.98)",
+  );
+  panel.addColorStop(1, "rgba(9, 12, 8, 0.98)");
+  context.fillStyle = panel;
   context.fillRect(position.x, position.y, position.width, position.height);
-  context.fillStyle =
-    match.status === "complete" ? shareColors.limeDeep : shareColors.line;
+  if (isFinal) {
+    context.strokeStyle = shareColors.gold;
+    context.lineWidth = 4;
+    context.strokeRect(position.x, position.y, position.width, position.height);
+  }
+  context.fillStyle = isFinal
+    ? shareColors.gold
+    : match.status === "complete"
+      ? shareColors.limeDeep
+      : shareColors.line;
   context.fillRect(position.x, position.y, 5, position.height);
   shareText(
     context,

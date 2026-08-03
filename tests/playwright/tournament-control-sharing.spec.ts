@@ -39,11 +39,10 @@ async function expectPortraitPng(path: string | null) {
   expect(png.data.some((channel) => channel !== 0)).toBe(true);
 }
 
-test("social draw pairs nearby ratings and bracket nodes rename stable players", async ({
+test("ranked draw separates top ratings and bracket nodes rename stable players", async ({
   page,
 }) => {
   await openSetup(page);
-  await page.getByRole("button", { name: "Closer games", exact: true }).click();
   await fillPlayers(page, [
     ["Maya", "5.0"],
     ["Rae", "4.5"],
@@ -57,12 +56,9 @@ test("social draw pairs nearby ratings and bracket nodes rename stable players",
     page.locator("[data-match-queue-state='available']"),
   ).toHaveCount(1);
 
-  const closeRatedCard = page
-    .locator(".tree-match-card")
-    .filter({ hasText: "Maya" })
-    .filter({ hasText: "Rae" });
-  await expect(closeRatedCard).toHaveCount(1);
-  await closeRatedCard.getByRole("button", { name: /Edit .* versus/ }).click();
+  const mayaCard = page.locator(".tree-match-card").filter({ hasText: "Maya" });
+  await expect(mayaCard).toHaveCount(1);
+  await mayaCard.getByRole("button", { name: /Edit .* versus/ }).click();
   await page.getByLabel("Player name for Maya").fill("Maya Prime");
   await page.getByRole("button", { name: "Save corrected score" }).click();
   await expect(

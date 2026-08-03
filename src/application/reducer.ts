@@ -28,6 +28,7 @@ export function initialAppState(now: number, hydrated = false): AppState {
     scorer: null,
     sessionDeadline: null,
     quickMatch: false,
+    historyTournamentId: null,
     recoveryMessage: null,
     history: emptySessionHistory(),
     historyRecoveryMessage: null,
@@ -37,6 +38,12 @@ export function initialAppState(now: number, hydrated = false): AppState {
 
 function touched(state: AppState, now: number): AppState {
   return { ...state, updatedAt: now };
+}
+
+function drawSignature(tournament: NonNullable<AppState["tournament"]>) {
+  return JSON.stringify(
+    tournament.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+  );
 }
 
 export function toSnapshot(state: AppState): TournamentSnapshotV1 | null {
@@ -51,6 +58,7 @@ export function toSnapshot(state: AppState): TournamentSnapshotV1 | null {
     scorer: state.scorer,
     sessionDeadline: state.sessionDeadline,
     quickMatch: state.quickMatch,
+    historyTournamentId: state.historyTournamentId,
   };
 }
 
@@ -139,6 +147,52 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         sessionDeadline: null,
         quickMatch: false,
       };
+    case "reroll-random-draw": {
+      if (
+        !state.setupDraft ||
+        !state.tournament ||
+        state.setupDraft.config.drawStyle !== "random" ||
+        state.tournament.matches.some(
+          ({ status }) => status === "live" || status === "complete",
+        )
+      ) {
+        return state;
+      }
+      const previousDraw = drawSignature(state.tournament);
+      let randomSeed = action.randomSeed;
+      let config = { ...state.setupDraft.config, randomSeed };
+      let tournament = createTournamentBracket(
+        state.setupDraft.players,
+        config,
+      );
+      for (
+        let attempt = 1;
+        attempt <= 8 && drawSignature(tournament) === previousDraw;
+        attempt += 1
+      ) {
+        randomSeed = `${action.randomSeed}:${attempt}`;
+        config = { ...state.setupDraft.config, randomSeed };
+        tournament = createTournamentBracket(state.setupDraft.players, config);
+      }
+      return {
+        ...state,
+        updatedAt: action.now,
+        setupDraft: { ...state.setupDraft, config },
+        tournament,
+      };
+    }
+    case "view-history-tournament":
+      if (!state.history.tournaments.some(({ id }) => id === action.id)) {
+        return { ...state, screen: "history", historyTournamentId: null };
+      }
+      return touched(
+        {
+          ...state,
+          screen: "history-results",
+          historyTournamentId: action.id,
+        },
+        action.now,
+      );
     case "apply-late-entry":
       return insertLatePlayerInState(state, action);
     case "undo-late-entry":
@@ -187,6 +241,16 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return touched(
         {
           ...state,
+          screen:
+            action.kind === "tournament" &&
+            action.id === state.historyTournamentId
+              ? "history"
+              : state.screen,
+          historyTournamentId:
+            action.kind === "tournament" &&
+            action.id === state.historyTournamentId
+              ? null
+              : state.historyTournamentId,
           history: {
             ...state.history,
             quickMatches:

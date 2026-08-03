@@ -25,7 +25,7 @@ class MemoryStorage implements StorageLike {
 }
 
 const config: TournamentConfig = {
-  drawStyle: "competitive",
+  drawStyle: "ranked",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -61,6 +61,7 @@ function snapshot(): TournamentSnapshotV1 {
     }),
     sessionDeadline: 8_000_000,
     quickMatch: false,
+    historyTournamentId: null,
   };
 }
 
@@ -115,7 +116,7 @@ describe("snapshot persistence", () => {
     delete legacy.scorer.scoreEvents;
     legacy.tournament.matches.forEach((match) => delete match.comebackDeficit);
     const migrated = migrateSnapshot(legacy);
-    expect(migrated.setupDraft?.config.drawStyle).toBe("competitive");
+    expect(migrated.setupDraft?.config.drawStyle).toBe("ranked");
     expect(migrated.scorer?.scoreEvents).toEqual([]);
     expect(
       migrated.tournament?.matches.every(
@@ -123,4 +124,20 @@ describe("snapshot persistence", () => {
       ),
     ).toBe(true);
   });
+
+  it.each([
+    ["competitive", "ranked"],
+    ["social", "random"],
+  ] as const)(
+    "migrates the legacy %s draw style to %s",
+    (legacyStyle, nextStyle) => {
+      const legacy = structuredClone(snapshot()) as unknown as {
+        setupDraft: { config: Record<string, unknown> };
+      };
+      legacy.setupDraft.config.drawStyle = legacyStyle;
+      expect(migrateSnapshot(legacy).setupDraft?.config.drawStyle).toBe(
+        nextStyle,
+      );
+    },
+  );
 });

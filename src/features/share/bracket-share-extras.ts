@@ -1,5 +1,6 @@
 import type { Match, TournamentBracket } from "../../tournament";
 import { shareColors, shareFittedText, shareText } from "./share-canvas";
+import { drawMedalBadge } from "./share-scene";
 
 export function drawChallengeSummary(
   context: CanvasRenderingContext2D,
@@ -29,26 +30,17 @@ export function drawBracketPodium(
   names: Map<string, string>,
 ) {
   if (!final?.winnerId || !final.loserId || !bronze?.winnerId) return;
-  shareText(context, "FINAL PODIUM", 800, 982, {
-    align: "center",
-    color: shareColors.mist,
-    font: "900 14px Manrope, sans-serif",
-  });
-  for (const [place, playerId, x, color] of [
-    ["2", final.loserId, 590, "#c8ced3"],
-    ["1", final.winnerId, 800, shareColors.gold],
-    ["3", bronze.winnerId, 1010, "#bd7a42"],
+  for (const [place, playerId, x, y, color] of [
+    ["2", final.loserId, 570, 1018, "#c8ced3"],
+    ["1", final.winnerId, 800, 996, shareColors.gold],
+    ["3", bronze.winnerId, 1030, 1028, "#bd7a42"],
   ] as const) {
-    shareText(context, place, x, 1040, {
-      align: "center",
-      color,
-      font: "900 44px 'Archivo Black', sans-serif",
-    });
+    drawMedalBadge(context, x, y, place, color, place === "1" ? 70 : 60);
     shareFittedText(
       context,
       (names.get(playerId) ?? "Player").toUpperCase(),
       x,
-      1074,
+      y + 72,
       {
         align: "center",
         color: shareColors.chalk,
@@ -60,10 +52,4 @@ export function drawBracketPodium(
       },
     );
   }
-  context.strokeStyle = shareColors.lime;
-  context.lineWidth = 3;
-  context.beginPath();
-  context.moveTo(480, 1093);
-  context.lineTo(1120, 1093);
-  context.stroke();
 }

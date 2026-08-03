@@ -37,6 +37,7 @@ html[data-visual-freeze="true"] .champion-mark {
   letter-spacing: 0;
   line-height: 0.9;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .results-final-score {
@@ -144,9 +145,11 @@ html[data-visual-freeze="true"] .champion-mark {
 }
 
 .podium-place strong {
+  max-width: 100%;
   margin: 0.7rem 0;
   font-size: clamp(1.25rem, 3vw, 2.25rem);
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .podium-place.second {
@@ -231,6 +234,16 @@ html[data-visual-freeze="true"] .champion-mark {
   font-variant-numeric: tabular-nums;
 }
 
+.standings-row > * {
+  min-width: 0;
+}
+
+.standings-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .standings-head {
   min-height: 42px;
   color: var(--mist);
@@ -296,8 +309,18 @@ html[data-visual-freeze="true"] .champion-mark {
 
 .tournament-share-dialog--preview {
   width: min(94vw, 1040px);
-  max-height: 94dvh;
-  overflow: auto;
+  height: min(94dvh, 920px);
+  max-height: none;
+  overflow: hidden;
+}
+
+.tournament-share-dialog--preview[open] {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.tournament-share-dialog--has-formats[open] {
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
 }
 
 .tournament-share-tabs {
@@ -329,7 +352,9 @@ html[data-visual-freeze="true"] .champion-mark {
 
 .tournament-share-preview {
   display: grid;
-  height: min(54dvh, 560px);
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
   place-items: center;
   margin: 0;
   overflow: hidden;
@@ -339,8 +364,10 @@ html[data-visual-freeze="true"] .champion-mark {
 
 .tournament-share-preview img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
 }
 
@@ -435,6 +462,13 @@ html[data-visual-freeze="true"] .champion-mark {
 }
 
 @media (max-width: 760px) {
+  .tournament-share-dialog--preview {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    padding: 1rem;
+  }
+
   .tournament-share-dialog--preview > footer {
     align-items: stretch;
     flex-direction: column;

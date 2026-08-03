@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import type { TournamentBracket } from "../../tournament";
 import {
   bracketShareCanvas,
+  shareFormatLabel,
   SharePreviewActions,
+  type ShareFormat,
   tournamentRecapCanvas,
   tournamentStatsCanvas,
   useSharePreview,
@@ -28,15 +30,17 @@ export function TournamentShareDialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [kind, setKind] = useState<TournamentShareKind>("recap");
+  const [format, setFormat] = useState<ShareFormat>("feed");
+  const imageFormat = kind === "bracket" ? "feed" : format;
   const preview = useSharePreview(
     () =>
       kind === "recap"
-        ? tournamentRecapCanvas(bracket)
+        ? tournamentRecapCanvas(bracket, imageFormat)
         : kind === "stats"
-          ? tournamentStatsCanvas(bracket)
+          ? tournamentStatsCanvas(bracket, imageFormat)
           : bracketShareCanvas(bracket),
-    `pickle-king-tournament-${kind}.png`,
-    `${kind}:${bracket.finalMatchId}`,
+    `pickle-king-tournament-${kind}${kind === "bracket" ? "" : `-${imageFormat}`}.png`,
+    `${kind}:${imageFormat}:${bracket.finalMatchId}`,
   );
 
   useEffect(() => {
@@ -46,14 +50,13 @@ export function TournamentShareDialog({
   return (
     <dialog
       aria-label="Share tournament"
-      className="tournament-share-dialog tournament-share-dialog--preview"
+      className={`tournament-share-dialog tournament-share-dialog--preview${kind !== "bracket" ? "tournament-share-dialog--has-formats" : ""}`}
       onCancel={onClose}
       ref={ref}
     >
       <header>
         <div>
-          <p className="eyebrow">Share tournament</p>
-          <h2>Preview your image</h2>
+          <h2>Share tournament</h2>
         </div>
         <button
           aria-label="Close share preview"
@@ -77,9 +80,27 @@ export function TournamentShareDialog({
           </button>
         ))}
       </div>
+      {kind !== "bracket" ? (
+        <div
+          aria-label="Image format"
+          className="share-format-choice"
+          role="group"
+        >
+          {(["feed", "story"] as const).map((value) => (
+            <button
+              aria-pressed={format === value}
+              key={value}
+              onClick={() => setFormat(value)}
+              type="button"
+            >
+              {shareFormatLabel(value)}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <figure
         aria-busy={!preview.ready}
-        className={`tournament-share-preview tournament-share-preview--${kind}`}
+        className={`tournament-share-preview tournament-share-preview--${kind} tournament-share-preview--${imageFormat}`}
       >
         {preview.previewUrl ? (
           // Blob URL for a locally generated canvas preview.
@@ -98,10 +119,7 @@ export function TournamentShareDialog({
         )}
       </figure>
       <footer>
-        <p>
-          Includes player names and scores. Nothing leaves this device until you
-          choose an action.
-        </p>
+        <p>Names and scores stay on this device until you share them.</p>
         <SharePreviewActions preview={preview} />
       </footer>
     </dialog>

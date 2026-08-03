@@ -3,7 +3,12 @@ import { FloatingAppNav } from "@/src/shared/ui";
 
 type Screen = TournamentSnapshotV1["screen"];
 type NavigableScreen =
-  "bracket" | "history" | "quick-setup" | "results" | "setup";
+  | "bracket"
+  | "history"
+  | "history-results"
+  | "quick-setup"
+  | "results"
+  | "setup";
 
 const navigation: Record<
   NavigableScreen,
@@ -33,6 +38,11 @@ const navigation: Record<
     backLabel: "Home",
     backScreen: "home",
     currentLabel: "Match history",
+  },
+  "history-results": {
+    backLabel: "History",
+    backScreen: "history",
+    currentLabel: "Tournament results",
   },
 };
 

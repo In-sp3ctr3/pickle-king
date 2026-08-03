@@ -62,7 +62,8 @@
 
 .floating-app-nav button {
   display: inline-flex;
-  min-height: 46px;
+  min-width: 48px;
+  min-height: 48px;
   align-items: center;
   gap: 0.45rem;
   border: 0;

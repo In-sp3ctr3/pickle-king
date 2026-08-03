@@ -26,8 +26,10 @@ export interface MatchConfig {
   capMs: number | null;
 }
 
+export type DrawStyle = "ranked" | "random";
+
 export interface TournamentConfig {
-  drawStyle: "competitive" | "social";
+  drawStyle: DrawStyle;
   timingMode: "timed" | "untimed";
   bookingMinutes: number;
   warmupMinutes: number;

@@ -49,6 +49,8 @@ export type Route = {
   prepare?:
     | "tournament-setup"
     | "four-player-bracket"
+    | "four-player-history"
+    | "four-player-history-results"
     | "four-player-results"
     | "quick-setup"
     | "quick-idle"
@@ -122,16 +124,22 @@ export async function openRoute(page: Page, route: Route) {
   }
   if (
     route.prepare === "four-player-bracket" ||
+    route.prepare === "four-player-history" ||
+    route.prepare === "four-player-history-results" ||
     route.prepare === "four-player-results"
   ) {
     await fillFourPlayerSetup(
       page,
-      route.prepare === "four-player-results" ? 1 : 11,
+      route.prepare === "four-player-bracket" ? 11 : 1,
     );
     await expect(page.locator("[data-qa='bracket-screen']")).toBeVisible();
     await page.evaluate(() => window.scrollTo(0, 0));
   }
-  if (route.prepare === "four-player-results") {
+  if (
+    route.prepare === "four-player-results" ||
+    route.prepare === "four-player-history" ||
+    route.prepare === "four-player-history-results"
+  ) {
     for (let match = 0; match < 4; match += 1) {
       await page.locator("[data-qa='start-next']").click();
       await page
@@ -141,6 +149,18 @@ export async function openRoute(page: Page, route: Route) {
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='confirm-result']").click();
     }
+    await expect(page.locator("[data-qa='results']")).toBeVisible();
+  }
+  if (
+    route.prepare === "four-player-history" ||
+    route.prepare === "four-player-history-results"
+  ) {
+    await page.locator("[data-qa='brand-home']").click();
+    await page.locator("[data-qa='match-history']").click();
+    await expect(page.locator("[data-qa='history-screen']")).toBeVisible();
+  }
+  if (route.prepare === "four-player-history-results") {
+    await page.getByRole("button", { name: "View results" }).click();
     await expect(page.locator("[data-qa='results']")).toBeVisible();
   }
   if (route.prepare === "quick-setup") {

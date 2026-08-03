@@ -43,19 +43,21 @@ export function NumberField({
         >
           <Minus aria-hidden="true" size={16} />
         </button>
-        <input
-          aria-describedby={`${helpId}${error ? ` ${errorId}` : ""}`}
-          aria-invalid={Boolean(error)}
-          id={id}
-          inputMode="numeric"
-          max={max}
-          min={min}
-          onChange={(event) => onChange(event.currentTarget.value)}
-          required
-          type="number"
-          value={value}
-        />
-        <span className="setup-number-suffix">{suffix}</span>
+        <span className="setup-number-value">
+          <input
+            aria-describedby={`${helpId}${error ? ` ${errorId}` : ""}`}
+            aria-invalid={Boolean(error)}
+            id={id}
+            inputMode="numeric"
+            max={max}
+            min={min}
+            onChange={(event) => onChange(event.currentTarget.value)}
+            required
+            type="number"
+            value={value}
+          />
+          <span className="setup-number-suffix">{suffix}</span>
+        </span>
         <button
           aria-label={`Increase ${label.toLowerCase()}`}
           disabled={numericValue >= max}

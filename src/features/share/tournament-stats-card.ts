@@ -5,8 +5,6 @@ import {
 } from "../../tournament";
 import {
   drawBrandMark,
-  drawExportBackdrop,
-  drawLimeGlow,
   drawShareFooter,
   fitCanvasText,
   shareCanvasSurface,
@@ -14,6 +12,8 @@ import {
   shareFittedText,
   shareText,
 } from "./share-canvas";
+import { shareDimensions, type ShareFormat } from "./share-format";
+import { drawExportBackdrop } from "./share-scene";
 import {
   championStanding,
   closestCompletedMatch,
@@ -23,16 +23,22 @@ import {
   tournamentNames,
 } from "./tournament-share-data";
 
-export async function tournamentStatsCanvas(bracket: TournamentBracket) {
+export async function tournamentStatsCanvas(
+  bracket: TournamentBracket,
+  format: ShareFormat = "feed",
+) {
   const result = calculateTournamentResult(bracket);
   const names = tournamentNames(bracket);
   const champion = championStanding(result);
   const final = finalMatchData(bracket, result);
   const closest = closestCompletedMatch(result);
-  const { element, context, mark } = await shareCanvasSurface(1080, 1350);
+  const { height, width } = shareDimensions(format);
+  const { arena, element, context, mark } = await shareCanvasSurface(
+    width,
+    height,
+  );
 
-  drawExportBackdrop(context, 1080, 1350, 290);
-  drawLimeGlow(context, 890, 120, 260);
+  drawExportBackdrop(context, width, height, arena, 290);
   shareText(context, "PICKLE KING", 54, 66, {
     color: shareColors.lime,
     font: "900 24px 'Archivo Black', sans-serif",
@@ -63,7 +69,7 @@ export async function tournamentStatsCanvas(bracket: TournamentBracket) {
   );
 
   const tableEnd = drawStandings(context, result.standings, names);
-  drawFacts(context, {
+  drawFacts(context, height, {
     top: Math.min(930, Math.max(680, tableEnd + 40)),
     final: `${playerName(names, result.championId)} ${final.championScore}–${final.opponentScore} ${playerName(names, final.opponentId)}`,
     closest: closest ? matchSummary(closest, names) : "No completed match",
@@ -71,7 +77,7 @@ export async function tournamentStatsCanvas(bracket: TournamentBracket) {
     championRecord: `${champion.wins} wins · ${champion.losses} loss${champion.losses === 1 ? "" : "es"}`,
     differential: `${signed(champion.differential)} points`,
   });
-  drawShareFooter(context, 1080, 1290);
+  drawShareFooter(context, width, height - 60);
   return element;
 }
 
@@ -150,6 +156,7 @@ function drawStandings(
 
 function drawFacts(
   context: CanvasRenderingContext2D,
+  canvasHeight: number,
   data: {
     top: number;
     final: string;
@@ -159,7 +166,7 @@ function drawFacts(
     differential: string;
   },
 ) {
-  const bottom = 1228;
+  const bottom = canvasHeight - 122;
   const height = bottom - data.top;
   context.fillStyle = "rgba(17, 21, 15, 0.97)";
   context.fillRect(56, data.top, 968, height);

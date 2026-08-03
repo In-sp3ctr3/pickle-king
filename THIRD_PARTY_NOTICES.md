@@ -21,6 +21,13 @@ The result celebration uses `canvas-confetti`, distributed under the ISC
 license. Pickle King uses the package API directly and does not copy a 21st.dev
 demo composition.
 
+## Frontend catalog research
+
+21st.dev Reward Card, Leaderboard Podium, Image Preview, and Share Menu entries,
+plus React Bits spotlight/background examples, were evaluated and rejected as
+implementation sources. No registry or React Bits source was copied. The final
+preview and Canvas compositions are original project code.
+
 ## Open-source packages
 
 Runtime and development dependencies retain their respective licenses. Exact

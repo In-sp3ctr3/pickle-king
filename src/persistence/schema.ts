@@ -75,7 +75,7 @@ export const tournamentBracketSchema = z.object({
   amendments: z.array(lateEntryAmendmentSchema).max(1).default([]),
 });
 const tournamentConfigSchema = z.object({
-  drawStyle: z.enum(["competitive", "social"]).default("competitive"),
+  drawStyle: z.enum(["ranked", "random"]).default("ranked"),
   timingMode: z.enum(["timed", "untimed"]).default("timed"),
   bookingMinutes: z.number().positive(),
   warmupMinutes: z.number().nonnegative(),
@@ -136,6 +136,7 @@ export const snapshotV1Schema = z
       "quick-live",
       "results",
       "history",
+      "history-results",
     ]),
     setupDraft: z
       .object({
@@ -148,6 +149,7 @@ export const snapshotV1Schema = z
     scorer: scoringSchema.nullable(),
     sessionDeadline: z.number().nullable(),
     quickMatch: z.boolean(),
+    historyTournamentId: z.string().nullable().default(null),
   })
   .superRefine((snapshot, context) => {
     const issue = (message: string, path: string[]) =>

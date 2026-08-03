@@ -1,4 +1,4 @@
-import type { SkillLevel } from "@/src/tournament";
+import type { DrawStyle, SkillLevel } from "@/src/tournament";
 
 export interface TournamentSetupPlayer {
   name: string;
@@ -7,7 +7,7 @@ export interface TournamentSetupPlayer {
 
 export interface TournamentSetupValues {
   players: TournamentSetupPlayer[];
-  drawStyle: "competitive" | "social";
+  drawStyle: DrawStyle;
   timingMode: "timed" | "untimed";
   bookingMinutes: number;
   warmupMinutes: number;
@@ -22,7 +22,7 @@ export interface TournamentSetupInitialValues {
   warmupMinutes?: number;
   transitionSeconds?: number;
   targetScore?: number;
-  drawStyle?: "competitive" | "social";
+  drawStyle?: DrawStyle;
 }
 
 export interface SetupPlayerDraft {
