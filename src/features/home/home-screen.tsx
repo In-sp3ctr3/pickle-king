@@ -11,6 +11,7 @@ export interface HomeScreenProps {
   onResume?: () => void;
   onHistory?: () => void;
   resumeLabel?: string;
+  hydrating?: boolean;
 }
 
 export function HomeScreen({
@@ -20,9 +21,10 @@ export function HomeScreen({
   onResume,
   onHistory,
   resumeLabel = "Resume tournament",
+  hydrating = false,
 }: HomeScreenProps) {
   return (
-    <main className="home-screen">
+    <main aria-busy={hydrating} className="home-screen">
       <section className="home-copy">
         <p className="home-brand-lockup">Pickle King</p>
         <p className="home-eyebrow">One court · One crown</p>
@@ -38,6 +40,7 @@ export function HomeScreen({
           <ActionButton
             className="home-primary-action"
             data-qa="start-tournament"
+            disabled={hydrating}
             onClick={onStartTournament}
           >
             Start tournament
@@ -45,6 +48,7 @@ export function HomeScreen({
           </ActionButton>
           <ActionButton
             data-qa="quick-match"
+            disabled={hydrating}
             onClick={onQuickMatch}
             variant="secondary"
           >
