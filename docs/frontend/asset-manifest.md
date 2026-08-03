@@ -4,21 +4,21 @@ Status: ready
 
 ## Asset Register
 
-| ID                      | Placement                          | Type               | Source                  | License                   | Status   | Optimization            | Notes                                                                         |
-| ----------------------- | ---------------------------------- | ------------------ | ----------------------- | ------------------------- | -------- | ----------------------- | ----------------------------------------------------------------------------- |
-| brand-mark              | header, results, icons, share PNGs | generated raster   | OpenAI image generation | Pickle King project asset | accepted | 512px stripped PNG      | sole crown-bearing mark                                                       |
-| result-reference        | result review and score PNG        | supplied reference | user attachment         | visual direction only     | accepted | 1456×1365 and 1152×1408 | layout/type hierarchy; no pixels copied                                       |
-| hero-art                | former home hero                   | generated raster   | OpenAI image generation | Pickle King project asset | rejected | removed from repository | user rejected artwork                                                         |
-| splatter-mask           | former home hero                   | generated raster   | OpenAI image generation | Pickle King project asset | rejected | removed from repository | user rejected reveal                                                          |
-| social-card             | metadata                           | generated raster   | OpenAI image generation | Pickle King project asset | accepted | exact 1200×630 PNG      | product-specific                                                              |
-| Barlow Condensed        | former display face                | WOFF2              | Fontsource              | SIL Open Font License     | rejected | dependency removed      | characters too tight                                                          |
-| Manrope                 | body/UI                            | WOFF2              | Fontsource              | SIL Open Font License     | accepted | local Latin subset      | no remote request                                                             |
-| Archivo Black           | display/numerals                   | WOFF2              | Fontsource              | SIL Open Font License     | accepted | local Latin subset      | heavy, separated glyphs                                                       |
-| icons                   | controls/status                    | React icon package | Lucide                  | ISC                       | accepted | tree-shaken components  | no hand-authored SVG                                                          |
-| bracket                 | tournament draw                    | DOM/CSS            | original implementation | MIT project code          | accepted | no canvas/WebGL         | no Skiper Pro source                                                          |
-| result/recap/stats PNGs | result and tournament sharing      | Canvas             | original implementation | MIT project code          | accepted | 1080×1350 + 1080×1920   | format-specific feed and story layouts; generated and previewed locally       |
-| bracket-share PNG       | live and completed draw sharing    | Canvas             | original implementation | MIT project code          | accepted | fixed 1600×1200 output  | 4:3 master for iPad preview and complete tree legibility                      |
-| share-arena-backdrop    | all exported share images          | generated WebP     | OpenAI image generation | Pickle King project asset | accepted | 1254×1254, 122KB WebP   | text-free center-safe court; no logo, crown, people, confetti, or baked-in UI |
+| ID                      | Placement                          | Type               | Source                  | License                   | Status   | Optimization            | Notes                                                                          |
+| ----------------------- | ---------------------------------- | ------------------ | ----------------------- | ------------------------- | -------- | ----------------------- | ------------------------------------------------------------------------------ |
+| brand-mark              | header, results, icons, share PNGs | generated raster   | OpenAI image generation | Pickle King project asset | accepted | 512px stripped PNG      | sole crown-bearing mark                                                        |
+| result-reference        | result review and score PNG        | supplied reference | user attachment         | visual direction only     | accepted | 1456×1365 and 1152×1408 | layout/type hierarchy; no pixels copied                                        |
+| hero-art                | former home hero                   | generated raster   | OpenAI image generation | Pickle King project asset | rejected | removed from repository | user rejected artwork                                                          |
+| splatter-mask           | former home hero                   | generated raster   | OpenAI image generation | Pickle King project asset | rejected | removed from repository | user rejected reveal                                                           |
+| social-card             | metadata                           | generated raster   | OpenAI image generation | Pickle King project asset | accepted | exact 1200×630 PNG      | product-specific                                                               |
+| Barlow Condensed        | former display face                | WOFF2              | Fontsource              | SIL Open Font License     | rejected | dependency removed      | characters too tight                                                           |
+| Manrope                 | body/UI                            | WOFF2              | Fontsource              | SIL Open Font License     | accepted | local Latin subset      | no remote request                                                              |
+| Archivo Black           | display/numerals                   | WOFF2              | Fontsource              | SIL Open Font License     | accepted | local Latin subset      | heavy, separated glyphs                                                        |
+| icons                   | controls/status                    | React icon package | Lucide                  | ISC                       | accepted | tree-shaken components  | no hand-authored SVG                                                           |
+| bracket                 | tournament draw                    | DOM/CSS            | original implementation | MIT project code          | accepted | no canvas/WebGL         | no Skiper Pro source                                                           |
+| result/recap/stats PNGs | result and tournament sharing      | Canvas             | original implementation | MIT project code          | accepted | 1080×1350 + 1080×1920   | format-specific Post and Story / Reel layouts; generated and previewed locally |
+| bracket-share PNG       | live and completed draw sharing    | Canvas             | original implementation | MIT project code          | accepted | 1600×1200 + portrait    | dedicated Full draw, Post, and Story / Reel geometry                           |
+| share-arena-backdrop    | all exported share images          | generated WebP     | OpenAI image generation | Pickle King project asset | accepted | 1254×1254, 122KB WebP   | text-free center-safe court; no logo, crown, people, confetti, or baked-in UI  |
 
 ## Catalog and Library Research
 
@@ -82,3 +82,5 @@ Status: ready
 
 No raw-asset exceptions are approved. React Bits source was not copied.
 Feature 005 introduced no new raster asset or runtime dependency.
+Feature 009 reuses the accepted mark, arena, local fonts, and icon package; it
+introduces no new raster asset or runtime dependency.

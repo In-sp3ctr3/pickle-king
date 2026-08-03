@@ -1,4 +1,5 @@
 export type ShareFormat = "feed" | "story";
+export type BracketShareFormat = ShareFormat | "landscape";
 
 export function shareDimensions(format: ShareFormat) {
   return format === "story"
@@ -7,5 +8,15 @@ export function shareDimensions(format: ShareFormat) {
 }
 
 export function shareFormatLabel(format: ShareFormat) {
-  return format === "story" ? "Story" : "Feed";
+  return format === "story" ? "Story / Reel · 9:16" : "Post · 4:5";
+}
+
+export function bracketShareDimensions(format: BracketShareFormat) {
+  return format === "landscape"
+    ? { height: 1200, width: 1600 }
+    : shareDimensions(format);
+}
+
+export function bracketShareFormatLabel(format: BracketShareFormat) {
+  return format === "landscape" ? "Full draw · 4:3" : shareFormatLabel(format);
 }

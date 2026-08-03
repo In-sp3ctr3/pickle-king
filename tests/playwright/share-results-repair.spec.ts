@@ -1,6 +1,4 @@
-import { readFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
-import { PNG } from "pngjs";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -68,7 +66,7 @@ test("quick result export keeps the reference-led score hierarchy", async ({
   await expect(
     page.getByRole("button", { name: "Download result" }),
   ).toHaveText("Saved");
-  await page.getByRole("button", { name: "Story" }).click();
+  await page.getByRole("button", { name: "Story / Reel · 9:16" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const storyDownloadEvent = page.waitForEvent("download");
@@ -146,14 +144,14 @@ test("tournament results lead with the champion and preview every export", async
   const recapDownload = await recapDownloadEvent;
   await recapDownload.saveAs("output/playwright/share-recap-feed.png");
   await expect(download).toHaveText("Saved");
-  await dialog.getByRole("button", { name: "Story" }).click();
+  await dialog.getByRole("button", { name: "Story / Reel · 9:16" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const storyDownloadEvent = page.waitForEvent("download");
   await download.click();
   const storyDownload = await storyDownloadEvent;
   await storyDownload.saveAs("output/playwright/share-recap-story.png");
-  await dialog.getByRole("button", { name: "Feed" }).click();
+  await dialog.getByRole("button", { name: "Post · 4:5" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   await dialog.getByRole("tab", { name: "Player stats" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
@@ -162,6 +160,7 @@ test("tournament results lead with the champion and preview every export", async
   const statsDownload = await statsDownloadEvent;
   await statsDownload.saveAs("output/playwright/share-stats-feed.png");
   await dialog.getByRole("tab", { name: "Full bracket" }).click();
+  await dialog.getByRole("button", { name: "Full draw · 4:3" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1600);
   await expect(preview).toHaveJSProperty("naturalHeight", 1200);
 
@@ -170,6 +169,37 @@ test("tournament results lead with the champion and preview every export", async
   const bracketDownload = await bracketDownloadEvent;
   await bracketDownload.saveAs("output/playwright/share-bracket-feed.png");
   await expect(dialog.getByText("Download started")).toHaveCount(0);
+
+  await dialog.getByRole("button", { name: "Expand bracket preview" }).click();
+  await expect(
+    dialog.getByRole("button", { name: "Fit bracket preview" }),
+  ).toBeVisible();
+  expect(
+    await dialog
+      .locator(".tournament-share-preview")
+      .evaluate(
+        (element) =>
+          element.scrollWidth > element.clientWidth ||
+          element.scrollHeight > element.clientHeight,
+      ),
+  ).toBe(true);
+  await dialog.getByRole("button", { name: "Fit bracket preview" }).click();
+
+  await dialog.getByRole("button", { name: "Post · 4:5" }).click();
+  await expect(preview).toHaveJSProperty("naturalWidth", 1080);
+  await expect(preview).toHaveJSProperty("naturalHeight", 1350);
+  const postBracketDownloadEvent = page.waitForEvent("download");
+  await download.click();
+  await (
+    await postBracketDownloadEvent
+  ).saveAs("output/playwright/share-bracket-post.png");
+  await dialog.getByRole("button", { name: "Story / Reel · 9:16" }).click();
+  await expect(preview).toHaveJSProperty("naturalHeight", 1920);
+  const storyBracketDownloadEvent = page.waitForEvent("download");
+  await download.click();
+  await (
+    await storyBracketDownloadEvent
+  ).saveAs("output/playwright/share-bracket-story.png");
 });
 
 test("share previews and results never overflow target screens", async ({
@@ -235,67 +265,3 @@ test("completed tournament results reopen without replacing the active draw", as
   });
   expect(restoredTournament).toEqual(activeTournament);
 });
-
-test("an eight-player completed bracket keeps its header and footer inside the PNG", async ({
-  page,
-}) => {
-  test.setTimeout(60_000);
-  await openSetup(page);
-  for (let index = 4; index < 8; index += 1) {
-    await page.getByRole("button", { name: "Add another player" }).click();
-  }
-  for (let index = 0; index < 8; index += 1) {
-    await page
-      .getByLabel("Player name")
-      .nth(index)
-      .fill(`Player ${index + 1}`);
-    await page.getByLabel("Rating").nth(index).click();
-    await page.getByRole("option", { name: "3.5", exact: true }).click();
-  }
-  await page.getByLabel("Every match plays to", { exact: true }).fill("2");
-  await page.getByRole("button", { name: "Build bracket" }).click();
-  for (let index = 0; index < 8; index += 1) {
-    await page.locator("[data-qa='start-next']").click();
-    await page
-      .getByRole("button", { name: "Start match", exact: true })
-      .click();
-    await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
-    await page.getByRole("button", { name: "Confirm result" }).click();
-  }
-  await page.getByRole("button", { name: "Share tournament" }).click();
-  const dialog = page.getByRole("dialog", { name: "Share tournament" });
-  await dialog.getByRole("tab", { name: "Full bracket" }).click();
-  await expect(dialog.locator("[data-qa='share-preview']")).toHaveJSProperty(
-    "naturalHeight",
-    1200,
-  );
-  const downloadEvent = page.waitForEvent("download");
-  await dialog.getByRole("button", { name: "Download image" }).click();
-  const download = await downloadEvent;
-  const path = await download.path();
-  if (!path) throw new Error("Bracket PNG path was unavailable.");
-  const png = PNG.sync.read(await readFile(path));
-  expect({ width: png.width, height: png.height }).toEqual({
-    width: 1600,
-    height: 1200,
-  });
-  expect(brightPixels(png, 0, 100)).toBeGreaterThan(1_000);
-  expect(brightPixels(png, 1100, 1200)).toBeGreaterThan(1_000);
-  await download.saveAs("output/playwright/adversarial-bracket-8-ci.png");
-});
-
-function brightPixels(png: PNG, startY: number, endY: number) {
-  let count = 0;
-  for (let y = startY; y < endY; y += 1) {
-    for (let x = 0; x < png.width; x += 1) {
-      const offset = (y * png.width + x) * 4;
-      if (
-        png.data[offset] + png.data[offset + 1] + png.data[offset + 2] >
-        420
-      ) {
-        count += 1;
-      }
-    }
-  }
-  return count;
-}

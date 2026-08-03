@@ -7,6 +7,7 @@ import {
   drawShareFooter,
   shareCanvasSurface,
   shareColors,
+  shareDimensionalFittedText,
   shareFittedText,
   shareText,
 } from "./share-canvas";
@@ -63,12 +64,19 @@ export async function tournamentRecapCanvas(
       font: "900 20px Manrope, sans-serif",
     },
   );
-  shareFittedText(context, championName.toUpperCase(), 540, height * 0.325, {
-    align: "center",
-    maxSize: 124,
-    minSize: 64,
-    maxWidth: 930,
-  });
+  shareDimensionalFittedText(
+    context,
+    championName.toUpperCase(),
+    540,
+    height * 0.325,
+    {
+      align: "center",
+      color: shareColors.chalk,
+      maxSize: 124,
+      minSize: 64,
+      maxWidth: 930,
+    },
+  );
   shareText(context, "CROWN SECURED", 540, height * 0.365, {
     align: "center",
     color: shareColors.lime,
@@ -165,11 +173,19 @@ function finalSide(
   top: number,
   panelHeight: number,
 ) {
-  shareText(context, String(score), x, top + panelHeight * 0.68, {
-    align: "center",
-    color: winner ? shareColors.lime : shareColors.chalk,
-    font: "900 110px 'Archivo Black', sans-serif",
-  });
+  shareDimensionalFittedText(
+    context,
+    String(score),
+    x,
+    top + panelHeight * 0.68,
+    {
+      align: "center",
+      color: winner ? shareColors.lime : shareColors.chalk,
+      maxSize: 110,
+      minSize: 88,
+      maxWidth: 220,
+    },
+  );
   shareFittedText(context, name.toUpperCase(), x, top + panelHeight * 0.87, {
     align: "center",
     color: winner ? shareColors.lime : shareColors.chalk,

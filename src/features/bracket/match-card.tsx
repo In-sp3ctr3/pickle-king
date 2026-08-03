@@ -1,6 +1,6 @@
 "use client";
 
-import { StatusLabel } from "@/src/shared/ui";
+import { MeasuredLabel, StatusLabel } from "@/src/shared/ui";
 import type { Match } from "@/src/tournament";
 import { Crown, FastForward, Trophy } from "lucide-react";
 import { useState } from "react";
@@ -205,7 +205,7 @@ function MatchSideRow({
     <div className={sideClass(isWinner, isLoser)}>
       <span className="tree-match-side__name">
         {isWinner ? <Crown aria-label="Winner" size={15} /> : null}
-        <span>{label}</span>
+        <MeasuredLabel maxSize={14} minSize={10} text={label} />
       </span>
       <strong>{showScore ? score : "·"}</strong>
     </div>
@@ -231,8 +231,8 @@ function FinalSide({
     <div
       className={`final-match-side is-${align} ${sideClass(isWinner, isLoser)}`}
     >
-      <span>{label}</span>
-      <strong>{showScore ? score : "·"}</strong>
+      <MeasuredLabel maxSize={13} minSize={9} text={label} />
+      <strong aria-hidden={!showScore}>{showScore ? score : ""}</strong>
     </div>
   );
 }

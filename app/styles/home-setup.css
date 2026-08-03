@@ -540,7 +540,7 @@
 }
 
 .setup-time-fields .setup-number-field {
-  grid-template-rows: 1rem 54px minmax(2.4rem, auto) auto;
+  grid-template-rows: 1rem 60px minmax(2.4rem, auto) auto;
   align-content: start;
 }
 
@@ -550,7 +550,8 @@
   grid-template-columns: 48px minmax(0, 1fr) 48px;
   column-gap: 0.5rem;
   align-items: center;
-  padding: 0.3rem;
+  min-height: 60px;
+  padding: 0.375rem;
 }
 
 .setup-number-value {

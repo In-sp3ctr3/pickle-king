@@ -133,6 +133,13 @@ export function AppShell() {
           }
           onHistory={() => dispatch({ type: "navigate", screen: "history" })}
           onResume={state.tournament ? resume : undefined}
+          resumeLabel={
+            state.tournament?.matches.every(
+              ({ status }) => status === "complete",
+            )
+              ? "View tournament results"
+              : "Resume tournament"
+          }
           onStartTournament={() =>
             dispatch({ type: "navigate", screen: "setup" })
           }
@@ -197,6 +204,12 @@ export function AppShell() {
             dispatch({ type: "start-quick", scorer, now: Date.now() })
           }
           suggestions={rememberedPlayerNames(state.history, [
+            ...state.history.quickMatches
+              .slice(0, 1)
+              .flatMap(({ participants }) => [
+                ...participants.sideA,
+                ...participants.sideB,
+              ]),
             ...handoffNames,
             ...(
               state.tournament?.players ??

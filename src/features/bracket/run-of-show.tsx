@@ -1,4 +1,4 @@
-import { ActionButton } from "@/src/shared/ui";
+import { ActionButton, MeasuredLabel } from "@/src/shared/ui";
 import type { Match, Player } from "@/src/tournament";
 import { Clock3, Play } from "lucide-react";
 import { matchSideLabel } from "./bracket-utils";
@@ -76,9 +76,12 @@ export function RunOfShow({
           className="run-of-show__faceoff"
           id="run-of-show-title"
         >
-          <span className="run-of-show__player" data-side="a">
-            {sideA}
-          </span>
+          <MeasuredLabel
+            className="run-of-show__player run-of-show__player--a"
+            maxSize={52}
+            minSize={20}
+            text={sideA}
+          />
           <span
             className={`run-of-show__versus ${
               isReady ? "text-[#536b16]" : "text-[#737b6c]"
@@ -86,9 +89,12 @@ export function RunOfShow({
           >
             vs
           </span>
-          <span className="run-of-show__player" data-side="b">
-            {sideB}
-          </span>
+          <MeasuredLabel
+            className="run-of-show__player run-of-show__player--b"
+            maxSize={52}
+            minSize={20}
+            text={sideB}
+          />
         </h2>
         {isReady ? (
           <ActionButton

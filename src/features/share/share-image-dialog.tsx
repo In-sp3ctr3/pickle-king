@@ -1,19 +1,24 @@
 "use client";
 
-import { X } from "lucide-react";
+import { Maximize2, Minimize2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { shareFormatLabel, type ShareFormat } from "./share-format";
+import {
+  bracketShareFormatLabel,
+  type BracketShareFormat,
+} from "./share-format";
 import { SharePreviewActions } from "./share-preview-actions";
+import { SharePreviewSkeleton } from "./share-preview-skeleton";
 import { useSharePreview } from "./use-share-preview";
 
 export interface ShareImageRequest {
   alt: string;
   aspect: "landscape" | "portrait";
-  build: (format: ShareFormat) => Promise<HTMLCanvasElement>;
+  build: (format: BracketShareFormat) => Promise<HTMLCanvasElement>;
   description?: string;
   fileName: string;
-  formats?: ShareFormat[];
-  initialFormat?: ShareFormat;
+  formats?: BracketShareFormat[];
+  initialFormat?: BracketShareFormat;
+  inspectable?: boolean;
   key: string;
   title: string;
 }
@@ -27,9 +32,11 @@ export function ShareImageDialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const formats = request.formats ?? ["feed"];
-  const [format, setFormat] = useState<ShareFormat>(
+  const [format, setFormat] = useState<BracketShareFormat>(
     request.initialFormat ?? formats[0] ?? "feed",
   );
+  const [expanded, setExpanded] = useState(false);
+  const aspect = format === "landscape" ? "landscape" : request.aspect;
   const preview = useSharePreview(
     () => request.build(format),
     formatFileName(request.fileName, format, formats.length > 1),
@@ -41,7 +48,13 @@ export function ShareImageDialog({
   return (
     <dialog
       aria-label={request.title}
-      className={`share-preview-dialog share-preview-dialog--${request.aspect}${formats.length > 1 ? "share-preview-dialog--has-formats" : ""}`}
+      className={[
+        "share-preview-dialog",
+        `share-preview-dialog--${aspect}`,
+        formats.length > 1 ? "share-preview-dialog--has-formats" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onCancel={onClose}
       ref={ref}
     >
@@ -57,25 +70,50 @@ export function ShareImageDialog({
       {formats.length > 1 ? (
         <div
           aria-label="Image format"
-          className="share-format-choice"
+          className="share-format-choice share-preview-dialog__formats"
           role="group"
         >
           {formats.map((value) => (
             <button
               aria-pressed={format === value}
               key={value}
-              onClick={() => setFormat(value)}
+              onClick={() => {
+                setExpanded(false);
+                setFormat(value);
+              }}
               type="button"
             >
-              {shareFormatLabel(value)}
+              {bracketShareFormatLabel(value)}
             </button>
           ))}
         </div>
       ) : null}
       <figure
         aria-busy={!preview.ready}
-        className={`share-preview-dialog__figure share-preview-dialog__figure--${format}`}
+        className={[
+          "share-preview-dialog__figure",
+          `share-preview-dialog__figure--${format}`,
+          expanded ? "share-preview-dialog__figure--expanded" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
+        {request.inspectable && preview.ready ? (
+          <button
+            aria-label={
+              expanded ? "Fit bracket preview" : "Expand bracket preview"
+            }
+            className="share-preview-dialog__fit"
+            onClick={() => setExpanded((value) => !value)}
+            type="button"
+          >
+            {expanded ? (
+              <Minimize2 aria-hidden="true" />
+            ) : (
+              <Maximize2 aria-hidden="true" />
+            )}
+          </button>
+        ) : null}
         {preview.previewUrl ? (
           // The source is a local Blob URL created from the generated canvas.
           // eslint-disable-next-line @next/next/no-img-element
@@ -83,13 +121,23 @@ export function ShareImageDialog({
             alt={request.alt}
             data-qa="share-preview"
             src={preview.previewUrl}
+            style={
+              expanded
+                ? {
+                    maxHeight: "none",
+                    maxWidth: "none",
+                    minWidth: format === "landscape" ? 1600 : 1080,
+                    position: "static",
+                  }
+                : undefined
+            }
           />
         ) : preview.error ? (
           <div className="share-preview-dialog__error" role="alert">
             {preview.error}
           </div>
         ) : (
-          <div aria-hidden="true" className="share-preview-dialog__loading" />
+          <SharePreviewSkeleton className="share-preview-dialog__loading" />
         )}
       </figure>
       <footer className="share-preview-dialog__footer">
@@ -102,7 +150,7 @@ export function ShareImageDialog({
 
 function formatFileName(
   fileName: string,
-  format: ShareFormat,
+  format: BracketShareFormat,
   includeFormat: boolean,
 ) {
   return includeFormat

@@ -62,7 +62,8 @@ test("confirmed Quick Matches become history and remembered-name suggestions", a
   await openFresh(page);
   await completeQuickMatch(page);
   await page.getByRole("button", { name: "Confirm result" }).click();
-  await page.getByRole("button", { name: "Done" }).click();
+  await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
+  await page.getByRole("button", { name: "Go home" }).click();
   await page.getByRole("button", { name: "Match history" }).click();
   await expect(page.getByText("Robbie 2–0 Maya")).toBeVisible();
   await page.screenshot({
@@ -146,6 +147,7 @@ test("result sharing downloads a branded PNG when native file share is unavailab
 });
 
 test("a tournament bracket exports as an offline PNG", async ({ page }) => {
+  await page.setViewportSize({ width: 820, height: 1180 });
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "canShare", { value: () => false });
   });
@@ -154,10 +156,20 @@ test("a tournament bracket exports as an offline PNG", async ({ page }) => {
   await page.getByRole("button", { name: "Share bracket" }).click();
   const dialog = page.getByRole("dialog", { name: "Share bracket" });
   await expect(dialog.locator("[data-qa='share-preview']")).toBeVisible();
+  const formatButtons = dialog.locator(".share-format-choice button");
+  const formatBoxes = await formatButtons.evaluateAll((buttons) =>
+    buttons.map((button) => button.getBoundingClientRect().toJSON()),
+  );
+  expect(formatBoxes).toHaveLength(3);
+  expect(Math.max(...formatBoxes.map(({ y }) => y))).toBeLessThanOrEqual(
+    Math.min(...formatBoxes.map(({ y }) => y)) + 1,
+  );
   const downloadPromise = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Download image" }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe("pickle-king-bracket.png");
+  expect(download.suggestedFilename()).toBe(
+    "pickle-king-bracket-landscape.png",
+  );
   await expectBrandedPng(download, 1600, 1200, {
     x: 700,
     y: 0,

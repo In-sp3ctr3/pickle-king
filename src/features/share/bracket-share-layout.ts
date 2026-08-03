@@ -26,7 +26,7 @@ export function eliminationSharePositions(
   const cardWidth =
     bracket.roundCount >= 4 ? 184 : bracket.roundCount === 3 ? 220 : 260;
   const maxDistance = Math.max(1, bracket.roundCount - 1);
-  const gap = (FINAL_X - 40 - maxDistance * cardWidth) / maxDistance;
+  const gap = (FINAL_X - 76 - maxDistance * cardWidth) / maxDistance;
 
   for (const match of matches) {
     if (match.id === bracket.finalMatchId) {

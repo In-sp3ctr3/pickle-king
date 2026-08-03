@@ -70,6 +70,27 @@ test("a completed 16-player bracket remains legible inside 1600 by 1200", async 
       ),
     ).toBeGreaterThan(1_000);
   }
+  for (const [label, width, height, file] of [
+    ["Post · 4:5", 1080, 1350, "post"],
+    ["Story / Reel · 9:16", 1080, 1920, "story"],
+  ] as const) {
+    await dialog.getByRole("button", { name: label }).click();
+    const preview = dialog.locator("[data-qa='share-preview']");
+    await expect(preview).toHaveJSProperty("naturalHeight", height);
+    const event = page.waitForEvent("download");
+    await dialog.getByRole("button", { name: "Download image" }).click();
+    const portraitDownload = await event;
+    const portraitPath = await portraitDownload.path();
+    if (!portraitPath) throw new Error("Portrait bracket PNG was unavailable.");
+    const portrait = PNG.sync.read(await readFile(portraitPath));
+    expect({ width: portrait.width, height: portrait.height }).toEqual({
+      width,
+      height,
+    });
+    await portraitDownload.saveAs(
+      `output/playwright/share-bracket-16-${file}.png`,
+    );
+  }
 });
 
 function brightPixels(png: PNG, startY: number, endY: number) {

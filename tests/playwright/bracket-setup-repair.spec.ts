@@ -64,6 +64,19 @@ for (const viewport of viewports) {
     }
     expect(await elementsStayInside(page, ".setup-number-input")).toBe(true);
     expect(
+      await page.locator(".setup-number-input").evaluateAll((controls) =>
+        controls.every((control) => {
+          const row = control.getBoundingClientRect();
+          return [...control.querySelectorAll("button")].every((button) => {
+            const box = button.getBoundingClientRect();
+            return (
+              Math.abs(box.y + box.height / 2 - (row.y + row.height / 2)) <= 1
+            );
+          });
+        }),
+      ),
+    ).toBe(true);
+    expect(
       await page
         .locator(".setup-time-fields .setup-number-field")
         .evaluateAll((elements) =>

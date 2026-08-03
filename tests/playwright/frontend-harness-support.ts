@@ -49,6 +49,8 @@ export type Route = {
   prepare?:
     | "tournament-setup"
     | "four-player-bracket"
+    | "four-player-completed-bracket"
+    | "four-player-completed-home"
     | "four-player-history"
     | "four-player-history-results"
     | "four-player-results"
@@ -124,6 +126,8 @@ export async function openRoute(page: Page, route: Route) {
   }
   if (
     route.prepare === "four-player-bracket" ||
+    route.prepare === "four-player-completed-bracket" ||
+    route.prepare === "four-player-completed-home" ||
     route.prepare === "four-player-history" ||
     route.prepare === "four-player-history-results" ||
     route.prepare === "four-player-results"
@@ -137,6 +141,8 @@ export async function openRoute(page: Page, route: Route) {
   }
   if (
     route.prepare === "four-player-results" ||
+    route.prepare === "four-player-completed-bracket" ||
+    route.prepare === "four-player-completed-home" ||
     route.prepare === "four-player-history" ||
     route.prepare === "four-player-history-results"
   ) {
@@ -150,6 +156,14 @@ export async function openRoute(page: Page, route: Route) {
       await page.locator("[data-qa='confirm-result']").click();
     }
     await expect(page.locator("[data-qa='results']")).toBeVisible();
+  }
+  if (route.prepare === "four-player-completed-home") {
+    await page.locator("[data-qa='brand-home']").click();
+    await expect(page.locator("[data-qa='resume-tournament']")).toBeVisible();
+  }
+  if (route.prepare === "four-player-completed-bracket") {
+    await page.locator("[data-qa='view-final-bracket']").click();
+    await expect(page.locator("[data-qa='bracket-screen']")).toBeVisible();
   }
   if (
     route.prepare === "four-player-history" ||

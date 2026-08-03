@@ -155,6 +155,7 @@ export function TournamentBracketRoute({
       onUndoLateEntry={() =>
         dispatch({ type: "undo-late-entry", now: Date.now() })
       }
+      onViewResults={() => dispatch({ type: "navigate", screen: "results" })}
       sessionLabel={sessionTimeLabel(
         state.sessionDeadline,
         Math.max(now, state.updatedAt),

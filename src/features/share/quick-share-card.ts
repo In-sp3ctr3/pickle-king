@@ -4,6 +4,7 @@ import {
   drawBrandMark,
   drawLimeGlow,
   drawShareFooter,
+  shareDimensionalFittedText,
   shareCanvasSurface,
   shareColors,
   shareFittedText,
@@ -72,7 +73,7 @@ export async function quickShareCanvas(
     context,
     finishLabel(input.finishReason, input.targetScore),
     540,
-    height * 0.865,
+    quickShareContextY(format),
     {
       align: "center",
       color: shareColors.lime,
@@ -83,6 +84,10 @@ export async function quickShareCanvas(
   return element;
 }
 
+export function quickShareContextY(format: ShareFormat) {
+  return format === "story" ? 1580 : 1350 * 0.865;
+}
+
 function drawWinnerName(
   context: CanvasRenderingContext2D,
   winnerName: string,
@@ -91,8 +96,9 @@ function drawWinnerName(
   const value = winnerName.toUpperCase();
   context.font = "900 64px 'Archivo Black', sans-serif";
   if (context.measureText(value).width <= 930) {
-    shareFittedText(context, value, 540, height * 0.32, {
+    shareDimensionalFittedText(context, value, 540, height * 0.32, {
       align: "center",
+      color: shareColors.chalk,
       maxSize: 132,
       minSize: 64,
       maxWidth: 930,
@@ -116,8 +122,9 @@ function drawWinnerName(
     [words.slice(0, split).join(" "), height * 0.285],
     [words.slice(split).join(" "), height * 0.35],
   ] as const) {
-    shareFittedText(context, line, 540, y, {
+    shareDimensionalFittedText(context, line, 540, y, {
       align: "center",
+      color: shareColors.chalk,
       maxSize: 84,
       minSize: 52,
       maxWidth: 930,
@@ -235,13 +242,19 @@ function drawScoreSide(
   top: number,
   arenaHeight: number,
 ) {
-  shareFittedText(context, String(score), x, top + arenaHeight * 0.67, {
-    align: "center",
-    color: winner ? shareColors.lime : shareColors.chalk,
-    maxSize: 230,
-    minSize: 180,
-    maxWidth: 330,
-  });
+  shareDimensionalFittedText(
+    context,
+    String(score),
+    x,
+    top + arenaHeight * 0.67,
+    {
+      align: "center",
+      color: winner ? shareColors.lime : shareColors.chalk,
+      maxSize: 230,
+      minSize: 180,
+      maxWidth: 330,
+    },
+  );
   shareFittedText(context, name.toUpperCase(), x, top + arenaHeight * 0.87, {
     align: "center",
     color: winner ? shareColors.lime : shareColors.chalk,

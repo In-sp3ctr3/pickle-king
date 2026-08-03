@@ -103,7 +103,7 @@ test("the result review is a branded, single-crown celebration", async ({
     path: "output/playwright/victory-dialog-ipad.png",
   });
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Feed" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Post · 4:5" })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
   await expect(
     page.getByRole("button", { name: "Confirm result" }),
@@ -123,7 +123,7 @@ test("the result review is a branded, single-crown celebration", async ({
     "burst",
   );
   await page.getByRole("button", { name: "Confirm result" }).click();
-  await expect(page.getByRole("button", { name: "Done" })).toBeVisible();
+  await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
 });
 
 test("reduced motion swaps the burst for static celebration", async ({
@@ -195,21 +195,18 @@ test("a 40-character winner stays inside the preview while it builds", async ({
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
-  const fallback = page.locator(".result-dialog__preview-fallback");
-  await expect(fallback).toBeVisible();
-  const contained = await fallback.evaluate((element) => {
-    const parent = element.getBoundingClientRect();
-    const winner = element.querySelector("strong")?.getBoundingClientRect();
-    return Boolean(
-      winner &&
-      winner.left >= parent.left - 1 &&
-      winner.right <= parent.right + 1 &&
-      winner.top >= parent.top - 1 &&
-      winner.bottom <= parent.bottom + 1,
-    );
-  });
-  expect(contained).toBe(true);
-  await expect(page.locator("[data-qa='result-preview']")).toBeVisible();
+  const skeleton = page.locator(".result-dialog__preview-skeleton");
+  await expect(skeleton).toBeVisible();
+  await expect(skeleton.getByText("Pickle King")).toBeVisible();
+  await expect(skeleton.locator("img")).toHaveAttribute(
+    "src",
+    "/brand/pickle-king-mark.png",
+  );
+  await expect(page.locator(".result-dialog__preview-fallback")).toHaveCount(0);
+  const preview = page.locator("[data-qa='result-preview']");
+  await expect(preview).toBeVisible();
+  await expect(preview).toHaveJSProperty("naturalWidth", 1080);
+  await expect(preview).toHaveJSProperty("naturalHeight", 1350);
 });
 
 test("draw utilities live with the bracket they affect", async ({ page }) => {

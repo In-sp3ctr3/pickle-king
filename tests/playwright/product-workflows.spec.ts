@@ -162,7 +162,7 @@ test("restart, tied early finish, and operator-selected winner are explicit", as
     page.getByText("Winner selected by the operator."),
   ).toBeVisible();
   await page.getByRole("button", { name: "Confirm result" }).click();
-  await expect(page.getByRole("button", { name: "Done" })).toBeVisible();
+  await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
 });
 
 test("discarding an early finish returns without a result", async ({
