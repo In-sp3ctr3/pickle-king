@@ -2,7 +2,6 @@
 
 import { Check, Flag, Pause, Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTransientStatus } from "../../shared/use-transient-status";
 import type { ScoringAction, ScoringState } from "../../match/types";
 import {
   MatchControlDialog,
@@ -30,7 +29,6 @@ export function MatchScreen({
   onExit: () => void;
 }) {
   const [controlMode, setControlMode] = useState<MatchControlMode | null>(null);
-  const [shareStatus, setShareStatus] = useTransientStatus();
   const startButtonRef = useRef<HTMLButtonElement>(null);
   const send = useCallback(
     (action: ScoringAction) => onAction(action),
@@ -233,13 +231,9 @@ export function MatchScreen({
         <ResultConfirmationDialog
           onConfirm={onConfirm}
           onEdit={() => send({ type: "edit-result" })}
-          onShareStatus={setShareStatus}
           scorer={scorer}
         />
       ) : null}
-      <p aria-live="polite" className="share-status">
-        {shareStatus}
-      </p>
     </main>
   );
 }

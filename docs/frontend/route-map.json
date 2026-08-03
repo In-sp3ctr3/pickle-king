@@ -272,7 +272,7 @@
           "selector": "[data-qa='share-bracket']",
           "auditOnly": true,
           "action": "click",
-          "expect": { "visible": "[data-qa='bracket-screen']" }
+          "expect": { "visible": "[data-qa='share-preview']" }
         }
       ],
       "motionChecks": [],
@@ -590,7 +590,21 @@
         },
         {
           "name": "tournament share choices",
-          "selector": ".tournament-share-dialog button",
+          "selector": ".tournament-share-dialog [role='tab']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "tournament share output actions",
+          "selector": ".tournament-share-dialog .share-preview-actions button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "close tournament share preview",
+          "selector": "button[aria-label='Close share preview']",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".tournament-share-dialog" }

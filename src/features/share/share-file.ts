@@ -1,5 +1,3 @@
-export type ShareOutcome = "shared" | "downloaded" | "cancelled";
-
 export function pngFile(
   canvas: HTMLCanvasElement,
   fileName: string,
@@ -42,16 +40,10 @@ export function downloadFile(file: File) {
   const link = document.createElement("a");
   link.download = file.name;
   link.href = url;
+  link.hidden = true;
+  document.body.append(link);
   link.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
   return "downloaded" as const;
-}
-
-export async function shareCanvas(
-  canvas: HTMLCanvasElement | Promise<HTMLCanvasElement>,
-  fileName: string,
-  title: string,
-): Promise<ShareOutcome> {
-  const file = await pngFile(await canvas, fileName);
-  return canShareFile(file) ? shareFile(file, title) : downloadFile(file);
 }

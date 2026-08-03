@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { PNG } from "pngjs";
 
-const baseUrl = "http://127.0.0.1:3000/";
+const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000/";
 
 async function openSetup(page: Page) {
   await page.addInitScript(() => window.localStorage.clear());
@@ -43,7 +43,7 @@ test("social draw pairs nearby ratings and bracket nodes rename stable players",
   page,
 }) => {
   await openSetup(page);
-  await page.getByRole("button", { name: "Social", exact: true }).click();
+  await page.getByRole("button", { name: "Closer games", exact: true }).click();
   await fillPlayers(page, [
     ["Maya", "5.0"],
     ["Rae", "4.5"],
@@ -94,20 +94,26 @@ test("completed tournament is static, shareable, and replayable", async ({
   await expect(page.locator(".podium-medal")).toHaveCount(3);
   await expect(page.getByRole("button", { name: "Correct" })).toHaveCount(0);
   await page.getByRole("button", { name: "Share tournament" }).click();
-  await expect(page.getByRole("dialog")).toContainText("Champion and podium");
+  await expect(page.getByRole("dialog")).toContainText("Champion card");
   await expect(page.getByRole("dialog")).toContainText("Player stats");
   await expect(page.getByRole("dialog")).toContainText("Full bracket");
+  await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
   const recapDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: /Champion and podium/ }).click();
+  await page.getByRole("button", { name: "Download image" }).click();
   const recap = await recapDownload;
   await expectPortraitPng(await recap.path());
   await recap.saveAs("output/playwright/tournament-recap-card.png");
-  await page.getByRole("button", { name: "Share tournament" }).click();
+  await page.getByRole("tab", { name: /Player stats/ }).click();
+  await expect(page.locator("[data-qa='share-preview']")).toHaveJSProperty(
+    "naturalWidth",
+    1080,
+  );
   const statsDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: /Player stats/ }).click();
+  await page.getByRole("button", { name: "Download image" }).click();
   const stats = await statsDownload;
   await expectPortraitPng(await stats.path());
   await stats.saveAs("output/playwright/tournament-stats-card.png");
+  await page.getByRole("button", { name: "Close share preview" }).click();
 
   await page.getByRole("button", { name: "Play again" }).click();
   await expect(page.getByRole("dialog")).toContainText("Replay same draw");

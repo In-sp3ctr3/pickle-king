@@ -1,20 +1,21 @@
 "use client";
 
-import { Download, Share2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { ScoringState } from "../../match/types";
-import { useResultShare } from "./use-result-share";
+import {
+  quickShareCanvas,
+  SharePreviewActions,
+  useSharePreview,
+} from "../share";
 import { VictoryConfetti } from "./victory-confetti";
 
 export function ResultConfirmationDialog({
   onConfirm,
   onEdit,
-  onShareStatus,
   scorer,
 }: {
   onConfirm: () => void;
   onEdit: () => void;
-  onShareStatus: (message: string) => void;
   scorer: ScoringState;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -39,7 +40,11 @@ export function ResultConfirmationDialog({
   }, []);
 
   const winnerName = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
-  const share = useResultShare(scorer, onShareStatus);
+  const share = useSharePreview(
+    () => quickShareCanvas(scorer),
+    "pickle-king-score-result.png",
+    `${scorer.labelA}:${scorer.labelB}:${scorer.scoreA}:${scorer.scoreB}:${scorer.finishReason}`,
+  );
 
   return (
     <dialog
@@ -93,33 +98,11 @@ export function ResultConfirmationDialog({
         <figcaption>Preview of the image you can share or download</figcaption>
       </figure>
       <ResultExplanation scorer={scorer} />
-      <div className="dialog-actions">
+      <div className="dialog-actions result-dialog__actions">
         <button className="secondary-button" onClick={onEdit} type="button">
           Edit score
         </button>
-        <button
-          aria-describedby={
-            !share.shareAvailable ? "share-unavailable" : undefined
-          }
-          className="secondary-button"
-          data-qa="share-result"
-          disabled={!share.ready || !share.shareAvailable || share.busy}
-          onClick={() => void share.share()}
-          type="button"
-        >
-          <Share2 aria-hidden="true" size={18} />
-          Share result
-        </button>
-        <button
-          className="secondary-button"
-          data-qa="download-result"
-          disabled={!share.ready || share.busy}
-          onClick={share.download}
-          type="button"
-        >
-          <Download aria-hidden="true" size={18} />
-          Download result
-        </button>
+        <SharePreviewActions preview={share} qaPrefix="result" />
         <button
           className="primary-button"
           data-initial-focus
@@ -132,7 +115,7 @@ export function ResultConfirmationDialog({
       </div>
       {!share.shareAvailable && share.ready ? (
         <p className="result-dialog__share-note" id="share-unavailable">
-          Native sharing is not available here. Download the image instead.
+          Native sharing is unavailable here. You can still download the PNG.
         </p>
       ) : null}
     </dialog>

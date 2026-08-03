@@ -5,20 +5,9 @@ import { motion, useReducedMotion } from "motion/react";
 import { calculateTournamentResult } from "../../tournament";
 import type { TournamentBracket } from "../../tournament";
 import { useState } from "react";
-import { useTransientStatus } from "../../shared/use-transient-status";
 import { VictoryConfetti } from "../live-match/victory-confetti";
-import {
-  bracketShareCanvas,
-  shareCanvas,
-  tournamentRecapCanvas,
-  tournamentStatsCanvas,
-} from "../share";
-import { championCopy } from "./champion-copy";
 import { ReplayTournamentDialog } from "./replay-tournament-dialog";
-import {
-  TournamentShareDialog,
-  type TournamentShareKind,
-} from "./tournament-share-dialog";
+import { TournamentShareDialog } from "./tournament-share-dialog";
 
 function roundName(round: number, total: number) {
   if (round === total) return "Final";
@@ -39,8 +28,6 @@ export function ResultsScreen({
   onViewBracket: () => void;
 }) {
   const reducedMotion = useReducedMotion();
-  const [shareStatus, setShareStatus] = useTransientStatus();
-  const [sharing, setSharing] = useState<TournamentShareKind | null>(null);
   const [showShare, setShowShare] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
   const result = calculateTournamentResult(bracket);
@@ -49,24 +36,12 @@ export function ResultsScreen({
   const champion = result.standings.find(
     ({ playerId }) => playerId === result.championId,
   )!;
-  const championMatches = result.matchHistory.filter(
-    ({ winnerId }) => winnerId === result.championId,
-  );
-  const comebackCount = championMatches.filter(
-    ({ comebackDeficit }) => comebackDeficit >= 3,
-  ).length;
-  const copy = championCopy({
-    championName: name(result.championId),
-    comebackCount,
-    differential: champion.differential,
-    seedKey: `${result.championId}:${champion.differential}`,
-    upsetCount: result.upsetWins.filter(
-      ({ winnerId }) => winnerId === result.championId,
-    ).length,
-    winningMargins: championMatches.map(({ scoreA, scoreB }) =>
-      Math.abs(scoreA - scoreB),
-    ),
-  });
+  const final = result.matchHistory.find(
+    ({ id }) => id === bracket.finalMatchId,
+  )!;
+  const championIsA = final.sideA?.memberIds.includes(result.championId);
+  const winnerScore = championIsA ? final.scoreA : final.scoreB;
+  const runnerUpScore = championIsA ? final.scoreB : final.scoreA;
   return (
     <main className="results-screen" data-qa="results">
       <motion.header
@@ -82,11 +57,19 @@ export function ResultsScreen({
           role="img"
           transition={{ delay: 0.3, duration: 0.7 }}
         />
-        <p className="eyebrow">Tournament complete</p>
-        <h1>{copy.headline}</h1>
-        <strong className="results-hero__champion">
-          {name(result.championId)}
-        </strong>
+        <p className="eyebrow">Tournament champion</p>
+        <h1>{name(result.championId)} wins</h1>
+        <div
+          className="results-final-score"
+          aria-label={`Final score ${winnerScore} to ${runnerUpScore}`}
+        >
+          <span>{winnerScore}</span>
+          <i>–</i>
+          <span>{runnerUpScore}</span>
+        </div>
+        <p className="results-final-opponent">
+          Final · {name(result.championId)} over {name(result.runnerUpId)}
+        </p>
         <div className="results-hero__record">
           <strong>
             {champion.wins}–{champion.losses} record
@@ -96,9 +79,6 @@ export function ResultsScreen({
             {champion.differential} point differential
           </span>
         </div>
-        <p>
-          {copy.subcomment} Tournament performance only, not a new skill rating.
-        </p>
         <div className="results-hero__actions">
           <button
             className="primary-button results-share"
@@ -152,9 +132,6 @@ export function ResultsScreen({
           <small>Third place</small>
         </div>
       </section>
-      <p aria-live="polite" className="share-status">
-        {shareStatus}
-      </p>
       {result.upsetWins.length ? (
         <section className="upset-strip" aria-labelledby="upsets-title">
           <Sparkles aria-hidden="true" />
@@ -166,7 +143,7 @@ export function ResultsScreen({
               {result.upsetWins
                 .map(
                   (upset) =>
-                    `${name(upset.winnerId)} beat seed ${player.get(upset.loserId)?.seed}`,
+                    `${name(upset.winnerId)} defeated the No. ${player.get(upset.loserId)?.seed} seed`,
                 )
                 .join(" · ")}
             </p>
@@ -243,40 +220,13 @@ export function ResultsScreen({
           </div>
         ))}
       </section>
+      <p className="results-footnote">
+        Ratings seed this draw only. These results reflect this tournament.
+      </p>
       {showShare ? (
         <TournamentShareDialog
-          busy={sharing}
+          bracket={bracket}
           onClose={() => setShowShare(false)}
-          onShare={(kind) => {
-            if (sharing) return;
-            setSharing(kind);
-            setShareStatus("Building image…");
-            const canvas =
-              kind === "recap"
-                ? tournamentRecapCanvas(bracket)
-                : kind === "stats"
-                  ? tournamentStatsCanvas(bracket)
-                  : bracketShareCanvas(bracket);
-            void shareCanvas(
-              canvas,
-              `pickle-king-tournament-${kind}.png`,
-              `Pickle King tournament ${kind}`,
-            )
-              .then((outcome) => {
-                setShareStatus(
-                  outcome === "shared"
-                    ? "Share sheet opened."
-                    : outcome === "downloaded"
-                      ? "Tournament image downloaded."
-                      : "Sharing cancelled.",
-                );
-                if (outcome !== "cancelled") setShowShare(false);
-              })
-              .catch(() =>
-                setShareStatus("The tournament image could not be shared."),
-              )
-              .finally(() => setSharing(null));
-          }}
         />
       ) : null}
       {showReplay ? (

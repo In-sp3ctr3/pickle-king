@@ -18,9 +18,11 @@ Last updated: 2026-08-03
 1. The approved product specification.
 2. The user-supplied classic double-sided tournament-tree screenshot for
    bracket geometry.
-3. Skiper v37 for the smooth number-change character only.
-4. The supplied near-black, acid-lime, athletic direction.
-5. Labelled product-specific inference.
+3. The user-supplied 2026-08-03 portrait and landscape victory cards for
+   result hierarchy, scale, and court atmosphere.
+4. Skiper v37 for the smooth number-change character only.
+5. The supplied near-black, acid-lime, athletic direction.
+6. Labelled product-specific inference.
 
 ## Sources
 
@@ -53,6 +55,7 @@ Last updated: 2026-08-03
 | Draw editor    | repair the field safely      | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild     |
 | Challenge lane | expose an amended route      | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo  |
 | Share result   | preview a brag artifact      | reference-led portrait winner and split score     | exact 1080×1350 canvas preview               | native share or explicit download  |
+| Share bracket  | preview the complete draw    | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download  |
 
 ## Geometry
 
@@ -142,9 +145,10 @@ Last updated: 2026-08-03
 - Only the recommended match may read `Next` or use the lime node state. Other
   ready matches in the earliest unfinished round read `Available` and can start.
 - Native select popups are prohibited for visible product controls.
-- No gradients, glassmorphism, WebGL, stock sports photos, or dashboard tile grids.
+- No generic app gradients, glassmorphism, WebGL, stock sports photos, or dashboard tile grids. Canvas exports may use contained radial light and court-depth shading derived from the supplied result references.
 - History reads as a courtside score ledger, not an admin dashboard.
 - Result sharing is opt-in and generated locally; no automatic social prompts.
+- Every share action opens the exact local PNG preview before native share or download.
 - Every celebration and exported image contains one crown: the mascot's crown.
 - Share generation must fail clearly rather than silently omit the mascot.
 - Draw editing and sharing controls stay with the Full draw they affect.

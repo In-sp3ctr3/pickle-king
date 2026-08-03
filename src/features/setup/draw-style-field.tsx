@@ -20,26 +20,25 @@ export function DrawStyleField({
       </legend>
       <div className="setup-draw-style__content">
         <div>
-          <p>What kind of night is this?</p>
+          <p>How should the opening round feel?</p>
           <span>
-            Competitive protects top seeds. Social opens with closer-rated
-            matchups to reduce early blowouts.
+            Choose a standard seeded bracket or closer opening matchups.
           </span>
         </div>
         <SlidingChoice
           ariaLabel="Tournament draw style"
           onChange={onChange}
           options={[
-            { label: "Competitive", value: "competitive" },
-            { label: "Social", value: "social" },
+            { label: "Seeded", value: "competitive" },
+            { label: "Closer games", value: "social" },
           ]}
           value={value}
         />
       </div>
       <p className="setup-draw-style__note">
         {value === "competitive"
-          ? "Strongest players are separated and may meet lower-rated players early."
-          : "Similar ratings meet first; strong players may face each other earlier."}
+          ? "Top-rated players start in separate parts of the draw. Opening matches can be uneven."
+          : "Similar skill levels meet first. Strong players may face each other sooner."}
       </p>
     </fieldset>
   );
