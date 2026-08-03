@@ -7,6 +7,11 @@ import {
   type TournamentBracket,
 } from "@/src/tournament";
 import { Trophy } from "lucide-react";
+import { Pencil, Share2 } from "lucide-react";
+import { useState } from "react";
+import type { Player } from "@/src/tournament";
+import { bracketShareCanvas, shareCanvas } from "../share";
+import { BracketEditorDialog } from "./bracket-editor-dialog";
 import { BracketTree } from "./bracket-tree";
 import { matchSideLabel, orderedRunOfShow } from "./bracket-utils";
 import { type CorrectMatch, MatchCard } from "./match-card";
@@ -18,6 +23,7 @@ export interface BracketScreenProps {
   onStartMatch: (matchId: string) => void;
   sessionLabel?: string;
   timingWarning?: string;
+  onEditDraw: (players: Omit<Player, "seed">[], structural: boolean) => boolean;
 }
 
 export function BracketScreen({
@@ -26,7 +32,10 @@ export function BracketScreen({
   onStartMatch,
   sessionLabel,
   timingWarning,
+  onEditDraw,
 }: BracketScreenProps) {
+  const [editing, setEditing] = useState(false);
+  const [shareStatus, setShareStatus] = useState("");
   const nextMatch = getNextMatch(bracket);
   const readySchedule = getReadySchedule(bracket);
   const runOfShow = [
@@ -53,9 +62,43 @@ export function BracketScreen({
           </p>
           <h1>Road to the crown.</h1>
         </div>
-        <p className="bracket-screen__progress">
-          {completeCount} of {bracket.matches.length} matches final
-        </p>
+        <div className="bracket-screen__header-actions">
+          <p className="bracket-screen__progress">
+            {completeCount} of {bracket.matches.length} matches final
+          </p>
+          <button
+            data-qa="edit-draw"
+            onClick={() => setEditing(true)}
+            type="button"
+          >
+            <Pencil aria-hidden="true" size={18} /> Edit draw
+          </button>
+          <button
+            data-qa="share-bracket"
+            onClick={() =>
+              void shareCanvas(
+                bracketShareCanvas(bracket),
+                "pickle-king-bracket.png",
+                "Pickle King tournament bracket",
+              )
+                .then((outcome) =>
+                  setShareStatus(
+                    outcome === "downloaded"
+                      ? "Bracket image downloaded."
+                      : outcome === "shared"
+                        ? "Share sheet opened."
+                        : "Sharing cancelled.",
+                  ),
+                )
+                .catch(() =>
+                  setShareStatus("The bracket image could not be shared."),
+                )
+            }
+            type="button"
+          >
+            <Share2 aria-hidden="true" size={18} /> Share bracket
+          </button>
+        </div>
       </header>
 
       <RunOfShow
@@ -121,6 +164,23 @@ export function BracketScreen({
           />
         </section>
       ) : null}
+      {editing ? (
+        <BracketEditorDialog
+          hasStarted={bracket.matches.some(
+            ({ startedAt }) => startedAt !== null,
+          )}
+          onClose={() => setEditing(false)}
+          onSave={(players, structural) => {
+            const saved = onEditDraw(players, structural);
+            if (saved) setEditing(false);
+            return saved;
+          }}
+          players={bracket.players}
+        />
+      ) : null}
+      <p aria-live="polite" className="share-status">
+        {shareStatus}
+      </p>
     </main>
   );
 }

@@ -2,7 +2,8 @@ import type { TournamentSnapshotV1 } from "@/src/persistence/schema";
 import { FloatingAppNav } from "@/src/shared/ui";
 
 type Screen = TournamentSnapshotV1["screen"];
-type NavigableScreen = "bracket" | "quick-setup" | "results" | "setup";
+type NavigableScreen =
+  "bracket" | "history" | "quick-setup" | "results" | "setup";
 
 const navigation: Record<
   NavigableScreen,
@@ -27,6 +28,11 @@ const navigation: Record<
     backLabel: "Home",
     backScreen: "home",
     currentLabel: "Tournament setup",
+  },
+  history: {
+    backLabel: "Home",
+    backScreen: "home",
+    currentLabel: "Match history",
   },
 };
 

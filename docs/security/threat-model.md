@@ -9,22 +9,26 @@ integrity. No passwords, payment data, tokens, or server-side secrets exist.
 
 ```text
 Organizer input -> React reducer -> validated localStorage snapshot
+                                -> bounded local history snapshot
                                 -> on-device bracket/results rendering
+Explicit Share action -> on-device Canvas PNG -> share sheet or download
 Static deploy -> service worker cache -> offline application shell
 ```
 
 ## Boundaries and threats
 
-| Threat                         | Boundary               | Mitigation                                           |
-| ------------------------------ | ---------------------- | ---------------------------------------------------- |
-| Corrupt or edited snapshot     | localStorage to domain | Versioned Zod parse; recoverable reset               |
-| Markup/script in a player name | input to DOM           | React text rendering; trim and length limit          |
-| Accidental result finalization | score UI to bracket    | Pause and explicit confirmation                      |
-| Stale worker during live play  | service worker update  | Defer activation while a match is active             |
-| Timer drift after sleep        | browser lifecycle      | Recompute from absolute deadlines                    |
-| Dependency compromise          | build pipeline         | Lockfile, Dependabot, CodeQL, dependency review      |
-| Secret in public repo          | Git/GitHub             | Secret scanning, push protection, no runtime secrets |
-| Shared-device disclosure       | local device           | Clear-session action and privacy notice              |
+| Threat                         | Boundary               | Mitigation                                            |
+| ------------------------------ | ---------------------- | ----------------------------------------------------- |
+| Corrupt or edited snapshot     | localStorage to domain | Versioned Zod parse; recoverable reset                |
+| Markup/script in a player name | input to DOM           | React text rendering; trim and length limit           |
+| Accidental result finalization | score UI to bracket    | Pause and explicit confirmation                       |
+| Stale worker during live play  | service worker update  | Defer activation while a match is active              |
+| Timer drift after sleep        | browser lifecycle      | Recompute from absolute deadlines                     |
+| Dependency compromise          | build pipeline         | Lockfile, Dependabot, CodeQL, dependency review       |
+| Secret in public repo          | Git/GitHub             | Secret scanning, push protection, no runtime secrets  |
+| Shared-device disclosure       | local device           | Clear-session action and privacy notice               |
+| Accidental history disclosure  | local history to UI    | Separate bounded store; explicit local reset          |
+| Unintended social disclosure   | share image boundary   | User-initiated export only; no automatic transmission |
 
 ## Security requirements
 

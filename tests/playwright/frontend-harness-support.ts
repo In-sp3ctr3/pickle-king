@@ -52,7 +52,8 @@ export type Route = {
     | "four-player-results"
     | "quick-setup"
     | "quick-live"
-    | "quick-result";
+    | "quick-result"
+    | "history-empty";
   primaryActionSelector?: string;
   primaryActionNotApplicableReason?: string;
   visualEvidence: Record<
@@ -141,6 +142,9 @@ export async function openRoute(page: Page, route: Route) {
   }
   if (route.prepare === "quick-setup") {
     await page.locator("[data-qa='quick-match']").click();
+  }
+  if (route.prepare === "history-empty") {
+    await page.locator("[data-qa='match-history']").click();
   }
   if (route.prepare === "quick-live" || route.prepare === "quick-result") {
     await fillQuickMatch(page, route.prepare === "quick-result" ? 1 : 11);

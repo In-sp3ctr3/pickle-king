@@ -3,14 +3,16 @@
 import { ArrowRight, Users } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useState, type FormEvent } from "react";
-import { ActionButton, SlidingChoice } from "@/src/shared/ui";
+import { ActionButton, NameCombobox, SlidingChoice } from "@/src/shared/ui";
 import { createScoringState } from "../../match/scoring";
 import type { ScoringState } from "../../match/types";
 
 export function QuickMatchSetup({
   onStart,
+  suggestions = [],
 }: {
   onStart: (scorer: ScoringState) => void;
+  suggestions?: string[];
 }) {
   const [doubles, setDoubles] = useState(false);
   const [names, setNames] = useState(["", "", "", ""]);
@@ -80,6 +82,10 @@ export function QuickMatchSetup({
         sideB: { memberIds: sideBIds },
         labelA: active.slice(0, doubles ? 2 : 1).join(" + "),
         labelB: active.slice(doubles ? 2 : 1).join(" + "),
+        participantNames: {
+          sideA: active.slice(0, doubles ? 2 : 1),
+          sideB: active.slice(doubles ? 2 : 1),
+        },
         targetScore: target,
         durationMs: timed ? minutes * 60_000 : null,
       }),
@@ -120,7 +126,7 @@ export function QuickMatchSetup({
           <legend>Players</legend>
           <div className="quick-player-grid">
             {Array.from({ length: count }, (_, index) => (
-              <motion.label
+              <motion.div
                 animate={
                   errors.names[index] && validationAttempt
                     ? { x: [0, -7, 6, -3, 0] }
@@ -130,28 +136,35 @@ export function QuickMatchSetup({
                 key={`${index}-${errors.names[index] ? validationAttempt : 0}`}
                 transition={{ duration: reducedMotion ? 0 : 0.32 }}
               >
-                <span>
-                  {doubles
-                    ? `Team ${index < 2 ? "A" : "B"} · Player ${(index % 2) + 1}`
-                    : `Side ${index === 0 ? "A" : "B"}`}
-                </span>
-                <input
-                  aria-describedby={
+                <NameCombobox
+                  describedBy={
                     errors.names[index]
                       ? `quick-name-${index}-error`
                       : undefined
                   }
-                  aria-invalid={Boolean(errors.names[index])}
-                  autoComplete="off"
-                  maxLength={40}
-                  onChange={(event) => {
+                  invalid={Boolean(errors.names[index])}
+                  label={
+                    doubles
+                      ? `Team ${index < 2 ? "A" : "B"} · Player ${(index % 2) + 1}`
+                      : `Side ${index === 0 ? "A" : "B"}`
+                  }
+                  onChange={(value) => {
                     setNames((current) =>
                       current.map((name, nameIndex) =>
-                        nameIndex === index ? event.target.value : name,
+                        nameIndex === index ? value : name,
                       ),
                     );
                     clearNameError(index);
                   }}
+                  suggestions={suggestions.filter(
+                    (suggestion) =>
+                      !names.some(
+                        (name, nameIndex) =>
+                          nameIndex !== index &&
+                          name.trim().toLocaleLowerCase() ===
+                            suggestion.toLocaleLowerCase(),
+                      ),
+                  )}
                   value={names[index]}
                 />
                 {errors.names[index] ? (
@@ -162,7 +175,7 @@ export function QuickMatchSetup({
                     {errors.names[index]}
                   </small>
                 ) : null}
-              </motion.label>
+              </motion.div>
             ))}
           </div>
         </fieldset>

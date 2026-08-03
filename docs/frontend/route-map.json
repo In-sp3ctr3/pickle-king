@@ -38,6 +38,14 @@
           "sequence": "home-to-quick-match",
           "action": "click",
           "expect": { "visible": "[data-qa='quick-match-setup']" }
+        },
+        {
+          "name": "match history",
+          "selector": "[data-qa='match-history']",
+          "viewports": ["desktop", "mobile"],
+          "sequence": "home-to-history",
+          "action": "click",
+          "expect": { "visible": "[data-qa='history-screen']" }
         }
       ],
       "motionChecks": [
@@ -237,6 +245,20 @@
           "sequence": "bracket-pan-right",
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
+        },
+        {
+          "name": "edit draw",
+          "selector": "[data-qa='edit-draw']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".draw-editor" }
+        },
+        {
+          "name": "share bracket",
+          "selector": "[data-qa='share-bracket']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
         }
       ],
       "motionChecks": [],
@@ -433,6 +455,13 @@
           "selector": "[data-qa='confirm-result']",
           "action": "click",
           "expect": { "visible": "button:has-text('Done')" }
+        },
+        {
+          "name": "share quick result",
+          "selector": "[data-qa='share-result']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".result-dialog" }
         }
       ],
       "motionChecks": [],
@@ -481,6 +510,13 @@
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='results']" }
+        },
+        {
+          "name": "share final bracket",
+          "selector": "[data-qa='share-final-bracket']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
         }
       ],
       "motionChecks": [],
@@ -488,6 +524,47 @@
         {
           "name": "results remain available",
           "selector": "[data-qa='results']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "history",
+      "path": "/",
+      "prepare": "history-empty",
+      "primaryActionNotApplicableReason": "An empty local ledger has no record action; navigation remains available.",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/history-desktop-source.png",
+          "render": "test-results/frontend-captures/history-desktop.png",
+          "comparison": "test-results/frontend-comparisons/history-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/history-mobile-source.png",
+          "render": "test-results/frontend-captures/history-mobile.png",
+          "comparison": "test-results/frontend-comparisons/history-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "history brand home",
+          "selector": "[data-qa='brand-home']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "history back",
+          "selector": "[data-qa='app-back']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "history remains available",
+          "selector": "[data-qa='history-screen']",
           "expect": "visible"
         }
       ],

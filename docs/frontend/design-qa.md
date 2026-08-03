@@ -1,12 +1,12 @@
 # Frontend Design QA
 
 Status: passed
-Last updated: 2026-07-31
+Last updated: 2026-08-02
 
 ## Environment
 
 - Commit/source state:
-  codex/fix/scoring-lock-number-motion@validated-working-tree-2026-07-31
+  codex/feat/session-history-sharing@validated-working-tree-2026-08-02
 - Browser: Playwright Chromium 1.62.1
 - Base URL: http://127.0.0.1:3000 production Vinext server
 - DPR: Playwright default at 1440×1000 and 390×844
@@ -34,26 +34,32 @@ Last updated: 2026-07-31
 | quick-result | mobile   | docs/frontend/evidence/quick-result-mobile-source.png  | test-results/frontend-captures/quick-result-mobile.png  | test-results/frontend-comparisons/quick-result-mobile.png  | passed          | passed     |
 | results      | desktop  | docs/frontend/evidence/results-desktop-source.png      | test-results/frontend-captures/results-desktop.png      | test-results/frontend-comparisons/results-desktop.png      | passed          | passed     |
 | results      | mobile   | docs/frontend/evidence/results-mobile-source.png       | test-results/frontend-captures/results-mobile.png       | test-results/frontend-comparisons/results-mobile.png       | passed          | passed     |
+| history      | desktop  | docs/frontend/evidence/history-desktop-source.png      | test-results/frontend-captures/history-desktop.png      | test-results/frontend-comparisons/history-desktop.png      | passed          | passed     |
+| history      | mobile   | docs/frontend/evidence/history-mobile-source.png       | test-results/frontend-captures/history-mobile.png       | test-results/frontend-comparisons/history-mobile.png       | passed          | passed     |
 
 ## Iteration History
 
-| Iteration | Region         | Pixel signal            | Human finding                                                 | Change                                                                             | Result |
-| --------- | -------------- | ----------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------ |
-| 1         | Typography     | glyph crowding          | condensed display face joined double-digit scores             | introduced Archivo Black with positive score tracking                              | passed |
-| 2         | Home hero      | concept rejection       | product-demo imagery kept replacing the requested identity    | made the existing crowned mascot the sole visual with a restrained blink           | passed |
-| 3         | Navigation     | misplaced controls      | corner navigation lacked a reliable bracket-to-setup path     | added one solid centered island with explicit Back and Home                        | passed |
-| 4         | Setup          | control imbalance       | generic controls and uneven timing fields felt unfinished     | added custom select, spring choices, field-local errors, and aligned rows          | passed |
-| 5         | Bracket        | node-model mismatch     | players and actions occupied separate nodes                   | rebuilt each node as a wide two-contender match converging on a trophy final       | passed |
-| 6         | Queue state    | scheduling ambiguity    | every dependency-ready match appeared ready                   | reserved lime and `Next` for the one-court eligible match; marked the rest queued  | passed |
-| 7         | Responsive QA  | missing target screens  | tablet and phone landscape behavior had not been proven       | added executable layout tests for all three target viewports                       | passed |
-| 8         | Bracket repair | unclear six-player draw | `BYE` looked like an unregistered participant                 | named automatic advances in setup/draw and removed the fake contender row          | passed |
-| 9         | Result repair  | correction interruption | completed scores opened browser prompts                       | added compact in-node score editing with explicit tied-result winner selection     | passed |
-| 10        | Score motion   | uncontrolled digit reel | rapid taps appeared to overshoot and subtraction spun forward | removed continuous cycling, restored delta direction, and bounded countdown digits | passed |
+| Iteration | Region         | Pixel signal             | Human finding                                                 | Change                                                                             | Result |
+| --------- | -------------- | ------------------------ | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------ |
+| 1         | Typography     | glyph crowding           | condensed display face joined double-digit scores             | introduced Archivo Black with positive score tracking                              | passed |
+| 2         | Home hero      | concept rejection        | product-demo imagery kept replacing the requested identity    | made the existing crowned mascot the sole visual with a restrained blink           | passed |
+| 3         | Navigation     | misplaced controls       | corner navigation lacked a reliable bracket-to-setup path     | added one solid centered island with explicit Back and Home                        | passed |
+| 4         | Setup          | control imbalance        | generic controls and uneven timing fields felt unfinished     | added custom select, spring choices, field-local errors, and aligned rows          | passed |
+| 5         | Bracket        | node-model mismatch      | players and actions occupied separate nodes                   | rebuilt each node as a wide two-contender match converging on a trophy final       | passed |
+| 6         | Queue state    | scheduling ambiguity     | every dependency-ready match appeared ready                   | reserved lime and `Next` for the one-court eligible match; marked the rest queued  | passed |
+| 7         | Responsive QA  | missing target screens   | tablet and phone landscape behavior had not been proven       | added executable layout tests for all three target viewports                       | passed |
+| 8         | Bracket repair | unclear six-player draw  | `BYE` looked like an unregistered participant                 | named automatic advances in setup/draw and removed the fake contender row          | passed |
+| 9         | Result repair  | correction interruption  | completed scores opened browser prompts                       | added compact in-node score editing with explicit tied-result winner selection     | passed |
+| 10        | Score motion   | uncontrolled digit reel  | rapid taps appeared to overshoot and subtraction spun forward | removed continuous cycling, restored delta direction, and bounded countdown digits | passed |
+| 11        | Draw repair    | destructive ambiguity    | a forgotten entrant could not be added honestly after play    | split safe name edits from a guarded full reseed                                   | passed |
+| 12        | Result moment  | weak share state         | final scores were difficult to screenshot or share            | made score/name/crown dominant and added local PNG sharing                         | passed |
+| 13        | Session recall | no durable visual record | Quick Matches disappeared after confirmation                  | added a bounded courtside ledger with per-record sharing                           | passed |
+| 14        | Name entry     | repeated typing          | recurring doubles players had to be entered every match       | added an accessible custom remembered-name combobox                                | passed |
 
 Pixel difference is an iteration signal, not a universal pass threshold. The
 intentional hero-scale and final-card repairs were visually reviewed and
-promoted as the new frozen baselines. Source/render pairs are identical for the
-home, setup, and bracket states.
+promoted as the new frozen baselines. Every reviewed source/render pair is
+identical.
 
 ## Findings
 
@@ -68,6 +74,10 @@ home, setup, and bracket states.
 | DQA-07 | P1       | bracket/final  | desktop and mobile bracket captures        | final label displaced its waiting state and faceoff        | frontend | fixed  |
 | DQA-08 | P2       | bracket/edit   | inline correction workflow and capture     | completed scores could not be edited in their bracket node | frontend | fixed  |
 | DQA-09 | P1       | scorer/motion  | burst-tap workflow and NumberFlow contract | visual reel could imply points beyond the locked result    | frontend | fixed  |
+| DQA-10 | P1       | bracket/edit   | completed and structural-edit workflows    | late entrants had no fair, comprehensible recovery path    | product  | fixed  |
+| DQA-11 | P1       | result/share   | desktop/mobile result and PNG evidence     | confirmed results were not presentation- or share-ready    | frontend | fixed  |
+| DQA-12 | P2       | history        | empty/populated ledger and iPad evidence   | a social session had no device-local record                | frontend | fixed  |
+| DQA-13 | P2       | quick/setup    | keyboard suggestion workflow               | recurring players required repeated name entry             | frontend | fixed  |
 
 ## Harness Results
 
@@ -90,8 +100,6 @@ Reviewer evidence: docs/frontend/reviews/design-review.md
 
 Result: passed
 
-Rationale: the reduced mascot-led hero, solid navigation island, balanced
-custom controls, field-local validation, lime run-of-show, explicit automatic
-advances, centered trophy final, in-node corrections, scorer, dialogs, and
-results meet the contract across the required orientations with no open
-P0/P1/P2 findings.
+Rationale: the draw editor separates safe and destructive work, the result
+moment is share-ready, and the ledger/name-recall flows remain legible across
+the required orientations with no open P0/P1/P2 findings.

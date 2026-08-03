@@ -17,6 +17,7 @@ export interface ScoringState {
   sideB: MatchSide;
   labelA: string;
   labelB: string;
+  participantNames?: { sideA: string[]; sideB: string[] };
   scoreA: number;
   scoreB: number;
   targetScore: number;

@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionButton } from "@/src/shared/ui";
-import { ArrowRight, Download, Play, RotateCcw } from "lucide-react";
+import { ArrowRight, Download, History, Play, RotateCcw } from "lucide-react";
 import { HomeMascot } from "./home-mascot";
 
 export interface HomeScreenProps {
@@ -9,6 +9,7 @@ export interface HomeScreenProps {
   onQuickMatch: () => void;
   onInstall?: () => void;
   onResume?: () => void;
+  onHistory?: () => void;
   resumeLabel?: string;
 }
 
@@ -17,6 +18,7 @@ export function HomeScreen({
   onQuickMatch,
   onInstall,
   onResume,
+  onHistory,
   resumeLabel = "Resume tournament",
 }: HomeScreenProps) {
   return (
@@ -57,6 +59,15 @@ export function HomeScreen({
             >
               <RotateCcw aria-hidden="true" size={18} />
               {resumeLabel}
+            </ActionButton>
+          ) : null}
+          {onHistory ? (
+            <ActionButton
+              data-qa="match-history"
+              onClick={onHistory}
+              variant="quiet"
+            >
+              <History aria-hidden="true" size={18} /> Match history
             </ActionButton>
           ) : null}
           {onInstall ? (

@@ -5,6 +5,7 @@ export function createScoringState(input: {
   sideB: ScoringState["sideB"];
   labelA: string;
   labelB: string;
+  participantNames?: ScoringState["participantNames"];
   targetScore: number;
   durationMs: number | null;
 }): ScoringState {
