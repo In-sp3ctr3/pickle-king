@@ -2,7 +2,7 @@
 
 import { ActionButton } from "@/src/shared/ui";
 import type { Match } from "@/src/tournament";
-import { PencilLine, Play } from "lucide-react";
+import { Pencil, Play } from "lucide-react";
 
 export function MatchCardAction({
   canStart,
@@ -12,6 +12,7 @@ export function MatchCardAction({
   onStartMatch,
   sideALabel,
   sideBLabel,
+  compact = false,
 }: {
   canStart: boolean;
   match: Match;
@@ -20,6 +21,7 @@ export function MatchCardAction({
   onStartMatch: (matchId: string) => void;
   sideALabel: string;
   sideBLabel: string;
+  compact?: boolean;
 }) {
   if (match.status === "ready" && canStart) {
     return (
@@ -36,6 +38,7 @@ export function MatchCardAction({
         </ActionButton>
         {onRenamePlayer ? (
           <EditAction
+            compact={compact}
             onEdit={onEdit}
             sideALabel={sideALabel}
             sideBLabel={sideBLabel}
@@ -50,6 +53,7 @@ export function MatchCardAction({
   ) {
     return (
       <EditAction
+        compact={compact}
         onEdit={onEdit}
         sideALabel={sideALabel}
         sideBLabel={sideBLabel}
@@ -60,10 +64,12 @@ export function MatchCardAction({
 }
 
 function EditAction({
+  compact,
   onEdit,
   sideALabel,
   sideBLabel,
 }: {
+  compact: boolean;
   onEdit: () => void;
   sideALabel: string;
   sideBLabel: string;
@@ -71,12 +77,12 @@ function EditAction({
   return (
     <ActionButton
       aria-label={`Edit ${sideALabel} versus ${sideBLabel}`}
-      className="tree-match-card__action"
+      className={`tree-match-card__action ${compact ? "tree-match-card__action--compact" : ""}`}
       data-qa="edit-bracket-match"
       onClick={onEdit}
       variant="quiet"
     >
-      <PencilLine aria-hidden="true" size={16} />
+      <Pencil aria-hidden="true" size={15} />
       <span className="sr-only">Edit match</span>
     </ActionButton>
   );

@@ -28,6 +28,7 @@ export function TournamentBracketRoute({
   return (
     <BracketScreen
       bracket={bracket}
+      drawStyle={config.drawStyle}
       onApplyLateEntry={(player, plan, declinedPlayerIds, removeTimeLimit) =>
         dispatch({
           type: "apply-late-entry",
@@ -110,6 +111,13 @@ export function TournamentBracketRoute({
         onQuickHandoff(player.name);
         dispatch({ type: "navigate", screen: "quick-setup" });
       }}
+      onRerollRandomDraw={() =>
+        dispatch({
+          type: "reroll-random-draw",
+          randomSeed: crypto.randomUUID(),
+          now: Date.now(),
+        })
+      }
       onRenamePlayer={(playerId, name) => {
         try {
           renameTournamentPlayer(bracket, playerId, name);

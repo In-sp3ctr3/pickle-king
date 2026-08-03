@@ -16,6 +16,7 @@ const historyScreens = [
   "quick-live",
   "results",
   "history",
+  "history-results",
 ] satisfies TournamentSnapshotV1["screen"][];
 
 export function isHistoryScreen(
@@ -33,13 +34,20 @@ export function stateFromSnapshot(
   const historyRecoveryMessage =
     historyLoad.status === "corrupt" ? historyLoad.message : null;
   if (snapshot.status === "ok") {
-    return {
+    const restored: AppState = {
       ...snapshot.snapshot,
       recoveryMessage: null,
       history,
       historyRecoveryMessage,
       hydrated: true,
     };
+    if (
+      restored.screen === "history-results" &&
+      !history.tournaments.some(({ id }) => id === restored.historyTournamentId)
+    ) {
+      return { ...restored, screen: "history", historyTournamentId: null };
+    }
+    return restored;
   }
   if (snapshot.status === "corrupt") {
     return {

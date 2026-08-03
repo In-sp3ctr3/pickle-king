@@ -50,11 +50,11 @@ Last updated: 2026-08-03
 | Run of show    | next match and time risk     | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match       |
 | Bracket        | advancement overview         | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct         |
 | Scorekeeper    | no-look scoring              | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset |
-| Results        | podium and evidence          | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, correct, or return home     |
-| History        | recall a social session      | editorial ledger + strong score rail              | table becomes stacked match rows             | share or remove one record         |
+| Results        | podium and evidence          | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, review, or replay           |
+| History        | recall a social session      | editorial ledger + strong score rail              | table becomes stacked match rows             | view, share, or remove one record  |
 | Draw editor    | repair the field safely      | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild     |
 | Challenge lane | expose an amended route      | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo  |
-| Share result   | preview a brag artifact      | reference-led portrait winner and split score     | exact 1080×1350 canvas preview               | native share or explicit download  |
+| Share result   | preview a brag artifact      | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download  |
 | Share bracket  | preview the complete draw    | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download  |
 
 ## Geometry
@@ -96,26 +96,26 @@ Last updated: 2026-08-03
 
 ## Components
 
-| Component         | States                                   | Rules                                                  |
-| ----------------- | ---------------------------------------- | ------------------------------------------------------ |
-| PrimaryButton     | default, pressed, disabled               | 52px minimum, filled tactile surface, no stroke        |
-| PlayerRow         | editing, invalid, complete               | inline name/React select; error text adjacent          |
-| RatingSelect      | closed, open, selected, invalid          | portal listbox; keyboard and touch operable            |
-| MatchCard         | waiting, available, next, live, complete | wide two-contender rows; recommended state is distinct |
-| FinalMatchCard    | waiting, queued, next, complete          | finalist left/right with trophy in the center          |
-| FloatingNav       | setup, bracket, results, quick           | solid centered island; explicit Back and Home          |
-| ScoreSide         | normal, leader, golden                   | whole court adds; explicit `+1` and `Undo −1`          |
-| NumberFlow        | changing, reduced motion                 | numbers only; no ornamental looping                    |
-| Dialog            | confirm, destructive                     | initial focus, escape, focus return                    |
-| LateEntryReview   | eligible, booking-risk, placement-lock   | exact route, match count, cancel always present        |
-| Toast/live region | neutral, warning                         | polite status clears after four seconds                |
-| NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names        |
-| HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid        |
-| ShareCard         | score, recap, stats, bracket             | focused local Canvas PNGs using brand tokens           |
-| StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert            |
-| VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate           |
-| DrawTools         | ready, building image                    | lives with Full draw heading; 48px controls            |
-| ReplayDialog      | same draw, new draw, cancel              | no destructive default; roster choice is explicit      |
+| Component         | States                                   | Rules                                                                    |
+| ----------------- | ---------------------------------------- | ------------------------------------------------------------------------ |
+| PrimaryButton     | default, pressed, disabled               | 52px minimum, filled tactile surface, no stroke                          |
+| PlayerRow         | editing, invalid, complete               | inline name/React select; error text adjacent                            |
+| RatingSelect      | closed, open, selected, invalid          | portal listbox; keyboard and touch operable                              |
+| MatchCard         | waiting, available, next, live, complete | wide two-contender rows; recommended state is distinct                   |
+| FinalMatchCard    | waiting, queued, next, complete          | compact warm-metal final; bounded names; trophy centered; edit in header |
+| FloatingNav       | setup, bracket, results, quick           | solid centered island; explicit Back and Home                            |
+| ScoreSide         | normal, leader, golden                   | whole court adds; explicit `+1` and `Undo −1`                            |
+| NumberFlow        | changing, reduced motion                 | numbers only; no ornamental looping                                      |
+| Dialog            | confirm, destructive                     | initial focus, escape, focus return                                      |
+| LateEntryReview   | eligible, booking-risk, placement-lock   | exact route, match count, cancel always present                          |
+| Toast/live region | neutral, warning                         | polite status clears after four seconds                                  |
+| NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names                          |
+| HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid                          |
+| ShareCard         | score, recap, stats, bracket             | 4:5 feed, 9:16 story, or 4:3 bracket over the local arena asset          |
+| StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert                              |
+| VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate                             |
+| DrawTools         | ready, reroll available, locked          | lives with Full draw heading; 48px controls                              |
+| ReplayDialog      | same draw, new draw, cancel              | no destructive default; roster choice is explicit                        |
 
 ## Motion
 
@@ -145,7 +145,7 @@ Last updated: 2026-08-03
 - Only the recommended match may read `Next` or use the lime node state. Other
   ready matches in the earliest unfinished round read `Available` and can start.
 - Native select popups are prohibited for visible product controls.
-- No generic app gradients, glassmorphism, WebGL, stock sports photos, or dashboard tile grids. Canvas exports may use contained radial light and court-depth shading derived from the supplied result references.
+- No generic app gradients, glassmorphism, WebGL, stock sports photos, radial light orbs, or dashboard tile grids. Canvas exports use the physical court environment and restrained edge lighting from the generated arena asset.
 - History reads as a courtside score ledger, not an admin dashboard.
 - Result sharing is opt-in and generated locally; no automatic social prompts.
 - Every share action opens the exact local PNG preview before native share or download.
@@ -155,7 +155,16 @@ Last updated: 2026-08-03
 - Structural draw edits must visually separate safe renames from destructive reseeding.
 - Late-entry repair must name the protected route, show its added matches and timing impact, and never hide the continue-unchanged action.
 - Result tables are read-only. Corrections and stable-identity renames live in bracket nodes.
-- Competitive and Social draw copy must name the tradeoff; random is not a substitute for Social.
+- Ranked and Random draw copy must state whether ratings affect placement. Random draws may be rerolled only before play begins.
+
+## Share Export Geometry
+
+- Feed exports: 1080×1350 with essential content inside x=54…1026 and y=54…1296.
+- Story exports: 1080×1920 with essential content inside x=72…1008 and y=240…1640.
+- Full bracket: 1600×1200 with champion/header above the tree, a distinct centered final, third place directly below it, and a medal podium below the draw.
+- Dynamic names use measured fitting. Winner names may wrap to two lines; participant rows shrink and then ellipsize. Horizontal text scaling and negative tracking are prohibited.
+- Decorative fragments stay in the outer 14% and never intersect text, scores, medals, or the mascot.
+- Preview images use containment; no ancestor may crop the generated PNG.
 
 ## Acceptance criteria
 

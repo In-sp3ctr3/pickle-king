@@ -12,7 +12,7 @@ import {
 import type { Player, TournamentBracket, TournamentConfig } from "./types";
 
 const config: TournamentConfig = {
-  drawStyle: "competitive",
+  drawStyle: "ranked",
   timingMode: "untimed",
   bookingMinutes: 120,
   warmupMinutes: 0,

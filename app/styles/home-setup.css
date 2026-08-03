@@ -200,10 +200,12 @@
 }
 
 .setup-draw-style__content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.setup-draw-style__content .sliding-choice {
+  width: 100%;
 }
 
 .setup-draw-style__content p,
@@ -523,7 +525,7 @@
 
 .setup-court-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.8fr);
+  grid-template-columns: minmax(0, 1.65fr) minmax(220px, 0.75fr);
   gap: 2.5rem;
   margin-top: 1.75rem;
   border-radius: 8px;
@@ -533,7 +535,6 @@
 
 .setup-time-fields {
   display: grid;
-  overflow: hidden;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
@@ -545,20 +546,30 @@
 
 .setup-number-input {
   display: grid;
-  grid-template-columns: 38px minmax(3.5rem, 1fr) minmax(2.75rem, auto) 38px;
-  column-gap: 0.6rem;
+  min-width: 0;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  column-gap: 0.5rem;
   align-items: center;
   padding: 0.3rem;
 }
 
-.setup-number-input input {
+.setup-number-value {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.setup-number-value input {
+  width: min(100%, 4.5rem);
   min-width: 0;
   min-height: 44px;
   border: 0;
   outline: 0;
   background: transparent;
   color: var(--chalk);
-  padding: 0 0.25rem;
+  padding: 0;
   font-size: 1.05rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -574,8 +585,8 @@
 
 .setup-number-input button {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   place-items: center;
   border: 0;
   border-radius: 12px;
@@ -770,10 +781,6 @@
 }
 
 @media (max-width: 640px) {
-  .setup-draw-style__content {
-    align-items: stretch;
-    flex-direction: column;
-  }
   .home-screen {
     gap: 3.5rem;
     padding-block: 2.5rem 4rem;

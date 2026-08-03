@@ -21,11 +21,33 @@ export function migrateSnapshot(value: unknown): TournamentSnapshotV1 {
   if (version !== 1) {
     throw new Error(`Saved session version ${String(version)} is unsupported.`);
   }
-  const parsed = snapshotV1Schema.safeParse(value);
+  const parsed = snapshotV1Schema.safeParse(migrateLegacyDrawStyle(value));
   if (!parsed.success) {
     throw new Error("The saved session failed validation.");
   }
   return parsed.data;
+}
+
+function migrateLegacyDrawStyle(value: object): object {
+  if (!("setupDraft" in value) || !value.setupDraft) return value;
+  const setupDraft = value.setupDraft;
+  if (typeof setupDraft !== "object" || !("config" in setupDraft)) return value;
+  const config = setupDraft.config;
+  if (!config || typeof config !== "object") return value;
+  const drawStyle = "drawStyle" in config ? config.drawStyle : undefined;
+  const migrated =
+    drawStyle === "competitive"
+      ? "ranked"
+      : drawStyle === "social"
+        ? "random"
+        : drawStyle;
+  return {
+    ...value,
+    setupDraft: {
+      ...setupDraft,
+      config: { ...config, ...(migrated ? { drawStyle: migrated } : {}) },
+    },
+  };
 }
 
 export function loadSnapshot(storage: StorageLike): SnapshotLoad {

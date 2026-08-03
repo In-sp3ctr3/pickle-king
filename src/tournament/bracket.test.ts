@@ -18,7 +18,7 @@ import type {
 const levels: SkillLevel[] = ["5.5+", "5.0", "4.5", "4.0", "3.5", "3.0", "2.5"];
 
 const config: TournamentConfig = {
-  drawStyle: "competitive",
+  drawStyle: "ranked",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -118,33 +118,58 @@ describe("tournament bracket", () => {
     );
   });
 
-  it("pairs neighboring ratings in a deterministic social opening draw", () => {
-    const social = createTournamentBracket(players(8), {
+  it("shuffles the complete field deterministically for a random draw", () => {
+    const random = createTournamentBracket(players(8), {
       ...config,
-      drawStyle: "social",
+      drawStyle: "random",
     });
-    const openingSeeds = social.matches
+    const openingIds = random.matches
       .filter(({ round }) => round === 1)
-      .map((match) =>
-        [match.sideA, match.sideB].map(
-          (side) =>
-            social.players.find(({ id }) => id === side?.memberIds[0])?.seed,
-        ),
-      );
-    expect(openingSeeds).toEqual(
-      expect.arrayContaining([
-        [1, 2],
-        [3, 4],
-        [5, 6],
-        [7, 8],
-      ]),
+      .flatMap((match) => [match.sideA, match.sideB])
+      .flatMap((side) => side?.memberIds ?? []);
+    expect(new Set(openingIds)).toEqual(
+      new Set(players(8).map(({ id }) => id)),
     );
     expect(
       createTournamentBracket(players(8), {
         ...config,
-        drawStyle: "social",
+        drawStyle: "random",
       }).matches,
-    ).toEqual(social.matches);
+    ).toEqual(random.matches);
+    expect(
+      createTournamentBracket(players(8), {
+        ...config,
+        drawStyle: "random",
+        randomSeed: "another-draw",
+      }).matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+    ).not.toEqual(
+      random.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+    );
+  });
+
+  it("allocates random-draw byes deterministically without favoring top seeds", () => {
+    const first = createTournamentBracket(players(6), {
+      ...config,
+      drawStyle: "random",
+      randomSeed: "random-byes",
+    });
+    const second = createTournamentBracket(players(6), {
+      ...config,
+      drawStyle: "random",
+      randomSeed: "random-byes",
+    });
+    const openingIds = new Set(
+      first.matches
+        .filter(({ round }) => round === 1)
+        .flatMap(({ sideA, sideB }) => [sideA, sideB])
+        .flatMap((side) => side?.memberIds ?? []),
+    );
+    const byeIds = first.players
+      .map(({ id }) => id)
+      .filter((id) => !openingIds.has(id));
+    expect(byeIds).toHaveLength(2);
+    expect(first.matches).toEqual(second.matches);
+    expect(byeIds).not.toEqual(first.players.slice(0, 2).map(({ id }) => id));
   });
 
   it("randomizes equal ratings deterministically", () => {
@@ -188,6 +213,18 @@ describe("tournament bracket", () => {
           expect(
             finished.matches.every(({ status }) => status === "complete"),
           ).toBe(true);
+          const randomBracket = createTournamentBracket(players(count), {
+            ...config,
+            drawStyle: "random",
+            randomSeed,
+          });
+          const openingIds = randomBracket.matches
+            .filter(({ round }) => round === 1)
+            .flatMap(({ sideA, sideB }) => [sideA, sideB])
+            .flatMap((side) => side?.memberIds ?? []);
+          const byeCount = randomBracket.bracketSize - count;
+          expect(new Set(openingIds)).toHaveLength(count - byeCount);
+          expect(finishTournament(randomBracket).matches).toHaveLength(count);
         },
       ),
       { numRuns: 80 },

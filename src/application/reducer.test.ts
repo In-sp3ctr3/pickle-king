@@ -14,7 +14,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: "3.5",
 }));
 const config: TournamentConfig = {
-  drawStyle: "competitive",
+  drawStyle: "ranked",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,

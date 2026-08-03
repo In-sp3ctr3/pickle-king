@@ -9,7 +9,7 @@ const players: Player[] = ["Maya", "Rae", "Kai", "Noah"].map((name, index) => ({
   rating: "3.5",
 }));
 const bracket = createTournamentBracket(players, {
-  drawStyle: "competitive",
+  drawStyle: "ranked",
   timingMode: "untimed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -32,7 +32,7 @@ describe("bracket cards", () => {
     expect(markup).not.toMatch(/>Bye</);
   });
 
-  it("keeps the waiting state in the final header and the faceoff centered", () => {
+  it("keeps the waiting state in a compact final header and the faceoff centered", () => {
     const markup = renderToStaticMarkup(
       <FinalMatchCard
         canStart={false}
@@ -47,6 +47,23 @@ describe("bracket cards", () => {
 
     expect(markup).toContain('data-qa="final-status"');
     expect(markup).toContain('data-qa="final-faceoff"');
+    expect(markup).toContain('data-qa="final-title"');
     expect(markup).not.toContain(">Championship<");
+    expect(markup).not.toContain("pencil-line");
+  });
+
+  it("labels a completed match as complete rather than final", () => {
+    const markup = renderToStaticMarkup(
+      <FinalMatchCard
+        canStart={false}
+        label="Final"
+        match={{ ...waitingFinal, status: "complete" }}
+        onCorrectMatch={vi.fn()}
+        onStartMatch={vi.fn()}
+        sideALabel="A very long finalist name that must stay bounded"
+        sideBLabel="Another very long finalist name that must stay bounded"
+      />,
+    );
+    expect(markup).toContain(">Complete<");
   });
 });

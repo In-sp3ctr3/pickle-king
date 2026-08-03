@@ -29,7 +29,7 @@ const statusDetails = {
     className: "text-[#ff9a78]",
   },
   complete: {
-    label: "Final",
+    label: "Complete",
     icon: CircleCheck,
     className: "text-[#f5f3e9]",
   },

@@ -23,9 +23,9 @@ export function ResultsScreen({
   onViewBracket,
 }: {
   bracket: TournamentBracket;
-  onNewDraw: () => void;
-  onReplaySame: () => void;
-  onViewBracket: () => void;
+  onNewDraw?: () => void;
+  onReplaySame?: () => void;
+  onViewBracket?: () => void;
 }) {
   const reducedMotion = useReducedMotion();
   const [showShare, setShowShare] = useState(false);
@@ -88,22 +88,26 @@ export function ResultsScreen({
           >
             <Share2 aria-hidden="true" size={18} /> Share tournament
           </button>
-          <button
-            className="secondary-button results-share"
-            data-qa="replay-tournament"
-            onClick={() => setShowReplay(true)}
-            type="button"
-          >
-            <RotateCcw aria-hidden="true" size={18} /> Play again
-          </button>
-          <button
-            className="text-button results-share"
-            data-qa="view-final-bracket"
-            onClick={onViewBracket}
-            type="button"
-          >
-            <GitBranch aria-hidden="true" size={18} /> Review bracket
-          </button>
+          {onReplaySame && onNewDraw ? (
+            <button
+              className="secondary-button results-share"
+              data-qa="replay-tournament"
+              onClick={() => setShowReplay(true)}
+              type="button"
+            >
+              <RotateCcw aria-hidden="true" size={18} /> Play again
+            </button>
+          ) : null}
+          {onViewBracket ? (
+            <button
+              className="text-button results-share"
+              data-qa="view-final-bracket"
+              onClick={onViewBracket}
+              type="button"
+            >
+              <GitBranch aria-hidden="true" size={18} /> Review bracket
+            </button>
+          ) : null}
         </div>
       </motion.header>
       <section aria-label="Podium" className="podium">
@@ -221,7 +225,7 @@ export function ResultsScreen({
         ))}
       </section>
       <p className="results-footnote">
-        Ratings seed this draw only. These results reflect this tournament.
+        Results from this tournament only. Player ratings stay unchanged.
       </p>
       {showShare ? (
         <TournamentShareDialog
@@ -229,7 +233,7 @@ export function ResultsScreen({
           onClose={() => setShowShare(false)}
         />
       ) : null}
-      {showReplay ? (
+      {showReplay && onNewDraw && onReplaySame ? (
         <ReplayTournamentDialog
           onClose={() => setShowReplay(false)}
           onNewDraw={onNewDraw}

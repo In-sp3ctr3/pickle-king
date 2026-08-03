@@ -1,8 +1,8 @@
 import {
   bracketSeedOrder,
   nextPowerOfTwo,
+  randomBracketSlots,
   seedPlayers,
-  socialBracketSlots,
 } from "./seeding";
 import { calculateMatchCap } from "./timing";
 import type {
@@ -92,8 +92,8 @@ export function createTournamentBracket(
         }).capMs
       : null;
   const orderedPlayers =
-    config.drawStyle === "social"
-      ? socialBracketSlots(seeded, bracketSize, config.randomSeed)
+    config.drawStyle === "random"
+      ? randomBracketSlots(seeded, bracketSize, config.randomSeed)
       : bracketSeedOrder(bracketSize).map((seed) =>
           seeded.find((player) => player.seed === seed),
         );

@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { SlidingChoice } from "@/src/shared/ui";
 import type { TournamentBracket } from "@/src/tournament";
 import { ChevronLeft, ChevronRight, Trophy } from "lucide-react";
 import {
@@ -75,29 +74,29 @@ export function BracketTree({
 
   return (
     <div className="bracket-tree-shell">
-      <SlidingChoice
-        ariaLabel="Tournament bracket section"
-        className="bracket-tree-nav"
-        onChange={moveViewport}
-        options={[
-          {
-            icon: <ChevronLeft aria-hidden="true" size={16} />,
-            label: "Left draw",
-            value: "left",
-          },
-          {
-            icon: <Trophy aria-hidden="true" size={16} />,
-            label: "Final",
-            value: "final",
-          },
-          {
-            icon: <ChevronRight aria-hidden="true" size={16} />,
-            label: "Right draw",
-            value: "right",
-          },
-        ]}
-        value={focus}
-      />
+      <nav aria-label="Tournament bracket section" className="bracket-tree-nav">
+        <BracketNavButton
+          active={focus === "left"}
+          label="Show left draw"
+          onClick={() => moveViewport("left")}
+        >
+          <ChevronLeft aria-hidden="true" size={19} />
+        </BracketNavButton>
+        <BracketNavButton
+          active={focus === "final"}
+          label="Show championship match"
+          onClick={() => moveViewport("final")}
+        >
+          <Trophy aria-hidden="true" size={18} />
+        </BracketNavButton>
+        <BracketNavButton
+          active={focus === "right"}
+          label="Show right draw"
+          onClick={() => moveViewport("right")}
+        >
+          <ChevronRight aria-hidden="true" size={19} />
+        </BracketNavButton>
+      </nav>
 
       <div
         aria-label="Connected tournament bracket. Each match contains two contenders and advances toward the center final."
@@ -121,7 +120,7 @@ export function BracketTree({
           ))}
           {layout.nodes.map((positioned, index) => (
             <motion.div
-              animate={{ scale: 1, y: 0 }}
+              animate={{ y: 0 }}
               className={`bracket-tree-node bracket-match-node ${
                 positioned.node.kind === "final"
                   ? "bracket-tree-node--final"
@@ -130,7 +129,7 @@ export function BracketTree({
               data-qa={
                 positioned.node.kind === "final" ? "final-match" : undefined
               }
-              initial={reducedMotion ? false : { scale: 0.96, y: 10 }}
+              initial={reducedMotion ? false : { y: 10 }}
               key={positioned.node.id}
               role="listitem"
               style={{
@@ -164,6 +163,30 @@ export function BracketTree({
         </div>
       </div>
     </div>
+  );
+}
+
+function BracketNavButton({
+  active,
+  children,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  children: ReactNode;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      aria-label={label}
+      aria-pressed={active}
+      onClick={onClick}
+      title={label}
+      type="button"
+    >
+      {children}
+    </button>
   );
 }
 

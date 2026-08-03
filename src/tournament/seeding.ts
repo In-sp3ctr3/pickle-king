@@ -60,29 +60,24 @@ export function bracketSeedOrder(size: number): number[] {
   return order;
 }
 
-export function socialBracketSlots(
+export function randomBracketSlots(
   seededPlayers: Player[],
   bracketSize: number,
   randomSeed: string,
 ): Array<Player | null> {
-  const random = randomFrom(`${randomSeed}:social-draw`);
+  const random = randomFrom(`${randomSeed}:random-draw`);
+  const shuffledPlayers = shuffle(seededPlayers, random);
   const byeCount = bracketSize - seededPlayers.length;
-  const byeIds = new Set(
-    seededPlayers
-      .map((player) => ({ player, order: random() }))
-      .sort((left, right) => left.order - right.order)
-      .slice(0, byeCount)
-      .map(({ player }) => player.id),
+  const byePlayers = shuffledPlayers.slice(0, byeCount);
+  const activePlayers = shuffledPlayers.slice(byeCount);
+  const matchups: Array<[Player, Player | null]> = [];
+  for (let index = 0; index < activePlayers.length; index += 2) {
+    matchups.push([activePlayers[index], activePlayers[index + 1]]);
+  }
+  for (const player of byePlayers) matchups.push([player, null]);
+  return shuffle(matchups, random).flatMap(([left, right]) =>
+    right && random() < 0.5 ? [right, left] : [left, right],
   );
-  const active = seededPlayers.filter(({ id }) => !byeIds.has(id));
-  const units: Array<[Player, Player | null]> = [];
-  for (let index = 0; index < active.length; index += 2) {
-    units.push([active[index], active[index + 1]]);
-  }
-  for (const player of seededPlayers.filter(({ id }) => byeIds.has(id))) {
-    units.push([player, null]);
-  }
-  return shuffle(units, random).flatMap(([left, right]) => [left, right]);
 }
 
 export function allocateByes(

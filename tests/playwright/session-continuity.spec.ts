@@ -90,12 +90,12 @@ test("safe renames retain results and structural edits rebuild the draw", async 
   await page.getByRole("button", { name: "End match" }).click();
   await page.getByRole("button", { name: /Keep score/ }).click();
   await page.getByRole("button", { name: "Confirm result" }).click();
-  await expect(page.getByText("1 of 4 matches final")).toBeVisible();
+  await expect(page.getByText("1 of 4 matches complete")).toBeVisible();
 
   await page.getByRole("button", { name: "Edit draw" }).click();
   await page.locator('.draw-editor input[value="Maya"]').fill("Patrick");
   await page.getByRole("button", { name: "Save names" }).click();
-  await expect(page.getByText("1 of 4 matches final")).toBeVisible();
+  await expect(page.getByText("1 of 4 matches complete")).toBeVisible();
   await expect(
     page.getByText("Patrick", { exact: true }).first(),
   ).toBeVisible();
@@ -108,14 +108,14 @@ test("safe renames retain results and structural edits rebuild the draw", async 
   await page
     .getByRole("button", { name: "Cancel and continue bracket as is" })
     .click();
-  await expect(page.getByText("1 of 4 matches final")).toBeVisible();
+  await expect(page.getByText("1 of 4 matches complete")).toBeVisible();
 
   await page.getByRole("button", { name: "Edit draw" }).click();
   await page.getByRole("button", { name: "Add forgotten player" }).click();
   await page.locator(".draw-editor__row input").last().fill("Late player");
   await page.getByRole("button", { name: "Review draw change" }).click();
   await page.getByRole("button", { name: "Rebuild from scratch" }).click();
-  await expect(page.getByText("0 of 5 matches final")).toBeVisible();
+  await expect(page.getByText("0 of 5 matches complete")).toBeVisible();
   await expect(
     page.getByText(/5 players · 3 automatic advances/),
   ).toBeVisible();
@@ -140,7 +140,9 @@ test("result sharing downloads a branded PNG when native file share is unavailab
     height: 270,
   });
   await download.saveAs("output/playwright/quick-share-card.png");
-  await expect(page.getByRole("status")).toHaveText("Download started");
+  await expect(
+    page.getByRole("button", { name: "Download result" }),
+  ).toHaveText("Saved");
 });
 
 test("a tournament bracket exports as an offline PNG", async ({ page }) => {
@@ -150,7 +152,7 @@ test("a tournament bracket exports as an offline PNG", async ({ page }) => {
   await openFresh(page);
   await buildTournament(page);
   await page.getByRole("button", { name: "Share bracket" }).click();
-  const dialog = page.getByRole("dialog", { name: "Bracket preview" });
+  const dialog = page.getByRole("dialog", { name: "Share bracket" });
   await expect(dialog.locator("[data-qa='share-preview']")).toBeVisible();
   const downloadPromise = page.waitForEvent("download");
   await dialog.getByRole("button", { name: "Download image" }).click();
@@ -158,7 +160,7 @@ test("a tournament bracket exports as an offline PNG", async ({ page }) => {
   expect(download.suggestedFilename()).toBe("pickle-king-bracket.png");
   await expectBrandedPng(download, 1600, 1200, {
     x: 700,
-    y: 100,
+    y: 0,
     width: 200,
     height: 200,
   });

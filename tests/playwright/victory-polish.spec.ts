@@ -85,6 +85,14 @@ test("the result review is a branded, single-crown celebration", async ({
     page.getByRole("button", { name: "Confirm result" }),
   ).toBeFocused();
   await expect(dialog.getByText(/Building image/)).toHaveCount(0);
+  for (const box of await dialog
+    .locator(".share-format-choice button")
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getBoundingClientRect().toJSON()),
+    )) {
+    expect(box.width).toBeGreaterThanOrEqual(48);
+    expect(box.height).toBeGreaterThanOrEqual(48);
+  }
   await expect(
     dialog.locator("[data-qa='victory-confetti'] canvas"),
   ).toBeVisible();
@@ -95,7 +103,7 @@ test("the result review is a branded, single-crown celebration", async ({
     path: "output/playwright/victory-dialog-ipad.png",
   });
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Edit score" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Feed" })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
   await expect(
     page.getByRole("button", { name: "Confirm result" }),
@@ -155,6 +163,53 @@ test("a 4 to 11 result keeps double-digit scores in separate lanes", async ({
   await page.getByRole("button", { name: "Download result" }).click();
   const download = await downloadPromise;
   await download.saveAs("output/playwright/result-share-4-11.png");
+});
+
+test("a 40-character winner stays inside the preview while it builds", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function delayedToBlob(
+      callback,
+      type,
+      quality,
+    ) {
+      window.setTimeout(
+        () => original.call(this, callback, type, quality),
+        1_200,
+      );
+    };
+  });
+  await page.addInitScript(() => window.localStorage.clear());
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Quick match" }).click();
+  await page
+    .getByLabel("Side A")
+    .fill("Samantha Elizabeth Richardson-Montgomery");
+  await page
+    .getByLabel("Side B")
+    .fill("Christopher Nathaniel Thompson-Alexander");
+  await page.getByLabel("Play to").fill("2");
+  await page.getByRole("button", { name: "Open scorer" }).click();
+  await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
+  const fallback = page.locator(".result-dialog__preview-fallback");
+  await expect(fallback).toBeVisible();
+  const contained = await fallback.evaluate((element) => {
+    const parent = element.getBoundingClientRect();
+    const winner = element.querySelector("strong")?.getBoundingClientRect();
+    return Boolean(
+      winner &&
+      winner.left >= parent.left - 1 &&
+      winner.right <= parent.right + 1 &&
+      winner.top >= parent.top - 1 &&
+      winner.bottom <= parent.bottom + 1,
+    );
+  });
+  expect(contained).toBe(true);
+  await expect(page.locator("[data-qa='result-preview']")).toBeVisible();
 });
 
 test("draw utilities live with the bracket they affect", async ({ page }) => {

@@ -2,15 +2,15 @@ import type { QuickMatchRecord } from "../../history";
 import type { FinishReason, ScoringState } from "../../match/types";
 import {
   drawBrandMark,
-  drawExportBackdrop,
   drawLimeGlow,
   drawShareFooter,
-  drawStaticConfetti,
   shareCanvasSurface,
   shareColors,
   shareFittedText,
   shareText,
 } from "./share-canvas";
+import { shareDimensions, type ShareFormat } from "./share-format";
+import { drawEdgeFragments, drawExportBackdrop } from "./share-scene";
 
 interface ScoreCardData {
   labelA: string;
@@ -22,6 +22,7 @@ interface ScoreCardData {
 
 export async function quickShareCanvas(
   input: QuickMatchRecord | ScoringState,
+  format: ShareFormat = "feed",
 ): Promise<HTMLCanvasElement> {
   const record = "labels" in input;
   const data: ScoreCardData = {
@@ -33,15 +34,13 @@ export async function quickShareCanvas(
   };
   if (!input.winner) throw new Error("A result needs a winner before sharing.");
 
-  const { element, context, mark } = await shareCanvasSurface(1080, 1350);
-  drawExportBackdrop(context, 1080, 1350, 460);
-  drawLimeGlow(context, 540, 180, 330);
-  drawStaticConfetti(
-    context,
-    { x: 38, y: 30, width: 1004, height: 540 },
-    17,
-    52,
+  const { height, width } = shareDimensions(format);
+  const { arena, element, context, mark } = await shareCanvasSurface(
+    width,
+    height,
   );
+  drawExportBackdrop(context, width, height, arena, height * 0.31);
+  drawEdgeFragments(context, width, Math.min(height * 0.32, 540), 17);
 
   shareText(context, "PICKLE KING", 54, 66, {
     color: shareColors.lime,
@@ -52,41 +51,78 @@ export async function quickShareCanvas(
     color: shareColors.mist,
     font: "800 19px Manrope, sans-serif",
   });
-  drawBrandMark(context, mark, 540, 62, 172);
+  drawBrandMark(context, mark, 540, height * 0.06, 172);
 
-  shareText(context, "F I N A L   S C O R E", 540, 280, {
+  shareText(context, "F I N A L   S C O R E", 540, height * 0.22, {
     align: "center",
     color: shareColors.lime,
     font: "900 22px Manrope, sans-serif",
   });
   const winnerName = data.winner === "A" ? data.labelA : data.labelB;
-  shareFittedText(context, winnerName.toUpperCase(), 540, 414, {
-    align: "center",
-    maxSize: 132,
-    minSize: 64,
-    maxWidth: 930,
-  });
-  drawWideWins(context, 540, 596);
-  shareText(context, "C R O W N   S E C U R E D", 540, 640, {
+  drawWinnerName(context, winnerName, height);
+  drawWideWins(context, 540, height * 0.475);
+  shareText(context, "C R O W N   S E C U R E D", 540, height * 0.515, {
     align: "center",
     color: shareColors.lime,
     font: "900 18px Manrope, sans-serif",
   });
 
-  drawScoreArena(context, data);
+  drawScoreArena(context, data, height);
   shareText(
     context,
     finishLabel(input.finishReason, input.targetScore),
     540,
-    1108,
+    height * 0.865,
     {
       align: "center",
       color: shareColors.lime,
       font: "900 21px Manrope, sans-serif",
     },
   );
-  drawShareFooter(context, 1080, 1290);
+  drawShareFooter(context, width, height - 60);
   return element;
+}
+
+function drawWinnerName(
+  context: CanvasRenderingContext2D,
+  winnerName: string,
+  height: number,
+) {
+  const value = winnerName.toUpperCase();
+  context.font = "900 64px 'Archivo Black', sans-serif";
+  if (context.measureText(value).width <= 930) {
+    shareFittedText(context, value, 540, height * 0.32, {
+      align: "center",
+      maxSize: 132,
+      minSize: 64,
+      maxWidth: 930,
+    });
+    return;
+  }
+  const words = value.split(/\s+/);
+  let split = 1;
+  let narrowest = Number.POSITIVE_INFINITY;
+  for (let index = 1; index < words.length; index += 1) {
+    const width = Math.max(
+      context.measureText(words.slice(0, index).join(" ")).width,
+      context.measureText(words.slice(index).join(" ")).width,
+    );
+    if (width < narrowest) {
+      narrowest = width;
+      split = index;
+    }
+  }
+  for (const [line, y] of [
+    [words.slice(0, split).join(" "), height * 0.285],
+    [words.slice(split).join(" "), height * 0.35],
+  ] as const) {
+    shareFittedText(context, line, 540, y, {
+      align: "center",
+      maxSize: 84,
+      minSize: 52,
+      maxWidth: 930,
+    });
+  }
 }
 
 function getStageLabel(input: QuickMatchRecord | ScoringState) {
@@ -129,38 +165,61 @@ function drawWideWins(
 function drawScoreArena(
   context: CanvasRenderingContext2D,
   data: ScoreCardData,
+  height: number,
 ) {
-  drawLimeGlow(context, 540, 860, 500);
+  const top = height * 0.54;
+  const arenaHeight = height * 0.25;
+  const bottom = top + arenaHeight;
+  drawLimeGlow(context, 540, top + arenaHeight / 2, 500);
   context.save();
-  context.fillStyle = "rgba(21, 27, 19, 0.96)";
+  const panel = context.createLinearGradient(0, top, 0, bottom);
+  panel.addColorStop(0, "rgba(31, 40, 27, 0.98)");
+  panel.addColorStop(1, "rgba(10, 13, 9, 0.98)");
+  context.fillStyle = panel;
   context.strokeStyle = shareColors.lime;
   context.lineWidth = 4;
   context.beginPath();
-  context.moveTo(122, 704);
-  context.lineTo(958, 704);
-  context.lineTo(1020, 1028);
-  context.lineTo(60, 1028);
+  context.moveTo(122, top);
+  context.lineTo(958, top);
+  context.lineTo(1020, bottom);
+  context.lineTo(60, bottom);
   context.closePath();
   context.fill();
   context.stroke();
   context.strokeStyle = "rgba(200, 255, 61, 0.45)";
   context.lineWidth = 2;
   context.beginPath();
-  context.moveTo(540, 740);
-  context.lineTo(540, 982);
+  context.moveTo(540, top + 36);
+  context.lineTo(540, bottom - 46);
   context.stroke();
   context.restore();
 
-  drawScoreSide(context, data.labelA, data.scoreA, 320, data.winner === "A");
-  drawScoreSide(context, data.labelB, data.scoreB, 760, data.winner === "B");
+  drawScoreSide(
+    context,
+    data.labelA,
+    data.scoreA,
+    320,
+    data.winner === "A",
+    top,
+    arenaHeight,
+  );
+  drawScoreSide(
+    context,
+    data.labelB,
+    data.scoreB,
+    760,
+    data.winner === "B",
+    top,
+    arenaHeight,
+  );
   context.fillStyle = shareColors.court;
   context.strokeStyle = shareColors.lime;
   context.lineWidth = 2;
   context.beginPath();
-  context.arc(540, 858, 34, 0, Math.PI * 2);
+  context.arc(540, top + arenaHeight / 2, 34, 0, Math.PI * 2);
   context.fill();
   context.stroke();
-  shareText(context, "VS", 540, 868, {
+  shareText(context, "VS", 540, top + arenaHeight / 2 + 10, {
     align: "center",
     color: shareColors.lime,
     font: "900 26px Manrope, sans-serif",
@@ -173,15 +232,17 @@ function drawScoreSide(
   score: number,
   x: number,
   winner: boolean,
+  top: number,
+  arenaHeight: number,
 ) {
-  shareFittedText(context, String(score), x, 946, {
+  shareFittedText(context, String(score), x, top + arenaHeight * 0.67, {
     align: "center",
     color: winner ? shareColors.lime : shareColors.chalk,
     maxSize: 230,
     minSize: 180,
     maxWidth: 330,
   });
-  shareFittedText(context, name.toUpperCase(), x, 1001, {
+  shareFittedText(context, name.toUpperCase(), x, top + arenaHeight * 0.87, {
     align: "center",
     color: winner ? shareColors.lime : shareColors.chalk,
     family: "Manrope, sans-serif",

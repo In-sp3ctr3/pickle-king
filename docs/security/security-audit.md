@@ -1,11 +1,12 @@
 # Security Audit
 
-Date: 2026-08-02
+Date: 2026-08-03
 
 ## Scope
 
 Session-history persistence, bracket editing, remembered player names,
-on-device share-image generation, and the public repository boundary.
+on-device share-image generation, archived-result viewing, and the public
+repository boundary.
 
 ## Results
 
@@ -18,6 +19,11 @@ on-device share-image generation, and the public repository boundary.
 - History is schema-validated, separately recoverable, and bounded.
 - Share cancellation is non-fatal; unsupported file sharing falls back to a
   local download.
+- Feed, Story, stats, recap, and bracket PNGs are composed from local assets.
+  The only transmission boundary remains the user-invoked Web Share API.
+- Archived results are selected by an ID already present in the validated,
+  bounded history store. A missing or deleted ID returns to history.
+- `npm audit --audit-level=high` reported zero vulnerabilities on 2026-08-03.
 
 Gitleaks, Semgrep, OSV-Scanner, and Trivy were not installed in the local
 environment. GitHub secret scanning, CodeQL, dependency review, and the locked

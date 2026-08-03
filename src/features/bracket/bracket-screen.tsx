@@ -4,11 +4,11 @@ import "@/app/styles/bracket.css";
 import {
   getNextMatch,
   getReadySchedule,
+  type DrawStyle,
   type LateEntryPlan,
   type TournamentBracket,
 } from "@/src/tournament";
-import { Trophy } from "lucide-react";
-import { Pencil, Share2 } from "lucide-react";
+import { Dices, Pencil, Share2, Trophy } from "lucide-react";
 import { useState } from "react";
 import type { Player } from "@/src/tournament";
 import {
@@ -28,6 +28,8 @@ export interface BracketScreenProps {
   bracket: TournamentBracket;
   onCorrectMatch: CorrectMatch;
   onRenamePlayer: RenamePlayer;
+  drawStyle?: DrawStyle;
+  onRerollRandomDraw?: () => void;
   onStartMatch: (matchId: string) => void;
   sessionLabel?: string;
   timingWarning?: string;
@@ -59,6 +61,8 @@ export function BracketScreen({
   bracket,
   onCorrectMatch,
   onRenamePlayer,
+  drawStyle,
+  onRerollRandomDraw,
   onStartMatch,
   sessionLabel,
   timingWarning,
@@ -99,6 +103,9 @@ export function BracketScreen({
     0,
     bracket.bracketSize - bracket.players.length,
   );
+  const drawHasStarted = bracket.matches.some(
+    ({ startedAt }) => startedAt !== null,
+  );
 
   return (
     <main className="bracket-screen" data-qa="bracket-screen">
@@ -112,7 +119,7 @@ export function BracketScreen({
         </div>
         <div className="bracket-screen__header-actions">
           <p className="bracket-screen__progress">
-            {completeCount} of {bracket.matches.length} matches final
+            {completeCount} of {bracket.matches.length} matches complete
           </p>
         </div>
       </header>
@@ -154,6 +161,20 @@ export function BracketScreen({
                 : "Follow each line from the opening round to the final."}
             </p>
             <div className="bracket-screen__draw-tools" aria-label="Draw tools">
+              {drawStyle === "random" &&
+              onRerollRandomDraw &&
+              !drawHasStarted ? (
+                <button
+                  aria-label="Shuffle random draw again"
+                  data-qa="reroll-random-draw"
+                  onClick={onRerollRandomDraw}
+                  title="Shuffle random draw again"
+                  type="button"
+                >
+                  <Dices aria-hidden="true" size={18} />
+                  Shuffle again
+                </button>
+              ) : null}
               <button
                 data-qa="edit-draw"
                 onClick={() => setEditing(true)}
@@ -168,10 +189,9 @@ export function BracketScreen({
                     alt: "Tournament bracket share image",
                     aspect: "landscape",
                     build: () => bracketShareCanvas(bracket),
-                    description: "Check the complete draw before sharing it.",
                     fileName: "pickle-king-bracket.png",
                     key: `bracket:${bracket.finalMatchId}:${completeCount}`,
-                    title: "Bracket preview",
+                    title: "Share bracket",
                   });
                 }}
                 type="button"

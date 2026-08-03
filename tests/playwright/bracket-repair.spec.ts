@@ -182,7 +182,7 @@ test("placement lock keeps the bracket and offers the late player to Quick Match
     .getByRole("button", { name: "Cancel and continue bracket as is" })
     .click();
   await expect(page.locator("[data-qa='bracket-screen']")).toBeVisible();
-  await expect(page.getByText("3 of 4 matches final")).toBeVisible();
+  await expect(page.getByText("3 of 4 matches complete")).toBeVisible();
 
   await reviewSam();
   await page.getByRole("button", { name: "Open Quick Match" }).click();

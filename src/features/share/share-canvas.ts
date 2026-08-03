@@ -11,6 +11,7 @@ export const shareColors = {
 };
 
 let brandMarkPromise: Promise<HTMLImageElement> | null = null;
+let arenaPromise: Promise<HTMLImageElement | null> | null = null;
 
 function loadBrandMark() {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -33,8 +34,32 @@ function brandMark() {
   return brandMarkPromise;
 }
 
+function loadArena() {
+  return new Promise<HTMLImageElement | null>((resolve) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      void image.decode().then(
+        () => resolve(image),
+        () => resolve(image),
+      );
+    };
+    image.onerror = () => resolve(null);
+    image.src = "/brand/pickle-king-arena.webp";
+  });
+}
+
+function arenaBackground() {
+  arenaPromise ??= loadArena();
+  return arenaPromise;
+}
+
 export async function shareCanvasSurface(width: number, height: number) {
-  const [mark] = await Promise.all([brandMark(), document.fonts.ready]);
+  const [mark, arena] = await Promise.all([
+    brandMark(),
+    arenaBackground(),
+    document.fonts.ready,
+  ]);
   const element = document.createElement("canvas");
   element.width = width;
   element.height = height;
@@ -42,7 +67,7 @@ export async function shareCanvasSurface(width: number, height: number) {
   if (!context) throw new Error("This browser cannot create share images.");
   context.fillStyle = shareColors.court;
   context.fillRect(0, 0, width, height);
-  return { context, element, mark };
+  return { arena, context, element, mark };
 }
 
 export function shareText(
@@ -119,44 +144,6 @@ export function drawBrandMark(
   context.drawImage(mark, centerX - size / 2, top, size, size);
 }
 
-export function drawExportBackdrop(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-  focusY = height * 0.36,
-) {
-  const glow = context.createRadialGradient(
-    width / 2,
-    focusY,
-    0,
-    width / 2,
-    focusY,
-    width * 0.62,
-  );
-  glow.addColorStop(0, "rgba(149, 199, 33, 0.18)");
-  glow.addColorStop(0.35, "rgba(90, 122, 19, 0.08)");
-  glow.addColorStop(1, "rgba(9, 11, 8, 0)");
-  context.fillStyle = glow;
-  context.fillRect(0, 0, width, height);
-
-  context.save();
-  context.globalAlpha = 0.52;
-  context.strokeStyle = "#273020";
-  context.lineWidth = Math.max(2, width / 700);
-  const horizon = height * 0.54;
-  for (const edge of [0.06, 0.27, 0.73, 0.94]) {
-    context.beginPath();
-    context.moveTo(width / 2, horizon);
-    context.lineTo(width * edge, height * 0.93);
-    context.stroke();
-  }
-  context.beginPath();
-  context.moveTo(width * 0.05, height * 0.93);
-  context.lineTo(width * 0.95, height * 0.93);
-  context.stroke();
-  context.restore();
-}
-
 export function drawLimeGlow(
   context: CanvasRenderingContext2D,
   x: number,
@@ -206,47 +193,6 @@ export function drawTrophy(
   context.fillRect(-size * 0.055, size * 0.16, size * 0.11, size * 0.28);
   context.fillRect(-size * 0.25, size * 0.42, size * 0.5, size * 0.1);
   context.restore();
-}
-
-function random(seed: number) {
-  let state = seed >>> 0;
-  return () => {
-    state = (Math.imul(state, 1_664_525) + 1_013_904_223) >>> 0;
-    return state / 4_294_967_296;
-  };
-}
-
-export function drawStaticConfetti(
-  context: CanvasRenderingContext2D,
-  bounds: { x: number; y: number; width: number; height: number },
-  seed: number,
-  count = 48,
-) {
-  const next = random(seed);
-  const colors = [
-    shareColors.lime,
-    shareColors.chalk,
-    shareColors.gold,
-    "#86a825",
-  ];
-  for (let index = 0; index < count; index += 1) {
-    const x = bounds.x + next() * bounds.width;
-    const y = bounds.y + next() * bounds.height;
-    const size = 5 + next() * 10;
-    context.save();
-    context.translate(x, y);
-    context.rotate(next() * Math.PI);
-    context.globalAlpha = 0.55 + next() * 0.4;
-    context.fillStyle = colors[index % colors.length];
-    if (index % 4 === 0) {
-      context.beginPath();
-      context.arc(0, 0, size / 2, 0, Math.PI * 2);
-      context.fill();
-    } else {
-      context.fillRect(-size / 2, -size, size, size * 2);
-    }
-    context.restore();
-  }
 }
 
 export function drawShareFooter(

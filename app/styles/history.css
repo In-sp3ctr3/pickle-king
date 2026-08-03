@@ -87,7 +87,9 @@
 }
 
 .session-ledger__row strong {
+  min-width: 0;
   font-size: clamp(1rem, 2.2vw, 1.4rem);
+  overflow-wrap: anywhere;
 }
 
 .session-ledger__row b {
@@ -117,9 +119,14 @@
   padding: 0.6rem 0.9rem;
 }
 
-.session-ledger__actions button:first-child {
+.session-ledger__actions .session-ledger__view,
+.session-ledger__actions button:first-child:not(:last-child) {
   background: var(--lime);
   color: var(--court);
+}
+
+.session-ledger__actions button:last-child {
+  padding-inline: 0.6rem;
 }
 
 @media (max-width: 640px) {
@@ -135,5 +142,14 @@
 
   .session-ledger__row {
     padding: 1rem 0;
+  }
+
+  .session-ledger__actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .session-ledger__view {
+    flex: 1;
   }
 }

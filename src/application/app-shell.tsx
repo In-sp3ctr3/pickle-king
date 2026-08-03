@@ -116,6 +116,9 @@ export function AppShell() {
       dispatch({ type: "navigate", screen: done ? "results" : "bracket" });
     }
   };
+  const archivedTournament = state.history.tournaments.find(
+    ({ id }) => id === state.historyTournamentId,
+  );
   return (
     <div className="app-shell">
       <AppNavigation
@@ -227,8 +230,18 @@ export function AppShell() {
             clearHistory(window.localStorage);
             dispatch({ type: "reset-history", now: Date.now() });
           }}
+          onViewResults={(id) =>
+            dispatch({
+              type: "view-history-tournament",
+              id,
+              now: Date.now(),
+            })
+          }
           recoveryMessage={state.historyRecoveryMessage}
         />
+      ) : null}
+      {state.screen === "history-results" && archivedTournament ? (
+        <ResultsScreen bracket={archivedTournament.bracket} />
       ) : null}
     </div>
   );

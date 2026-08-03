@@ -241,21 +241,21 @@
         },
         {
           "name": "show left draw",
-          "selector": ".bracket-tree-nav button:nth-child(1)",
+          "selector": ".bracket-tree-nav button[aria-label='Show left draw']",
           "sequence": "bracket-pan-left",
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
-          "name": "show final",
-          "selector": ".bracket-tree-nav button:nth-child(2)",
+          "name": "show championship match",
+          "selector": ".bracket-tree-nav button[aria-label='Show championship match']",
           "sequence": "bracket-pan-final",
           "action": "click",
           "expect": { "visible": "[data-qa='final-match']" }
         },
         {
           "name": "show right draw",
-          "selector": ".bracket-tree-nav button:nth-child(3)",
+          "selector": ".bracket-tree-nav button[aria-label='Show right draw']",
           "sequence": "bracket-pan-right",
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
@@ -273,6 +273,13 @@
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "reroll untouched random draw",
+          "selector": "[data-qa='reroll-random-draw']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
         }
       ],
       "motionChecks": [],
@@ -596,6 +603,13 @@
           "expect": { "visible": "[data-qa='share-preview']" }
         },
         {
+          "name": "tournament share formats",
+          "selector": ".tournament-share-dialog .share-format-choice button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
           "name": "tournament share output actions",
           "selector": ".tournament-share-dialog .share-preview-actions button",
           "auditOnly": true,
@@ -675,6 +689,142 @@
         {
           "name": "history remains available",
           "selector": "[data-qa='history-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "history-populated",
+      "path": "/",
+      "prepare": "four-player-history",
+      "primaryActionSelector": ".session-ledger__view",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/history-populated-desktop-source.png",
+          "render": "test-results/frontend-captures/history-populated-desktop.png",
+          "comparison": "test-results/frontend-comparisons/history-populated-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/history-populated-mobile-source.png",
+          "render": "test-results/frontend-captures/history-populated-mobile.png",
+          "comparison": "test-results/frontend-comparisons/history-populated-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "populated history brand home",
+          "selector": "[data-qa='brand-home']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "populated history back",
+          "selector": "[data-qa='app-back']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "view archived tournament results",
+          "selector": ".session-ledger__view",
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        },
+        {
+          "name": "share archived bracket",
+          "selector": "[data-qa='share-archived-bracket']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "remove archived tournament",
+          "selector": "button[aria-label='Remove tournament from history']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='history-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "populated history remains available",
+          "selector": "[data-qa='history-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "history-results",
+      "path": "/",
+      "prepare": "four-player-history-results",
+      "primaryActionSelector": "[data-qa='share-tournament']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/history-results-desktop-source.png",
+          "render": "test-results/frontend-captures/history-results-desktop.png",
+          "comparison": "test-results/frontend-comparisons/history-results-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/history-results-mobile-source.png",
+          "render": "test-results/frontend-captures/history-results-mobile.png",
+          "comparison": "test-results/frontend-comparisons/history-results-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "archived results brand home",
+          "selector": "[data-qa='brand-home']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "archived results back to history",
+          "selector": "[data-qa='app-back']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='history-screen']" }
+        },
+        {
+          "name": "share archived tournament",
+          "selector": "[data-qa='share-tournament']",
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "archived tournament share choices",
+          "selector": ".tournament-share-dialog [role='tab']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "archived tournament share formats",
+          "selector": ".tournament-share-dialog .share-format-choice button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "archived tournament share output actions",
+          "selector": ".tournament-share-dialog .share-preview-actions button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "close archived tournament share preview",
+          "selector": "button[aria-label='Close share preview']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "archived results remain available",
+          "selector": "[data-qa='results']",
           "expect": "visible"
         }
       ],

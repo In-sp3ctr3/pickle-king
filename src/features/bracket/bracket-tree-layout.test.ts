@@ -12,7 +12,7 @@ function players(count: number): Player[] {
 
 function bracket(count: number) {
   return createTournamentBracket(players(count), {
-    drawStyle: "competitive",
+    drawStyle: "ranked",
     bookingMinutes: 120,
     randomSeed: "tree-layout",
     targetScore: 11,
@@ -70,5 +70,26 @@ describe("connected bracket tree layout", () => {
     expect(byes).toHaveLength(2);
     expect(byes.every(({ player }) => player)).toBe(true);
     expect(layout.nodes.map(({ node }) => node.kind)).not.toContain("entry");
+  });
+
+  it("places the actual random-draw bye recipients in the connected tree", () => {
+    const tournament = createTournamentBracket(players(6), {
+      drawStyle: "random",
+      bookingMinutes: 120,
+      randomSeed: "tree-random-byes",
+      targetScore: 11,
+      timingMode: "untimed",
+      transitionSeconds: 60,
+      warmupMinutes: 10,
+    });
+    const layout = createTreeLayout(tournament);
+    const byeIds = layout.nodes.flatMap(({ node }) =>
+      node.kind === "bye" ? [node.player.id] : [],
+    );
+    const directlyAdvancedIds = tournament.matches
+      .filter(({ kind, round }) => kind === "elimination" && round === 2)
+      .flatMap(({ sourceA, sourceB }) => [sourceA, sourceB])
+      .flatMap((source) => (source.type === "player" ? [source.playerId] : []));
+    expect(new Set(byeIds)).toEqual(new Set(directlyAdvancedIds));
   });
 });
