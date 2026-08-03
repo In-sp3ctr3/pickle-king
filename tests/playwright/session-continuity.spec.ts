@@ -130,9 +130,9 @@ test("result sharing downloads a branded PNG when native file share is unavailab
   await openFresh(page);
   await completeQuickMatch(page);
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Share result" }).click();
+  await page.getByRole("button", { name: "Download result" }).click();
   const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^pickle-king-score-.*\.png$/);
+  expect(download.suggestedFilename()).toMatch(/^pickle-king-.*\.png$/);
   await expectBrandedPng(download, 1080, 1350, {
     x: 410,
     y: 90,
@@ -140,7 +140,7 @@ test("result sharing downloads a branded PNG when native file share is unavailab
     height: 270,
   });
   await download.saveAs("output/playwright/quick-share-card.png");
-  await expect(page.getByText("Score image downloaded.")).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText("Download started");
 });
 
 test("a tournament bracket exports as an offline PNG", async ({ page }) => {
@@ -149,11 +149,14 @@ test("a tournament bracket exports as an offline PNG", async ({ page }) => {
   });
   await openFresh(page);
   await buildTournament(page);
-  const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Share bracket" }).click();
+  const dialog = page.getByRole("dialog", { name: "Bracket preview" });
+  await expect(dialog.locator("[data-qa='share-preview']")).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Download image" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("pickle-king-bracket.png");
-  await expectBrandedPng(download, 1600, 1000, {
+  await expectBrandedPng(download, 1600, 1200, {
     x: 700,
     y: 100,
     width: 200,

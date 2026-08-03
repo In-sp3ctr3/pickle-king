@@ -10,9 +10,12 @@ import {
 import { Trophy } from "lucide-react";
 import { Pencil, Share2 } from "lucide-react";
 import { useState } from "react";
-import { useTransientStatus } from "@/src/shared/use-transient-status";
 import type { Player } from "@/src/tournament";
-import { bracketShareCanvas, shareCanvas } from "../share";
+import {
+  bracketShareCanvas,
+  ShareImageDialog,
+  type ShareImageRequest,
+} from "../share";
 import { BracketEditorDialog } from "./bracket-editor-dialog";
 import { BracketTree } from "./bracket-tree";
 import { LateEntryDialog } from "./late-entry-dialog";
@@ -75,8 +78,9 @@ export function BracketScreen({
       }
     | undefined
   >();
-  const [shareStatus, setShareStatus] = useTransientStatus();
-  const [sharing, setSharing] = useState(false);
+  const [shareRequest, setShareRequest] = useState<ShareImageRequest | null>(
+    null,
+  );
   const nextMatch = getNextMatch(bracket);
   const readySchedule = getReadySchedule(bracket);
   const runOfShow = [
@@ -159,34 +163,21 @@ export function BracketScreen({
               </button>
               <button
                 data-qa="share-bracket"
-                disabled={sharing}
                 onClick={() => {
-                  if (sharing) return;
-                  setSharing(true);
-                  setShareStatus("Building image…");
-                  void shareCanvas(
-                    bracketShareCanvas(bracket),
-                    "pickle-king-bracket.png",
-                    "Pickle King tournament bracket",
-                  )
-                    .then((outcome) =>
-                      setShareStatus(
-                        outcome === "downloaded"
-                          ? "Bracket image downloaded."
-                          : outcome === "shared"
-                            ? "Share sheet opened."
-                            : "Sharing cancelled.",
-                      ),
-                    )
-                    .catch(() =>
-                      setShareStatus("The bracket image could not be shared."),
-                    )
-                    .finally(() => setSharing(false));
+                  setShareRequest({
+                    alt: "Tournament bracket share image",
+                    aspect: "landscape",
+                    build: () => bracketShareCanvas(bracket),
+                    description: "Check the complete draw before sharing it.",
+                    fileName: "pickle-king-bracket.png",
+                    key: `bracket:${bracket.finalMatchId}:${completeCount}`,
+                    title: "Bracket preview",
+                  });
                 }}
                 type="button"
               >
                 <Share2 aria-hidden="true" size={18} />
-                {sharing ? "Building image…" : "Share bracket"}
+                Share bracket
               </button>
             </div>
           </div>
@@ -279,9 +270,12 @@ export function BracketScreen({
           player={lateReview.player}
         />
       ) : null}
-      <p aria-live="polite" className="share-status">
-        {shareStatus}
-      </p>
+      {shareRequest ? (
+        <ShareImageDialog
+          onClose={() => setShareRequest(null)}
+          request={shareRequest}
+        />
+      ) : null}
     </main>
   );
 }

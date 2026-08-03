@@ -2,9 +2,13 @@
 
 import { AlertTriangle, Share2, Trash2, Trophy } from "lucide-react";
 import { useState } from "react";
-import { useTransientStatus } from "../../shared/use-transient-status";
 import type { SessionHistoryV1 } from "../../history";
-import { bracketShareCanvas, quickShareCanvas, shareCanvas } from "../share";
+import {
+  bracketShareCanvas,
+  quickShareCanvas,
+  ShareImageDialog,
+  type ShareImageRequest,
+} from "../share";
 
 function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, {
@@ -24,32 +28,9 @@ export function HistoryScreen({
   onRemove: (id: string, kind: "quick" | "tournament") => void;
   onReset: () => void;
 }) {
-  const [status, setStatus] = useTransientStatus();
-  const [sharingId, setSharingId] = useState<string | null>(null);
-  async function share(
-    canvas: Promise<HTMLCanvasElement>,
-    fileName: string,
-    title: string,
-    id: string,
-  ) {
-    if (sharingId) return;
-    setSharingId(id);
-    setStatus("Building image…");
-    try {
-      const outcome = await shareCanvas(canvas, fileName, title);
-      setStatus(
-        outcome === "shared"
-          ? "Share sheet opened."
-          : outcome === "downloaded"
-            ? "Image downloaded."
-            : "Sharing cancelled.",
-      );
-    } catch {
-      setStatus("The image could not be shared. Try again.");
-    } finally {
-      setSharingId(null);
-    }
-  }
+  const [shareRequest, setShareRequest] = useState<ShareImageRequest | null>(
+    null,
+  );
   if (recoveryMessage) {
     return (
       <main className="history-screen" data-qa="history-screen">
@@ -111,14 +92,16 @@ export function HistoryScreen({
               </div>
               <div className="session-ledger__actions">
                 <button
-                  disabled={sharingId !== null}
                   onClick={() =>
-                    void share(
-                      quickShareCanvas(match),
-                      `pickle-king-${match.completedAt}.png`,
-                      "Pickle King final score",
-                      match.id,
-                    )
+                    setShareRequest({
+                      alt: `${match.labels.sideA} versus ${match.labels.sideB} final score`,
+                      aspect: "portrait",
+                      build: () => quickShareCanvas(match),
+                      description: "Check the final score before sharing it.",
+                      fileName: `pickle-king-${match.completedAt}.png`,
+                      key: `quick:${match.id}`,
+                      title: "Result preview",
+                    })
                   }
                   type="button"
                 >
@@ -160,14 +143,17 @@ export function HistoryScreen({
                 </div>
                 <div className="session-ledger__actions">
                   <button
-                    disabled={sharingId !== null}
                     onClick={() =>
-                      void share(
-                        bracketShareCanvas(item.bracket),
-                        `pickle-king-bracket-${item.completedAt}.png`,
-                        "Pickle King tournament bracket",
-                        item.id,
-                      )
+                      setShareRequest({
+                        alt: `${champion} tournament bracket`,
+                        aspect: "landscape",
+                        build: () => bracketShareCanvas(item.bracket),
+                        description:
+                          "Check the completed draw before sharing it.",
+                        fileName: `pickle-king-bracket-${item.completedAt}.png`,
+                        key: `tournament:${item.id}`,
+                        title: "Bracket preview",
+                      })
                     }
                     type="button"
                   >
@@ -186,9 +172,12 @@ export function HistoryScreen({
           })}
         </section>
       ) : null}
-      <p aria-live="polite" className="share-status">
-        {status}
-      </p>
+      {shareRequest ? (
+        <ShareImageDialog
+          onClose={() => setShareRequest(null)}
+          request={shareRequest}
+        />
+      ) : null}
     </main>
   );
 }

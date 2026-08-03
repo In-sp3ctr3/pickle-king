@@ -1,110 +1,186 @@
 import type { Match, TournamentBracket } from "../../tournament";
 import {
+  drawBracketPodium,
+  drawChallengeSummary,
+} from "./bracket-share-extras";
+import {
+  eliminationSharePositions,
+  matchSources,
+  resolvedSide,
+  sourceFallback,
+  type ShareMatchPosition,
+} from "./bracket-share-layout";
+import {
   drawBrandMark,
+  drawExportBackdrop,
+  drawLimeGlow,
   drawShareFooter,
   drawStaticConfetti,
-  fitShareText,
+  drawTrophy,
+  fitCanvasText,
   shareCanvasSurface,
   shareColors,
+  shareFittedText,
   shareText,
 } from "./share-canvas";
 
-interface Position {
-  x: number;
-  y: number;
-}
+export async function bracketShareCanvas(
+  bracket: TournamentBracket,
+): Promise<HTMLCanvasElement> {
+  const { element, context, mark } = await shareCanvasSurface(1600, 1200);
+  const names = new Map(bracket.players.map(({ id, name }) => [id, name]));
+  const matchLookup = new Map(
+    bracket.matches.map((match) => [match.id, match]),
+  );
+  const elimination = bracket.matches.filter(
+    ({ kind }) => kind === "elimination",
+  );
+  const final = matchLookup.get(bracket.finalMatchId);
+  const bronze = matchLookup.get(bracket.bronzeMatchId);
+  const champion = final?.winnerId ? names.get(final.winnerId) : null;
 
-function drawMatch(
-  context: CanvasRenderingContext2D,
-  match: Match,
-  position: Position,
-  names: Map<string, string>,
-) {
-  const width = 252;
-  context.fillStyle = shareColors.surface;
-  context.fillRect(position.x, position.y, width, 88);
-  const label = (ids: string[] | undefined) =>
-    ids?.map((id) => names.get(id) ?? "Player").join(" + ") ?? "TBD";
-  for (const [side, y] of [
-    [match.sideA, 33],
-    [match.sideB, 69],
-  ] as const) {
-    shareText(
+  drawExportBackdrop(context, 1600, 1200, 310);
+  drawLimeGlow(context, 800, 190, 360);
+  if (champion) {
+    drawStaticConfetti(
       context,
-      fitShareText(label(side?.memberIds), 17),
-      position.x + 14,
-      position.y + y,
-      { font: "800 20px Manrope, sans-serif" },
+      { x: 470, y: 16, width: 660, height: 320 },
+      29,
+      42,
     );
   }
-  if (match.status !== "complete") return;
-  for (const [score, y] of [
-    [match.scoreA, 33],
-    [match.scoreB, 69],
-  ] as const) {
-    shareText(context, String(score), position.x + width - 14, position.y + y, {
-      align: "right",
-      color: shareColors.lime,
-      font: "900 21px Manrope, sans-serif",
-    });
+  drawHeader(context, mark, bracket, champion ?? null, final, names);
+
+  const positions = eliminationSharePositions(bracket, elimination);
+  drawConnectors(context, bracket, elimination, positions);
+  for (const match of elimination) {
+    const position = positions.get(match.id);
+    if (position) {
+      drawMatch(
+        context,
+        match,
+        position,
+        names,
+        matchLookup,
+        match.id === bracket.finalMatchId,
+      );
+    }
   }
+
+  if (bronze) {
+    shareText(context, "THIRD PLACE", 54, 834, {
+      color: shareColors.mist,
+      font: "900 15px Manrope, sans-serif",
+    });
+    drawMatch(
+      context,
+      bronze,
+      { x: 54, y: 850, width: 300, height: 96 },
+      names,
+      matchLookup,
+      false,
+    );
+  }
+  drawChallengeSummary(context, bracket);
+  drawBracketPodium(context, final, bronze, names);
+  drawShareFooter(context, 1600, 1165);
+  return element;
 }
 
-function eliminationPositions(bracket: TournamentBracket, matches: Match[]) {
-  const positions = new Map<string, Position>();
-  for (let round = 1; round <= bracket.roundCount; round += 1) {
-    const roundMatches = matches
-      .filter((match) => match.round === round)
-      .sort((left, right) => left.ordinal - right.ordinal);
-    if (round === bracket.roundCount) {
-      positions.set(roundMatches[0].id, { x: 674, y: 390 });
-      continue;
-    }
-    const half = Math.ceil(roundMatches.length / 2);
-    roundMatches.forEach((match, index) => {
-      const right = index >= half;
-      const local = right ? index - half : index;
-      const count = right ? roundMatches.length - half : half;
-      positions.set(match.id, {
-        x: right ? 1278 - (round - 1) * 285 : 70 + (round - 1) * 285,
-        y: 120 + ((local + 1) * 650) / (count + 1),
-      });
+function drawHeader(
+  context: CanvasRenderingContext2D,
+  mark: HTMLImageElement,
+  bracket: TournamentBracket,
+  champion: string | null,
+  final: Match | undefined,
+  names: Map<string, string>,
+) {
+  shareText(context, "PICKLE KING", 50, 62, {
+    color: shareColors.lime,
+    font: "900 23px 'Archivo Black', sans-serif",
+  });
+  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 1550, 62, {
+    align: "right",
+    color: shareColors.mist,
+    font: "800 18px Manrope, sans-serif",
+  });
+  drawBrandMark(context, mark, 800, 28, 132);
+  shareText(
+    context,
+    champion ? "TOURNAMENT CHAMPION" : "ROAD TO THE CROWN",
+    800,
+    192,
+    {
+      align: "center",
+      color: champion ? shareColors.gold : shareColors.lime,
+      font: "900 18px Manrope, sans-serif",
+    },
+  );
+  if (champion) {
+    shareFittedText(context, champion.toUpperCase(), 800, 254, {
+      align: "center",
+      color: shareColors.chalk,
+      maxSize: 54,
+      minSize: 32,
+      maxWidth: 520,
     });
+    drawTrophy(context, 800, 301, 60);
+  } else {
+    shareText(
+      context,
+      `${bracket.matches.filter(({ status }) => status === "complete").length} MATCHES COMPLETE`,
+      800,
+      242,
+      {
+        align: "center",
+        color: shareColors.mist,
+        font: "800 17px Manrope, sans-serif",
+      },
+    );
   }
-  return positions;
+  if (final?.status === "complete") {
+    const sideA = final.sideA?.memberIds[0];
+    const sideB = final.sideB?.memberIds[0];
+    shareText(
+      context,
+      `${names.get(sideA ?? "") ?? "Finalist"} ${final.scoreA}–${final.scoreB} ${names.get(sideB ?? "") ?? "Finalist"}`,
+      800,
+      365,
+      {
+        align: "center",
+        color: shareColors.mist,
+        font: "800 17px Manrope, sans-serif",
+      },
+    );
+  }
 }
 
 function drawConnectors(
   context: CanvasRenderingContext2D,
   bracket: TournamentBracket,
   matches: Match[],
-  positions: Map<string, Position>,
+  positions: Map<string, ShareMatchPosition>,
 ) {
-  context.strokeStyle = shareColors.line;
-  context.lineWidth = 4;
-  for (const match of matches) {
-    const target = positions.get(match.id);
-    if (!target) continue;
-    const amendment = bracket.amendments.find(
-      ({ targetMatchId }) => targetMatchId === match.id,
-    );
-    const sources = [
-      amendment?.targetSlot === "A"
-        ? amendment.originalTargetSource
-        : match.sourceA,
-      amendment?.targetSlot === "B"
-        ? amendment.originalTargetSource
-        : match.sourceB,
-    ];
-    for (const source of sources) {
+  for (const target of matches) {
+    const targetPosition = positions.get(target.id);
+    if (!targetPosition) continue;
+    for (const source of matchSources(bracket, target)) {
       if (source.type === "player") continue;
-      const start = positions.get(source.matchId);
-      if (!start) continue;
-      const fromRight = start.x > 800;
-      const x1 = fromRight ? start.x : start.x + 252;
-      const x2 = fromRight ? target.x + 252 : target.x;
-      const y1 = start.y + 44;
-      const y2 = target.y + 44;
+      const startPosition = positions.get(source.matchId);
+      const sourceMatch = matches.find(({ id }) => id === source.matchId);
+      if (!startPosition || !sourceMatch) continue;
+      const fromLeft = startPosition.x < 800;
+      const x1 = fromLeft
+        ? startPosition.x + startPosition.width
+        : startPosition.x;
+      const x2 = fromLeft
+        ? targetPosition.x
+        : targetPosition.x + targetPosition.width;
+      const y1 = startPosition.y + startPosition.height / 2;
+      const y2 = targetPosition.y + targetPosition.height / 2;
+      context.strokeStyle =
+        sourceMatch.status === "complete" ? shareColors.limeDeep : "#516048";
+      context.lineWidth = sourceMatch.status === "complete" ? 4 : 3;
       context.beginPath();
       context.moveTo(x1, y1);
       context.lineTo((x1 + x2) / 2, y1);
@@ -115,74 +191,85 @@ function drawConnectors(
   }
 }
 
-export async function bracketShareCanvas(
-  bracket: TournamentBracket,
-): Promise<HTMLCanvasElement> {
-  const { element, context, mark } = await shareCanvasSurface(1600, 1000);
-  const names = new Map(bracket.players.map(({ id, name }) => [id, name]));
-  const final = bracket.matches.find(({ id }) => id === bracket.finalMatchId);
-  const champion = final?.winnerId ? names.get(final.winnerId) : null;
-  drawStaticConfetti(
-    context,
-    { x: 575, y: 20, width: 450, height: 310 },
-    29,
-    34,
-  );
+function drawMatch(
+  context: CanvasRenderingContext2D,
+  match: Match,
+  position: ShareMatchPosition,
+  names: Map<string, string>,
+  matches: Map<string, Match>,
+  isFinal: boolean,
+) {
+  context.fillStyle = "rgba(21, 27, 19, 0.97)";
+  context.fillRect(position.x, position.y, position.width, position.height);
+  context.fillStyle =
+    match.status === "complete" ? shareColors.limeDeep : shareColors.line;
+  context.fillRect(position.x, position.y, 5, position.height);
   shareText(
     context,
-    champion ? `${fitShareText(champion, 20)} REIGNS` : "ROAD TO THE CROWN",
-    70,
-    78,
+    matchLabel(match, isFinal),
+    position.x + 14,
+    position.y + 18,
     {
-      color: shareColors.lime,
-      font: "900 30px 'Archivo Black', sans-serif",
-    },
-  );
-  shareText(
-    context,
-    `${bracket.amendments.length ? "AMENDED · " : ""}${bracket.players.length} PLAYER TOURNAMENT`,
-    1530,
-    76,
-    {
-      align: "right",
       color: shareColors.mist,
-      font: "800 20px Manrope, sans-serif",
+      font: "900 11px Manrope, sans-serif",
     },
   );
-  drawBrandMark(context, mark, 800, 112, 178);
-  const elimination = bracket.matches.filter(
-    ({ kind }) => kind === "elimination",
+  drawMatchRow(context, match, "A", position, names, matches, 43);
+  drawMatchRow(context, match, "B", position, names, matches, 76);
+}
+
+function drawMatchRow(
+  context: CanvasRenderingContext2D,
+  match: Match,
+  side: "A" | "B",
+  position: ShareMatchPosition,
+  names: Map<string, string>,
+  matches: Map<string, Match>,
+  offsetY: number,
+) {
+  const sideData = resolvedSide(match, side, matches);
+  const playerId = sideData?.memberIds[0];
+  const rawName = playerId
+    ? (names.get(playerId) ?? "Player")
+    : sourceFallback(match, side, matches);
+  const winner = match.status === "complete" && playerId === match.winnerId;
+  const loser = match.status === "complete" && playerId === match.loserId;
+  const score = side === "A" ? match.scoreA : match.scoreB;
+  const scoreWidth = match.status === "complete" ? 36 : 8;
+  const fontSize = position.width <= 190 ? 15 : 17;
+  context.font = `800 ${fontSize}px Manrope, sans-serif`;
+  const label = fitCanvasText(
+    context,
+    rawName,
+    position.width - 32 - scoreWidth,
   );
-  const positions = eliminationPositions(bracket, elimination);
-  drawConnectors(context, bracket, elimination, positions);
-  elimination.forEach((match) => {
-    const position = positions.get(match.id);
-    if (position) drawMatch(context, match, position, names);
+  const x = position.x + 14;
+  const y = position.y + offsetY;
+  shareText(context, label, x, y, {
+    color: winner ? shareColors.lime : loser ? "#747c6d" : shareColors.chalk,
+    font: `800 ${fontSize}px Manrope, sans-serif`,
   });
-  const bronze = bracket.matches.find(({ id }) => id === bracket.bronzeMatchId);
-  if (bronze) {
-    shareText(context, "THIRD PLACE", 674, 650, {
-      color: shareColors.mist,
-      font: "800 16px Manrope, sans-serif",
+  if (match.status === "complete") {
+    shareText(context, String(score), position.x + position.width - 12, y, {
+      align: "right",
+      color: winner ? shareColors.lime : "#747c6d",
+      font: "900 17px Manrope, sans-serif",
     });
-    drawMatch(context, bronze, { x: 674, y: 674 }, names);
   }
-  const challenges = bracket.matches.filter(({ kind }) => kind === "challenge");
-  if (challenges.length) {
-    shareText(context, "LATE ENTRY CHALLENGE", 70, 820, {
-      color: shareColors.lime,
-      font: "800 16px Manrope, sans-serif",
-    });
-    const totalWidth = challenges.length * 252 + (challenges.length - 1) * 28;
-    challenges.forEach((match, index) =>
-      drawMatch(
-        context,
-        match,
-        { x: 800 - totalWidth / 2 + index * 280, y: 836 },
-        names,
-      ),
-    );
+  if (loser) {
+    context.strokeStyle = "#747c6d";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(x, y - fontSize * 0.35);
+    context.lineTo(x + context.measureText(label).width, y - fontSize * 0.35);
+    context.stroke();
   }
-  drawShareFooter(context, 1600, 940);
-  return element;
+}
+
+function matchLabel(match: Match, isFinal: boolean) {
+  if (isFinal) return "FINAL";
+  if (match.kind === "bronze") return "THIRD PLACE";
+  return match.round > 1
+    ? `ROUND ${match.round} · MATCH ${match.ordinal}`
+    : `OPENING · MATCH ${match.ordinal}`;
 }

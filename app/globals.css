@@ -4,6 +4,7 @@
 @import "./styles/match.css";
 @import "./styles/results.css";
 @import "./styles/history.css";
+@import "./styles/share.css";
 
 :root {
   color-scheme: dark;

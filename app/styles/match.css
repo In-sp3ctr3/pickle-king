@@ -513,17 +513,21 @@ html[data-visual-freeze="true"] .victory-confetti__static {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(8rem, 1fr) auto minmax(8rem, 1fr);
   gap: 0.75rem;
   margin-top: 0.75rem;
 }
 
-.result-dialog .dialog-actions button {
+.result-dialog .dialog-actions > button {
   min-width: 0;
   min-height: 52px;
   justify-content: center;
   padding-inline: 0.7rem;
   font-size: 0.72rem;
+}
+
+.result-dialog__actions .share-preview-actions {
+  align-self: center;
 }
 
 @media (max-width: 700px) {
@@ -590,7 +594,11 @@ html[data-visual-freeze="true"] .victory-confetti__static {
   }
 
   .dialog-actions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr auto;
+  }
+
+  .result-dialog__actions > .primary-button {
+    grid-column: 1 / -1;
   }
 
   .result-dialog {
