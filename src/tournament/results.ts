@@ -51,7 +51,7 @@ export function calculateTournamentResult(
     second.pointsAgainst += match.scoreA;
     standings.get(match.winnerId)!.wins += 1;
     standings.get(match.loserId)!.losses += 1;
-    if (match.kind === "elimination") {
+    if (match.kind !== "bronze") {
       standings.get(match.loserId)!.eliminatedRound = match.round;
     }
     const winnerSeed = seedByPlayer.get(match.winnerId) ?? 0;
@@ -76,16 +76,16 @@ export function calculateTournamentResult(
     [bronze.loserId, 3],
   ]);
   const elimination = Map.groupBy(
-    bracket.matches.filter(({ kind }) => kind === "elimination"),
-    ({ round }) => round,
+    values.filter(({ eliminatedRound }) => eliminatedRound !== null) as Array<
+      PlayerStanding & { eliminatedRound: number }
+    >,
+    ({ eliminatedRound }) => eliminatedRound,
   );
   const eliminationGroups: EliminationGroup[] = [...elimination.entries()]
     .sort(([left], [right]) => right - left)
-    .map(([round, matches]) => ({
+    .map(([round, standings]) => ({
       round,
-      playerIds: matches
-        .map(({ loserId }) => loserId)
-        .filter((id): id is string => Boolean(id)),
+      playerIds: standings.map(({ playerId }) => playerId),
     }));
   return {
     championId: final.winnerId,

@@ -1,14 +1,20 @@
 import { scoringReducer } from "../match/scoring";
 import { emptySessionHistory } from "../history";
 import type { TournamentSnapshotV1 } from "../persistence/schema";
-import { abandonMatch, createTournamentBracket } from "../tournament";
+import {
+  abandonMatch,
+  createTournamentBracket,
+  resetTournamentBracket,
+} from "../tournament";
 import type { AppAction, AppState } from "./types";
 import {
   confirmAppResult,
   correctTournamentInState,
+  insertLatePlayerInState,
   rebuildTournamentInState,
   renamePlayerInState,
   startTournamentMatch,
+  undoLatePlayerInState,
 } from "./tournament-state";
 
 export function initialAppState(now: number, hydrated = false): AppState {
@@ -101,6 +107,42 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       return renamePlayerInState(state, action);
     case "rebuild-tournament":
       return rebuildTournamentInState(state, action);
+    case "replay-same-draw": {
+      if (!state.setupDraft) return state;
+      return {
+        ...state,
+        updatedAt: action.now,
+        screen: "bracket",
+        tournament: state.tournament
+          ? resetTournamentBracket(state.tournament)
+          : createTournamentBracket(
+              state.setupDraft.players,
+              state.setupDraft.config,
+            ),
+        activeMatchId: null,
+        scorer: null,
+        sessionDeadline:
+          state.setupDraft.config.timingMode === "timed"
+            ? action.now + state.setupDraft.config.bookingMinutes * 60_000
+            : null,
+        quickMatch: false,
+      };
+    }
+    case "prepare-new-draw":
+      return {
+        ...state,
+        updatedAt: action.now,
+        screen: "setup",
+        tournament: null,
+        activeMatchId: null,
+        scorer: null,
+        sessionDeadline: null,
+        quickMatch: false,
+      };
+    case "apply-late-entry":
+      return insertLatePlayerInState(state, action);
+    case "undo-late-entry":
+      return undoLatePlayerInState(state, action);
     case "discard-match": {
       if (state.quickMatch) {
         return {

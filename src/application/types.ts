@@ -1,7 +1,7 @@
 import type { ScoringAction, ScoringState } from "../match/types";
 import type { SessionHistoryV1 } from "../history";
 import type { TournamentSnapshotV1 } from "../persistence/schema";
-import type { Player, TournamentConfig } from "../tournament";
+import type { LateEntryPlan, Player, TournamentConfig } from "../tournament";
 
 export type AppState = Omit<TournamentSnapshotV1, "screen"> & {
   screen: TournamentSnapshotV1["screen"] | "recovery";
@@ -30,6 +30,17 @@ export type AppAction =
   | { type: "confirm-result"; now: number }
   | { type: "rename-player"; playerId: string; name: string; now: number }
   | { type: "rebuild-tournament"; players: Player[]; now: number }
+  | { type: "replay-same-draw"; now: number }
+  | { type: "prepare-new-draw"; now: number }
+  | {
+      type: "apply-late-entry";
+      player: Player;
+      plan: LateEntryPlan;
+      declinedPlayerIds: string[];
+      removeTimeLimit: boolean;
+      now: number;
+    }
+  | { type: "undo-late-entry"; now: number }
   | { type: "discard-match"; now: number }
   | {
       type: "correct-result";

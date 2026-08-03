@@ -50,10 +50,12 @@ export function useAppLifecycle(
     focusedScreen.current = state.screen;
     window.scrollTo({ behavior: "auto", left: 0, top: 0 });
     const frame = window.requestAnimationFrame(() => {
-      const heading = document.querySelector<HTMLElement>("main h1");
-      if (!heading) return;
-      heading.tabIndex = -1;
-      heading.focus({ preventScroll: true });
+      const target =
+        document.querySelector<HTMLElement>("[data-screen-initial-focus]") ??
+        document.querySelector<HTMLElement>("main h1");
+      if (!target) return;
+      if (target.matches("h1")) target.tabIndex = -1;
+      target.focus({ preventScroll: true });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [state.hydrated, state.screen]);

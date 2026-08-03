@@ -14,6 +14,7 @@ import { matchSideLabel, roundLabel } from "./bracket-utils";
 import {
   ByeCard,
   type CorrectMatch,
+  type RenamePlayer,
   FinalMatchCard,
   MatchCard,
 } from "./match-card";
@@ -21,7 +22,9 @@ import {
 interface BracketTreeProps {
   bracket: TournamentBracket;
   nextMatchId?: string;
+  readyMatchIds: string[];
   onCorrectMatch: CorrectMatch;
+  onRenamePlayer: RenamePlayer;
   onStartMatch: (matchId: string) => void;
 }
 
@@ -30,7 +33,9 @@ type BracketFocus = "left" | "final" | "right";
 export function BracketTree({
   bracket,
   nextMatchId,
+  readyMatchIds,
   onCorrectMatch,
+  onRenamePlayer,
   onStartMatch,
 }: BracketTreeProps) {
   const layout = useMemo(() => createTreeLayout(bracket), [bracket]);
@@ -143,10 +148,15 @@ export function BracketTree({
                 bracket={bracket}
                 canStart={
                   positioned.node.kind !== "bye" &&
+                  readyMatchIds.includes(positioned.node.match.id)
+                }
+                recommended={
+                  positioned.node.kind !== "bye" &&
                   positioned.node.match.id === nextMatchId
                 }
                 node={positioned.node}
                 onCorrectMatch={onCorrectMatch}
+                onRenamePlayer={onRenamePlayer}
                 onStartMatch={onStartMatch}
               />
             </motion.div>
@@ -160,14 +170,18 @@ export function BracketTree({
 function TreeNode({
   bracket,
   canStart,
+  recommended,
   node,
   onCorrectMatch,
+  onRenamePlayer,
   onStartMatch,
 }: {
   bracket: TournamentBracket;
   canStart: boolean;
+  recommended: boolean;
   node: PositionedNode["node"];
   onCorrectMatch: CorrectMatch;
+  onRenamePlayer: RenamePlayer;
   onStartMatch: (matchId: string) => void;
 }) {
   const label =
@@ -181,9 +195,11 @@ function TreeNode({
   return (
     <Card
       canStart={canStart}
+      recommended={recommended}
       label={label}
       match={node.match}
       onCorrectMatch={onCorrectMatch}
+      onRenamePlayer={onRenamePlayer}
       onStartMatch={onStartMatch}
       sideALabel={matchSideLabel(node.match.sideA?.memberIds, bracket.players)}
       sideBLabel={matchSideLabel(node.match.sideB?.memberIds, bracket.players)}

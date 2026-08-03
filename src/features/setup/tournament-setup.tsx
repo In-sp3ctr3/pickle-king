@@ -6,6 +6,7 @@ import { ArrowRight, Plus } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRef, useState, type FormEvent } from "react";
 import { CourtPlan } from "./court-plan";
+import { DrawStyleField } from "./draw-style-field";
 import { MinimumPlayersDialog } from "./minimum-players-dialog";
 import { PlayerRow } from "./player-row";
 import type {
@@ -46,6 +47,9 @@ export function TournamentSetup({
   const [timingMode, setTimingMode] = useState<
     TournamentSetupValues["timingMode"]
   >(initialValues?.timingMode ?? "timed");
+  const [drawStyle, setDrawStyle] = useState<
+    TournamentSetupValues["drawStyle"]
+  >(initialValues?.drawStyle ?? "competitive");
   const [numbers, setNumbers] = useState<SetupNumberDrafts>({
     bookingMinutes: String(initialValues?.bookingMinutes ?? 120),
     warmupMinutes: String(initialValues?.warmupMinutes ?? 10),
@@ -90,7 +94,7 @@ export function TournamentSetup({
     setValidationAttempt((attempt) => attempt + 1);
     const result = validateSetup(players, numbers, timingMode);
     if (result.values) {
-      onSubmit(result.values);
+      onSubmit({ ...result.values, drawStyle });
       return;
     }
     window.requestAnimationFrame(() => {
@@ -118,7 +122,7 @@ export function TournamentSetup({
         <p>Tournament setup</p>
         <h1>Build the field.</h1>
         <span>
-          Add the crew and a rough skill level. We use ratings for seeding—not
+          Add the crew and a rough skill level. Ratings shape the draw, but not
           to hand out new ratings after one Saturday.
         </span>
       </header>
@@ -209,6 +213,8 @@ export function TournamentSetup({
           </ActionButton>
         </fieldset>
 
+        <DrawStyleField onChange={setDrawStyle} value={drawStyle} />
+
         <CourtPlan
           errors={errors}
           numbers={numbers}
@@ -229,11 +235,13 @@ export function TournamentSetup({
                 className="setup-advance-note"
                 data-qa="automatic-advance-note"
               >
-                With {players.length} players, {automaticAdvanceCount} top{" "}
+                With {players.length} players, {automaticAdvanceCount}{" "}
+                {drawStyle === "competitive" ? "top " : ""}
                 {automaticAdvanceCount === 1
                   ? "seed advances"
                   : "seeds advance"}{" "}
-                automatically through round one.
+                automatically through round one
+                {drawStyle === "social" ? " after a deterministic draw" : ""}.
               </p>
             ) : null}
           </div>

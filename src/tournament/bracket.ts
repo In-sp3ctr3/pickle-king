@@ -1,4 +1,9 @@
-import { bracketSeedOrder, nextPowerOfTwo, seedPlayers } from "./seeding";
+import {
+  bracketSeedOrder,
+  nextPowerOfTwo,
+  seedPlayers,
+  socialBracketSlots,
+} from "./seeding";
 import { calculateMatchCap } from "./timing";
 import type {
   Match,
@@ -51,6 +56,7 @@ function makeMatch(input: {
     loserId: null,
     startedAt: null,
     completedAt: null,
+    comebackDeficit: 0,
   };
 }
 
@@ -85,12 +91,14 @@ export function createTournamentBracket(
           transitionSeconds: config.transitionSeconds,
         }).capMs
       : null;
-  const bySeed = new Map(seeded.map((player) => [player.seed, player]));
-  let sources: Array<MatchSource | null> = bracketSeedOrder(bracketSize).map(
-    (seed) => {
-      const player = bySeed.get(seed);
-      return player ? { type: "player", playerId: player.id } : null;
-    },
+  const orderedPlayers =
+    config.drawStyle === "social"
+      ? socialBracketSlots(seeded, bracketSize, config.randomSeed)
+      : bracketSeedOrder(bracketSize).map((seed) =>
+          seeded.find((player) => player.seed === seed),
+        );
+  let sources: Array<MatchSource | null> = orderedPlayers.map((player) =>
+    player ? { type: "player", playerId: player.id } : null,
   );
   const matches = new Map<string, Match>();
   const semifinalIds: string[] = [];
@@ -150,10 +158,11 @@ export function createTournamentBracket(
     matches: [...matches.values()],
     finalMatchId: finalMatch.id,
     bronzeMatchId: bronze.id,
+    amendments: [],
   };
 }
 
-function resolvedMatches(matches: Match[]): Match[] {
+export function resolveBracketMatches(matches: Match[]): Match[] {
   const lookup = new Map(matches.map((match) => [match.id, match]));
   return matches.map((match) => {
     if (match.status === "complete" || match.status === "live") return match;
@@ -168,6 +177,25 @@ function resolvedMatches(matches: Match[]): Match[] {
   });
 }
 
+export function resetTournamentBracket(
+  bracket: TournamentBracket,
+): TournamentBracket {
+  const cleared = bracket.matches.map((match) => ({
+    ...match,
+    sideA: null,
+    sideB: null,
+    scoreA: 0,
+    scoreB: 0,
+    status: "waiting" as const,
+    winnerId: null,
+    loserId: null,
+    startedAt: null,
+    completedAt: null,
+    comebackDeficit: 0,
+  }));
+  return { ...bracket, matches: resolveBracketMatches(cleared) };
+}
+
 export function completeMatch(
   bracket: TournamentBracket,
   matchId: string,
@@ -175,6 +203,7 @@ export function completeMatch(
   scoreB: number,
   completedAt: number,
   winnerIdOverride?: string,
+  comebackDeficit = 0,
 ): TournamentBracket {
   const target = bracket.matches.find((match) => match.id === matchId);
   if (!target) throw new Error("Match not found.");
@@ -206,7 +235,9 @@ export function completeMatch(
     !Number.isInteger(scoreB) ||
     scoreA < 0 ||
     scoreB < 0 ||
-    !Number.isFinite(completedAt)
+    !Number.isFinite(completedAt) ||
+    !Number.isInteger(comebackDeficit) ||
+    comebackDeficit < 0
   ) {
     throw new Error("Scores and completion time must be valid.");
   }
@@ -235,8 +266,9 @@ export function completeMatch(
           loserId,
           status: "complete" as const,
           completedAt,
+          comebackDeficit,
         }
       : match,
   );
-  return { ...bracket, matches: resolvedMatches(matches) };
+  return { ...bracket, matches: resolveBracketMatches(matches) };
 }

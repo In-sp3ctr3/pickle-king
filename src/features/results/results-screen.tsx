@@ -1,12 +1,24 @@
 "use client";
 
-import { Crown, Share2, Sparkles } from "lucide-react";
+import { GitBranch, Medal, RotateCcw, Share2, Sparkles } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { promptForCorrection } from "../../application/correction-prompt";
 import { calculateTournamentResult } from "../../tournament";
 import type { TournamentBracket } from "../../tournament";
 import { useState } from "react";
-import { bracketShareCanvas, shareCanvas } from "../share";
+import { useTransientStatus } from "../../shared/use-transient-status";
+import { VictoryConfetti } from "../live-match/victory-confetti";
+import {
+  bracketShareCanvas,
+  shareCanvas,
+  tournamentRecapCanvas,
+  tournamentStatsCanvas,
+} from "../share";
+import { championCopy } from "./champion-copy";
+import { ReplayTournamentDialog } from "./replay-tournament-dialog";
+import {
+  TournamentShareDialog,
+  type TournamentShareKind,
+} from "./tournament-share-dialog";
 
 function roundName(round: number, total: number) {
   if (round === total) return "Final";
@@ -17,21 +29,44 @@ function roundName(round: number, total: number) {
 
 export function ResultsScreen({
   bracket,
-  onCorrect,
+  onNewDraw,
+  onReplaySame,
+  onViewBracket,
 }: {
   bracket: TournamentBracket;
-  onCorrect: (
-    matchId: string,
-    scoreA: number,
-    scoreB: number,
-    winnerIdOverride?: string,
-  ) => void;
+  onNewDraw: () => void;
+  onReplaySame: () => void;
+  onViewBracket: () => void;
 }) {
   const reducedMotion = useReducedMotion();
-  const [shareStatus, setShareStatus] = useState("");
+  const [shareStatus, setShareStatus] = useTransientStatus();
+  const [sharing, setSharing] = useState<TournamentShareKind | null>(null);
+  const [showShare, setShowShare] = useState(false);
+  const [showReplay, setShowReplay] = useState(false);
   const result = calculateTournamentResult(bracket);
   const player = new Map(bracket.players.map((item) => [item.id, item]));
   const name = (id: string) => player.get(id)?.name ?? "Player";
+  const champion = result.standings.find(
+    ({ playerId }) => playerId === result.championId,
+  )!;
+  const championMatches = result.matchHistory.filter(
+    ({ winnerId }) => winnerId === result.championId,
+  );
+  const comebackCount = championMatches.filter(
+    ({ comebackDeficit }) => comebackDeficit >= 3,
+  ).length;
+  const copy = championCopy({
+    championName: name(result.championId),
+    comebackCount,
+    differential: champion.differential,
+    seedKey: `${result.championId}:${champion.differential}`,
+    upsetCount: result.upsetWins.filter(
+      ({ winnerId }) => winnerId === result.championId,
+    ).length,
+    winningMargins: championMatches.map(({ scoreA, scoreB }) =>
+      Math.abs(scoreA - scoreB),
+    ),
+  });
   return (
     <main className="results-screen" data-qa="results">
       <motion.header
@@ -39,6 +74,7 @@ export function ResultsScreen({
         className="results-hero"
         initial={reducedMotion ? false : { y: 24 }}
       >
+        <VictoryConfetti className="results-hero__confetti" />
         <motion.div
           animate={reducedMotion ? undefined : { rotate: [0, -8, 6, 0] }}
           aria-label="Crowned pickleball champion mark"
@@ -47,51 +83,71 @@ export function ResultsScreen({
           transition={{ delay: 0.3, duration: 0.7 }}
         />
         <p className="eyebrow">Tournament complete</p>
-        <h1>{name(result.championId)} reigns.</h1>
+        <h1>{copy.headline}</h1>
+        <strong className="results-hero__champion">
+          {name(result.championId)}
+        </strong>
+        <div className="results-hero__record">
+          <strong>
+            {champion.wins}–{champion.losses} record
+          </strong>
+          <span>
+            {champion.differential > 0 ? "+" : ""}
+            {champion.differential} point differential
+          </span>
+        </div>
         <p>
-          Champion of the court—not a new official skill rating. The numbers
-          below describe this tournament only.
+          {copy.subcomment} Tournament performance only, not a new skill rating.
         </p>
-        <button
-          className="primary-button results-share"
-          data-qa="share-final-bracket"
-          onClick={() =>
-            void shareCanvas(
-              bracketShareCanvas(bracket),
-              "pickle-king-final-bracket.png",
-              "Pickle King final bracket",
-            )
-              .then((outcome) =>
-                setShareStatus(
-                  outcome === "shared"
-                    ? "Share sheet opened."
-                    : outcome === "downloaded"
-                      ? "Bracket image downloaded."
-                      : "Sharing cancelled.",
-                ),
-              )
-              .catch(() =>
-                setShareStatus("The bracket image could not be shared."),
-              )
-          }
-          type="button"
-        >
-          <Share2 aria-hidden="true" size={18} /> Share final bracket
-        </button>
+        <div className="results-hero__actions">
+          <button
+            className="primary-button results-share"
+            data-qa="share-tournament"
+            onClick={() => setShowShare(true)}
+            type="button"
+          >
+            <Share2 aria-hidden="true" size={18} /> Share tournament
+          </button>
+          <button
+            className="secondary-button results-share"
+            data-qa="replay-tournament"
+            onClick={() => setShowReplay(true)}
+            type="button"
+          >
+            <RotateCcw aria-hidden="true" size={18} /> Play again
+          </button>
+          <button
+            className="text-button results-share"
+            data-qa="view-final-bracket"
+            onClick={onViewBracket}
+            type="button"
+          >
+            <GitBranch aria-hidden="true" size={18} /> Review bracket
+          </button>
+        </div>
       </motion.header>
       <section aria-label="Podium" className="podium">
         <div className="podium-place second">
-          <span>02</span>
+          <Medal
+            aria-label="Silver medal"
+            className="podium-medal podium-medal--silver"
+          />
           <strong>{name(result.runnerUpId)}</strong>
           <small>Runner-up</small>
         </div>
         <div className="podium-place first">
-          <Crown aria-hidden="true" size={22} />
+          <Medal
+            aria-label="Gold medal"
+            className="podium-medal podium-medal--gold"
+          />
           <strong>{name(result.championId)}</strong>
           <small>Champion</small>
         </div>
         <div className="podium-place third">
-          <span>03</span>
+          <Medal
+            aria-label="Bronze medal"
+            className="podium-medal podium-medal--bronze"
+          />
           <strong>{name(result.thirdPlaceId)}</strong>
           <small>Third place</small>
         </div>
@@ -176,42 +232,60 @@ export function ResultsScreen({
             <span>
               {match.kind === "bronze"
                 ? "Third place"
-                : roundName(match.round, bracket.roundCount)}
+                : match.kind === "challenge"
+                  ? "Late-entry challenge"
+                  : roundName(match.round, bracket.roundCount)}
             </span>
             <strong>
               {name(match.sideA!.memberIds[0])} {match.scoreA}–{match.scoreB}{" "}
               {name(match.sideB!.memberIds[0])}
             </strong>
-            <button
-              className="text-button"
-              onClick={() => {
-                const sideAId = match.sideA!.memberIds[0];
-                const sideBId = match.sideB!.memberIds[0];
-                const corrected = promptForCorrection({
-                  currentScoreA: match.scoreA,
-                  currentScoreB: match.scoreB,
-                  currentWinnerId: match.winnerId,
-                  prompt: (message, defaultValue) =>
-                    window.prompt(message, defaultValue),
-                  sideA: { id: sideAId, label: name(sideAId) },
-                  sideB: { id: sideBId, label: name(sideBId) },
-                });
-                if (corrected) {
-                  onCorrect(
-                    match.id,
-                    corrected.scoreA,
-                    corrected.scoreB,
-                    corrected.winnerIdOverride,
-                  );
-                }
-              }}
-              type="button"
-            >
-              Correct
-            </button>
           </div>
         ))}
       </section>
+      {showShare ? (
+        <TournamentShareDialog
+          busy={sharing}
+          onClose={() => setShowShare(false)}
+          onShare={(kind) => {
+            if (sharing) return;
+            setSharing(kind);
+            setShareStatus("Building image…");
+            const canvas =
+              kind === "recap"
+                ? tournamentRecapCanvas(bracket)
+                : kind === "stats"
+                  ? tournamentStatsCanvas(bracket)
+                  : bracketShareCanvas(bracket);
+            void shareCanvas(
+              canvas,
+              `pickle-king-tournament-${kind}.png`,
+              `Pickle King tournament ${kind}`,
+            )
+              .then((outcome) => {
+                setShareStatus(
+                  outcome === "shared"
+                    ? "Share sheet opened."
+                    : outcome === "downloaded"
+                      ? "Tournament image downloaded."
+                      : "Sharing cancelled.",
+                );
+                if (outcome !== "cancelled") setShowShare(false);
+              })
+              .catch(() =>
+                setShareStatus("The tournament image could not be shared."),
+              )
+              .finally(() => setSharing(null));
+          }}
+        />
+      ) : null}
+      {showReplay ? (
+        <ReplayTournamentDialog
+          onClose={() => setShowReplay(false)}
+          onNewDraw={onNewDraw}
+          onSameDraw={onReplaySame}
+        />
+      ) : null}
     </main>
   );
 }

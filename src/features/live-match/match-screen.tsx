@@ -1,8 +1,8 @@
 "use client";
 
 import { Check, Flag, Pause, Play, RotateCcw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import { quickShareCanvas, shareCanvas } from "../share";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTransientStatus } from "../../shared/use-transient-status";
 import type { ScoringAction, ScoringState } from "../../match/types";
 import {
   MatchControlDialog,
@@ -21,7 +21,6 @@ export function MatchScreen({
   onConfirm,
   onDiscard,
   onExit,
-  standalone = false,
 }: {
   scorer: ScoringState;
   sessionDeadline: number | null;
@@ -29,10 +28,10 @@ export function MatchScreen({
   onConfirm: () => void;
   onDiscard: () => void;
   onExit: () => void;
-  standalone?: boolean;
 }) {
   const [controlMode, setControlMode] = useState<MatchControlMode | null>(null);
-  const [shareStatus, setShareStatus] = useState("");
+  const [shareStatus, setShareStatus] = useTransientStatus();
+  const startButtonRef = useRef<HTMLButtonElement>(null);
   const send = useCallback(
     (action: ScoringAction) => onAction(action),
     [onAction],
@@ -47,6 +46,10 @@ export function MatchScreen({
     document
       .querySelector<HTMLButtonElement>("[data-qa='score-a-add']")
       ?.focus();
+  }, [scorer.status]);
+  useEffect(() => {
+    if (scorer.status !== "idle") return;
+    startButtonRef.current?.focus({ preventScroll: true });
   }, [scorer.status]);
   const wakeLock = useWakeLock(
     ["running", "paused", "golden-point"].includes(scorer.status),
@@ -79,7 +82,8 @@ export function MatchScreen({
           sessionDeadline={sessionDeadline}
         />
         <div className="target-label">
-          <span>First to {scorer.targetScore} · win by 2</span>
+          {scorer.stageLabel ? <strong>{scorer.stageLabel}</strong> : null}
+          <span>First to {scorer.targetScore}</span>
           {wakeLock === "active" ? <small>Screen awake</small> : null}
           {wakeLock === "unsupported" || wakeLock === "error" ? (
             <small>Keep screen awake</small>
@@ -103,6 +107,7 @@ export function MatchScreen({
             send({ type: "adjust", team: "A", delta: -1, now: Date.now() })
           }
           score={scorer.scoreA}
+          showHint={scorer.status !== "idle"}
           team="A"
         />
         <ScoreSide
@@ -116,8 +121,31 @@ export function MatchScreen({
             send({ type: "adjust", team: "B", delta: -1, now: Date.now() })
           }
           score={scorer.scoreB}
+          showHint={scorer.status !== "idle"}
           team="B"
         />
+        {scorer.status === "idle" ? (
+          <div className="match-start-overlay">
+            <button
+              aria-label="Start match"
+              className="match-start-button"
+              data-qa="match-start"
+              data-screen-initial-focus
+              onClick={() => send({ type: "start", now: Date.now() })}
+              ref={startButtonRef}
+              type="button"
+            >
+              <Play aria-hidden="true" fill="currentColor" size={28} />
+              <strong>Start match</strong>
+              <span>
+                Play to {scorer.targetScore}
+                {scorer.durationMs === null
+                  ? ""
+                  : ` · ${Math.round(scorer.durationMs / 60_000)} min`}
+              </span>
+            </button>
+          </div>
+        ) : null}
       </div>
       {scorer.status === "editing-result" ? (
         <footer className="match-controls match-controls--editing">
@@ -138,7 +166,7 @@ export function MatchScreen({
             Review corrected result
           </button>
         </footer>
-      ) : scorer.status !== "awaiting-confirmation" ? (
+      ) : !["awaiting-confirmation", "idle"].includes(scorer.status) ? (
         <footer className="match-controls">
           {scorer.status !== "golden-point" ? (
             <button
@@ -205,27 +233,8 @@ export function MatchScreen({
         <ResultConfirmationDialog
           onConfirm={onConfirm}
           onEdit={() => send({ type: "edit-result" })}
-          onShare={() => {
-            void shareCanvas(
-              quickShareCanvas(scorer),
-              `pickle-king-score-${Date.now()}.png`,
-              "Pickle King final score",
-            )
-              .then((outcome) =>
-                setShareStatus(
-                  outcome === "shared"
-                    ? "Share sheet opened."
-                    : outcome === "downloaded"
-                      ? "Score image downloaded."
-                      : "Sharing cancelled.",
-                ),
-              )
-              .catch(() =>
-                setShareStatus("The score image could not be shared."),
-              );
-          }}
+          onShareStatus={setShareStatus}
           scorer={scorer}
-          standalone={standalone}
         />
       ) : null}
       <p aria-live="polite" className="share-status">

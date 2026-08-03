@@ -7,6 +7,7 @@ export interface TournamentSetupPlayer {
 
 export interface TournamentSetupValues {
   players: TournamentSetupPlayer[];
+  drawStyle: "competitive" | "social";
   timingMode: "timed" | "untimed";
   bookingMinutes: number;
   warmupMinutes: number;
@@ -21,6 +22,7 @@ export interface TournamentSetupInitialValues {
   warmupMinutes?: number;
   transitionSeconds?: number;
   targetScore?: number;
+  drawStyle?: "competitive" | "social";
 }
 
 export interface SetupPlayerDraft {

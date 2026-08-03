@@ -7,7 +7,14 @@ const responsiveViewports = [
   { name: "phone-landscape", width: 844, height: 390 },
 ] as const;
 
-const routes = ["home", "setup", "bracket"] as const;
+const routes = [
+  "home",
+  "setup",
+  "bracket",
+  "quick-idle",
+  "quick-live",
+  "quick-result",
+] as const;
 
 for (const viewport of responsiveViewports) {
   test.describe(viewport.name, () => {

@@ -42,8 +42,8 @@ test("a completed result is corrected inside its bracket node", async ({
   page,
 }) => {
   await buildTournament(page);
-  await page.locator("[data-qa='bracket-node-start']").click();
-  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.locator("[data-qa='bracket-node-start']").first().click();
+  await page.getByRole("button", { name: "Start match", exact: true }).click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.getByRole("button", { name: "Confirm result" }).click();
@@ -52,7 +52,7 @@ test("a completed result is corrected inside its bracket node", async ({
   const contenders = await completed
     .locator(".tree-match-side__name")
     .allTextContents();
-  await completed.getByRole("button", { name: /Edit score/ }).click();
+  await completed.getByRole("button", { name: /Edit .* versus/ }).click();
   await completed
     .getByLabel(/Score for/)
     .first()
@@ -76,7 +76,7 @@ test("a completed result is corrected inside its bracket node", async ({
   );
   await expect(completed.getByLabel(/Score for/)).toHaveCount(0);
 
-  await completed.getByRole("button", { name: /Edit score/ }).click();
+  await completed.getByRole("button", { name: /Edit .* versus/ }).click();
   await completed
     .getByLabel(/Score for/)
     .first()
@@ -102,4 +102,90 @@ test("a completed result is corrected inside its bracket node", async ({
     fullPage: true,
     path: "output/playwright/inline-bracket-correction.png",
   });
+});
+
+test("a forgotten player can review, cancel, apply, and undo a late entry", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await buildTournament(page, names);
+  await page.locator("[data-qa='bracket-node-start']").first().click();
+  await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='score-a-add']").click();
+  await page.locator("[data-qa='score-a-add']").click();
+  await page.getByRole("button", { name: "Confirm result" }).click();
+
+  async function addForgottenPlayer() {
+    await page.locator("[data-qa='edit-draw']").click();
+    await page.getByRole("button", { name: "Add forgotten player" }).click();
+    await page.locator(".draw-editor__row input").last().fill("Sam");
+    await page.getByRole("button", { name: "Review draw change" }).click();
+  }
+
+  await addForgottenPlayer();
+  await expect(page.locator("[data-qa='late-entry-dialog']")).toBeVisible();
+  await expect(page.getByText("Fill the open route.")).toBeVisible();
+  await page.screenshot({
+    animations: "disabled",
+    fullPage: true,
+    path: "output/playwright/late-entry-review.png",
+  });
+  await page
+    .getByRole("button", { name: "Cancel and continue bracket as is" })
+    .click();
+  await expect(page.locator("[data-qa='late-entry-lane']")).toHaveCount(0);
+
+  await addForgottenPlayer();
+  await page.locator("[data-qa='confirm-late-entry']").click();
+  await expect(page.locator("[data-qa='late-entry-lane']")).toContainText(
+    "Sam runs the challenge lane",
+  );
+  await expect(page.getByText("Challenge 1 of 1")).toBeVisible();
+  await page.waitForTimeout(500);
+  await page.screenshot({
+    animations: "disabled",
+    fullPage: true,
+    path: "output/playwright/late-entry-lane.png",
+  });
+  await page.locator("[data-qa='undo-late-entry']").click();
+  await expect(page.locator("[data-qa='late-entry-lane']")).toHaveCount(0);
+  await expect(
+    page.getByText("6 players · 2 automatic advances"),
+  ).toBeVisible();
+});
+
+test("placement lock keeps the bracket and offers the late player to Quick Match", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 820, height: 1180 });
+  await buildTournament(page);
+  for (let match = 0; match < 3; match += 1) {
+    await page.locator("[data-qa='start-next']").click();
+    await page
+      .getByRole("button", { name: "Start match", exact: true })
+      .click();
+    await page.locator("[data-qa='score-a-add']").click();
+    await page.locator("[data-qa='score-a-add']").click();
+    await page.getByRole("button", { name: "Confirm result" }).click();
+  }
+
+  async function reviewSam() {
+    await page.locator("[data-qa='edit-draw']").click();
+    await page.getByRole("button", { name: "Add forgotten player" }).click();
+    await page.locator(".draw-editor__row input").last().fill("Sam");
+    await page.getByRole("button", { name: "Review draw change" }).click();
+    await expect(page.getByText("The draw is locked.")).toBeVisible();
+  }
+
+  await reviewSam();
+  await page
+    .getByRole("button", { name: "Cancel and continue bracket as is" })
+    .click();
+  await expect(page.locator("[data-qa='bracket-screen']")).toBeVisible();
+  await expect(page.getByText("3 of 4 matches final")).toBeVisible();
+
+  await reviewSam();
+  await page.getByRole("button", { name: "Open Quick Match" }).click();
+  await page.getByLabel("Side A").fill("Sa");
+  await expect(page.getByRole("option", { name: "Sam" })).toBeVisible();
 });

@@ -5,6 +5,7 @@ import { getNextMatch } from "./schedule";
 import type { Player, TournamentConfig } from "./types";
 
 const config: TournamentConfig = {
+  drawStyle: "competitive",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,

@@ -5,6 +5,7 @@ import {
   completeMatch,
   createTournamentBracket,
   getNextMatch,
+  resetTournamentBracket,
 } from "./index";
 import type {
   Match,
@@ -17,6 +18,7 @@ import type {
 const levels: SkillLevel[] = ["5.5+", "5.0", "4.5", "4.0", "3.5", "3.0", "2.5"];
 
 const config: TournamentConfig = {
+  drawStyle: "competitive",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -116,6 +118,35 @@ describe("tournament bracket", () => {
     );
   });
 
+  it("pairs neighboring ratings in a deterministic social opening draw", () => {
+    const social = createTournamentBracket(players(8), {
+      ...config,
+      drawStyle: "social",
+    });
+    const openingSeeds = social.matches
+      .filter(({ round }) => round === 1)
+      .map((match) =>
+        [match.sideA, match.sideB].map(
+          (side) =>
+            social.players.find(({ id }) => id === side?.memberIds[0])?.seed,
+        ),
+      );
+    expect(openingSeeds).toEqual(
+      expect.arrayContaining([
+        [1, 2],
+        [3, 4],
+        [5, 6],
+        [7, 8],
+      ]),
+    );
+    expect(
+      createTournamentBracket(players(8), {
+        ...config,
+        drawStyle: "social",
+      }).matches,
+    ).toEqual(social.matches);
+  });
+
   it("randomizes equal ratings deterministically", () => {
     const first = createTournamentBracket(players(12, true), config);
     const second = createTournamentBracket(players(12, true), config);
@@ -175,6 +206,31 @@ describe("tournament bracket", () => {
     expect(bracket.matches.every(({ status }) => status === "complete")).toBe(
       true,
     );
+  });
+
+  it("resets scores while preserving the exact draw graph", () => {
+    let bracket = createTournamentBracket(players(6), config);
+    const originalSources = bracket.matches.map(({ id, sourceA, sourceB }) => ({
+      id,
+      sourceA,
+      sourceB,
+    }));
+    const next = getNextMatch(bracket)!;
+    bracket = completeMatch(bracket, next.id, 11, 5, 1_000);
+    const replay = resetTournamentBracket(bracket);
+    expect(
+      replay.matches.map(({ id, sourceA, sourceB }) => ({
+        id,
+        sourceA,
+        sourceB,
+      })),
+    ).toEqual(originalSources);
+    expect(
+      replay.matches.every(
+        ({ scoreA, scoreB }) => scoreA === 0 && scoreB === 0,
+      ),
+    ).toBe(true);
+    expect(getNextMatch(replay)).not.toBeNull();
   });
 
   it("requires an operator-selected participant to resolve a tied early finish", () => {

@@ -2,6 +2,9 @@
 
 Status: accepted
 
+Late-entry portion partially superseded by ADR 0006. Removals, rating changes,
+multiple additions, and other structural edits still use the rebuild policy below.
+
 ## Context
 
 Production use exposed three related needs: correct a participant identity,

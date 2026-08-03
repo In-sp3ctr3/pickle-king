@@ -1,5 +1,5 @@
 import { completeMatch } from "./bracket";
-import { getNextMatch } from "./schedule";
+import { getReadySchedule } from "./schedule";
 import type { Match, TournamentBracket } from "./types";
 
 export function startMatch(
@@ -8,8 +8,8 @@ export function startMatch(
   startedAt: number,
 ): TournamentBracket {
   if (!Number.isFinite(startedAt)) throw new Error("Start time must be valid.");
-  if (getNextMatch(bracket)?.id !== matchId) {
-    throw new Error("Only the next scheduled match can start.");
+  if (!getReadySchedule(bracket).some(({ id }) => id === matchId)) {
+    throw new Error("Only a ready match in the current round can start.");
   }
   return {
     ...bracket,
@@ -107,6 +107,7 @@ export function correctMatchResult(
         loserId: null,
         startedAt: null,
         completedAt: null,
+        comebackDeficit: 0,
       };
     }
     if (!affected.has(match.id)) return match;
@@ -121,6 +122,7 @@ export function correctMatchResult(
       loserId: null,
       startedAt: null,
       completedAt: null,
+      comebackDeficit: 0,
     };
   });
   return completeMatch(

@@ -35,6 +35,7 @@ export function createScoringState(input: {
     pausedRemainingMs: input.durationMs,
     winner: null,
     finishReason: null,
+    scoreEvents: [],
   };
 }
 
@@ -94,6 +95,7 @@ function adjust(
     return {
       ...initial,
       [key]: Math.max(0, initial[key] + delta),
+      scoreEvents: [],
     };
   }
   const state = tick(initial, now);
@@ -103,7 +105,13 @@ function adjust(
   const key = team === "A" ? "scoreA" : "scoreB";
   const nextScore = Math.max(0, state[key] + delta);
   if (nextScore === state[key]) return state;
-  const next = { ...state, [key]: nextScore };
+  const scoreEvents = [...state.scoreEvents];
+  if (delta > 0) scoreEvents.push(team);
+  else {
+    const lastTeamPoint = scoreEvents.lastIndexOf(team);
+    if (lastTeamPoint >= 0) scoreEvents.splice(lastTeamPoint, 1);
+  }
+  const next = { ...state, [key]: nextScore, scoreEvents };
   if (state.status === "golden-point" && delta < 0) {
     return finish(next, next.scoreA > next.scoreB ? "A" : "B", "buzzer", now);
   }
@@ -192,6 +200,7 @@ export function scoringReducer(
         status: "editing-result",
         winner: null,
         finishReason: null,
+        scoreEvents: [],
       };
     case "review-result": {
       if (state.status !== "editing-result" || state.scoreA === state.scoreB) {
@@ -219,10 +228,25 @@ export function scoringReducer(
         pausedRemainingMs: state.durationMs,
         winner: null,
         finishReason: null,
+        scoreEvents: [],
       };
     case "confirm":
       return state.status === "awaiting-confirmation"
         ? { ...state, status: "complete" }
         : state;
   }
+}
+
+export function winnerComebackDeficit(state: ScoringState): number {
+  if (!state.winner) return 0;
+  let scoreA = 0;
+  let scoreB = 0;
+  let largestDeficit = 0;
+  for (const team of state.scoreEvents) {
+    if (team === "A") scoreA += 1;
+    else scoreB += 1;
+    const deficit = state.winner === "A" ? scoreB - scoreA : scoreA - scoreB;
+    largestDeficit = Math.max(largestDeficit, deficit);
+  }
+  return largestDeficit;
 }

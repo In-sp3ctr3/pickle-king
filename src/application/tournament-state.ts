@@ -5,14 +5,17 @@ import {
   syncTournamentArchive,
   tournamentArchive,
 } from "../history";
-import { scoringReducer } from "../match/scoring";
+import { scoringReducer, winnerComebackDeficit } from "../match/scoring";
 import {
+  applyLateEntry,
   completeMatch,
   correctMatchResult,
   createTournamentBracket,
+  matchStageLabel,
   rebalanceRemainingCap,
   renameTournamentPlayer,
   startMatch,
+  undoLateEntry,
 } from "../tournament";
 import type { AppAction, AppState } from "./types";
 
@@ -78,6 +81,8 @@ export function startTournamentMatch(
       pausedRemainingMs: match.config.capMs,
       winner: null,
       finishReason: null,
+      scoreEvents: [],
+      stageLabel: matchStageLabel(tournament, match) ?? undefined,
     },
     quickMatch: false,
   };
@@ -117,6 +122,7 @@ export function confirmAppResult(
           ? scorer.sideB.memberIds[0]
           : undefined
       : undefined,
+    winnerComebackDeficit(scorer),
   );
   const done = tournament.matches.every(({ status }) => status === "complete");
   return {
@@ -198,6 +204,70 @@ export function rebuildTournamentInState(
     activeMatchId: null,
     scorer: null,
     quickMatch: false,
+  };
+}
+
+export function insertLatePlayerInState(
+  state: AppState,
+  action: Extract<AppAction, { type: "apply-late-entry" }>,
+): AppState {
+  if (!state.tournament || !state.setupDraft || state.activeMatchId)
+    return state;
+  const tournament = applyLateEntry(
+    state.tournament,
+    action.player,
+    action.plan,
+    {
+      createdAt: action.now,
+      declinedPlayerIds: action.declinedPlayerIds,
+      removeTimeLimit: action.removeTimeLimit,
+    },
+  );
+  return {
+    ...state,
+    updatedAt: action.now,
+    screen: "bracket",
+    tournament,
+    setupDraft: {
+      players: tournament.players.map(({ id, name, rating }) => ({
+        id,
+        name,
+        rating,
+      })),
+      config: action.removeTimeLimit
+        ? { ...state.setupDraft.config, timingMode: "untimed" }
+        : state.setupDraft.config,
+    },
+    sessionDeadline: action.removeTimeLimit ? null : state.sessionDeadline,
+  };
+}
+
+export function undoLatePlayerInState(
+  state: AppState,
+  action: Extract<AppAction, { type: "undo-late-entry" }>,
+): AppState {
+  if (!state.tournament || !state.setupDraft || state.activeMatchId)
+    return state;
+  const amendment = state.tournament.amendments.at(-1);
+  if (!amendment) return state;
+  const tournament = undoLateEntry(state.tournament);
+  return {
+    ...state,
+    updatedAt: action.now,
+    tournament,
+    setupDraft: {
+      players: tournament.players.map(({ id, name, rating }) => ({
+        id,
+        name,
+        rating,
+      })),
+      config: {
+        ...state.setupDraft.config,
+        timingMode:
+          amendment.timing.currentCapMs === null ? "untimed" : "timed",
+      },
+    },
+    sessionDeadline: amendment.timing.sessionDeadline,
   };
 }
 

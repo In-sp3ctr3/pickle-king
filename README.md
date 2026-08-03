@@ -4,12 +4,13 @@ An offline-first tournament director and scorekeeper for a weekly pickleball
 crew. Seed 4–16 players, finish a fair one-court knockout inside the booking,
 and crown a winner without sending player data anywhere.
 
-> Pickle King is under active v1 development. Ratings are used only for bracket
-> seeding; the app does not calculate an official pickleball rating.
+> Pickle King is under active v1 development. Ratings shape Competitive or
+> Social draws; the app does not calculate an official pickleball rating.
 
 ## What it does
 
 - Connected, double-sided singles brackets with automatic byes
+- Competitive seeding or closer-rated Social opening matchups
 - One-court, round-by-round scheduling with protected rest
 - Mandatory third-place match before the final
 - Optional booking timer for tournaments and Quick Match
@@ -19,7 +20,9 @@ and crown a winner without sending player data anywhere.
 - Recent Quick Match and tournament history, stored only on this device
 - Remembered-name suggestions for faster rematches
 - Safe player-name corrections and explicit draw rebuilds for roster changes
-- Branded, shareable PNGs for individual results and completed brackets
+- One procedurally fair late-entry challenge before placement play begins
+- Branded result, champion/podium, player-stat, and full-bracket PNGs
+- Exact-draw replay or a prefilled fresh draw after a tournament
 - Results, point differential, match history, and upset highlights
 - Offline recovery across refresh, sleep, and network loss
 - Local-only storage: names and scores never leave the device
@@ -51,6 +54,9 @@ npm run test:pwa
 
 See the [v1 product specification](specs/001-offline-tournament-pwa/spec.md),
 [session continuity specification](specs/002-session-continuity-sharing/spec.md),
+[late-entry specification](specs/003-late-entry-challenge/spec.md),
+[victory and scorer polish specification](specs/004-victory-sharing-scorer-polish/spec.md),
+[tournament control and sharing specification](specs/005-tournament-control-sharing/spec.md),
 [architecture decisions](docs/architecture), and the
 [verification records](specs).
 

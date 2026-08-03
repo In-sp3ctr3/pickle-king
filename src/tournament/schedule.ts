@@ -19,6 +19,14 @@ function lastPlayedAt(playerId: string, completedMatches: Match[]): number {
 
 export function getReadySchedule(bracket: TournamentBracket): Match[] {
   if (bracket.matches.some(({ status }) => status === "live")) return [];
+  const pendingChallenges = bracket.matches.filter(
+    ({ kind, status }) => kind === "challenge" && status !== "complete",
+  );
+  if (pendingChallenges.length) {
+    return pendingChallenges
+      .filter(({ status }) => status === "ready")
+      .sort((left, right) => left.ordinal - right.ordinal);
+  }
   const completed = bracket.matches.filter(
     (match) => match.status === "complete",
   );

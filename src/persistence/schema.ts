@@ -17,7 +17,7 @@ const sourceSchema = z.discriminatedUnion("type", [
 ]);
 const matchSchema = z.object({
   id: z.string().min(1),
-  kind: z.enum(["elimination", "bronze"]),
+  kind: z.enum(["elimination", "bronze", "challenge"]),
   round: z.number().int().positive(),
   ordinal: z.number().int().nonnegative(),
   sourceA: sourceSchema,
@@ -35,6 +35,35 @@ const matchSchema = z.object({
   loserId: z.string().nullable(),
   startedAt: z.number().nullable(),
   completedAt: z.number().nullable(),
+  comebackDeficit: z.number().int().nonnegative().default(0),
+});
+const lateEntryTimingSchema = z.object({
+  currentCapMs: z.number().int().positive().nullable(),
+  proposedCapMs: z.number().int().positive().nullable(),
+  feasible: z.boolean(),
+  remainingMatches: z.number().int().positive(),
+  sessionDeadline: z.number().nullable(),
+});
+const lateEntryAmendmentSchema = z.object({
+  id: z.string().min(1),
+  createdAt: z.number().finite(),
+  method: z.enum([
+    "reversible-bye",
+    "untouched-preliminary",
+    "branch-gauntlet",
+  ]),
+  playerId: z.string().min(1),
+  protectedPlayerId: z.string().min(1),
+  restoredPlayerIds: z.array(z.string().min(1)),
+  lineageMatchIds: z.array(z.string().min(1)),
+  targetMatchId: z.string().min(1),
+  targetSlot: z.enum(["A", "B"]),
+  originalTargetSource: sourceSchema,
+  bronzeSlot: z.enum(["A", "B"]).nullable(),
+  originalBronzeSource: sourceSchema.nullable(),
+  timing: lateEntryTimingSchema,
+  challengeMatchIds: z.array(z.string().min(1)).min(1),
+  declinedPlayerIds: z.array(z.string().min(1)),
 });
 export const tournamentBracketSchema = z.object({
   bracketSize: z.number().int().positive(),
@@ -43,8 +72,10 @@ export const tournamentBracketSchema = z.object({
   matches: z.array(matchSchema),
   finalMatchId: z.string().min(1),
   bronzeMatchId: z.string().min(1),
+  amendments: z.array(lateEntryAmendmentSchema).max(1).default([]),
 });
 const tournamentConfigSchema = z.object({
+  drawStyle: z.enum(["competitive", "social"]).default("competitive"),
   timingMode: z.enum(["timed", "untimed"]).default("timed"),
   bookingMinutes: z.number().positive(),
   warmupMinutes: z.number().nonnegative(),
@@ -63,6 +94,7 @@ const scoringSchema = z.object({
       sideB: z.array(z.string().trim().min(1).max(40)).min(1).max(2),
     })
     .optional(),
+  stageLabel: z.string().trim().min(1).max(40).optional(),
   scoreA: z.number().int().nonnegative(),
   scoreB: z.number().int().nonnegative(),
   targetScore: z.number().int().min(1).max(99),
@@ -88,6 +120,7 @@ const scoringSchema = z.object({
       "operator-selection",
     ])
     .nullable(),
+  scoreEvents: z.array(z.enum(["A", "B"])).default([]),
 });
 
 export const snapshotV1Schema = z

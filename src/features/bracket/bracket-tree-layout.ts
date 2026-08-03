@@ -63,12 +63,17 @@ function createByeNodes(bracket: TournamentBracket): ByeNode[] {
       .filter(({ kind, round }) => kind === "elimination" && round === 1)
       .map(({ ordinal }) => ordinal),
   );
+  const reopened = new Set(
+    bracket.amendments
+      .filter(({ method }) => method === "reversible-bye")
+      .map(({ protectedPlayerId }) => protectedPlayerId),
+  );
 
   return Array.from({ length: bracket.bracketSize / 2 }, (_, index) => {
     const ordinal = index + 1;
     if (played.has(ordinal)) return null;
     const player = entries[index * 2] ?? entries[index * 2 + 1];
-    return player
+    return player && !reopened.has(player.id)
       ? {
           id: `bye-${ordinal}`,
           kind: "bye" as const,
@@ -108,10 +113,22 @@ function createLinks(
     ({ kind, round }) => kind === "elimination" && round > 1,
   );
   return nodes.flatMap((node) => {
-    const target = targets.find(
-      ({ sourceA, sourceB }) =>
-        sourceMatchesNode(sourceA, node) || sourceMatchesNode(sourceB, node),
-    );
+    const target = targets.find((match) => {
+      const amendment = bracket.amendments.find(
+        ({ targetMatchId }) => targetMatchId === match.id,
+      );
+      const sourceA =
+        amendment?.targetSlot === "A"
+          ? amendment.originalTargetSource
+          : match.sourceA;
+      const sourceB =
+        amendment?.targetSlot === "B"
+          ? amendment.originalTargetSource
+          : match.sourceB;
+      return (
+        sourceMatchesNode(sourceA, node) || sourceMatchesNode(sourceB, node)
+      );
+    });
     if (!target) return [];
     return [
       {

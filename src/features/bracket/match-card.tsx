@@ -1,10 +1,11 @@
 "use client";
 
-import { ActionButton, StatusLabel } from "@/src/shared/ui";
+import { StatusLabel } from "@/src/shared/ui";
 import type { Match } from "@/src/tournament";
-import { Crown, FastForward, PencilLine, Play, Trophy } from "lucide-react";
+import { Crown, FastForward, Trophy } from "lucide-react";
 import { useState } from "react";
 import { InlineScoreEditor } from "./inline-score-editor";
+import { MatchCardAction } from "./match-card-action";
 
 export type CorrectMatch = (
   matchId: string,
@@ -12,19 +13,22 @@ export type CorrectMatch = (
   scoreB: number,
   winnerIdOverride?: string,
 ) => boolean;
+export type RenamePlayer = (playerId: string, name: string) => boolean;
 
 export interface MatchCardProps {
   canStart: boolean;
+  recommended?: boolean;
   label: string;
   match: Match;
   onCorrectMatch: CorrectMatch;
+  onRenamePlayer?: RenamePlayer;
   onStartMatch: (matchId: string) => void;
   sideALabel: string;
   sideBLabel: string;
 }
 
 export function MatchCard(props: MatchCardProps) {
-  const { canStart, label, match, sideALabel, sideBLabel } = props;
+  const { canStart, label, match, recommended, sideALabel, sideBLabel } = props;
   const [editing, setEditing] = useState(false);
   const complete = match.status === "complete";
   if (editing) {
@@ -38,6 +42,7 @@ export function MatchCard(props: MatchCardProps) {
           match={match}
           onCancel={() => setEditing(false)}
           onSave={props.onCorrectMatch}
+          onRenamePlayer={props.onRenamePlayer}
           sideALabel={sideALabel}
           sideBLabel={sideBLabel}
         />
@@ -48,10 +53,20 @@ export function MatchCard(props: MatchCardProps) {
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
       className={`tree-match-card tree-match-card--${match.status} ${
-        canStart ? "tree-match-card--next" : ""
+        recommended
+          ? "tree-match-card--next"
+          : canStart
+            ? "tree-match-card--available"
+            : ""
       }`}
       data-match-queue-state={
-        canStart ? "next" : match.status === "ready" ? "queued" : match.status
+        recommended
+          ? "next"
+          : canStart
+            ? "available"
+            : match.status === "ready"
+              ? "queued"
+              : match.status
       }
       data-match-status={match.status}
     >
@@ -74,13 +89,13 @@ export function MatchCard(props: MatchCardProps) {
           />
         </div>
       </div>
-      <MatchAction {...props} onEdit={() => setEditing(true)} />
+      <MatchCardAction {...props} onEdit={() => setEditing(true)} />
     </article>
   );
 }
 
 export function FinalMatchCard(props: MatchCardProps) {
-  const { canStart, label, match, sideALabel, sideBLabel } = props;
+  const { canStart, label, match, recommended, sideALabel, sideBLabel } = props;
   const [editing, setEditing] = useState(false);
   const complete = match.status === "complete";
   if (editing) {
@@ -94,6 +109,7 @@ export function FinalMatchCard(props: MatchCardProps) {
           match={match}
           onCancel={() => setEditing(false)}
           onSave={props.onCorrectMatch}
+          onRenamePlayer={props.onRenamePlayer}
           sideALabel={sideALabel}
           sideBLabel={sideBLabel}
         />
@@ -104,10 +120,20 @@ export function FinalMatchCard(props: MatchCardProps) {
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
       className={`tree-match-card final-match-card ${
-        canStart ? "tree-match-card--next" : ""
+        recommended
+          ? "tree-match-card--next"
+          : canStart
+            ? "tree-match-card--available"
+            : ""
       }`}
       data-match-queue-state={
-        canStart ? "next" : match.status === "ready" ? "queued" : match.status
+        recommended
+          ? "next"
+          : canStart
+            ? "available"
+            : match.status === "ready"
+              ? "queued"
+              : match.status
       }
       data-match-status={match.status}
     >
@@ -139,7 +165,7 @@ export function FinalMatchCard(props: MatchCardProps) {
           showScore={match.status === "live" || complete}
         />
       </div>
-      <MatchAction {...props} onEdit={() => setEditing(true)} />
+      <MatchCardAction {...props} onEdit={() => setEditing(true)} />
     </article>
   );
 }
@@ -157,45 +183,6 @@ function MatchHeader({
       />
     </header>
   );
-}
-
-function MatchAction({
-  canStart,
-  match,
-  onStartMatch,
-  onEdit,
-  sideALabel,
-  sideBLabel,
-}: MatchCardProps & { onEdit: () => void }) {
-  if (match.status === "ready" && canStart) {
-    return (
-      <ActionButton
-        aria-label={`Start ${match.id}`}
-        className="tree-match-card__action"
-        data-qa="bracket-node-start"
-        onClick={() => onStartMatch(match.id)}
-        variant="inverse"
-      >
-        <Play aria-hidden="true" fill="currentColor" size={17} />
-        <span className="sr-only">Start match</span>
-      </ActionButton>
-    );
-  }
-  if (match.status === "complete") {
-    return (
-      <ActionButton
-        aria-label={`Edit score for ${sideALabel} versus ${sideBLabel}`}
-        className="tree-match-card__action"
-        data-qa="edit-bracket-score"
-        onClick={onEdit}
-        variant="quiet"
-      >
-        <PencilLine aria-hidden="true" size={16} />
-        <span className="sr-only">Correct result</span>
-      </ActionButton>
-    );
-  }
-  return null;
 }
 
 function MatchSideRow({
@@ -217,7 +204,7 @@ function MatchSideRow({
         {isWinner ? <Crown aria-label="Winner" size={15} /> : null}
         <span>{label}</span>
       </span>
-      <strong>{showScore ? score : "—"}</strong>
+      <strong>{showScore ? score : "·"}</strong>
     </div>
   );
 }
@@ -242,7 +229,7 @@ function FinalSide({
       className={`final-match-side is-${align} ${sideClass(isWinner, isLoser)}`}
     >
       <span>{label}</span>
-      <strong>{showScore ? score : "—"}</strong>
+      <strong>{showScore ? score : "·"}</strong>
     </div>
   );
 }

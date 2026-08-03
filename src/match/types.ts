@@ -18,6 +18,7 @@ export interface ScoringState {
   labelA: string;
   labelB: string;
   participantNames?: { sideA: string[]; sideB: string[] };
+  stageLabel?: string;
   scoreA: number;
   scoreB: number;
   targetScore: number;
@@ -27,6 +28,7 @@ export interface ScoringState {
   pausedRemainingMs: number | null;
   winner: MatchTeam | null;
   finishReason: FinishReason | null;
+  scoreEvents: MatchTeam[];
 }
 
 export type ScoringAction =

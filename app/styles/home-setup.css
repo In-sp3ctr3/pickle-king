@@ -194,6 +194,34 @@
   padding: 0;
 }
 
+.setup-draw-style {
+  display: grid;
+  gap: 1rem;
+}
+
+.setup-draw-style__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.setup-draw-style__content p,
+.setup-draw-style__note {
+  margin: 0;
+}
+
+.setup-draw-style__content span,
+.setup-draw-style__note {
+  color: var(--mist);
+  font-size: 0.78rem;
+}
+
+.setup-draw-style__note {
+  min-height: 1.25rem;
+  color: var(--lime);
+}
+
 .setup-error-summary {
   margin-bottom: 2rem;
   border-radius: 14px;
@@ -739,6 +767,10 @@
 }
 
 @media (max-width: 640px) {
+  .setup-draw-style__content {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .home-screen {
     gap: 3.5rem;
     padding-block: 2.5rem 4rem;

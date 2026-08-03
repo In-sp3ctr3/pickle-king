@@ -1,8 +1,7 @@
 "use client";
 
 import { AlertTriangle } from "lucide-react";
-import { useCallback, useReducer } from "react";
-import { BracketScreen } from "../features/bracket";
+import { useCallback, useReducer, useState } from "react";
 import { HomeScreen } from "../features/home";
 import { HistoryScreen } from "../features/history";
 import { MatchScreen } from "../features/live-match";
@@ -16,17 +15,18 @@ import { rememberedPlayerNames } from "../history";
 import type { ScoringAction } from "../match/types";
 import {
   correctionNeedsConfirmation,
-  tournamentHasStarted,
+  lateEntryCorrectionBlockReason,
 } from "../tournament";
 import { setupPlayers } from "./app-helpers";
+import { TournamentBracketRoute } from "./bracket-route";
 import { appReducer, initialAppState } from "./reducer";
 import { AppNavigation } from "./app-navigation";
-import { sessionTimeLabel, timingAdjustment } from "./timing-view";
 import { useAppLifecycle } from "./use-app-lifecycle";
 const noop = () => undefined;
 
 export function AppShell() {
   const [state, dispatch] = useReducer(appReducer, initialAppState(0));
+  const [handoffNames, setHandoffNames] = useState<string[]>([]);
   const now = useAppLifecycle(state, dispatch);
   const pwa = usePwa(state.screen === "live" || state.screen === "quick-live");
 
@@ -43,6 +43,14 @@ export function AppShell() {
       winnerIdOverride?: string,
     ) => {
       if (!state.tournament) return false;
+      const lateEntryBlock = lateEntryCorrectionBlockReason(
+        state.tournament,
+        matchId,
+      );
+      if (lateEntryBlock) {
+        window.alert(lateEntryBlock);
+        return false;
+      }
       const needsConfirmation = correctionNeedsConfirmation(
         state.tournament,
         matchId,
@@ -146,6 +154,7 @@ export function AppShell() {
               players: setupPlayers(values),
               config: {
                 timingMode: values.timingMode,
+                drawStyle: values.drawStyle,
                 bookingMinutes: values.bookingMinutes,
                 warmupMinutes: values.warmupMinutes,
                 transitionSeconds: values.transitionSeconds,
@@ -158,52 +167,12 @@ export function AppShell() {
         />
       ) : null}
       {state.screen === "bracket" && state.tournament ? (
-        <BracketScreen
-          bracket={state.tournament}
-          onEditDraw={(players, structural) => {
-            if (structural) {
-              if (
-                tournamentHasStarted(state.tournament!) &&
-                !window.confirm(
-                  "Changing the player field now will clear every score and result, then reseed the entire bracket. The original court deadline will stay in place. Continue?",
-                )
-              ) {
-                return false;
-              }
-              dispatch({
-                type: "rebuild-tournament",
-                players,
-                now: Date.now(),
-              });
-              return true;
-            }
-            const currentNames = new Map(
-              state.tournament!.players.map(({ id, name }) => [id, name]),
-            );
-            players.forEach((player) => {
-              if (currentNames.get(player.id) !== player.name) {
-                dispatch({
-                  type: "rename-player",
-                  playerId: player.id,
-                  name: player.name,
-                  now: Date.now(),
-                });
-              }
-            });
-            return true;
-          }}
-          onCorrectMatch={correctResult}
-          onStartMatch={(matchId) =>
-            dispatch({ type: "start-match", matchId, now: Date.now() })
-          }
-          sessionLabel={sessionTimeLabel(
-            state.sessionDeadline,
-            Math.max(now, state.updatedAt),
-          )}
-          timingWarning={timingAdjustment(
-            state.tournament,
-            state.setupDraft?.config,
-          )}
+        <TournamentBracketRoute
+          correctResult={correctResult}
+          dispatch={dispatch}
+          now={now}
+          onQuickHandoff={(name) => setHandoffNames([name])}
+          state={state}
         />
       ) : null}
       {(state.screen === "live" || state.screen === "quick-live") &&
@@ -217,7 +186,6 @@ export function AppShell() {
           onExit={() => dispatch({ type: "navigate", screen: "home" })}
           scorer={state.scorer}
           sessionDeadline={state.quickMatch ? null : state.sessionDeadline}
-          standalone={state.screen === "quick-live"}
         />
       ) : null}
       {state.screen === "quick-setup" ? (
@@ -225,16 +193,29 @@ export function AppShell() {
           onStart={(scorer) =>
             dispatch({ type: "start-quick", scorer, now: Date.now() })
           }
-          suggestions={rememberedPlayerNames(
-            state.history,
-            (state.tournament?.players ?? state.setupDraft?.players ?? []).map(
-              ({ name }) => name,
-            ),
-          )}
+          suggestions={rememberedPlayerNames(state.history, [
+            ...handoffNames,
+            ...(
+              state.tournament?.players ??
+              state.setupDraft?.players ??
+              []
+            ).map(({ name }) => name),
+          ])}
         />
       ) : null}
       {state.screen === "results" && state.tournament ? (
-        <ResultsScreen bracket={state.tournament} onCorrect={correctResult} />
+        <ResultsScreen
+          bracket={state.tournament}
+          onNewDraw={() =>
+            dispatch({ type: "prepare-new-draw", now: Date.now() })
+          }
+          onReplaySame={() =>
+            dispatch({ type: "replay-same-draw", now: Date.now() })
+          }
+          onViewBracket={() =>
+            dispatch({ type: "navigate", screen: "bracket" })
+          }
+        />
       ) : null}
       {state.screen === "history" ? (
         <HistoryScreen

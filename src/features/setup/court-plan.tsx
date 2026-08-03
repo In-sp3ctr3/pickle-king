@@ -32,7 +32,7 @@ export function CourtPlan({
     <fieldset className="setup-court-plan">
       <legend>
         <span aria-hidden="true" className="setup-section-number">
-          02
+          03
         </span>
         <span className="setup-section-title">Court rules</span>
       </legend>

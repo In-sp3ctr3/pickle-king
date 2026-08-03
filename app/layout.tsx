@@ -11,7 +11,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Pickle King — Run the court. Crown the best.",
+    default: "Pickle King | Run the court. Crown the best.",
     template: "%s · Pickle King",
   },
   description:
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "Pickle King — Run the court. Crown the best.",
+    title: "Pickle King | Run the court. Crown the best.",
     description:
       "Offline-first pickleball tournaments, scoring, timing, and results.",
     images: [

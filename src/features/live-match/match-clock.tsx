@@ -36,11 +36,12 @@ export function MatchClock({
   }, [matchMs, now, onExpire, scorer.status]);
   const match = matchMs === null ? null : clockParts(matchMs);
   const session = clockParts(sessionMs);
+  if (!match && !sessionDeadline) return null;
   return (
     <div className="match-clocks" aria-live="polite">
-      <div>
-        <span className="clock-label">Match clock</span>
-        {match ? (
+      {match ? (
+        <div>
+          <span className="clock-label">Match clock</span>
           <strong className="clock-value">
             <AnimatedNumber
               format={twoDigitFormat}
@@ -55,10 +56,8 @@ export function MatchClock({
               value={match.seconds}
             />
           </strong>
-        ) : (
-          <strong className="clock-value clock-untimed">Untimed</strong>
-        )}
-      </div>
+        </div>
+      ) : null}
       {sessionDeadline ? (
         <div className="session-clock">
           <span className="clock-label">Session left</span>

@@ -12,6 +12,7 @@ function players(count: number): Player[] {
 
 function bracket(count: number) {
   return createTournamentBracket(players(count), {
+    drawStyle: "competitive",
     bookingMinutes: 120,
     randomSeed: "tree-layout",
     targetScore: 11,
