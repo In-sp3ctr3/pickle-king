@@ -4,7 +4,7 @@ const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
 async function openFresh(page: Page) {
   await page.addInitScript(() => window.localStorage.clear());
-  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await expect(page.getByRole("button", { name: "Quick match" })).toBeEnabled();
 }
 

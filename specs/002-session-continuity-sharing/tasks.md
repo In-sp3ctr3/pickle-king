@@ -13,5 +13,5 @@
 - [x] U002 Redesign result confirmation as a share-ready celebration.
 - [x] U003 Generate and share/download Quick Match and bracket PNG cards.
 - [x] V001 Run unit, component, browser, responsive, accessibility, and visual QA.
-- [ ] R001 Create and merge the verified squash PR.
-- [ ] R002 Publish the exact merged main commit through Sites.
+- [x] R001 Create and merge the verified squash PR.
+- [x] R002 Publish the exact merged main commit through Sites.
