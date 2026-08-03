@@ -21,7 +21,10 @@ export function validateSetup(
   players: SetupPlayerDraft[],
   numbers: SetupNumberDrafts,
   timingMode: "timed" | "untimed",
-): { errors: SetupErrors; values?: TournamentSetupValues } {
+): {
+  errors: SetupErrors;
+  values?: Omit<TournamentSetupValues, "drawStyle">;
+} {
   const errors: SetupErrors = { names: {}, ratings: {} };
   const normalizedNames = players.map((player) =>
     player.name.trim().toLocaleLowerCase(),

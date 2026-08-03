@@ -15,7 +15,7 @@ export function BracketEditorDialog({
 }: {
   hasStarted: boolean;
   onClose: () => void;
-  onSave: (players: EditablePlayer[], structural: boolean) => boolean;
+  onSave: (players: EditablePlayer[], structural: boolean) => void;
   players: Player[];
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -94,7 +94,7 @@ export function BracketEditorDialog({
         <span>
           {structural
             ? hasStarted
-              ? "Saving will ask to clear every score and reseed the bracket."
+              ? "A single forgotten player can use late-entry repair. Other field changes rebuild the bracket."
               : "Saving will reseed the bracket before play begins."
             : "Player identity and every completed score stay intact."}
         </span>
@@ -166,7 +166,7 @@ export function BracketEditorDialog({
           onClick={save}
           type="button"
         >
-          {structural ? "Rebuild bracket" : "Save names"}
+          {structural ? "Review draw change" : "Save names"}
         </button>
       </footer>
     </dialog>

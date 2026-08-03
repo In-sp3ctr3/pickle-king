@@ -14,8 +14,8 @@ async function openQuickMatch(page: Page, target = 11) {
   await page.getByLabel("Side B").fill("Blair");
   await page.getByLabel("Play to").fill(String(target));
   await page.getByRole("button", { name: "Open scorer" }).click();
-  await expect(page.getByText("Untimed", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await expect(page.getByText("Untimed", { exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Start match", exact: true }).click();
 }
 
 test("quick setup points to each invalid field and animates the timed rule", async ({
@@ -103,7 +103,10 @@ test("a burst of score taps locks at the winning point", async ({ page }) => {
   });
 
   await expect(page.getByRole("heading", { name: "Alex wins" })).toBeVisible();
-  await expect(page.getByRole("dialog")).toContainText("7–0");
+  await expect(page.locator("[data-qa='result-preview']")).toHaveAttribute(
+    "alt",
+    "Alex wins 7 to 0. Share image preview.",
+  );
   await expect(
     page.locator("section[aria-label='Alex, 7 points']"),
   ).toBeVisible();
@@ -147,7 +150,7 @@ test("restart, tied early finish, and operator-selected winner are explicit", as
     page.locator("section[aria-label='Alex, 0 points']"),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: "Start", exact: true }).click();
+  await page.getByRole("button", { name: "Start match", exact: true }).click();
   await addA.click();
   await addB.click();
   await page.getByRole("button", { name: "End match" }).click();
@@ -200,9 +203,9 @@ test("setup explains the four-player minimum and builds an untimed centered draw
   await expect(page.locator("[data-qa='final-match']")).toBeVisible();
   await expect(page.locator(".bracket-match-node")).toHaveCount(3);
   await expect(page.locator("[data-match-queue-state='next']")).toHaveCount(1);
-  await expect(page.locator("[data-match-queue-state='queued']")).toHaveCount(
-    1,
-  );
+  await expect(
+    page.locator("[data-match-queue-state='available']"),
+  ).toHaveCount(1);
   await expect(
     page.locator(".bracket-match-node").first().locator(".tree-match-side"),
   ).toHaveCount(2);
@@ -211,7 +214,7 @@ test("setup explains the four-player minimum and builds an untimed centered draw
   await expect(page.getByLabel("Player name").first()).toHaveValue("Maya");
 });
 
-test("a six-player draw stays connected and queues one court at a time", async ({
+test("a six-player draw stays connected and exposes the ready opening courts", async ({
   page,
 }) => {
   await openFresh(page);
@@ -228,9 +231,9 @@ test("a six-player draw stays connected and queues one court at a time", async (
   await page.getByRole("button", { name: "Build bracket" }).click();
   await expect(page.locator(".bracket-match-node")).toHaveCount(7);
   await expect(page.locator("[data-match-queue-state='next']")).toHaveCount(1);
-  await expect(page.locator("[data-match-queue-state='queued']")).toHaveCount(
-    1,
-  );
+  await expect(
+    page.locator("[data-match-queue-state='available']"),
+  ).toHaveCount(1);
   const viewport = page.locator(".bracket-tree-viewport");
   await page.getByRole("button", { name: "Left draw" }).click();
   await expect

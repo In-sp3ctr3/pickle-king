@@ -27,6 +27,7 @@ export interface MatchConfig {
 }
 
 export interface TournamentConfig {
+  drawStyle: "competitive" | "social";
   timingMode: "timed" | "untimed";
   bookingMinutes: number;
   warmupMinutes: number;
@@ -40,10 +41,13 @@ export type MatchSource =
   | { type: "winner" | "loser"; matchId: string };
 
 export type MatchStatus = "waiting" | "ready" | "live" | "complete";
+export type MatchSlot = "A" | "B";
+export type LateEntryMethod =
+  "reversible-bye" | "untouched-preliminary" | "branch-gauntlet";
 
 export interface Match {
   id: string;
-  kind: "elimination" | "bronze";
+  kind: "elimination" | "bronze" | "challenge";
   round: number;
   ordinal: number;
   sourceA: MatchSource;
@@ -58,6 +62,36 @@ export interface Match {
   loserId: string | null;
   startedAt: number | null;
   completedAt: number | null;
+  comebackDeficit: number;
+}
+
+export interface LateEntryTiming {
+  currentCapMs: number | null;
+  proposedCapMs: number | null;
+  feasible: boolean;
+  remainingMatches: number;
+  sessionDeadline: number | null;
+}
+
+export interface LateEntryPlan {
+  method: LateEntryMethod;
+  playerId: string;
+  protectedPlayerId: string;
+  restoredPlayerIds: string[];
+  lineageMatchIds: string[];
+  targetMatchId: string;
+  targetSlot: MatchSlot;
+  originalTargetSource: MatchSource;
+  bronzeSlot: MatchSlot | null;
+  originalBronzeSource: MatchSource | null;
+  timing: LateEntryTiming;
+}
+
+export interface LateEntryAmendment extends LateEntryPlan {
+  id: string;
+  createdAt: number;
+  challengeMatchIds: string[];
+  declinedPlayerIds: string[];
 }
 
 export interface TournamentBracket {
@@ -67,6 +101,7 @@ export interface TournamentBracket {
   matches: Match[];
   finalMatchId: string;
   bronzeMatchId: string;
+  amendments: LateEntryAmendment[];
 }
 
 export interface PlayerStanding {

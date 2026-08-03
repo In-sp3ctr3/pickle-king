@@ -140,7 +140,10 @@ for (const viewport of routeMap.viewports) {
         if ((await focusable.count()) > 0) {
           const focusResponse = await openRoute(page, route);
           expect(focusResponse?.ok()).toBe(true);
-          await page.keyboard.press("Tab");
+          const initiallyFocused = await page.evaluate(
+            () => document.activeElement?.tagName ?? "",
+          );
+          if (initiallyFocused === "BODY") await page.keyboard.press("Tab");
           expect(
             await page.evaluate(() => document.activeElement?.tagName ?? ""),
           ).not.toBe("BODY");
@@ -154,6 +157,7 @@ for (const viewport of routeMap.viewports) {
           if (document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
           }
+          document.documentElement.dataset.visualFreeze = "true";
         });
         await page.screenshot({
           path: safeRenderPath(route.visualEvidence[viewport.name].render),

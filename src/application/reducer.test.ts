@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createScoringState } from "../match/scoring";
 import {
   getNextMatch,
+  planLateEntry,
   type Player,
   type TournamentConfig,
 } from "../tournament";
@@ -13,6 +14,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: "3.5",
 }));
 const config: TournamentConfig = {
+  drawStyle: "competitive",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -195,6 +197,49 @@ describe("application reducer", () => {
           scoreA === 0 && scoreB === 0 && status !== "complete",
       ),
     ).toBe(true);
+    expect(state.sessionDeadline).toBe(deadline);
+  });
+
+  it("applies and reverses a late-entry amendment without clearing results", () => {
+    const sixPlayers = [
+      ...players,
+      { id: "p4", name: "Player 4", rating: "3.5" as const },
+      { id: "p5", name: "Player 5", rating: "3.5" as const },
+    ];
+    let state = appReducer(initialAppState(0, true), {
+      type: "create-tournament",
+      players: sixPlayers,
+      config,
+      now: 1_000,
+    });
+    const late = { id: "late", name: "Late Player", rating: "3.5" as const };
+    const plan = planLateEntry(state.tournament!, late, {
+      now: 2_000,
+      randomSeed: config.randomSeed,
+      sessionDeadline: state.sessionDeadline,
+      transitionSeconds: config.transitionSeconds,
+    });
+    const deadline = state.sessionDeadline;
+    state = appReducer(state, {
+      type: "apply-late-entry",
+      player: late,
+      plan,
+      declinedPlayerIds: [],
+      removeTimeLimit: false,
+      now: 2_000,
+    });
+    expect(state.tournament).toMatchObject({
+      players: expect.arrayContaining([
+        expect.objectContaining({ id: "late" }),
+      ]),
+      amendments: [expect.objectContaining({ method: "reversible-bye" })],
+    });
+    expect(getNextMatch(state.tournament!)?.kind).toBe("challenge");
+    expect(state.sessionDeadline).toBe(deadline);
+
+    state = appReducer(state, { type: "undo-late-entry", now: 3_000 });
+    expect(state.tournament?.players).toHaveLength(6);
+    expect(state.tournament?.amendments).toEqual([]);
     expect(state.sessionDeadline).toBe(deadline);
   });
 

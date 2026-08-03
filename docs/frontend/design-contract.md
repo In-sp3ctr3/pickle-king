@@ -6,7 +6,7 @@ Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-02
+Last updated: 2026-08-03
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -34,24 +34,25 @@ Last updated: 2026-08-02
 
 ## Product and UX
 
-- Audience: a friend group operating a phone beside a court.
+- Audience: a friend group operating a phone or iPad beside a court.
 - Primary job: finish a fair tournament inside the booked time.
 - Primary action: start or resume the next scheduled match.
 - Privacy: all names and scores remain local and stay out of URLs.
 
 ## Page Regions
 
-| Region       | Purpose                      | Geometry                             | Responsive behavior                          | Interaction                  |
-| ------------ | ---------------------------- | ------------------------------------ | -------------------------------------------- | ---------------------------- |
-| Court header | explicit app navigation      | centered floating island             | labels contract, actions remain available    | back and home                |
-| Home hero    | establish identity and begin | asymmetric copy + crowned mascot     | stacked; CTA first                           | mascot arrival and blink     |
-| Run of show  | next match and time risk     | lime court slab + ordered queue      | horizontal queue becomes list                | start the one eligible match |
-| Bracket      | advancement overview         | connected two-sided elimination tree | full tree desktop; preserved overflow mobile | scroll, start, and correct   |
-| Scorekeeper  | no-look scoring              | split screen with oversized zones    | portrait two halves; landscape two columns   | add, subtract, pause, reset  |
-| Results      | podium and evidence          | crown focal point + grouped tables   | stacked podium then cards                    | correct or return home       |
-| History      | recall a social session      | editorial ledger + strong score rail | table becomes stacked match rows             | share or remove one record   |
-| Draw editor  | repair the field safely      | focused sheet with consequence copy  | full-height mobile dialog                    | rename or guarded rebuild    |
-| Share result | create a brag artifact       | portrait score poster                | preview scales without cropping              | share file or download       |
+| Region         | Purpose                      | Geometry                                          | Responsive behavior                          | Interaction                        |
+| -------------- | ---------------------------- | ------------------------------------------------- | -------------------------------------------- | ---------------------------------- |
+| Court header   | explicit app navigation      | centered floating island                          | labels contract, actions remain available    | back and home                      |
+| Home hero      | establish identity and begin | asymmetric copy + crowned mascot                  | stacked; CTA first                           | mascot arrival and blink           |
+| Run of show    | next match and time risk     | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match       |
+| Bracket        | advancement overview         | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct         |
+| Scorekeeper    | no-look scoring              | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset |
+| Results        | podium and evidence          | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, correct, or return home     |
+| History        | recall a social session      | editorial ledger + strong score rail              | table becomes stacked match rows             | share or remove one record         |
+| Draw editor    | repair the field safely      | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild     |
+| Challenge lane | expose an amended route      | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo  |
+| Share result   | preview a brag artifact      | reference-led portrait winner and split score     | exact 1080×1350 canvas preview               | native share or explicit download  |
 
 ## Geometry
 
@@ -92,21 +93,26 @@ Last updated: 2026-08-02
 
 ## Components
 
-| Component         | States                                | Rules                                           |
-| ----------------- | ------------------------------------- | ----------------------------------------------- |
-| PrimaryButton     | default, pressed, disabled            | 52px minimum, filled tactile surface, no stroke |
-| PlayerRow         | editing, invalid, complete            | inline name/React select; error text adjacent   |
-| RatingSelect      | closed, open, selected, invalid       | portal listbox; keyboard and touch operable     |
-| MatchCard         | waiting, queued, next, live, complete | wide two-contender rows; circle action at right |
-| FinalMatchCard    | waiting, queued, next, complete       | finalist left/right with trophy in the center   |
-| FloatingNav       | setup, bracket, results, quick        | solid centered island; explicit Back and Home   |
-| ScoreSide         | normal, leader, golden                | whole large zone adds; explicit minus button    |
-| NumberFlow        | changing, reduced motion              | numbers only; no ornamental looping             |
-| Dialog            | confirm, destructive                  | initial focus, escape, focus return             |
-| Toast/live region | neutral, warning                      | concise and announced politely                  |
-| NameCombobox      | empty, filtering, selected, invalid   | custom listbox; excludes already selected names |
-| HistoryRow        | quick match, tournament               | score-led ledger row; never dashboard-card grid |
-| ShareCard         | quick result, bracket                 | Canvas PNG using local data and brand tokens    |
+| Component         | States                                   | Rules                                                  |
+| ----------------- | ---------------------------------------- | ------------------------------------------------------ |
+| PrimaryButton     | default, pressed, disabled               | 52px minimum, filled tactile surface, no stroke        |
+| PlayerRow         | editing, invalid, complete               | inline name/React select; error text adjacent          |
+| RatingSelect      | closed, open, selected, invalid          | portal listbox; keyboard and touch operable            |
+| MatchCard         | waiting, available, next, live, complete | wide two-contender rows; recommended state is distinct |
+| FinalMatchCard    | waiting, queued, next, complete          | finalist left/right with trophy in the center          |
+| FloatingNav       | setup, bracket, results, quick           | solid centered island; explicit Back and Home          |
+| ScoreSide         | normal, leader, golden                   | whole court adds; explicit `+1` and `Undo −1`          |
+| NumberFlow        | changing, reduced motion                 | numbers only; no ornamental looping                    |
+| Dialog            | confirm, destructive                     | initial focus, escape, focus return                    |
+| LateEntryReview   | eligible, booking-risk, placement-lock   | exact route, match count, cancel always present        |
+| Toast/live region | neutral, warning                         | polite status clears after four seconds                |
+| NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names        |
+| HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid        |
+| ShareCard         | score, recap, stats, bracket             | focused local Canvas PNGs using brand tokens           |
+| StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert            |
+| VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate           |
+| DrawTools         | ready, building image                    | lives with Full draw heading; 48px controls            |
+| ReplayDialog      | same draw, new draw, cancel              | no destructive default; roster choice is explicit      |
 
 ## Motion
 
@@ -119,8 +125,8 @@ Last updated: 2026-08-02
 | rating popup        | connect trigger and menu      | open/select         | 180ms ease-out      | immediate menu |
 | bracket advancement | show dependency               | result confirmation | 420ms ease-out      | crossfade      |
 | connector reveal    | show advancement path         | result confirmation | 280ms ease-out      | immediate      |
-| crown arrival       | celebrate winner              | results entry       | 700ms spring        | static crown   |
-| result celebration  | mark confirmed performance    | result review       | 520ms spring        | static crown   |
+| mascot arrival      | celebrate tournament champion | results entry       | 700ms spring        | static mascot  |
+| result confetti     | mark confirmed performance    | result review       | two bursts, 1.2s    | static scatter |
 | suggestion reveal   | retain typing context         | input filtering     | 160ms ease-out      | immediate list |
 | press response      | confirm touch                 | pointer/keyboard    | 90ms                | color only     |
 
@@ -133,13 +139,19 @@ Last updated: 2026-08-02
 - The home visual is the existing crowned mascot without a frame, product-demo
   diagram, fake dashboard, or unrelated hero effect.
 - Match nodes contain both contenders. Separate player cards are prohibited.
-- Only the one-court eligible match may read `Next` or use the lime node state;
-  other dependency-ready matches read `Queued`.
+- Only the recommended match may read `Next` or use the lime node state. Other
+  ready matches in the earliest unfinished round read `Available` and can start.
 - Native select popups are prohibited for visible product controls.
 - No gradients, glassmorphism, WebGL, stock sports photos, or dashboard tile grids.
 - History reads as a courtside score ledger, not an admin dashboard.
 - Result sharing is opt-in and generated locally; no automatic social prompts.
+- Every celebration and exported image contains one crown: the mascot's crown.
+- Share generation must fail clearly rather than silently omit the mascot.
+- Draw editing and sharing controls stay with the Full draw they affect.
 - Structural draw edits must visually separate safe renames from destructive reseeding.
+- Late-entry repair must name the protected route, show its added matches and timing impact, and never hide the continue-unchanged action.
+- Result tables are read-only. Corrections and stable-identity renames live in bracket nodes.
+- Competitive and Social draw copy must name the tradeoff; random is not a substitute for Social.
 
 ## Acceptance criteria
 

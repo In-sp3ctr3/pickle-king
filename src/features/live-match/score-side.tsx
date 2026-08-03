@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { AnimatedNumber } from "./animated-number";
 
 export function ScoreSide({
@@ -8,6 +8,7 @@ export function ScoreSide({
   label,
   score,
   leader,
+  showHint,
   disabled,
   onAdd,
   onSubtract,
@@ -16,6 +17,7 @@ export function ScoreSide({
   label: string;
   score: number;
   leader: boolean;
+  showHint: boolean;
   disabled: boolean;
   onAdd: () => void;
   onSubtract: () => void;
@@ -34,18 +36,28 @@ export function ScoreSide({
       >
         <span className="score-player">{label}</span>
         <AnimatedNumber className="score-number" value={score} />
-        <span className="score-hint">Tap anywhere to add</span>
+        {showHint ? <span className="score-hint">Tap court to add</span> : null}
       </button>
-      <button
-        aria-label={`Subtract one point from ${label}`}
-        className="score-subtract"
-        disabled={disabled || score === 0}
-        onClick={onSubtract}
-        type="button"
-      >
-        <Minus aria-hidden="true" size={22} />
-        Point
-      </button>
+      <div className="score-stepper" aria-label={`${label} score controls`}>
+        <button
+          aria-label={`Undo one point from ${label}`}
+          disabled={disabled || score === 0}
+          onClick={onSubtract}
+          type="button"
+        >
+          <Minus aria-hidden="true" size={20} />
+          <span>Undo −1</span>
+        </button>
+        <button
+          aria-label={`Add one point to ${label}`}
+          disabled={disabled}
+          onClick={onAdd}
+          type="button"
+        >
+          <Plus aria-hidden="true" size={20} />
+          <span>+1 point</span>
+        </button>
+      </div>
     </section>
   );
 }

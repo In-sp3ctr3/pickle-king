@@ -134,6 +134,13 @@
           "expect": { "visible": "[data-qa='tournament-setup']" }
         },
         {
+          "name": "draw style options",
+          "selector": ".setup-draw-style .sliding-choice button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
           "name": "court number fields",
           "selector": ".setup-number-input input",
           "auditOnly": true,
@@ -212,10 +219,17 @@
         },
         {
           "name": "start match from tree",
-          "selector": "[data-qa='bracket-node-start']",
+          "selector": "[data-match-queue-state='next'] [data-qa='bracket-node-start']",
           "sequence": "bracket-tree-start",
           "action": "click",
           "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "available bracket node controls",
+          "selector": ".tree-match-card button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
           "name": "keyboard pan bracket",
@@ -347,6 +361,54 @@
       "canvasChecks": []
     },
     {
+      "name": "quick-idle",
+      "path": "/",
+      "prepare": "quick-idle",
+      "primaryActionSelector": "[data-qa='match-start']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/quick-idle-desktop-source.png",
+          "render": "test-results/frontend-captures/quick-idle-desktop.png",
+          "comparison": "test-results/frontend-comparisons/quick-idle-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/quick-idle-mobile-source.png",
+          "render": "test-results/frontend-captures/quick-idle-mobile.png",
+          "comparison": "test-results/frontend-comparisons/quick-idle-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "idle scorer controls",
+          "selector": ".match-screen button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "start match overlay",
+          "selector": "[data-qa='match-start']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='match-toggle']" }
+        },
+        {
+          "name": "exit idle scorer",
+          "selector": ".match-topbar > .text-button",
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "start overlay remains available",
+          "selector": "[data-qa='match-start']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
       "name": "quick-live",
       "path": "/",
       "prepare": "quick-live",
@@ -462,9 +524,25 @@
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".result-dialog" }
+        },
+        {
+          "name": "download quick result",
+          "selector": "[data-qa='download-result']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='result-preview']" }
         }
       ],
-      "motionChecks": [],
+      "motionChecks": [
+        {
+          "name": "victory confetti burst",
+          "selector": "[data-qa='victory-confetti']",
+          "stateAttribute": "data-motion-state",
+          "requiredStates": ["burst", "settled"],
+          "reducedMotionState": "static",
+          "observationMs": 1400
+        }
+      ],
       "reducedMotionChecks": [
         {
           "name": "result dialog remains available",
@@ -478,7 +556,7 @@
       "name": "results",
       "path": "/",
       "prepare": "four-player-results",
-      "primaryActionNotApplicableReason": "Results is a read-only summary; navigation lives in the floating app island.",
+      "primaryActionSelector": "[data-qa='share-tournament']",
       "visualEvidence": {
         "desktop": {
           "source": "docs/frontend/evidence/results-desktop-source.png",
@@ -505,18 +583,36 @@
           "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
-          "name": "result corrections",
-          "selector": ".match-history button",
-          "auditOnly": true,
+          "name": "share tournament",
+          "selector": "[data-qa='share-tournament']",
           "action": "click",
-          "expect": { "visible": "[data-qa='results']" }
+          "expect": { "visible": ".tournament-share-dialog" }
         },
         {
-          "name": "share final bracket",
-          "selector": "[data-qa='share-final-bracket']",
+          "name": "tournament share choices",
+          "selector": ".tournament-share-dialog button",
           "auditOnly": true,
           "action": "click",
-          "expect": { "visible": "[data-qa='results']" }
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "replay tournament",
+          "selector": "[data-qa='replay-tournament']",
+          "action": "click",
+          "expect": { "visible": ".replay-dialog" }
+        },
+        {
+          "name": "tournament replay choices",
+          "selector": ".replay-dialog button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".replay-dialog" }
+        },
+        {
+          "name": "review final bracket",
+          "selector": "[data-qa='view-final-bracket']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
         }
       ],
       "motionChecks": [],

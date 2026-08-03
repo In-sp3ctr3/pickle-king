@@ -9,6 +9,7 @@ const players: Player[] = ["Maya", "Rae", "Kai", "Noah"].map((name, index) => ({
   rating: "3.5",
 }));
 const bracket = createTournamentBracket(players, {
+  drawStyle: "competitive",
   timingMode: "untimed",
   bookingMinutes: 120,
   warmupMinutes: 10,

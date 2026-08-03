@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Share2, Trash2, Trophy } from "lucide-react";
 import { useState } from "react";
+import { useTransientStatus } from "../../shared/use-transient-status";
 import type { SessionHistoryV1 } from "../../history";
 import { bracketShareCanvas, quickShareCanvas, shareCanvas } from "../share";
 
@@ -23,12 +24,17 @@ export function HistoryScreen({
   onRemove: (id: string, kind: "quick" | "tournament") => void;
   onReset: () => void;
 }) {
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useTransientStatus();
+  const [sharingId, setSharingId] = useState<string | null>(null);
   async function share(
-    canvas: HTMLCanvasElement,
+    canvas: Promise<HTMLCanvasElement>,
     fileName: string,
     title: string,
+    id: string,
   ) {
+    if (sharingId) return;
+    setSharingId(id);
+    setStatus("Building image…");
     try {
       const outcome = await shareCanvas(canvas, fileName, title);
       setStatus(
@@ -40,6 +46,8 @@ export function HistoryScreen({
       );
     } catch {
       setStatus("The image could not be shared. Try again.");
+    } finally {
+      setSharingId(null);
     }
   }
   if (recoveryMessage) {
@@ -103,11 +111,13 @@ export function HistoryScreen({
               </div>
               <div className="session-ledger__actions">
                 <button
+                  disabled={sharingId !== null}
                   onClick={() =>
                     void share(
                       quickShareCanvas(match),
                       `pickle-king-${match.completedAt}.png`,
                       "Pickle King final score",
+                      match.id,
                     )
                   }
                   type="button"
@@ -150,11 +160,13 @@ export function HistoryScreen({
                 </div>
                 <div className="session-ledger__actions">
                   <button
+                    disabled={sharingId !== null}
                     onClick={() =>
                       void share(
                         bracketShareCanvas(item.bracket),
                         `pickle-king-bracket-${item.completedAt}.png`,
                         "Pickle King tournament bracket",
+                        item.id,
                       )
                     }
                     type="button"

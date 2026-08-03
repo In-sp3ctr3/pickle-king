@@ -1,21 +1,21 @@
 "use client";
 
+import { Download, Share2 } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { Crown, Share2 } from "lucide-react";
 import type { ScoringState } from "../../match/types";
+import { useResultShare } from "./use-result-share";
+import { VictoryConfetti } from "./victory-confetti";
 
 export function ResultConfirmationDialog({
   onConfirm,
   onEdit,
-  onShare,
+  onShareStatus,
   scorer,
-  standalone,
 }: {
   onConfirm: () => void;
   onEdit: () => void;
-  onShare: () => void;
+  onShareStatus: (message: string) => void;
   scorer: ScoringState;
-  standalone: boolean;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -37,6 +37,9 @@ export function ResultConfirmationDialog({
       });
     };
   }, []);
+
+  const winnerName = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
+  const share = useResultShare(scorer, onShareStatus);
 
   return (
     <dialog
@@ -64,35 +67,58 @@ export function ResultConfirmationDialog({
       }}
       ref={dialogRef}
     >
-      <Crown aria-hidden="true" className="result-dialog__crown" size={52} />
-      <p className="eyebrow">{scorer.finishReason?.replaceAll("-", " ")}</p>
-      <h2 id="result-title">
-        {scorer.winner === "A" ? scorer.labelA : scorer.labelB} wins
+      <VictoryConfetti />
+      <h2 className="sr-only" id="result-title">
+        {winnerName} wins
       </h2>
-      <div
-        className="result-dialog__score"
-        aria-label={`${scorer.scoreA} to ${scorer.scoreB}`}
-      >
-        <strong>{scorer.scoreA}</strong>
-        <span>–</span>
-        <strong>{scorer.scoreB}</strong>
-      </div>
-      <div className="result-dialog__names">
-        <span>{scorer.labelA}</span>
-        <span>{scorer.labelB}</span>
-      </div>
-      <ResultExplanation scorer={scorer} standalone={standalone} />
+      <span className="sr-only">{scorer.stageLabel ?? "Final score"}</span>
+      <figure aria-busy={!share.ready} className="result-dialog__preview">
+        {share.previewUrl ? (
+          // Blob previews are already-local generated images and cannot use an image optimizer.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            alt={`${winnerName} wins ${scorer.scoreA} to ${scorer.scoreB}. Share image preview.`}
+            data-qa="result-preview"
+            src={share.previewUrl}
+          />
+        ) : (
+          <div className="result-dialog__preview-fallback">
+            <span>{scorer.stageLabel ?? "Final score"}</span>
+            <strong>{winnerName} wins</strong>
+            <b>
+              {scorer.scoreA} <i>to</i> {scorer.scoreB}
+            </b>
+          </div>
+        )}
+        <figcaption>Preview of the image you can share or download</figcaption>
+      </figure>
+      <ResultExplanation scorer={scorer} />
       <div className="dialog-actions">
         <button className="secondary-button" onClick={onEdit} type="button">
           Edit score
         </button>
         <button
+          aria-describedby={
+            !share.shareAvailable ? "share-unavailable" : undefined
+          }
           className="secondary-button"
           data-qa="share-result"
-          onClick={onShare}
+          disabled={!share.ready || !share.shareAvailable || share.busy}
+          onClick={() => void share.share()}
           type="button"
         >
-          <Share2 aria-hidden="true" size={18} /> Share result
+          <Share2 aria-hidden="true" size={18} />
+          Share result
+        </button>
+        <button
+          className="secondary-button"
+          data-qa="download-result"
+          disabled={!share.ready || share.busy}
+          onClick={share.download}
+          type="button"
+        >
+          <Download aria-hidden="true" size={18} />
+          Download result
         </button>
         <button
           className="primary-button"
@@ -104,38 +130,30 @@ export function ResultConfirmationDialog({
           Confirm result
         </button>
       </div>
+      {!share.shareAvailable && share.ready ? (
+        <p className="result-dialog__share-note" id="share-unavailable">
+          Native sharing is not available here. Download the image instead.
+        </p>
+      ) : null}
     </dialog>
   );
 }
 
-function ResultExplanation({
-  scorer,
-  standalone,
-}: {
-  scorer: ScoringState;
-  standalone: boolean;
-}) {
+function ResultExplanation({ scorer }: { scorer: ScoringState }) {
   if (scorer.finishReason === "operator-selection") {
     return (
-      <p>
-        Tied at {scorer.scoreA}–{scorer.scoreB}. Winner selected by the
+      <p className="result-dialog__exception">
+        Tied at {scorer.scoreA} to {scorer.scoreB}. Winner selected by the
         operator.
       </p>
     );
   }
   if (scorer.finishReason === "ended-early") {
     return (
-      <p>
-        Ended early at {scorer.scoreA}–{scorer.scoreB}. The leader will advance.
+      <p className="result-dialog__exception">
+        Match ended early. The recorded leader will advance.
       </p>
     );
   }
-  return (
-    <p>
-      {scorer.scoreA}–{scorer.scoreB}.{" "}
-      {standalone
-        ? "Confirm to finish this match."
-        : "Confirm before the bracket moves."}
-    </p>
-  );
+  return null;
 }

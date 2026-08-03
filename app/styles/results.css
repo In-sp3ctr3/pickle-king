@@ -5,27 +5,88 @@
 }
 
 .results-hero {
+  position: relative;
   display: grid;
+  overflow: hidden;
   justify-items: center;
   margin: 3rem auto;
+  padding: 1rem;
   text-align: center;
 }
 
 .champion-mark {
-  width: 104px;
-  height: 104px;
+  position: relative;
+  z-index: 1;
+  width: clamp(150px, 18vw, 220px);
+  height: clamp(150px, 18vw, 220px);
   margin-bottom: 1.5rem;
   background: url("/brand/pickle-king-mark.png") center / contain no-repeat;
   filter: drop-shadow(0 16px 28px rgb(0 0 0 / 60%));
 }
 
+html[data-visual-freeze="true"] .champion-mark {
+  transform: none !important;
+}
+
 .results-hero h1 {
+  position: relative;
+  z-index: 1;
   max-width: 12ch;
   margin: 0;
   font-size: clamp(4rem, 11vw, 9rem);
   letter-spacing: 0;
   line-height: 0.8;
   text-transform: uppercase;
+}
+
+.results-hero__champion {
+  position: relative;
+  z-index: 1;
+  margin-top: 1.1rem;
+  color: var(--lime);
+  font-size: clamp(1.4rem, 4vw, 2.8rem);
+  text-transform: uppercase;
+}
+
+.results-hero__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.results-hero > .eyebrow,
+.results-hero > p,
+.results-hero > button,
+.results-hero__record {
+  position: relative;
+  z-index: 1;
+}
+
+.results-hero__confetti {
+  z-index: 0;
+}
+
+.results-hero__record {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1rem;
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.results-hero__record strong {
+  color: var(--lime);
+}
+
+.results-hero__record span {
+  color: var(--mist);
 }
 
 .results-hero > p:last-child {
@@ -75,8 +136,26 @@
   text-transform: uppercase;
 }
 
-.podium-place.first small {
+.podium-place.first small,
+.podium-place.first > span {
   color: #415311;
+}
+
+.podium-medal {
+  width: 42px;
+  height: 42px;
+}
+
+.podium-medal--gold {
+  color: #8c6400;
+}
+
+.podium-medal--silver {
+  color: #c8ced3;
+}
+
+.podium-medal--bronze {
+  color: #bd7a42;
 }
 
 .upset-strip {
@@ -160,10 +239,91 @@
 .history-row {
   display: grid;
   min-height: 62px;
-  grid-template-columns: 8rem 1fr auto;
+  grid-template-columns: 8rem 1fr;
   align-items: center;
   gap: 1rem;
   border-top: 1px solid var(--line);
+}
+
+.replay-dialog,
+.tournament-share-dialog {
+  width: min(92vw, 680px);
+  max-width: none;
+  margin: auto;
+  border: 0;
+  border-radius: 24px;
+  background: #11150f;
+  color: var(--chalk);
+  padding: 1.5rem;
+  box-shadow: 0 32px 90px rgb(0 0 0 / 70%);
+}
+
+.replay-dialog::backdrop,
+.tournament-share-dialog::backdrop {
+  background: rgb(7 9 7 / 82%);
+  backdrop-filter: blur(8px);
+}
+
+.replay-dialog > header,
+.tournament-share-dialog > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.replay-dialog h2,
+.tournament-share-dialog h2 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.replay-dialog header > button,
+.tournament-share-dialog header > button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #252c21;
+  color: var(--chalk);
+}
+
+.replay-dialog__choices,
+.tournament-share-dialog__choices {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1.5rem 0;
+}
+
+.replay-dialog__choices > button,
+.tournament-share-dialog__choices > button {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 0.2rem 0.8rem;
+  border: 0;
+  border-radius: 16px;
+  background: #20271c;
+  color: var(--chalk);
+  padding: 1rem;
+  text-align: left;
+}
+
+.replay-dialog__choices svg,
+.tournament-share-dialog__choices svg {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--lime);
+}
+
+.replay-dialog__choices span,
+.tournament-share-dialog__choices span {
+  color: var(--mist);
+  font-size: 0.78rem;
 }
 
 .history-row > span {

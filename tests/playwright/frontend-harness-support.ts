@@ -51,6 +51,7 @@ export type Route = {
     | "four-player-bracket"
     | "four-player-results"
     | "quick-setup"
+    | "quick-idle"
     | "quick-live"
     | "quick-result"
     | "history-empty";
@@ -133,7 +134,9 @@ export async function openRoute(page: Page, route: Route) {
   if (route.prepare === "four-player-results") {
     for (let match = 0; match < 4; match += 1) {
       await page.locator("[data-qa='start-next']").click();
-      await page.getByRole("button", { name: "Start", exact: true }).click();
+      await page
+        .getByRole("button", { name: "Start match", exact: true })
+        .click();
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='confirm-result']").click();
@@ -146,9 +149,17 @@ export async function openRoute(page: Page, route: Route) {
   if (route.prepare === "history-empty") {
     await page.locator("[data-qa='match-history']").click();
   }
-  if (route.prepare === "quick-live" || route.prepare === "quick-result") {
+  if (
+    route.prepare === "quick-idle" ||
+    route.prepare === "quick-live" ||
+    route.prepare === "quick-result"
+  ) {
     await fillQuickMatch(page, route.prepare === "quick-result" ? 1 : 11);
-    await page.getByRole("button", { name: "Start", exact: true }).click();
+  }
+  if (route.prepare === "quick-live" || route.prepare === "quick-result") {
+    await page
+      .getByRole("button", { name: "Start match", exact: true })
+      .click();
     await page.locator("[data-qa='score-a-add']").click();
     if (route.prepare === "quick-live") {
       await page.locator("[data-qa='score-b-add']").click();

@@ -15,6 +15,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: index === 0 ? "5.0" : "3.5",
 }));
 const config: TournamentConfig = {
+  drawStyle: "competitive",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -24,7 +25,7 @@ const config: TournamentConfig = {
 };
 
 describe("match lifecycle", () => {
-  it("starts only the next scheduled one-court match", () => {
+  it("starts a ready current-round match but rejects a locked round", () => {
     const bracket = createTournamentBracket(players, config);
     const next = getNextMatch(bracket)!;
     expect(startMatch(bracket, next.id, 1_000).matches).toEqual(
@@ -32,9 +33,7 @@ describe("match lifecycle", () => {
         expect.objectContaining({ id: next.id, status: "live" }),
       ]),
     );
-    expect(() => startMatch(bracket, "r1-m2", 1_000)).toThrow(
-      /next scheduled/i,
-    );
+    expect(() => startMatch(bracket, "r2-m1", 1_000)).toThrow(/current round/i);
   });
 
   it("discards a live attempt without advancing or losing its schedule slot", () => {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { completeMatch, createTournamentBracket } from "./bracket";
+import { startMatch } from "./lifecycle";
 import { getReadySchedule } from "./schedule";
 import type { Player, TournamentConfig } from "./types";
 
@@ -9,6 +10,7 @@ const players: Player[] = Array.from({ length: 8 }, (_, index) => ({
   rating: index < 2 ? "5.0" : "3.5",
 }));
 const config: TournamentConfig = {
+  drawStyle: "competitive",
   timingMode: "timed",
   bookingMinutes: 120,
   warmupMinutes: 10,
@@ -55,5 +57,15 @@ describe("one-court schedule", () => {
       ),
     };
     expect(getReadySchedule(withLive)).toEqual([]);
+  });
+
+  it("allows any ready match in the earliest unfinished round to start", () => {
+    const bracket = createTournamentBracket(players, config);
+    const ready = getReadySchedule(bracket);
+    expect(ready).toHaveLength(4);
+    const alternate = ready[2];
+    expect(startMatch(bracket, alternate.id, 1_000).matches).toContainEqual(
+      expect.objectContaining({ id: alternate.id, status: "live" }),
+    );
   });
 });

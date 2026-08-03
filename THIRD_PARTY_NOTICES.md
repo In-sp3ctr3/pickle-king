@@ -15,6 +15,12 @@ Archivo Black and Manrope are locally bundled through Fontsource and are
 licensed under the SIL Open Font License 1.1. No font is loaded from a remote
 runtime service.
 
+## canvas-confetti
+
+The result celebration uses `canvas-confetti`, distributed under the ISC
+license. Pickle King uses the package API directly and does not copy a 21st.dev
+demo composition.
+
 ## Open-source packages
 
 Runtime and development dependencies retain their respective licenses. Exact
