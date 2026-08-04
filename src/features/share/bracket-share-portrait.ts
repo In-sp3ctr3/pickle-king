@@ -18,8 +18,10 @@ export async function portraitBracketShareCanvas(
   format: ShareFormat,
 ) {
   const { width, height } = bracketShareDimensions(format);
-  const surface = await shareCanvasSurface(width, height);
-  const { arena, context, element, mark } = surface;
+  const { arena, context, element, mark } = await shareCanvasSurface(
+    width,
+    height,
+  );
   const names = new Map(bracket.players.map(({ id, name }) => [id, name]));
   const lookup = new Map(bracket.matches.map((match) => [match.id, match]));
   const elimination = bracket.matches.filter(
@@ -27,72 +29,91 @@ export async function portraitBracketShareCanvas(
   );
   const final = lookup.get(bracket.finalMatchId);
   const bronze = lookup.get(bracket.bronzeMatchId);
-  const geometry = portraitBracketGeometry(format);
+  const geometry = portraitBracketGeometry(format, bracket.roundCount);
   const positions = portraitPositions(bracket, elimination, geometry);
 
   drawExportBackdrop(context, width, height, arena, height * 0.42);
   drawPortraitHeader(context, mark, bracket, final, names, height);
-  drawPortraitConnectors(context, bracket, elimination, positions, geometry);
-  if (final?.winnerId) {
-    const position = positions.get(bracket.finalMatchId)!;
-    drawTrophy(context, position.x + position.width / 2, position.y - 28, 38);
-  }
+  drawPortraitConnectors(context, bracket, elimination, positions);
   for (const match of elimination) {
     const position = positions.get(match.id);
-    if (position) {
-      drawBracketMatch(
-        context,
-        match,
-        position,
-        names,
-        lookup,
-        match.id === bracket.finalMatchId,
-      );
-    }
-  }
-  if (bronze) {
-    const finalPosition = positions.get(bracket.finalMatchId)!;
+    if (!position) continue;
     drawBracketMatch(
       context,
-      bronze,
-      {
-        x: 360,
-        y: geometry.bronzeY,
-        width: 360,
-        height: finalPosition.height,
-      },
+      match,
+      position,
       names,
       lookup,
-      false,
+      match.id === bracket.finalMatchId,
     );
   }
-  drawPortraitPodium(context, bracket, final, bronze, names, geometry);
+  const finalPosition = positions.get(bracket.finalMatchId);
+  if (finalPosition) {
+    drawTrophy(
+      context,
+      finalPosition.x + finalPosition.width / 2,
+      finalPosition.y - 20,
+      34,
+    );
+  }
+  if (bronze) {
+    drawBracketMatch(context, bronze, geometry.bronze, names, lookup, false);
+  }
+  drawPortraitPodium(context, final, bronze, names, geometry);
   drawShareFooter(context, width, height - 54);
   return element;
 }
 
-interface PortraitGeometry {
-  branchGap: number;
-  bronzeY: number;
+export interface PortraitGeometry {
+  bronze: ShareMatchPosition;
   cardHeight: number;
-  finalY: number;
-  layerGap: number;
+  cardWidth: number;
+  final: ShareMatchPosition;
   podiumY: number;
+  roundGap: number;
+  roundStartY: number;
+  rowGap: number;
   safeBottom: number;
 }
 
-export function portraitBracketGeometry(format: ShareFormat): PortraitGeometry {
-  const compact = format === "feed";
-  const finalY = compact ? 610 : 850;
-  const cardHeight = compact ? 68 : 86;
+export function portraitBracketGeometry(
+  format: ShareFormat,
+  roundCount = 4,
+): PortraitGeometry {
+  const story = format === "story";
+  const cardHeight = story ? 82 : 68;
+  const cardWidth = 440;
+  const rowGap = story ? 14 : 8;
+  const roundGap = story ? 54 : 28;
+  const roundStartY = story ? 360 : 292;
+  const branchRounds = Math.max(1, roundCount - 1);
+  let cursor = roundStartY;
+  for (let round = 1; round <= branchRounds; round += 1) {
+    const rows = Math.max(1, 2 ** (roundCount - round - 1));
+    cursor += rows * cardHeight + Math.max(0, rows - 1) * rowGap + roundGap;
+  }
+  const final = {
+    x: 260,
+    y: cursor,
+    width: 560,
+    height: story ? 92 : 76,
+  };
+  const bronze = {
+    x: 320,
+    y: final.y + final.height + (story ? 38 : 24),
+    width: 440,
+    height: cardHeight,
+  };
   return {
-    branchGap: compact ? 76 : 110,
-    bronzeY: finalY + cardHeight + (compact ? 28 : 44),
+    bronze,
     cardHeight,
-    finalY,
-    layerGap: compact ? 74 : 100,
-    podiumY: compact ? 1190 : 1550,
-    safeBottom: compact ? 1296 : 1640,
+    cardWidth,
+    final,
+    podiumY: story ? 1650 : 1210,
+    roundGap,
+    roundStartY,
+    rowGap,
+    safeBottom: story ? 1740 : 1296,
   };
 }
 
@@ -102,40 +123,28 @@ function portraitPositions(
   geometry: PortraitGeometry,
 ) {
   const positions = new Map<string, ShareMatchPosition>();
-  const { branchGap, cardHeight, finalY, layerGap } = geometry;
-  const safeLeft = 66;
-  const safeWidth = 948;
-  for (const match of matches) {
-    if (match.id === bracket.finalMatchId) {
+  let cursor = geometry.roundStartY;
+  for (let round = 1; round < bracket.roundCount; round += 1) {
+    const roundMatches = matches
+      .filter((match) => match.round === round)
+      .sort((left, right) => left.ordinal - right.ordinal);
+    const perSide = Math.max(1, Math.ceil(roundMatches.length / 2));
+    roundMatches.forEach((match, index) => {
+      const right = index >= perSide;
+      const row = index % perSide;
       positions.set(match.id, {
-        x: 350,
-        y: finalY,
-        width: 380,
-        height: cardHeight,
+        x: right ? 574 : 66,
+        y: cursor + row * (geometry.cardHeight + geometry.rowGap),
+        width: geometry.cardWidth,
+        height: geometry.cardHeight,
       });
-      continue;
-    }
-    const expected = 2 ** (bracket.roundCount - match.round);
-    const perBranch = Math.max(1, expected / 2);
-    const lower = match.ordinal > perBranch;
-    const slot = (match.ordinal - 1) % perBranch;
-    const gap = perBranch > 1 ? 16 : 0;
-    const width = Math.min(
-      360,
-      (safeWidth - gap * (perBranch - 1)) / perBranch,
-    );
-    const rowWidth = perBranch * width + (perBranch - 1) * gap;
-    const x = safeLeft + (safeWidth - rowWidth) / 2 + slot * (width + gap);
-    const distance = bracket.roundCount - match.round;
-    positions.set(match.id, {
-      x,
-      y: lower
-        ? finalY + cardHeight + branchGap + distance * layerGap
-        : finalY - branchGap - distance * layerGap - cardHeight,
-      width,
-      height: cardHeight,
     });
+    cursor +=
+      perSide * geometry.cardHeight +
+      Math.max(0, perSide - 1) * geometry.rowGap +
+      geometry.roundGap;
   }
+  positions.set(bracket.finalMatchId, geometry.final);
   return positions;
 }
 
@@ -144,7 +153,6 @@ function drawPortraitConnectors(
   bracket: TournamentBracket,
   matches: Match[],
   positions: Map<string, ShareMatchPosition>,
-  geometry: PortraitGeometry,
 ) {
   const lookup = new Map(matches.map((match) => [match.id, match]));
   for (const target of matches) {
@@ -154,11 +162,11 @@ function drawPortraitConnectors(
       if (source.type === "player") continue;
       const start = positions.get(source.matchId);
       if (!start) continue;
-      const above = start.y < end.y;
       const x1 = start.x + start.width / 2;
-      const y1 = above ? start.y + start.height : start.y;
+      const y1 = start.y + start.height;
       const x2 = end.x + end.width / 2;
-      const y2 = above ? end.y : end.y + end.height;
+      const y2 = end.y;
+      const railY = (y1 + y2) / 2;
       context.strokeStyle =
         lookup.get(source.matchId)?.status === "complete"
           ? shareColors.limeDeep
@@ -166,20 +174,8 @@ function drawPortraitConnectors(
       context.lineWidth = 3;
       context.beginPath();
       context.moveTo(x1, y1);
-      if (target.id === bracket.finalMatchId && !above) {
-        const bronzeBottom = geometry.bronzeY + geometry.cardHeight;
-        const railY = (y1 + bronzeBottom) / 2;
-        const detourX = end.x + end.width + 34;
-        context.lineTo(x1, railY);
-        context.lineTo(detourX, railY);
-        context.lineTo(detourX, y2 + 12);
-        context.lineTo(x2, y2 + 12);
-        context.lineTo(x2, y2);
-        context.stroke();
-        continue;
-      }
-      context.lineTo(x1, (y1 + y2) / 2);
-      context.lineTo(x2, (y1 + y2) / 2);
+      context.lineTo(x1, railY);
+      context.lineTo(x2, railY);
       context.lineTo(x2, y2);
       context.stroke();
     }
@@ -203,17 +199,17 @@ function drawPortraitHeader(
     color: shareColors.mist,
     font: "800 17px Manrope, sans-serif",
   });
-  drawBrandMark(context, mark, 540, height === 1350 ? 70 : 92, 110);
+  drawBrandMark(context, mark, 540, height === 1350 ? 68 : 92, 104);
   const champion = final?.winnerId ? names.get(final.winnerId) : null;
   shareFittedText(
     context,
     (champion ?? "ROAD TO THE CROWN").toUpperCase(),
     540,
-    height === 1350 ? 220 : 258,
+    height === 1350 ? 218 : 258,
     {
       align: "center",
       color: champion ? shareColors.lime : shareColors.chalk,
-      maxSize: 52,
+      maxSize: 50,
       minSize: 28,
       maxWidth: 820,
     },
@@ -222,36 +218,40 @@ function drawPortraitHeader(
 
 function drawPortraitPodium(
   context: CanvasRenderingContext2D,
-  bracket: TournamentBracket,
   final: Match | undefined,
   bronze: Match | undefined,
   names: Map<string, string>,
   geometry: PortraitGeometry,
 ) {
   if (!final?.winnerId) return;
-  const podium = [final.winnerId, final.loserId, bronze?.winnerId].filter(
-    (id): id is string => Boolean(id),
-  );
-  const y = geometry.podiumY;
-  const colors = [shareColors.gold, "#c9cec5", "#c6814a"];
-  podium.forEach((id, index) => {
-    const x = 250 + index * 290;
-    drawMedalBadge(
+  const places = [
+    { id: final.loserId, medal: "2" as const, color: "#c9cec5", x: 240 },
+    {
+      id: final.winnerId,
+      medal: "1" as const,
+      color: shareColors.gold,
+      x: 540,
+    },
+    { id: bronze?.winnerId, medal: "3" as const, color: "#c6814a", x: 840 },
+  ];
+  places.forEach(({ color, id, medal, x }) => {
+    if (!id) return;
+    const lift = medal === "1" ? -18 : 0;
+    drawMedalBadge(context, x, geometry.podiumY + lift, medal, color, 54);
+    shareFittedText(
       context,
+      names.get(id) ?? "Player",
       x,
-      y,
-      String(index + 1) as "1" | "2" | "3",
-      colors[index],
-      54,
+      geometry.podiumY + 66,
+      {
+        align: "center",
+        color: medal === "1" ? shareColors.lime : shareColors.chalk,
+        family: "Manrope, sans-serif",
+        weight: 900,
+        maxSize: 18,
+        minSize: 12,
+        maxWidth: 220,
+      },
     );
-    shareFittedText(context, names.get(id) ?? "Player", x, y + 66, {
-      align: "center",
-      color: index === 0 ? shareColors.lime : shareColors.chalk,
-      family: "Manrope, sans-serif",
-      weight: 900,
-      maxSize: 18,
-      minSize: 12,
-      maxWidth: 220,
-    });
   });
 }

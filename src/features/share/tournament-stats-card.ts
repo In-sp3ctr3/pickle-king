@@ -65,12 +65,14 @@ export async function tournamentStatsCanvas(
     { color: shareColors.chalk, font: "900 21px Manrope, sans-serif" },
   );
 
-  const tableEnd = drawStandings(context, result.standings, names);
+  const tableEnd = drawStandings(context, result.standings, names, format);
   drawHighlights(
     context,
     highlights,
-    Math.min(height - 430, Math.max(680, tableEnd + 40)),
-    height - 122,
+    format === "story"
+      ? Math.min(1420, Math.max(950, tableEnd + 60))
+      : Math.min(height - 390, Math.max(680, tableEnd + 48)),
+    format,
   );
   drawShareFooter(context, width, height - 60);
   return element;
@@ -80,9 +82,14 @@ function drawStandings(
   context: CanvasRenderingContext2D,
   standings: ReturnType<typeof calculateTournamentResult>["standings"],
   names: Map<string, string>,
+  format: ShareFormat,
 ) {
-  const top = 326;
-  const rowHeight = Math.min(52, 570 / standings.length);
+  const story = format === "story";
+  const top = story ? 360 : 326;
+  const rowHeight = Math.min(
+    story ? 92 : 52,
+    (story ? 760 : 570) / standings.length,
+  );
   for (const [label, x, align] of [
     ["PLAYER", 70, "left"],
     ["W–L", 702, "right"],
@@ -153,40 +160,54 @@ function drawHighlights(
   context: CanvasRenderingContext2D,
   highlights: TournamentHighlight[],
   top: number,
-  bottom: number,
+  format: ShareFormat,
 ) {
-  const gap = 16;
-  const cardWidth = (968 - gap) / 2;
-  const cardHeight = (bottom - top - gap) / 2;
+  shareText(context, "TOURNAMENT MOMENTS", 56, top, {
+    color: shareColors.mist,
+    font: "900 16px Manrope, sans-serif",
+  });
+  const sectionTop = top + 28;
+  const cellWidth = 484;
+  const rowHeight = format === "story" ? 180 : 112;
+  context.strokeStyle = "rgba(111, 128, 103, 0.42)";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(56, sectionTop);
+  context.lineTo(1024, sectionTop);
+  context.moveTo(540, sectionTop);
+  context.lineTo(540, sectionTop + rowHeight * 2);
+  context.moveTo(56, sectionTop + rowHeight);
+  context.lineTo(1024, sectionTop + rowHeight);
+  context.moveTo(56, sectionTop + rowHeight * 2);
+  context.lineTo(1024, sectionTop + rowHeight * 2);
+  context.stroke();
   highlights.forEach((highlight, index) => {
     const column = index % 2;
     const row = Math.floor(index / 2);
-    const x = 56 + column * (cardWidth + gap);
-    const y = top + row * (cardHeight + gap);
-    const wash = context.createLinearGradient(
-      x,
-      y,
-      x + cardWidth,
-      y + cardHeight,
-    );
-    wash.addColorStop(0, "rgba(32, 42, 28, 0.97)");
-    wash.addColorStop(1, "rgba(13, 17, 12, 0.97)");
-    context.fillStyle = wash;
-    context.fillRect(x, y, cardWidth, cardHeight);
-    context.fillStyle = index === 0 ? shareColors.lime : shareColors.gold;
-    context.fillRect(x, y, 6, cardHeight);
-    shareText(context, highlight.label.toUpperCase(), x + 28, y + 40, {
+    const x = 56 + column * cellWidth;
+    const y = sectionTop + row * rowHeight;
+    shareText(context, `0${index + 1}`, x + 18, y + 42, {
+      color: index === 0 ? shareColors.lime : shareColors.gold,
+      font: "900 17px Manrope, sans-serif",
+    });
+    shareText(context, highlight.label.toUpperCase(), x + 68, y + 42, {
       color: shareColors.mist,
       font: "900 14px Manrope, sans-serif",
     });
-    shareFittedText(context, highlight.value, x + 28, y + cardHeight * 0.7, {
-      color: index === 0 ? shareColors.lime : shareColors.chalk,
-      family: "Manrope, sans-serif",
-      weight: 900,
-      maxSize: 27,
-      minSize: 16,
-      maxWidth: cardWidth - 54,
-    });
+    shareFittedText(
+      context,
+      highlight.value,
+      x + 68,
+      y + (format === "story" ? 112 : 78),
+      {
+        color: index === 0 ? shareColors.lime : shareColors.chalk,
+        family: "Manrope, sans-serif",
+        weight: 900,
+        maxSize: 24,
+        minSize: 16,
+        maxWidth: cellWidth - 94,
+      },
+    );
   });
 }
 

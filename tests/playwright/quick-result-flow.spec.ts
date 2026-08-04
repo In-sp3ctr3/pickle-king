@@ -46,7 +46,7 @@ test("result rendering shows only an aspect-correct branded skeleton", async ({
   const skeleton = page.locator(".result-dialog__preview-skeleton");
   await expect(skeleton).toBeVisible();
   await expect(page.locator(".result-dialog__preview-fallback")).toHaveCount(0);
-  await page.getByRole("button", { name: "Story / Reel · 9:16" }).click();
+  await page.getByRole("button", { name: "Story / Reel" }).click();
   await expect(skeleton).toHaveCSS("aspect-ratio", "9 / 16");
   await expect(page.locator("[data-qa='result-preview']")).toBeVisible();
 });

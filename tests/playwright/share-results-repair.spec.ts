@@ -66,7 +66,7 @@ test("quick result export keeps the reference-led score hierarchy", async ({
   await expect(
     page.getByRole("button", { name: "Download result" }),
   ).toHaveText("Saved");
-  await page.getByRole("button", { name: "Story / Reel · 9:16" }).click();
+  await page.getByRole("button", { name: "Story / Reel" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const storyDownloadEvent = page.waitForEvent("download");
@@ -144,14 +144,14 @@ test("tournament results lead with the champion and preview every export", async
   const recapDownload = await recapDownloadEvent;
   await recapDownload.saveAs("output/playwright/share-recap-feed.png");
   await expect(download).toHaveText("Saved");
-  await dialog.getByRole("button", { name: "Story / Reel · 9:16" }).click();
+  await dialog.getByRole("button", { name: "Story / Reel" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const storyDownloadEvent = page.waitForEvent("download");
   await download.click();
   const storyDownload = await storyDownloadEvent;
   await storyDownload.saveAs("output/playwright/share-recap-story.png");
-  await dialog.getByRole("button", { name: "Post · 4:5" }).click();
+  await dialog.getByRole("button", { name: "Post" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   await dialog.getByRole("tab", { name: "Player stats" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
@@ -159,8 +159,14 @@ test("tournament results lead with the champion and preview every export", async
   await download.click();
   const statsDownload = await statsDownloadEvent;
   await statsDownload.saveAs("output/playwright/share-stats-feed.png");
+  await dialog.getByRole("button", { name: "Story / Reel" }).click();
+  const statsStoryDownloadEvent = page.waitForEvent("download");
+  await download.click();
+  await (
+    await statsStoryDownloadEvent
+  ).saveAs("output/playwright/share-stats-story.png");
   await dialog.getByRole("tab", { name: "Full bracket" }).click();
-  await dialog.getByRole("button", { name: "Full draw · 4:3" }).click();
+  await dialog.getByRole("button", { name: "Full draw" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1600);
   await expect(preview).toHaveJSProperty("naturalHeight", 1200);
 
@@ -185,7 +191,7 @@ test("tournament results lead with the champion and preview every export", async
   ).toBe(true);
   await dialog.getByRole("button", { name: "Fit bracket preview" }).click();
 
-  await dialog.getByRole("button", { name: "Post · 4:5" }).click();
+  await dialog.getByRole("button", { name: "Post" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   const postBracketDownloadEvent = page.waitForEvent("download");
@@ -193,7 +199,7 @@ test("tournament results lead with the champion and preview every export", async
   await (
     await postBracketDownloadEvent
   ).saveAs("output/playwright/share-bracket-post.png");
-  await dialog.getByRole("button", { name: "Story / Reel · 9:16" }).click();
+  await dialog.getByRole("button", { name: "Story / Reel" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const storyBracketDownloadEvent = page.waitForEvent("download");
   await download.click();
@@ -221,18 +227,22 @@ test("share previews and results never overflow target screens", async ({
     const figure = page.locator(".tournament-share-preview");
     const image = figure.locator("img");
     await expect(image).toBeVisible();
-    const [figureBox, imageBox] = await Promise.all([
-      figure.boundingBox(),
-      image.boundingBox(),
-    ]);
-    expect(imageBox?.x).toBeGreaterThanOrEqual(figureBox?.x ?? 0);
-    expect(imageBox?.y).toBeGreaterThanOrEqual(figureBox?.y ?? 0);
-    expect((imageBox?.x ?? 0) + (imageBox?.width ?? 0)).toBeLessThanOrEqual(
-      (figureBox?.x ?? 0) + (figureBox?.width ?? 0) + 1,
-    );
-    expect((imageBox?.y ?? 0) + (imageBox?.height ?? 0)).toBeLessThanOrEqual(
-      (figureBox?.y ?? 0) + (figureBox?.height ?? 0) + 1,
-    );
+    await expect
+      .poll(() =>
+        figure.evaluate((node) => {
+          const image = node.querySelector("img");
+          if (!image) return false;
+          const parent = node.getBoundingClientRect();
+          const child = image.getBoundingClientRect();
+          return (
+            child.x >= parent.x &&
+            child.y >= parent.y &&
+            child.right <= parent.right + 1 &&
+            child.bottom <= parent.bottom + 1
+          );
+        }),
+      )
+      .toBe(true);
     expect(
       await page.evaluate(() => {
         const offenders = [...document.querySelectorAll<HTMLElement>("body *")]

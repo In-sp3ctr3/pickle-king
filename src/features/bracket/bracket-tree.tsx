@@ -124,10 +124,16 @@ export function BracketTree({
               className={`bracket-tree-node bracket-match-node ${
                 positioned.node.kind === "final"
                   ? "bracket-tree-node--final"
-                  : ""
+                  : positioned.node.kind === "bronze"
+                    ? "bracket-tree-node--bronze"
+                    : ""
               }`}
               data-qa={
-                positioned.node.kind === "final" ? "final-match" : undefined
+                positioned.node.kind === "final"
+                  ? "final-match"
+                  : positioned.node.kind === "bronze"
+                    ? "bronze-match"
+                    : undefined
               }
               initial={reducedMotion ? false : { y: 10 }}
               key={positioned.node.id}
@@ -210,7 +216,9 @@ function TreeNode({
   const label =
     node.kind === "final"
       ? "Final"
-      : `${roundLabel(node.round, bracket.roundCount)} · ${node.ordinal}`;
+      : node.kind === "bronze"
+        ? "Third place"
+        : `${roundLabel(node.round, bracket.roundCount)} · ${node.ordinal}`;
   if (node.kind === "bye") {
     return <ByeCard label={label} playerName={node.player.name} />;
   }

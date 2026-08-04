@@ -7,8 +7,8 @@ import {
 
 describe("share formats", () => {
   it("uses production Post and Story / Reel labels", () => {
-    expect(shareFormatLabel("feed")).toBe("Post · 4:5");
-    expect(shareFormatLabel("story")).toBe("Story / Reel · 9:16");
+    expect(shareFormatLabel("feed")).toBe("Post");
+    expect(shareFormatLabel("story")).toBe("Story / Reel");
   });
 
   it("contracts every bracket canvas dimension", () => {
@@ -24,6 +24,6 @@ describe("share formats", () => {
       height: 1920,
       width: 1080,
     });
-    expect(bracketShareFormatLabel("landscape")).toBe("Full draw · 4:3");
+    expect(bracketShareFormatLabel("landscape")).toBe("Full draw");
   });
 });

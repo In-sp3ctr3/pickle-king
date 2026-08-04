@@ -3,9 +3,9 @@
 import { MeasuredLabel, StatusLabel } from "@/src/shared/ui";
 import type { Match } from "@/src/tournament";
 import { Crown, FastForward, Trophy } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { InlineScoreEditor } from "./inline-score-editor";
-import { MatchCardAction } from "./match-card-action";
+import { MatchEditAction, MatchStartAction } from "./match-card-action";
 
 export type CorrectMatch = (
   matchId: string,
@@ -71,7 +71,15 @@ export function MatchCard(props: MatchCardProps) {
       data-match-status={match.status}
     >
       <div className="tree-match-card__body">
-        <MatchHeader canStart={canStart} label={label} match={match} />
+        <MatchHeader canStart={canStart} label={label} match={match}>
+          <MatchEditAction
+            match={match}
+            onEdit={() => setEditing(true)}
+            onRenamePlayer={props.onRenamePlayer}
+            sideALabel={sideALabel}
+            sideBLabel={sideBLabel}
+          />
+        </MatchHeader>
         <div className="tree-match-card__sides">
           <MatchSideRow
             isLoser={complete && match.loserId === match.sideA?.memberIds[0]}
@@ -89,7 +97,7 @@ export function MatchCard(props: MatchCardProps) {
           />
         </div>
       </div>
-      <MatchCardAction {...props} onEdit={() => setEditing(true)} />
+      <MatchStartAction {...props} />
     </article>
   );
 }
@@ -119,7 +127,7 @@ export function FinalMatchCard(props: MatchCardProps) {
   return (
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
-      className={`tree-match-card final-match-card ${
+      className={`tree-match-card final-match-card tree-match-card--${match.status} ${
         recommended
           ? "tree-match-card--next"
           : canStart
@@ -147,7 +155,13 @@ export function FinalMatchCard(props: MatchCardProps) {
               }
             />
           </span>
-          <MatchCardAction {...props} compact onEdit={() => setEditing(true)} />
+          <MatchEditAction
+            match={match}
+            onEdit={() => setEditing(true)}
+            onRenamePlayer={props.onRenamePlayer}
+            sideALabel={sideALabel}
+            sideBLabel={sideBLabel}
+          />
         </div>
       </header>
       <div className="final-match-card__faceoff" data-qa="final-faceoff">
@@ -175,15 +189,23 @@ export function FinalMatchCard(props: MatchCardProps) {
 
 function MatchHeader({
   canStart,
+  children,
   label,
   match,
-}: Pick<MatchCardProps, "canStart" | "label" | "match">) {
+}: Pick<MatchCardProps, "canStart" | "label" | "match"> & {
+  children?: ReactNode;
+}) {
   return (
     <header>
       <p>{label}</p>
-      <StatusLabel
-        status={match.status === "ready" && !canStart ? "queued" : match.status}
-      />
+      <div className="tree-match-card__header-tools">
+        <StatusLabel
+          status={
+            match.status === "ready" && !canStart ? "queued" : match.status
+          }
+        />
+        {children}
+      </div>
     </header>
   );
 }
@@ -205,7 +227,7 @@ function MatchSideRow({
     <div className={sideClass(isWinner, isLoser)}>
       <span className="tree-match-side__name">
         {isWinner ? <Crown aria-label="Winner" size={15} /> : null}
-        <MeasuredLabel maxSize={14} minSize={10} text={label} />
+        <MeasuredLabel maxSize={14} minSize={8} text={label} />
       </span>
       <strong>{showScore ? score : "·"}</strong>
     </div>
@@ -231,7 +253,7 @@ function FinalSide({
     <div
       className={`final-match-side is-${align} ${sideClass(isWinner, isLoser)}`}
     >
-      <MeasuredLabel maxSize={13} minSize={9} text={label} />
+      <MeasuredLabel maxSize={13} minSize={8} text={label} />
       <strong aria-hidden={!showScore}>{showScore ? score : ""}</strong>
     </div>
   );

@@ -154,6 +154,13 @@
           "expect": { "visible": "[data-qa='start-tournament']" }
         },
         {
+          "name": "reset tournament setup",
+          "selector": ".setup-reset",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
           "name": "player names",
           "selector": ".setup-player-row input",
           "auditOnly": true,

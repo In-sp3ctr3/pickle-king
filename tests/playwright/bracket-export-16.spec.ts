@@ -71,8 +71,8 @@ test("a completed 16-player bracket remains legible inside 1600 by 1200", async 
     ).toBeGreaterThan(1_000);
   }
   for (const [label, width, height, file] of [
-    ["Post · 4:5", 1080, 1350, "post"],
-    ["Story / Reel · 9:16", 1080, 1920, "story"],
+    ["Post", 1080, 1350, "post"],
+    ["Story / Reel", 1080, 1920, "story"],
   ] as const) {
     await dialog.getByRole("button", { name: label }).click();
     const preview = dialog.locator("[data-qa='share-preview']");

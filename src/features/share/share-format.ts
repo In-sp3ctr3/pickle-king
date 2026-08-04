@@ -8,7 +8,7 @@ export function shareDimensions(format: ShareFormat) {
 }
 
 export function shareFormatLabel(format: ShareFormat) {
-  return format === "story" ? "Story / Reel · 9:16" : "Post · 4:5";
+  return format === "story" ? "Story / Reel" : "Post";
 }
 
 export function bracketShareDimensions(format: BracketShareFormat) {
@@ -18,5 +18,5 @@ export function bracketShareDimensions(format: BracketShareFormat) {
 }
 
 export function bracketShareFormatLabel(format: BracketShareFormat) {
-  return format === "landscape" ? "Full draw · 4:3" : shareFormatLabel(format);
+  return format === "landscape" ? "Full draw" : shareFormatLabel(format);
 }

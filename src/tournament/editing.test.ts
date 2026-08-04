@@ -37,13 +37,13 @@ describe("tournament editing", () => {
   it("rejects empty, duplicate, overlong, and unknown-player renames", () => {
     const bracket = createTournamentBracket(players, config);
     expect(() => renameTournamentPlayer(bracket, "p0", " ")).toThrow(
-      /1 and 40/i,
+      /1 and 24/i,
     );
     expect(() => renameTournamentPlayer(bracket, "p0", "PLAYER 1")).toThrow(
       /unique/i,
     );
-    expect(() => renameTournamentPlayer(bracket, "p0", "x".repeat(41))).toThrow(
-      /1 and 40/i,
+    expect(() => renameTournamentPlayer(bracket, "p0", "x".repeat(25))).toThrow(
+      /1 and 24/i,
     );
     expect(() => renameTournamentPlayer(bracket, "missing", "Patrick")).toThrow(
       /not found/i,

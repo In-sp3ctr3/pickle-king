@@ -2,7 +2,7 @@
 
 import { Plus, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Player } from "../../tournament";
+import { PLAYER_NAME_MAX_LENGTH, type Player } from "../../tournament";
 import { RatingSelect } from "../setup/rating-select";
 
 type EditablePlayer = Omit<Player, "seed">;
@@ -54,8 +54,12 @@ export function BracketEditorDialog({
       setMessage("A tournament needs between 4 and 16 players.");
       return;
     }
-    if (trimmed.some(({ name }) => !name || name.length > 40)) {
-      setMessage("Every player needs a name between 1 and 40 characters.");
+    if (
+      trimmed.some(({ name }) => !name || name.length > PLAYER_NAME_MAX_LENGTH)
+    ) {
+      setMessage(
+        `Every player needs a name between 1 and ${PLAYER_NAME_MAX_LENGTH} characters.`,
+      );
       return;
     }
     const names = trimmed.map(({ name }) => name.toLocaleLowerCase());
@@ -95,7 +99,7 @@ export function BracketEditorDialog({
           {structural
             ? hasStarted
               ? "A single forgotten player can use late-entry repair. Other field changes rebuild the bracket."
-              : "Saving will reseed the bracket before play begins."
+              : "Saving will rebuild the bracket before play begins."
             : "Player identity and every completed score stay intact."}
         </span>
       </div>
@@ -106,7 +110,7 @@ export function BracketEditorDialog({
             <label>
               <span>Name</span>
               <input
-                maxLength={40}
+                maxLength={PLAYER_NAME_MAX_LENGTH}
                 onChange={(event) =>
                   update(player.id, { name: event.target.value })
                 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { GitBranch, Medal, RotateCcw, Share2, Sparkles } from "lucide-react";
+import { GitBranch, Medal, RotateCcw, Share2 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { calculateTournamentResult } from "../../tournament";
 import type { TournamentBracket } from "../../tournament";
@@ -136,24 +136,6 @@ export function ResultsScreen({
           <small>Third place</small>
         </div>
       </section>
-      {result.upsetWins.length ? (
-        <section className="upset-strip" aria-labelledby="upsets-title">
-          <Sparkles aria-hidden="true" />
-          <div>
-            <p className="eyebrow" id="upsets-title">
-              Upset watch
-            </p>
-            <p>
-              {result.upsetWins
-                .map(
-                  (upset) =>
-                    `${name(upset.winnerId)} defeated the No. ${player.get(upset.loserId)?.seed} seed`,
-                )
-                .join(" · ")}
-            </p>
-          </div>
-        </section>
-      ) : null}
       <section className="results-grid">
         <div>
           <h2>Player stats</h2>
