@@ -82,6 +82,8 @@ Open P2: 0
 | DR-43 | P1       | bracket/nodes   | current iPad next-match capture             | split round, status, and edit into a balanced header and aligned play with participant rows | fixed  |
 | DR-44 | P2       | bracket/story   | current 16-player Post and Story renders    | routed each sibling pair through an independent bounded lane                                | fixed  |
 | DR-45 | P1       | bracket/edit    | completed rename browser regression         | separated stable label edits from guarded result corrections                                | fixed  |
+| DR-46 | P1       | bracket/nodes   | supplied ready/waiting iPad captures        | made the action lane startable-only and balanced the compact header and participant insets  | fixed  |
+| DR-47 | P1       | bracket/story   | current 8/16-player Post and Story renders  | replaced shared central rails with a conventional mirrored dependency tree                  | fixed  |
 
 ## Decision
 
@@ -90,4 +92,6 @@ behavior, factual results, and current quick/recap/stats/4/8/16 comparison
 evidence meet the supplied reference's athletic hierarchy without copying its
 pixels or baking dynamic data into raster art. The latest iPad node captures and
 full-height portrait trees close the remaining balance and progression defects.
-The adversarial review has no open P0/P1/P2 finding.
+Ready nodes now reserve their action lane only while startable; waiting nodes
+remain full width. Portrait connector groups are isolated and converge once per
+dependency. The adversarial review has no open P0/P1/P2 finding.

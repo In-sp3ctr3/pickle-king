@@ -61,6 +61,7 @@ test("iPad next cards contain both players and use a dark edit pencil", async ({
     "color",
     "rgb(9, 11, 8)",
   );
+  await expect(card).toHaveCSS("background-color", "rgb(200, 255, 61)");
   await expect(card).toContainText("Next");
   const [cardBox, headerBox, roundBox, statusBox, editBox, sidesBox, startBox] =
     await Promise.all([
@@ -74,6 +75,12 @@ test("iPad next cards contain both players and use a dark edit pencil", async ({
     ]);
   expect(roundBox!.x).toBeLessThan(statusBox!.x);
   expect(editBox!.x).toBeGreaterThan(statusBox!.x + statusBox!.width);
+  expect(editBox!.width).toBeGreaterThanOrEqual(48);
+  expect(editBox!.height).toBeGreaterThanOrEqual(48);
+  expect(startBox!.width).toBeGreaterThanOrEqual(48);
+  expect(startBox!.height).toBeGreaterThanOrEqual(48);
+  expect(headerBox!.height).toBeLessThanOrEqual(36.1);
+  expect(roundBox!.y - cardBox!.y).toBeLessThanOrEqual(24);
   expect(
     Math.abs(
       statusBox!.x +
@@ -93,6 +100,13 @@ test("iPad next cards contain both players and use a dark edit pencil", async ({
         (cardBox!.y + cardBox!.height - (sidesBox!.y + sidesBox!.height)),
     ),
   ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(
+      sidesBox!.x -
+        cardBox!.x -
+        (cardBox!.x + cardBox!.width - (startBox!.x + startBox!.width)),
+    ),
+  ).toBeLessThanOrEqual(1);
   const available = page.locator(".tree-match-card--available").first();
   await expect(available).toContainText("Available");
   await expect(available).not.toContainText("Next");
@@ -105,6 +119,45 @@ test("iPad next cards contain both players and use a dark edit pencil", async ({
     animations: "disabled",
     fullPage: true,
     path: "output/playwright/match-card-next-balanced.png",
+  });
+});
+
+test("waiting cards keep a compact header and full-width player rows", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await buildDraw(page);
+
+  const card = page
+    .locator(".tree-match-card--standard[data-match-queue-state='waiting']")
+    .first();
+  await expect(card).toBeVisible();
+  await expect(card.locator("[data-qa='bracket-node-start']")).toHaveCount(0);
+  await expect(card.locator("[data-qa='edit-bracket-match']")).toHaveCount(0);
+
+  const [cardBox, headerBox, statusBox, sidesBox] = await Promise.all([
+    card.boundingBox(),
+    card.locator("header").boundingBox(),
+    card.locator(".tree-match-card__status").boundingBox(),
+    card.locator(".tree-match-card__sides").boundingBox(),
+  ]);
+  expect(
+    Math.abs(
+      headerBox!.x + headerBox!.width - (statusBox!.x + statusBox!.width),
+    ),
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(
+      sidesBox!.x -
+        cardBox!.x -
+        (cardBox!.x + cardBox!.width - (sidesBox!.x + sidesBox!.width)),
+    ),
+  ).toBeLessThanOrEqual(1);
+
+  await page.screenshot({
+    animations: "disabled",
+    fullPage: true,
+    path: "output/playwright/match-card-waiting-compact.png",
   });
 });
 

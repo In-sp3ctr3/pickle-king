@@ -176,6 +176,8 @@ The supplied source hashes are
 | DQA-56 | P2       | bracket/portrait | current 16-player Post and Story renders          | adjacent sibling pairs shared connector rails and obscured real dependencies     | frontend | fixed  |
 | DQA-57 | P1       | bracket/edit     | completed-tournament rename workflow              | a label-only edit resubmitted the result and reopened downstream matches         | product  | fixed  |
 | DQA-58 | P2       | bracket/edit     | two-label validation regression                   | a rejected second rename could leave the first label partially saved             | product  | fixed  |
+| DQA-59 | P1       | bracket/nodes    | supplied ready/waiting iPad captures              | one universal grid created uneven optical padding and an empty action lane       | frontend | fixed  |
+| DQA-60 | P1       | bracket/portrait | supplied eight-player Story render                | shared central rails obscured dependencies and did not read as a tournament tree | frontend | fixed  |
 
 ## Harness Results
 
@@ -201,7 +203,8 @@ Result: passed
 Rationale: exact contained previews, native share/download fallbacks, measured
 name fitting, 48px court-side controls, safe-area geometry, and the current
 quick, recap, stats, and 4/8/16-player bracket artifacts were reviewed. The
-latest iPad evidence proves contained ordinary nodes, state-aware edit contrast,
-a balanced warm-metal final, and third place directly below it. Current portrait
-exports use descending branches that converge across the available canvas
-height. No P0/P1/P2 design finding remains open.
+latest iPad evidence proves state-specific ordinary nodes: compact equal-inset
+startable cards and full-width waiting cards with no phantom action lane.
+Current portrait exports use isolated mirrored dependency rails and one final
+convergence, with intersection tests for 8- and 16-player draws. No P0/P1/P2
+design finding remains open.

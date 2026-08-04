@@ -12,6 +12,8 @@ export interface PortraitGeometry {
   roundStartY: number;
   rowGap: number;
   safeBottom: number;
+  safeLeft: number;
+  safeRight: number;
 }
 
 export interface PortraitRoundBand {
@@ -54,6 +56,8 @@ export function portraitBracketGeometry(format: ShareFormat): PortraitGeometry {
     roundStartY: story ? 350 : 280,
     rowGap: story ? 22 : 12,
     safeBottom: story ? 1640 : 1296,
+    safeLeft: story ? 72 : 54,
+    safeRight: story ? 1008 : 1026,
   };
 }
 
@@ -88,26 +92,64 @@ export function portraitMatchPositions(
   geometry: PortraitGeometry,
 ) {
   const positions = new Map<string, ShareMatchPosition>();
-  const bands = portraitRoundBands(geometry, bracket.roundCount);
   const branchRounds = Math.max(1, bracket.roundCount - 1);
-  for (let round = 1; round < bracket.roundCount; round += 1) {
-    const roundMatches = matches
-      .filter((match) => match.round === round)
-      .sort((left, right) => left.ordinal - right.ordinal);
-    const perSide = Math.max(1, Math.ceil(roundMatches.length / 2));
-    const progress = branchRounds === 1 ? 0 : (round - 1) / (branchRounds - 1);
-    const leftX = 64 + progress * 100;
-    const rightX = 1080 - leftX - geometry.cardWidth;
-    roundMatches.forEach((match, index) => {
-      const right = index >= perSide;
-      const row = index % perSide;
+  const columnCount = branchRounds * 2;
+  const availableWidth = geometry.safeRight - geometry.safeLeft;
+  const cardWidth = Math.min(
+    geometry.cardWidth,
+    Math.floor((availableWidth - (columnCount - 1) * 14) / columnCount),
+  );
+  const columnGap =
+    columnCount === 1
+      ? 0
+      : (availableWidth - columnCount * cardWidth) / (columnCount - 1);
+  const columnX = (round: number, right: boolean) =>
+    right
+      ? geometry.safeRight - cardWidth - (round - 1) * (cardWidth + columnGap)
+      : geometry.safeLeft + (round - 1) * (cardWidth + columnGap);
+  const opening = matches
+    .filter(({ round }) => round === 1)
+    .sort((left, right) => left.ordinal - right.ordinal);
+  const openingPerSide = Math.max(1, Math.ceil(opening.length / 2));
+  const lastOpeningTop = geometry.final.y - geometry.cardHeight * 2.5;
+  const openingTop = (row: number) =>
+    openingPerSide === 1
+      ? geometry.roundStartY + (lastOpeningTop - geometry.roundStartY) * 0.55
+      : geometry.roundStartY +
+        (row * (lastOpeningTop - geometry.roundStartY)) / (openingPerSide - 1);
+  opening.forEach((match, index) => {
+    const right = index >= openingPerSide;
+    positions.set(match.id, {
+      x: columnX(1, right),
+      y: openingTop(index % openingPerSide),
+      width: cardWidth,
+      height: geometry.cardHeight,
+    });
+  });
+
+  for (let round = 2; round < bracket.roundCount; round += 1) {
+    for (const match of matches.filter(
+      (candidate) => candidate.round === round,
+    )) {
+      const sources = matchSources(bracket, match)
+        .filter((source) => source.type !== "player")
+        .map((source) => positions.get(source.matchId))
+        .filter((source): source is ShareMatchPosition => Boolean(source));
+      if (sources.length === 0) continue;
+      const centerX =
+        sources.reduce((sum, source) => sum + source.x + source.width / 2, 0) /
+        sources.length;
+      const centerY =
+        sources.reduce((sum, source) => sum + source.y + source.height / 2, 0) /
+        sources.length;
+      const right = centerX > (geometry.safeLeft + geometry.safeRight) / 2;
       positions.set(match.id, {
-        x: right ? rightX : leftX,
-        y: bands[round - 1].top + row * (geometry.cardHeight + geometry.rowGap),
-        width: geometry.cardWidth,
+        x: columnX(round, right),
+        y: centerY - geometry.cardHeight / 2,
+        width: cardWidth,
         height: geometry.cardHeight,
       });
-    });
+    }
   }
   positions.set(bracket.finalMatchId, geometry.final);
   return positions;
@@ -187,7 +229,7 @@ export function portraitConnectorSegments(
     connectDependencyGroup(
       sources.map(({ position }) => position),
       end,
-      target.ordinal,
+      target.id === bracket.finalMatchId,
       add,
     );
   }
@@ -197,54 +239,40 @@ export function portraitConnectorSegments(
 function connectDependencyGroup(
   sources: ShareMatchPosition[],
   target: ShareMatchPosition,
-  targetOrdinal: number,
+  final: boolean,
   add: (x1: number, y1: number, x2: number, y2: number) => void,
 ) {
   const targetX = target.x + target.width / 2;
-  const maxBottom = Math.max(...sources.map(({ height, y }) => y + height));
-  const railY = Math.min(
-    target.y - 18,
-    maxBottom + Math.max(18, (target.y - maxBottom) * 0.42),
-  );
-  const centers = sources.map(({ width, x }) => x + width / 2);
-  const spread = Math.max(...centers) - Math.min(...centers);
-  if (sources.length > 1 && spread > sources[0].width * 0.75) {
+  if (final) {
+    const maxBottom = Math.max(...sources.map(({ height, y }) => y + height));
+    const railY = Math.max(maxBottom + 24, target.y - 48);
     for (const source of sources) {
       const sourceX = source.x + source.width / 2;
       add(sourceX, source.y + source.height, sourceX, railY);
     }
+    const centers = sources.map(({ width, x }) => x + width / 2);
     add(Math.min(...centers), railY, Math.max(...centers), railY);
-  } else if (sources.length > 1) {
-    const sourceCenter =
-      centers.reduce((sum, x) => sum + x, 0) / centers.length;
-    const leftBranch = sourceCenter < targetX;
-    const mergeX = leftBranch
-      ? Math.max(...sources.map(({ width, x }) => x + width)) + 20
-      : Math.min(...sources.map(({ x }) => x)) - 20;
-    const anchors = sources.map((source) => ({
-      x: leftBranch ? source.x + source.width : source.x,
-      y: source.y + source.height / 2,
-    }));
-    const top = Math.min(...anchors.map(({ y }) => y));
-    const bottom = Math.max(...anchors.map(({ y }) => y));
-    const joinY = (top + bottom) / 2;
-    const targetEdge = leftBranch ? target.x + target.width : target.x;
-    const laneOffset = 20 + ((targetOrdinal - 1) % 2) * 40;
-    const laneX = targetEdge + (leftBranch ? laneOffset : -laneOffset);
-    const targetY = target.y + target.height / 2;
-    for (const anchor of anchors) add(anchor.x, anchor.y, mergeX, anchor.y);
-    add(mergeX, top, mergeX, bottom);
-    add(mergeX, joinY, laneX, joinY);
-    add(laneX, joinY, laneX, targetY);
-    add(laneX, targetY, targetEdge, targetY);
+    add(targetX, railY, targetX, target.y);
     return;
-  } else {
-    const source = sources[0];
-    const sourceX = source.x + source.width / 2;
-    add(sourceX, source.y + source.height, sourceX, railY);
-    add(sourceX, railY, targetX, railY);
   }
-  add(targetX, railY, targetX, target.y);
+  const sourceCenterX =
+    sources.reduce((sum, source) => sum + source.x + source.width / 2, 0) /
+    sources.length;
+  const leftBranch = sourceCenterX < targetX;
+  const sourceEdge = leftBranch
+    ? Math.max(...sources.map(({ x, width }) => x + width))
+    : Math.min(...sources.map(({ x }) => x));
+  const targetEdge = leftBranch ? target.x : target.x + target.width;
+  const railX = (sourceEdge + targetEdge) / 2;
+  const anchors = sources.map((source) => ({
+    x: leftBranch ? source.x + source.width : source.x,
+    y: source.y + source.height / 2,
+  }));
+  const top = Math.min(...anchors.map(({ y }) => y));
+  const bottom = Math.max(...anchors.map(({ y }) => y));
+  for (const anchor of anchors) add(anchor.x, anchor.y, railX, anchor.y);
+  add(railX, top, railX, bottom);
+  add(railX, (top + bottom) / 2, targetEdge, target.y + target.height / 2);
 }
 
 function connectorKey(x1: number, y1: number, x2: number, y2: number) {

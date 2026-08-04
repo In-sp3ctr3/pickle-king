@@ -59,7 +59,7 @@ export function MatchCard(props: MatchCardProps) {
           : canStart
             ? "tree-match-card--available"
             : ""
-      }`}
+      } ${canStart && match.status === "ready" ? "tree-match-card--startable" : ""}`}
       data-match-queue-state={
         recommended
           ? "next"

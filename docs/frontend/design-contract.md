@@ -145,6 +145,9 @@ Last updated: 2026-08-03
 - Ordinary match headers use three explicit lanes: round at left, status at
   center, and edit at right. Their start action aligns to the participant-row
   midpoint rather than the whole node.
+- The play-action lane exists only while an ordinary node is startable. Waiting
+  and queued nodes keep a two-lane round/status header and full-width participant
+  rows; they never reserve an empty action column.
 - Only the recommended match may read `Next` or use the lime node state. Other
   ready matches in the earliest unfinished round read `Available` and can start.
 - Native select popups are prohibited for visible product controls.
@@ -164,7 +167,7 @@ Last updated: 2026-08-03
 
 - Post exports: 1080×1350 with essential content inside x=54…1026 and y=54…1296.
 - Story / Reel exports: 1080×1920 with essential content inside x=72…1008 and y=240…1640.
-- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use descending two-column branches that move inward each round, converge on the centered final, and use the available canvas height rather than compressing the draw into the upper half. Each dependency group draws one source bracket and one shared trunk; overlapping duplicate connector paths are prohibited.
+- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use mirrored horizontal branches: opening matches occupy the outside columns, each dependent match moves inward and is vertically centered between its two sources, and only the two semifinal branches converge downward into the centered final. Each dependency group owns one private merge rail; unrelated connector groups may not cross, overlap, share a rail, or enter another card.
 - Bracket previews open fitted. Expand creates an internally scrolling inspection surface with overscroll containment.
 - Native Web Share completion reads `Done`; only an explicit browser download reads `Saved`.
 - Confirmed Quick Matches return directly to setup after one history write. The completed-score screen is not a second step.

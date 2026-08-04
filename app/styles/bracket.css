@@ -579,9 +579,14 @@ html[data-visual-freeze="true"] .bracket-tree-node {
 }
 
 .tree-match-card--standard {
-  grid-template-columns: minmax(0, 1fr) 58px;
-  grid-template-rows: 48px minmax(0, 1fr);
-  padding: 0.35rem 0.4rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 36px minmax(0, 1fr);
+  padding: 0.4rem;
+}
+
+.tree-match-card--standard.tree-match-card--startable {
+  grid-template-columns: minmax(0, 1fr) 49px;
+  column-gap: 0.4rem;
 }
 
 .tree-match-card--next {
@@ -624,7 +629,7 @@ html[data-visual-freeze="true"] .bracket-tree-node {
 
 .tree-match-card--standard header {
   display: grid;
-  min-height: 48px;
+  min-height: 36px;
   grid-column: 1 / -1;
   grid-row: 1;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -634,6 +639,14 @@ html[data-visual-freeze="true"] .bracket-tree-node {
 
 .tree-match-card--standard header > p {
   justify-self: start;
+}
+
+.tree-match-card--standard header:not(:has(button)) {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.tree-match-card--standard header:not(:has(button)) .tree-match-card__status {
+  justify-self: end;
 }
 
 .tree-match-card header > p {

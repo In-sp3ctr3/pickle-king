@@ -86,6 +86,7 @@ describe("bracket cards", () => {
     );
 
     expect(markup).toContain("tree-match-card--next");
+    expect(markup).toContain("tree-match-card--startable");
     expect(markup).toMatch(/tree-match-card__status[\s\S]*edit-bracket-match/);
     expect(markup.indexOf("Round 1 · 1")).toBeLessThan(
       markup.indexOf("tree-match-card__status"),
@@ -93,6 +94,26 @@ describe("bracket cards", () => {
     expect(markup.indexOf("tree-match-card__status")).toBeLessThan(
       markup.indexOf("edit-bracket-match"),
     );
+  });
+
+  it("does not reserve action space for a waiting match", () => {
+    const markup = renderToStaticMarkup(
+      <MatchCard
+        canStart={false}
+        label="Semifinals · 1"
+        match={waitingFinal}
+        onCorrectMatch={vi.fn()}
+        onRenamePlayer={vi.fn(() => true)}
+        onStartMatch={vi.fn()}
+        sideALabel="TBD"
+        sideBLabel="TBD"
+      />,
+    );
+
+    expect(markup).toContain("tree-match-card--waiting");
+    expect(markup).not.toContain("tree-match-card--startable");
+    expect(markup).not.toContain("bracket-node-start");
+    expect(markup).not.toContain("edit-bracket-match");
   });
 
   it("gives a ready final a dedicated state and symmetrical score lanes", () => {
