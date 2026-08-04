@@ -4,7 +4,7 @@ import type {
   SetupPlayerDraft,
   TournamentSetupValues,
 } from "./setup-types";
-import { calculateMatchCap } from "@/src/tournament";
+import { calculateMatchCap, PLAYER_NAME_MAX_LENGTH } from "@/src/tournament";
 
 function integerInRange(
   value: string,
@@ -37,6 +37,9 @@ export function validateSetup(
   players.forEach((player, index) => {
     if (!normalizedNames[index]) {
       errors.names[player.id] = "Enter a player name.";
+    } else if (player.name.trim().length > PLAYER_NAME_MAX_LENGTH) {
+      errors.names[player.id] =
+        `Use ${PLAYER_NAME_MAX_LENGTH} characters or fewer.`;
     } else if (
       normalizedNames.filter((name) => name === normalizedNames[index]).length >
       1

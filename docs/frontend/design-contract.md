@@ -111,7 +111,7 @@ Last updated: 2026-08-03
 | Toast/live region | neutral, warning                         | polite status clears after four seconds                                  |
 | NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names                          |
 | HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid                          |
-| ShareCard         | score, recap, stats, bracket             | Post 4:5, Story / Reel 9:16, or Full draw 4:3 over the local arena asset |
+| ShareCard         | score, recap, stats, bracket             | Post, Story / Reel, or Full draw over the local arena asset              |
 | StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert                              |
 | VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate                             |
 | DrawTools         | ready, reroll available, locked          | lives with Full draw heading; 48px controls                              |
@@ -161,11 +161,11 @@ Last updated: 2026-08-03
 
 - Post exports: 1080×1350 with essential content inside x=54…1026 and y=54…1296.
 - Story / Reel exports: 1080×1920 with essential content inside x=72…1008 and y=240…1640.
-- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use upper and lower branches rather than shrinking the landscape tree.
+- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use top-to-bottom two-column round bands rather than shrinking or rotating the landscape tree.
 - Bracket previews open fitted. Expand creates an internally scrolling inspection surface with overscroll containment.
 - Native Web Share completion reads `Done`; only an explicit browser download reads `Saved`.
 - Confirmed Quick Matches return directly to setup after one history write. The completed-score screen is not a second step.
-- Dynamic names use measured fitting. Winner names may wrap to two lines; participant rows shrink and then ellipsize. Horizontal text scaling and negative tracking are prohibited.
+- New tournament names are capped at 24 characters. Dynamic labels use measured fitting within single-line participant rows; run-of-show opponents stack around `vs`. Horizontal text scaling, mid-word wrapping, and negative tracking are prohibited.
 - Decorative fragments stay in the outer 14% and never intersect text, scores, medals, or the mascot.
 - Preview images use containment; no ancestor may crop the generated PNG.
 

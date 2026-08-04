@@ -2,7 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import type { Match } from "@/src/tournament";
+import { PLAYER_NAME_MAX_LENGTH, type Match } from "@/src/tournament";
 
 interface InlineScoreEditorProps {
   match: Match;
@@ -167,6 +167,7 @@ function ScoreEditRow({
       ) : null}
       <input
         aria-label={`Player name for ${label}`}
+        maxLength={PLAYER_NAME_MAX_LENGTH}
         onChange={(event) => onNameChange(event.target.value)}
         type="text"
         value={name}

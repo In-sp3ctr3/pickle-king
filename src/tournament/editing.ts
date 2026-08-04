@@ -1,4 +1,9 @@
-import { SKILL_LEVELS, type Player, type TournamentBracket } from "./types";
+import {
+  PLAYER_NAME_MAX_LENGTH,
+  SKILL_LEVELS,
+  type Player,
+  type TournamentBracket,
+} from "./types";
 
 function validateName(
   players: Player[],
@@ -6,8 +11,10 @@ function validateName(
   name: string,
 ): string {
   const trimmed = name.trim();
-  if (!trimmed || trimmed.length > 40) {
-    throw new Error("Player names must be between 1 and 40 characters.");
+  if (!trimmed || trimmed.length > PLAYER_NAME_MAX_LENGTH) {
+    throw new Error(
+      `Player names must be between 1 and ${PLAYER_NAME_MAX_LENGTH} characters.`,
+    );
   }
   const duplicate = players.some(
     (player) =>

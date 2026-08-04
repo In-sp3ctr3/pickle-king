@@ -2,7 +2,7 @@
 
 import { ActionButton } from "@/src/shared/ui";
 import { nextPowerOfTwo } from "@/src/tournament";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, Plus, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRef, useState, type FormEvent } from "react";
 import { CourtPlan } from "./court-plan";
@@ -35,6 +35,17 @@ function makeInitialPlayers(
   }));
 }
 
+function makeInitialNumbers(
+  initialValues?: TournamentSetupInitialValues,
+): SetupNumberDrafts {
+  return {
+    bookingMinutes: String(initialValues?.bookingMinutes ?? 120),
+    warmupMinutes: String(initialValues?.warmupMinutes ?? 10),
+    transitionSeconds: String(initialValues?.transitionSeconds ?? 60),
+    targetScore: String(initialValues?.targetScore ?? 11),
+  };
+}
+
 export function TournamentSetup({
   initialValues,
   onQuickMatch,
@@ -50,12 +61,9 @@ export function TournamentSetup({
   const [drawStyle, setDrawStyle] = useState<
     TournamentSetupValues["drawStyle"]
   >(initialValues?.drawStyle ?? "ranked");
-  const [numbers, setNumbers] = useState<SetupNumberDrafts>({
-    bookingMinutes: String(initialValues?.bookingMinutes ?? 120),
-    warmupMinutes: String(initialValues?.warmupMinutes ?? 10),
-    transitionSeconds: String(initialValues?.transitionSeconds ?? 60),
-    targetScore: String(initialValues?.targetScore ?? 11),
-  });
+  const [numbers, setNumbers] = useState<SetupNumberDrafts>(() =>
+    makeInitialNumbers(initialValues),
+  );
   const [showErrors, setShowErrors] = useState(false);
   const [validationAttempt, setValidationAttempt] = useState(0);
   const [showMinimumDialog, setShowMinimumDialog] = useState(false);
@@ -86,6 +94,16 @@ export function TournamentSetup({
       return;
     }
     setPlayers((current) => current.filter((player) => player.id !== id));
+  }
+
+  function resetAllFields() {
+    setPlayers(makeInitialPlayers());
+    setTimingMode("timed");
+    setDrawStyle("ranked");
+    setNumbers(makeInitialNumbers());
+    setShowErrors(false);
+    setValidationAttempt(0);
+    nextPlayerId.current = 5;
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -125,6 +143,16 @@ export function TournamentSetup({
           Add the crew and a rough skill level. Ratings affect placement only
           when you choose a ranked draw.
         </span>
+        <ActionButton
+          aria-label="Reset all fields"
+          className="setup-reset"
+          onClick={resetAllFields}
+          title="Clear players and restore default rules"
+          variant="quiet"
+        >
+          <RotateCcw aria-hidden="true" size={17} />
+          Reset all
+        </ActionButton>
       </header>
 
       <form

@@ -35,7 +35,9 @@ export function ReplayTournamentDialog({
         <button data-qa="replay-same-draw" onClick={onSameDraw} type="button">
           <RefreshCw aria-hidden="true" />
           <strong>Replay same draw</strong>
-          <span>Same roster, rules, seeds, byes, and opening matchups.</span>
+          <span>
+            Same roster, rules, automatic advances, and opening matchups.
+          </span>
         </button>
         <button data-qa="prepare-new-draw" onClick={onNewDraw} type="button">
           <Shuffle aria-hidden="true" />

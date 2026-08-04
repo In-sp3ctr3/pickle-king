@@ -103,7 +103,7 @@ test("the result review is a branded, single-crown celebration", async ({
     path: "output/playwright/victory-dialog-ipad.png",
   });
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Post · 4:5" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Post" })).toBeFocused();
   await page.keyboard.press("Shift+Tab");
   await expect(
     page.getByRole("button", { name: "Confirm result" }),

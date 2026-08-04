@@ -201,7 +201,7 @@ test("setup explains the four-player minimum and builds an untimed centered draw
   ).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
   await expect(page.locator("[data-qa='final-match']")).toBeVisible();
-  await expect(page.locator(".bracket-match-node")).toHaveCount(3);
+  await expect(page.locator(".bracket-match-node")).toHaveCount(4);
   await expect(page.locator("[data-match-queue-state='next']")).toHaveCount(1);
   await expect(
     page.locator("[data-match-queue-state='available']"),
@@ -229,7 +229,7 @@ test("a six-player draw stays connected and exposes the ready opening courts", a
     await page.getByRole("option", { name: "3.5" }).click();
   }
   await page.getByRole("button", { name: "Build bracket" }).click();
-  await expect(page.locator(".bracket-match-node")).toHaveCount(7);
+  await expect(page.locator(".bracket-match-node")).toHaveCount(8);
   await expect(page.locator("[data-match-queue-state='next']")).toHaveCount(1);
   await expect(
     page.locator("[data-match-queue-state='available']"),

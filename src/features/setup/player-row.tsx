@@ -1,6 +1,7 @@
 import { ActionButton } from "@/src/shared/ui";
 import { Trash2 } from "lucide-react";
 import type { SetupPlayerDraft } from "./setup-types";
+import { PLAYER_NAME_MAX_LENGTH } from "@/src/tournament";
 import { RatingSelect } from "./rating-select";
 
 interface PlayerRowProps {
@@ -38,7 +39,7 @@ export function PlayerRow({
           aria-describedby={nameError ? nameErrorId : undefined}
           aria-invalid={Boolean(nameError)}
           autoComplete="off"
-          maxLength={40}
+          maxLength={PLAYER_NAME_MAX_LENGTH}
           onChange={(event) =>
             onChange({ ...player, name: event.currentTarget.value })
           }

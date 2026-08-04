@@ -44,9 +44,9 @@ test("eight-player brackets export complete landscape, Post, and Story images", 
   const dialog = page.getByRole("dialog", { name: "Share tournament" });
   await dialog.getByRole("tab", { name: "Full bracket" }).click();
   for (const [label, width, height, file] of [
-    ["Full draw · 4:3", 1600, 1200, "landscape"],
-    ["Post · 4:5", 1080, 1350, "post"],
-    ["Story / Reel · 9:16", 1080, 1920, "story"],
+    ["Full draw", 1600, 1200, "landscape"],
+    ["Post", 1080, 1350, "post"],
+    ["Story / Reel", 1080, 1920, "story"],
   ] as const) {
     await dialog.getByRole("button", { name: label }).click();
     const preview = dialog.locator("[data-qa='share-preview']");

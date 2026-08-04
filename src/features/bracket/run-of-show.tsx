@@ -79,7 +79,7 @@ export function RunOfShow({
           <MeasuredLabel
             className="run-of-show__player run-of-show__player--a"
             maxSize={52}
-            minSize={20}
+            minSize={14}
             text={sideA}
           />
           <span
@@ -92,7 +92,7 @@ export function RunOfShow({
           <MeasuredLabel
             className="run-of-show__player run-of-show__player--b"
             maxSize={52}
-            minSize={20}
+            minSize={14}
             text={sideB}
           />
         </h2>

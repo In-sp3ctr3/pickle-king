@@ -29,9 +29,10 @@ describe("connected bracket tree layout", () => {
       const tournament = bracket(count);
       const layout = createTreeLayout(tournament);
       const final = layout.nodes.find(({ node }) => node.kind === "final");
+      const bronze = layout.nodes.find(({ node }) => node.kind === "bronze");
       const openingNodes = layout.nodes.filter(({ node }) => node.round === 1);
 
-      expect(layout.nodes).toHaveLength(tournament.bracketSize - 1);
+      expect(layout.nodes).toHaveLength(tournament.bracketSize);
       expect(openingNodes).toHaveLength(tournament.bracketSize / 2);
       expect(Math.min(...openingNodes.map(({ x }) => x))).toBe(24);
       expect(Math.max(...openingNodes.map(({ x }) => x))).toBeGreaterThan(
@@ -42,8 +43,12 @@ describe("connected bracket tree layout", () => {
         throw new Error("Final node missing.");
       }
       expect(final.x).toBe(layout.boardWidth / 2 - final.width / 2);
-      const sideNodes = layout.nodes.filter(
-        ({ node }) => node.kind !== "final",
+      expect(bronze).toBeDefined();
+      if (!bronze) throw new Error("Bronze node missing.");
+      expect(bronze.x + bronze.width / 2).toBe(final.x + final.width / 2);
+      expect(bronze.y).toBeGreaterThan(final.y);
+      const sideNodes = layout.nodes.filter(({ node }) =>
+        ["match", "bye"].includes(node.kind),
       );
       expect(
         sideNodes.every(

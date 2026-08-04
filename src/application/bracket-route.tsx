@@ -99,7 +99,7 @@ export function TournamentBracketRoute({
         if (
           tournamentHasStarted(bracket) &&
           !window.confirm(
-            "Changing the player field now will clear every score and result, then reseed the entire bracket. The original court deadline will stay in place. Continue?",
+            "Changing the player field now will clear every score and result, then rebuild the entire bracket. The original court deadline will stay in place. Continue?",
           )
         ) {
           return { kind: "saved" };

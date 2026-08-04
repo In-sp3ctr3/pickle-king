@@ -25,8 +25,8 @@ import {
 import { BracketTree } from "./bracket-tree";
 import { LateEntryDialog } from "./late-entry-dialog";
 import { LateEntryLane } from "./late-entry-lane";
-import { matchSideLabel, orderedRunOfShow } from "./bracket-utils";
-import { type CorrectMatch, MatchCard, type RenamePlayer } from "./match-card";
+import { orderedRunOfShow } from "./bracket-utils";
+import { type CorrectMatch, type RenamePlayer } from "./match-card";
 import { RunOfShow } from "./run-of-show";
 
 export interface BracketScreenProps {
@@ -103,9 +103,6 @@ export function BracketScreen({
   const completeCount = bracket.matches.filter(
     (match) => match.status === "complete",
   ).length;
-  const bronze = bracket.matches.find(
-    (match) => match.id === bracket.bronzeMatchId,
-  );
   const automaticAdvanceCount = Math.max(
     0,
     bracket.bracketSize - bracket.players.length,
@@ -218,34 +215,6 @@ export function BracketScreen({
         />
       </section>
 
-      {bronze ? (
-        <section
-          aria-labelledby="bronze-title"
-          className="bracket-screen__bronze"
-        >
-          <div>
-            <p>Before the final</p>
-            <h2 id="bronze-title">Third-place court</h2>
-          </div>
-          <MatchCard
-            canStart={readySchedule.some(({ id }) => id === bronze.id)}
-            recommended={bronze.id === nextMatch?.id}
-            label="Bronze match"
-            match={bronze}
-            onCorrectMatch={onCorrectMatch}
-            onRenamePlayer={onRenamePlayer}
-            onStartMatch={onStartMatch}
-            sideALabel={matchSideLabel(
-              bronze.sideA?.memberIds,
-              bracket.players,
-            )}
-            sideBLabel={matchSideLabel(
-              bronze.sideB?.memberIds,
-              bracket.players,
-            )}
-          />
-        </section>
-      ) : null}
       {editing ? (
         <BracketEditorDialog
           hasStarted={bracket.matches.some(
