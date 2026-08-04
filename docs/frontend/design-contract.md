@@ -161,7 +161,7 @@ Last updated: 2026-08-03
 
 - Post exports: 1080×1350 with essential content inside x=54…1026 and y=54…1296.
 - Story / Reel exports: 1080×1920 with essential content inside x=72…1008 and y=240…1640.
-- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use top-to-bottom two-column round bands rather than shrinking or rotating the landscape tree.
+- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use descending two-column branches that move inward each round, converge on the centered final, and use the available canvas height rather than compressing the draw into the upper half.
 - Bracket previews open fitted. Expand creates an internally scrolling inspection surface with overscroll containment.
 - Native Web Share completion reads `Done`; only an explicit browser download reads `Saved`.
 - Confirmed Quick Matches return directly to setup after one history write. The completed-score screen is not a second step.

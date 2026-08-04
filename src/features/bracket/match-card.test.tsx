@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { createTournamentBracket, type Player } from "@/src/tournament";
-import { ByeCard, FinalMatchCard } from "./match-card";
+import { ByeCard, FinalMatchCard, MatchCard } from "./match-card";
 
 const players: Player[] = ["Maya", "Rae", "Kai", "Noah"].map((name, index) => ({
   id: `p${index + 1}`,
@@ -65,5 +65,56 @@ describe("bracket cards", () => {
       />,
     );
     expect(markup).toContain(">Complete<");
+  });
+
+  it("keeps the edit action in the header of a recommended match", () => {
+    const match = bracket.matches.find(
+      ({ kind, status }) => kind === "elimination" && status === "ready",
+    )!;
+    const markup = renderToStaticMarkup(
+      <MatchCard
+        canStart
+        recommended
+        label="Round 1 · 1"
+        match={match}
+        onCorrectMatch={vi.fn()}
+        onRenamePlayer={vi.fn(() => true)}
+        onStartMatch={vi.fn()}
+        sideALabel="Shemar"
+        sideBLabel="Samantha"
+      />,
+    );
+
+    expect(markup).toContain("tree-match-card--next");
+    expect(markup).toMatch(
+      /tree-match-card__header-tools[\s\S]*edit-bracket-match/,
+    );
+  });
+
+  it("gives a ready final a dedicated state and symmetrical score lanes", () => {
+    const readyFinal = {
+      ...waitingFinal,
+      sideA: { memberIds: [players[0].id] },
+      sideB: { memberIds: [players[1].id] },
+      status: "ready" as const,
+    };
+    const markup = renderToStaticMarkup(
+      <FinalMatchCard
+        canStart
+        recommended
+        label="Final"
+        match={readyFinal}
+        onCorrectMatch={vi.fn()}
+        onRenamePlayer={vi.fn(() => true)}
+        onStartMatch={vi.fn()}
+        sideALabel="Shemar"
+        sideBLabel="Samantha"
+      />,
+    );
+
+    expect(markup).toContain("final-match-card tree-match-card--ready");
+    expect(markup).toContain("tree-match-card--next");
+    expect(markup.match(/data-show-score="false"/g)).toHaveLength(2);
+    expect(markup).not.toContain("final-match-side tree-match-side");
   });
 });

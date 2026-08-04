@@ -1,12 +1,12 @@
 # Frontend Design QA
 
 Status: passed
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Environment
 
 - Commit/source state:
-  codex/fix/share-flow-ipad-polish@base-7c2cdb0 + reviewed working tree
+  codex/fix/bracket-balance-story-tree@base-0bf6906 + reviewed working tree
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -169,6 +169,9 @@ The supplied source hashes are
 | DQA-49 | P2       | share/controls   | iPad share dialogs                                | ratio-heavy labels stacked and obscured the simple format choice                 | frontend | fixed  |
 | DQA-50 | P1       | bracket/portrait | eight-player Post and Story renders               | mirrored portrait trees were difficult to follow and used the wrong podium order | frontend | fixed  |
 | DQA-51 | P2       | share/stats      | four-player Post and Story renders                | oversized fact cards created weak hierarchy and empty interiors                  | frontend | fixed  |
+| DQA-52 | P1       | bracket/iPad     | supplied next/final node captures                 | moved edit controls crowded participant rows and used unreadable state contrast  | frontend | fixed  |
+| DQA-53 | P2       | setup/hierarchy  | 820×1180 setup capture                            | Reset all was detached from the field it clears                                  | frontend | fixed  |
+| DQA-54 | P1       | bracket/story    | 8/16-player Story / Reel renders                  | portrait rounds occupied the upper canvas and did not visibly converge as a tree | frontend | fixed  |
 
 ## Harness Results
 
@@ -194,7 +197,7 @@ Result: passed
 Rationale: exact contained previews, native share/download fallbacks, measured
 name fitting, 48px court-side controls, safe-area geometry, and the current
 quick, recap, stats, and 4/8/16-player bracket artifacts were reviewed. The
-supplied Jack 5–3 source/render/diff sheet records the reference delta; browser
-and pure geometry checks prove the compact final, isolated third place,
-connectors, medals, long names, and complete frames. No P0/P1/P2 design finding
-remains open.
+latest iPad evidence proves contained ordinary nodes, state-aware edit contrast,
+a balanced warm-metal final, and third place directly below it. Current portrait
+exports use descending branches that converge across the available canvas
+height. No P0/P1/P2 design finding remains open.

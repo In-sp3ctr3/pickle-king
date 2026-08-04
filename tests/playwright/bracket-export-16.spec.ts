@@ -87,6 +87,19 @@ test("a completed 16-player bracket remains legible inside 1600 by 1200", async 
       width,
       height,
     });
+    if (file === "story") {
+      for (const [startY, endY] of [
+        [340, 760],
+        [760, 1180],
+        [1180, 1480],
+      ] as const) {
+        expect(
+          regionPixels(portrait, 40, 1040, startY, endY, ([red, green, blue]) =>
+            Boolean(green > 80 && green > red * 1.04 && blue < 150),
+          ),
+        ).toBeGreaterThan(700);
+      }
+    }
     await portraitDownload.saveAs(
       `output/playwright/share-bracket-16-${file}.png`,
     );

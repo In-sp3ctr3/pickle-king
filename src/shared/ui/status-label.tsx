@@ -18,6 +18,11 @@ const statusDetails = {
     icon: TimerReset,
     className: "text-[#c8ff3d]",
   },
+  available: {
+    label: "Available",
+    icon: TimerReset,
+    className: "text-[#c8ff3d]",
+  },
   queued: {
     label: "Queued",
     icon: Clock3,
@@ -34,17 +39,22 @@ const statusDetails = {
     className: "text-[#f5f3e9]",
   },
 } satisfies Record<
-  MatchStatus | "queued",
+  MatchStatus | "available" | "queued",
   { label: string; icon: typeof CircleCheck; className: string }
 >;
 
-export function StatusLabel({ status }: { status: MatchStatus | "queued" }) {
+export function StatusLabel({
+  status,
+}: {
+  status: MatchStatus | "available" | "queued";
+}) {
   const detail = statusDetails[status];
   const Icon = detail.icon;
 
   return (
     <span
       className={`inline-flex min-h-8 items-center gap-1.5 text-xs font-extrabold tracking-[0.12em] uppercase ${detail.className}`}
+      data-status={status}
     >
       <Icon aria-hidden="true" size={16} strokeWidth={2.25} />
       {detail.label}
