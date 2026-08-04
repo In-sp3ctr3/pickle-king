@@ -41,6 +41,10 @@
   },
   "homepage": "https://github.com/In-sp3ctr3/pickle-king#readme",
   "overrides": {
+    "fast-uri": "3.1.5",
+    "miniflare": {
+      "undici": "7.29.0"
+    },
     "postcss": "8.5.25",
     "sharp": "0.35.3"
   },
