@@ -143,16 +143,6 @@ export function TournamentSetup({
           Add the crew and a rough skill level. Ratings affect placement only
           when you choose a ranked draw.
         </span>
-        <ActionButton
-          aria-label="Reset all fields"
-          className="setup-reset"
-          onClick={resetAllFields}
-          title="Clear players and restore default rules"
-          variant="quiet"
-        >
-          <RotateCcw aria-hidden="true" size={17} />
-          Reset all
-        </ActionButton>
       </header>
 
       <form
@@ -161,6 +151,19 @@ export function TournamentSetup({
         onSubmit={handleSubmit}
         ref={formRef}
       >
+        <div className="setup-reset-row">
+          <ActionButton
+            aria-label="Reset all fields"
+            className="setup-reset"
+            onClick={resetAllFields}
+            title="Clear players and restore default rules"
+            type="button"
+            variant="quiet"
+          >
+            <RotateCcw aria-hidden="true" size={17} />
+            Reset all
+          </ActionButton>
+        </div>
         {showErrors && errorCount > 0 ? (
           <div aria-live="polite" className="setup-error-summary" role="alert">
             <p>A few details need your attention.</p>

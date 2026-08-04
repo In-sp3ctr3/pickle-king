@@ -38,10 +38,26 @@ test("setup can reset the entire form without clearing remembered history", asyn
   page,
 }) => {
   await openSetup(page);
+  const reset = page.getByRole("button", { name: "Reset all fields" });
+  const fieldHeading = page.getByText("The field", { exact: true });
+  const [resetBox, fieldHeadingBox] = await Promise.all([
+    reset.boundingBox(),
+    fieldHeading.boundingBox(),
+  ]);
+  expect((resetBox?.y ?? 0) + (resetBox?.height ?? 0)).toBeLessThan(
+    fieldHeadingBox?.y ?? 0,
+  );
+  expect(
+    (fieldHeadingBox?.y ?? 0) - ((resetBox?.y ?? 0) + (resetBox?.height ?? 0)),
+  ).toBeLessThanOrEqual(40);
+  await page.screenshot({
+    fullPage: true,
+    path: "output/playwright/setup-reset-position.png",
+  });
   await fillFourPlayers(page);
   await page.getByRole("button", { name: "No time limit" }).click();
   await page.getByLabel("Every match plays to", { exact: true }).fill("7");
-  await page.getByRole("button", { name: "Reset all fields" }).click();
+  await reset.click();
 
   await expect(page.getByLabel("Player name")).toHaveCount(4);
   for (const input of await page.getByLabel("Player name").all()) {

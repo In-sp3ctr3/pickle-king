@@ -162,14 +162,15 @@
 }
 
 .setup-header {
-  position: relative;
   padding-bottom: 2.5rem;
 }
 
+.setup-reset-row {
+  display: flex;
+  margin-bottom: 1.5rem;
+}
+
 .setup-reset {
-  position: absolute;
-  top: 0;
-  right: 0;
   min-height: 48px;
   padding-inline: 1rem;
 }
@@ -791,12 +792,6 @@
 }
 
 @media (max-width: 640px) {
-  .setup-reset {
-    position: static;
-    width: fit-content;
-    margin-top: 1.25rem;
-  }
-
   .home-screen {
     gap: 3.5rem;
     padding-block: 2.5rem 4rem;
