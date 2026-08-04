@@ -96,26 +96,26 @@ Last updated: 2026-08-03
 
 ## Components
 
-| Component         | States                                   | Rules                                                                    |
-| ----------------- | ---------------------------------------- | ------------------------------------------------------------------------ |
-| PrimaryButton     | default, pressed, disabled               | 52px minimum, filled tactile surface, no stroke                          |
-| PlayerRow         | editing, invalid, complete               | inline name/React select; error text adjacent                            |
-| RatingSelect      | closed, open, selected, invalid          | portal listbox; keyboard and touch operable                              |
-| MatchCard         | waiting, available, next, live, complete | wide two-contender rows; recommended state is distinct                   |
-| FinalMatchCard    | waiting, queued, next, complete          | compact warm-metal final; bounded names; trophy centered; edit in header |
-| FloatingNav       | setup, bracket, results, quick           | solid centered island; explicit Back and Home                            |
-| ScoreSide         | normal, leader, golden                   | whole court adds; explicit `+1` and `Undo −1`                            |
-| NumberFlow        | changing, reduced motion                 | numbers only; no ornamental looping                                      |
-| Dialog            | confirm, destructive                     | initial focus, escape, focus return                                      |
-| LateEntryReview   | eligible, booking-risk, placement-lock   | exact route, match count, cancel always present                          |
-| Toast/live region | neutral, warning                         | polite status clears after four seconds                                  |
-| NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names                          |
-| HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid                          |
-| ShareCard         | score, recap, stats, bracket             | Post, Story / Reel, or Full draw over the local arena asset              |
-| StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert                              |
-| VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate                             |
-| DrawTools         | ready, reroll available, locked          | lives with Full draw heading; 48px controls                              |
-| ReplayDialog      | same draw, new draw, cancel              | no destructive default; roster choice is explicit                        |
+| Component         | States                                   | Rules                                                                        |
+| ----------------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
+| PrimaryButton     | default, pressed, disabled               | 52px minimum, filled tactile surface, no stroke                              |
+| PlayerRow         | editing, invalid, complete               | inline name/React select; error text adjacent                                |
+| RatingSelect      | closed, open, selected, invalid          | portal listbox; keyboard and touch operable                                  |
+| MatchCard         | waiting, available, next, live, complete | round/status/edit header; two contender rows; action aligned to row midpoint |
+| FinalMatchCard    | waiting, queued, next, complete          | compact warm-metal final; bounded names; trophy centered; edit in header     |
+| FloatingNav       | setup, bracket, results, quick           | solid centered island; explicit Back and Home                                |
+| ScoreSide         | normal, leader, golden                   | whole court adds; explicit `+1` and `Undo −1`                                |
+| NumberFlow        | changing, reduced motion                 | numbers only; no ornamental looping                                          |
+| Dialog            | confirm, destructive                     | initial focus, escape, focus return                                          |
+| LateEntryReview   | eligible, booking-risk, placement-lock   | exact route, match count, cancel always present                              |
+| Toast/live region | neutral, warning                         | polite status clears after four seconds                                      |
+| NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names                              |
+| HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid                              |
+| ShareCard         | score, recap, stats, bracket             | Post, Story / Reel, or Full draw over the local arena asset                  |
+| StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert                                  |
+| VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate                                 |
+| DrawTools         | ready, reroll available, locked          | lives with Full draw heading; 48px controls                                  |
+| ReplayDialog      | same draw, new draw, cancel              | no destructive default; roster choice is explicit                            |
 
 ## Motion
 
@@ -142,6 +142,9 @@ Last updated: 2026-08-03
 - The home visual is the existing crowned mascot without a frame, product-demo
   diagram, fake dashboard, or unrelated hero effect.
 - Match nodes contain both contenders. Separate player cards are prohibited.
+- Ordinary match headers use three explicit lanes: round at left, status at
+  center, and edit at right. Their start action aligns to the participant-row
+  midpoint rather than the whole node.
 - Only the recommended match may read `Next` or use the lime node state. Other
   ready matches in the earliest unfinished round read `Available` and can start.
 - Native select popups are prohibited for visible product controls.
@@ -152,7 +155,7 @@ Last updated: 2026-08-03
 - Every celebration and exported image contains one crown: the mascot's crown.
 - Share generation must fail clearly rather than silently omit the mascot.
 - Draw editing and sharing controls stay with the Full draw they affect.
-- Structural draw edits must visually separate safe renames from destructive reseeding.
+- Structural draw edits must visually separate safe renames from destructive reseeding. A safe rename changes the stable player record only; it never submits a result correction or reopens downstream matches.
 - Late-entry repair must name the protected route, show its added matches and timing impact, and never hide the continue-unchanged action.
 - Result tables are read-only. Corrections and stable-identity renames live in bracket nodes.
 - Ranked and Random draw copy must state whether ratings affect placement. Random draws may be rerolled only before play begins.
@@ -161,7 +164,7 @@ Last updated: 2026-08-03
 
 - Post exports: 1080×1350 with essential content inside x=54…1026 and y=54…1296.
 - Story / Reel exports: 1080×1920 with essential content inside x=72…1008 and y=240…1640.
-- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use descending two-column branches that move inward each round, converge on the centered final, and use the available canvas height rather than compressing the draw into the upper half.
+- Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use descending two-column branches that move inward each round, converge on the centered final, and use the available canvas height rather than compressing the draw into the upper half. Each dependency group draws one source bracket and one shared trunk; overlapping duplicate connector paths are prohibited.
 - Bracket previews open fitted. Expand creates an internally scrolling inspection surface with overscroll containment.
 - Native Web Share completion reads `Done`; only an explicit browser download reads `Saved`.
 - Confirmed Quick Matches return directly to setup after one history write. The completed-score screen is not a second step.

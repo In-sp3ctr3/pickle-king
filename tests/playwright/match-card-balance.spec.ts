@@ -62,6 +62,37 @@ test("iPad next cards contain both players and use a dark edit pencil", async ({
     "rgb(9, 11, 8)",
   );
   await expect(card).toContainText("Next");
+  const [cardBox, headerBox, roundBox, statusBox, editBox, sidesBox, startBox] =
+    await Promise.all([
+      card.boundingBox(),
+      card.locator("header").boundingBox(),
+      card.locator("header > p").boundingBox(),
+      card.locator(".tree-match-card__status").boundingBox(),
+      card.locator("[data-qa='edit-bracket-match']").boundingBox(),
+      card.locator(".tree-match-card__sides").boundingBox(),
+      card.locator("[data-qa='bracket-node-start']").boundingBox(),
+    ]);
+  expect(roundBox!.x).toBeLessThan(statusBox!.x);
+  expect(editBox!.x).toBeGreaterThan(statusBox!.x + statusBox!.width);
+  expect(
+    Math.abs(
+      statusBox!.x +
+        statusBox!.width / 2 -
+        (headerBox!.x + headerBox!.width / 2),
+    ),
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(
+      startBox!.y + startBox!.height / 2 - (sidesBox!.y + sidesBox!.height / 2),
+    ),
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(
+      headerBox!.y -
+        cardBox!.y -
+        (cardBox!.y + cardBox!.height - (sidesBox!.y + sidesBox!.height)),
+    ),
+  ).toBeLessThanOrEqual(1);
   const available = page.locator(".tree-match-card--available").first();
   await expect(available).toContainText("Available");
   await expect(available).not.toContainText("Next");

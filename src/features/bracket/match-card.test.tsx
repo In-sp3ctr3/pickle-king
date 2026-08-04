@@ -86,8 +86,12 @@ describe("bracket cards", () => {
     );
 
     expect(markup).toContain("tree-match-card--next");
-    expect(markup).toMatch(
-      /tree-match-card__header-tools[\s\S]*edit-bracket-match/,
+    expect(markup).toMatch(/tree-match-card__status[\s\S]*edit-bracket-match/);
+    expect(markup.indexOf("Round 1 · 1")).toBeLessThan(
+      markup.indexOf("tree-match-card__status"),
+    );
+    expect(markup.indexOf("tree-match-card__status")).toBeLessThan(
+      markup.indexOf("edit-bracket-match"),
     );
   });
 

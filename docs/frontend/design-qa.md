@@ -172,6 +172,10 @@ The supplied source hashes are
 | DQA-52 | P1       | bracket/iPad     | supplied next/final node captures                 | moved edit controls crowded participant rows and used unreadable state contrast  | frontend | fixed  |
 | DQA-53 | P2       | setup/hierarchy  | 820×1180 setup capture                            | Reset all was detached from the field it clears                                  | frontend | fixed  |
 | DQA-54 | P1       | bracket/story    | 8/16-player Story / Reel renders                  | portrait rounds occupied the upper canvas and did not visibly converge as a tree | frontend | fixed  |
+| DQA-55 | P1       | bracket/nodes    | current iPad next-match capture                   | status and edit actions crowded the round label and misaligned the play control  | frontend | fixed  |
+| DQA-56 | P2       | bracket/portrait | current 16-player Post and Story renders          | adjacent sibling pairs shared connector rails and obscured real dependencies     | frontend | fixed  |
+| DQA-57 | P1       | bracket/edit     | completed-tournament rename workflow              | a label-only edit resubmitted the result and reopened downstream matches         | product  | fixed  |
+| DQA-58 | P2       | bracket/edit     | two-label validation regression                   | a rejected second rename could leave the first label partially saved             | product  | fixed  |
 
 ## Harness Results
 

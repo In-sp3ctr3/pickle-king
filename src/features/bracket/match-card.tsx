@@ -53,7 +53,7 @@ export function MatchCard(props: MatchCardProps) {
   return (
     <article
       aria-label={`${label}: ${sideALabel} versus ${sideBLabel}`}
-      className={`tree-match-card tree-match-card--${match.status} ${
+      className={`tree-match-card tree-match-card--standard tree-match-card--${match.status} ${
         recommended
           ? "tree-match-card--next"
           : canStart
@@ -211,7 +211,7 @@ function MatchHeader({
   return (
     <header>
       <p>{label}</p>
-      <div className="tree-match-card__header-tools">
+      <span className="tree-match-card__status">
         <StatusLabel
           status={
             match.status === "ready"
@@ -223,8 +223,8 @@ function MatchHeader({
               : match.status
           }
         />
-        {children}
-      </div>
+      </span>
+      {children}
     </header>
   );
 }

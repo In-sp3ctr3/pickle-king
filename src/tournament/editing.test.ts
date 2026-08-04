@@ -21,13 +21,16 @@ const config: TournamentConfig = {
 describe("tournament editing", () => {
   it("renames a stable player identity without changing completed results", () => {
     let bracket = createTournamentBracket(players, config);
-    const first = getNextMatch(bracket)!;
-    bracket = completeMatch(bracket, first.id, 11, 4, 1);
-    const winnerId = bracket.matches.find(
-      ({ id }) => id === first.id,
-    )!.winnerId!;
-    const renamed = renameTournamentPlayer(bracket, winnerId, "Patrick");
-    expect(renamed.players.find(({ id }) => id === winnerId)?.name).toBe(
+    let completedAt = 1;
+    while (bracket.matches.some(({ status }) => status !== "complete")) {
+      const next = getNextMatch(bracket)!;
+      bracket = completeMatch(bracket, next.id, 11, 4, completedAt++);
+    }
+    const renamedId = bracket.matches.find(
+      ({ id }) => id === bracket.bronzeMatchId,
+    )!.sideA!.memberIds[0];
+    const renamed = renameTournamentPlayer(bracket, renamedId, "Patrick");
+    expect(renamed.players.find(({ id }) => id === renamedId)?.name).toBe(
       "Patrick",
     );
     expect(renamed.matches).toEqual(bracket.matches);

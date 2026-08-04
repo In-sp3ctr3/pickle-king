@@ -45,25 +45,28 @@ export function InlineScoreEditor({
     nameA.trim().toLocaleLowerCase() !== nameB.trim().toLocaleLowerCase();
   const canSave =
     namesValid && (!editingResult || (valid && (!tied || selectedWinner)));
+  const resultChanged =
+    editingResult &&
+    valid &&
+    (parsedA !== match.scoreA ||
+      parsedB !== match.scoreB ||
+      (tied && selectedWinner !== match.winnerId));
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!nameA.trim() || !nameB.trim() || nameA.trim() === nameB.trim()) return;
-    if (
-      onRenamePlayer &&
-      sideAId &&
-      nameA.trim() !== sideALabel &&
-      !onRenamePlayer(sideAId, nameA.trim())
-    )
-      return;
+    const renamedA = onRenamePlayer && sideAId && nameA.trim() !== sideALabel;
+    if (renamedA && !onRenamePlayer(sideAId, nameA.trim())) return;
     if (
       onRenamePlayer &&
       sideBId &&
       nameB.trim() !== sideBLabel &&
       !onRenamePlayer(sideBId, nameB.trim())
-    )
+    ) {
+      if (renamedA) onRenamePlayer(sideAId, sideALabel);
       return;
-    if (match.status !== "complete") return onCancel();
+    }
+    if (match.status !== "complete" || !resultChanged) return onCancel();
     if (!valid || parsedA === null || parsedB === null) return;
     const winnerOverride = tied ? selectedWinner || undefined : undefined;
     if (tied && !winnerOverride) return;
