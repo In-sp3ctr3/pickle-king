@@ -1,6 +1,6 @@
 # ADR 0004: Optional pool play before the knockout draw
 
-Status: proposed
+Status: accepted
 Date: 2026-07-31
 
 ## Context
@@ -50,9 +50,10 @@ The product must say that every entrant receives at least two pool matches. It
 must not say everyone plays everyone. A complete round robin remains unsuitable
 for a normal two-hour, one-court session.
 
-For exactly four players, offer a true round robin as the future
-participation-first format: six preliminary matches, followed by a final
-between first and second for seven matches total. Do not add semifinals that
+For exactly four players, offer a true round robin as the
+participation-first format: six preliminary matches, followed by a third-place
+match between third and fourth and a final between first and second for eight
+matches total. Every entrant plays four matches. Do not add semifinals that
 advance all four players; that would turn the six preliminary matches into
 little more than seeding and raise the session to ten matches.
 

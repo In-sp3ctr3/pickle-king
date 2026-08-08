@@ -11,6 +11,8 @@ const routes = [
   "home",
   "setup",
   "bracket",
+  "round-robin-initial",
+  "round-robin-results",
   "quick-idle",
   "quick-live",
   "quick-result",
@@ -63,6 +65,25 @@ for (const viewport of responsiveViewports) {
               return Math.abs(viewportCenter - finalCenter);
             })
             .toBeLessThan(6);
+        }
+
+        if (
+          routeName === "round-robin-initial" &&
+          viewport.name === "phone-landscape"
+        ) {
+          const start = await page
+            .locator("[data-qa='start-next']")
+            .boundingBox();
+          expect(start).not.toBeNull();
+          expect(start!.y + start!.height).toBeLessThanOrEqual(viewport.height);
+          const cardTops = await page
+            .locator(".round-robin-round")
+            .first()
+            .locator(".tree-match-card")
+            .evaluateAll((cards) =>
+              cards.map((card) => Math.round(card.getBoundingClientRect().top)),
+            );
+          expect(new Set(cardTops).size).toBe(2);
         }
 
         await page.screenshot({

@@ -32,7 +32,7 @@ export function CourtPlan({
     <fieldset className="setup-court-plan">
       <legend>
         <span aria-hidden="true" className="setup-section-number">
-          03
+          04
         </span>
         <span className="setup-section-title">Court rules</span>
       </legend>
@@ -114,7 +114,7 @@ export function CourtPlan({
               key="untimed"
               transition={{ duration: reducedMotion ? 0 : 0.2 }}
             >
-              No match clock. The bracket advances only when a player wins.
+              No match clock. The tournament advances only when a player wins.
             </motion.p>
           )}
         </AnimatePresence>

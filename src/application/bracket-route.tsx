@@ -1,6 +1,7 @@
 "use client";
 
 import { BracketScreen, type CorrectMatch } from "../features/bracket";
+import { RoundRobinScreen } from "../features/round-robin";
 import {
   planLateEntry,
   renameTournamentPlayer,
@@ -25,6 +26,49 @@ export function TournamentBracketRoute({
 }) {
   const bracket = state.tournament!;
   const config = state.setupDraft!.config;
+  const renamePlayer = (playerId: string, name: string) => {
+    try {
+      renameTournamentPlayer(bracket, playerId, name);
+      dispatch({ type: "rename-player", playerId, name, now: Date.now() });
+      return true;
+    } catch (error) {
+      window.alert(
+        error instanceof Error ? error.message : "That name cannot be saved.",
+      );
+      return false;
+    }
+  };
+  const startMatch = (matchId: string) =>
+    dispatch({ type: "start-match", matchId, now: Date.now() });
+  const viewResults = () => dispatch({ type: "navigate", screen: "results" });
+  const rerollRandomDraw = () =>
+    dispatch({
+      type: "reroll-random-draw",
+      randomSeed: crypto.randomUUID(),
+      now: Date.now(),
+    });
+  const sessionLabel = sessionTimeLabel(
+    state.sessionDeadline,
+    Math.max(now, state.updatedAt),
+  );
+  const timingWarning = timingAdjustment(bracket, config);
+
+  if (bracket.format === "round-robin-finals") {
+    return (
+      <RoundRobinScreen
+        bracket={bracket}
+        drawStyle={config.drawStyle}
+        onCorrectMatch={correctResult}
+        onRenamePlayer={renamePlayer}
+        onRerollRandomDraw={rerollRandomDraw}
+        onStartMatch={startMatch}
+        onViewResults={viewResults}
+        sessionLabel={sessionLabel}
+        timingWarning={timingWarning}
+      />
+    );
+  }
+
   return (
     <BracketScreen
       bracket={bracket}
@@ -111,27 +155,8 @@ export function TournamentBracketRoute({
         onQuickHandoff(player.name);
         dispatch({ type: "navigate", screen: "quick-setup" });
       }}
-      onRerollRandomDraw={() =>
-        dispatch({
-          type: "reroll-random-draw",
-          randomSeed: crypto.randomUUID(),
-          now: Date.now(),
-        })
-      }
-      onRenamePlayer={(playerId, name) => {
-        try {
-          renameTournamentPlayer(bracket, playerId, name);
-          dispatch({ type: "rename-player", playerId, name, now: Date.now() });
-          return true;
-        } catch (error) {
-          window.alert(
-            error instanceof Error
-              ? error.message
-              : "That name cannot be saved.",
-          );
-          return false;
-        }
-      }}
+      onRerollRandomDraw={rerollRandomDraw}
+      onRenamePlayer={renamePlayer}
       onRebuildWithPlayer={(player) =>
         dispatch({
           type: "rebuild-tournament",
@@ -149,18 +174,13 @@ export function TournamentBracketRoute({
       onReplanLateEntry={(player, declinedPlayerIds) =>
         createPlan(state, player, declinedPlayerIds)
       }
-      onStartMatch={(matchId) =>
-        dispatch({ type: "start-match", matchId, now: Date.now() })
-      }
+      onStartMatch={startMatch}
       onUndoLateEntry={() =>
         dispatch({ type: "undo-late-entry", now: Date.now() })
       }
-      onViewResults={() => dispatch({ type: "navigate", screen: "results" })}
-      sessionLabel={sessionTimeLabel(
-        state.sessionDeadline,
-        Math.max(now, state.updatedAt),
-      )}
-      timingWarning={timingAdjustment(bracket, config)}
+      onViewResults={viewResults}
+      sessionLabel={sessionLabel}
+      timingWarning={timingWarning}
     />
   );
 }

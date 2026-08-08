@@ -2,13 +2,16 @@
 
 import { ActionButton } from "@/src/shared/ui";
 import { nextPowerOfTwo } from "@/src/tournament";
-import { ArrowRight, Plus, RotateCcw } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useRef, useState, type FormEvent } from "react";
+import { useCallback, useRef, useState, type FormEvent } from "react";
 import { CourtPlan } from "./court-plan";
 import { DrawStyleField } from "./draw-style-field";
+import { FormatField } from "./format-field";
+import { FormatStatus } from "./format-status";
 import { MinimumPlayersDialog } from "./minimum-players-dialog";
 import { PlayerRow } from "./player-row";
+import { SetupSubmit } from "./setup-submit";
 import type {
   SetupNumberDrafts,
   SetupPlayerDraft,
@@ -55,6 +58,11 @@ export function TournamentSetup({
   const [players, setPlayers] = useState<SetupPlayerDraft[]>(() =>
     makeInitialPlayers(initialValues),
   );
+  const [format, setFormat] = useState<TournamentSetupValues["format"]>(() =>
+    initialValues?.format === "round-robin-finals" && players.length === 4
+      ? "round-robin-finals"
+      : "knockout",
+  );
   const [timingMode, setTimingMode] = useState<
     TournamentSetupValues["timingMode"]
   >(initialValues?.timingMode ?? "timed");
@@ -67,11 +75,13 @@ export function TournamentSetup({
   const [showErrors, setShowErrors] = useState(false);
   const [validationAttempt, setValidationAttempt] = useState(0);
   const [showMinimumDialog, setShowMinimumDialog] = useState(false);
+  const [formatStatus, setFormatStatus] = useState("");
   const nextPlayerId = useRef(players.length + 1);
   const formRef = useRef<HTMLFormElement>(null);
-  const validation = validateSetup(players, numbers, timingMode);
+  const validation = validateSetup(players, numbers, timingMode, format);
   const errors = showErrors ? validation.errors : undefined;
   const automaticAdvanceCount = nextPowerOfTwo(players.length) - players.length;
+  const clearFormatStatus = useCallback(() => setFormatStatus(""), []);
 
   function updatePlayer(updatedPlayer: SetupPlayerDraft) {
     setPlayers((current) =>
@@ -85,6 +95,12 @@ export function TournamentSetup({
     if (players.length >= 16) return;
     const id = `added-${nextPlayerId.current}`;
     nextPlayerId.current += 1;
+    if (format === "round-robin-finals") {
+      setFormat("knockout");
+      setFormatStatus(
+        "Fast knockout selected because round robin + finals needs exactly four players.",
+      );
+    }
     setPlayers((current) => [...current, { id, name: "", rating: "" }]);
   }
 
@@ -98,6 +114,8 @@ export function TournamentSetup({
 
   function resetAllFields() {
     setPlayers(makeInitialPlayers());
+    setFormat("knockout");
+    setFormatStatus("");
     setTimingMode("timed");
     setDrawStyle("ranked");
     setNumbers(makeInitialNumbers());
@@ -110,9 +128,9 @@ export function TournamentSetup({
     event.preventDefault();
     setShowErrors(true);
     setValidationAttempt((attempt) => attempt + 1);
-    const result = validateSetup(players, numbers, timingMode);
+    const result = validateSetup(players, numbers, timingMode, format);
     if (result.values) {
-      onSubmit({ ...result.values, drawStyle });
+      onSubmit({ ...result.values, drawStyle, format });
       return;
     }
     window.requestAnimationFrame(() => {
@@ -140,8 +158,8 @@ export function TournamentSetup({
         <p>Tournament setup</p>
         <h1>Build the field.</h1>
         <span>
-          Add the crew and a rough skill level. Ratings affect placement only
-          when you choose a ranked draw.
+          Add the crew and a rough skill level. Ratings guide the tournament
+          only when you choose a ranked draw.
         </span>
       </header>
 
@@ -244,7 +262,19 @@ export function TournamentSetup({
           </ActionButton>
         </fieldset>
 
-        <DrawStyleField onChange={setDrawStyle} value={drawStyle} />
+        <FormatField
+          onChange={setFormat}
+          playerCount={players.length}
+          value={format}
+        />
+
+        <FormatStatus message={formatStatus} onClear={clearFormatStatus} />
+
+        <DrawStyleField
+          format={format}
+          onChange={setDrawStyle}
+          value={drawStyle}
+        />
 
         <CourtPlan
           errors={errors}
@@ -254,32 +284,14 @@ export function TournamentSetup({
           timingMode={timingMode}
         />
 
-        <div className="setup-submit-row">
-          <div>
-            <p>
-              {timingMode === "timed"
-                ? "Match caps are calculated when the bracket is built."
-                : "Untimed matches still use your selected score target."}
-            </p>
-            {automaticAdvanceCount > 0 ? (
-              <p
-                className="setup-advance-note"
-                data-qa="automatic-advance-note"
-              >
-                With {players.length} players, {automaticAdvanceCount}{" "}
-                {drawStyle === "ranked" ? "top-ranked " : ""}
-                {automaticAdvanceCount === 1 ? "player" : "players"}{" "}
-                {automaticAdvanceCount === 1 ? "advances" : "advance"}{" "}
-                automatically through round one
-                {drawStyle === "random" ? " after the shuffle" : ""}.
-              </p>
-            ) : null}
-          </div>
-          <ActionButton data-qa="build-bracket" type="submit">
-            Build bracket
-            <ArrowRight aria-hidden="true" size={19} />
-          </ActionButton>
-        </div>
+        <SetupSubmit
+          automaticAdvanceCount={automaticAdvanceCount}
+          drawStyle={drawStyle}
+          format={format}
+          numbers={numbers}
+          playerCount={players.length}
+          timingMode={timingMode}
+        />
       </form>
 
       <MinimumPlayersDialog

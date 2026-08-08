@@ -21,6 +21,7 @@ import {
   championStanding,
   finalMatchData,
   playerName,
+  tournamentFormatLabel,
   tournamentNames,
 } from "./tournament-share-data";
 
@@ -46,7 +47,7 @@ export async function tournamentRecapCanvas(
     color: shareColors.lime,
     font: "900 24px 'Archivo Black', sans-serif",
   });
-  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 1026, 68, {
+  shareText(context, tournamentFormatLabel(bracket), 1026, 68, {
     align: "right",
     color: shareColors.mist,
     font: "800 19px Manrope, sans-serif",

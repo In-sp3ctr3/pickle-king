@@ -84,3 +84,5 @@ No raw-asset exceptions are approved. React Bits source was not copied.
 Feature 005 introduced no new raster asset or runtime dependency.
 Feature 009 reuses the accepted mark, arena, local fonts, and icon package; it
 introduces no new raster asset or runtime dependency.
+Feature 014 reuses the accepted setup, match, table, medal, and local share
+assets. It introduces no new raster asset or runtime dependency.

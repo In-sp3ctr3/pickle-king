@@ -14,7 +14,7 @@ export function MeasuredLabel({
   text: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [size, setSize] = useState(maxSize);
+  const [size, setSize] = useState(minSize);
 
   useLayoutEffect(() => {
     const element = ref.current;
@@ -26,10 +26,23 @@ export function MeasuredLabel({
       const available = element.clientWidth;
       if (available <= 0) return;
       const style = window.getComputedStyle(element);
+      const measuredText =
+        style.textTransform === "uppercase"
+          ? text.toLocaleUpperCase()
+          : style.textTransform === "lowercase"
+            ? text.toLocaleLowerCase()
+            : text;
+      const letterSpacing =
+        style.letterSpacing === "normal"
+          ? 0
+          : Number.parseFloat(style.letterSpacing) || 0;
       let next = maxSize;
       while (next > minSize) {
         context.font = `${style.fontWeight} ${next}px ${style.fontFamily}`;
-        if (context.measureText(text).width <= available) break;
+        const width =
+          context.measureText(measuredText).width +
+          Math.max(0, measuredText.length - 1) * letterSpacing;
+        if (width <= available) break;
         next -= 1;
       }
       setSize(next);

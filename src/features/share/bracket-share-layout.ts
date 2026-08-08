@@ -75,6 +75,7 @@ export function sourceFallback(
 ) {
   const source = side === "A" ? match.sourceA : match.sourceB;
   if (source.type === "player") return "PLAYER";
+  if (source.type === "standing") return `RANK ${source.rank}`;
   const sourceMatch = matches.get(source.matchId);
   if (!sourceMatch) return "AWAITING RESULT";
   return `${source.type === "winner" ? "WINNER" : "LOSER"} · R${sourceMatch.round} M${sourceMatch.ordinal}`;
@@ -94,8 +95,19 @@ export function matchSources(bracket: TournamentBracket, match: Match) {
   ];
 }
 
+export function matchDependencySources(
+  bracket: TournamentBracket,
+  match: Match,
+) {
+  return matchSources(bracket, match).filter(
+    (source): source is Extract<MatchSource, { type: "winner" | "loser" }> =>
+      source.type === "winner" || source.type === "loser",
+  );
+}
+
 function playerFromSource(source: MatchSource, matches: Map<string, Match>) {
   if (source.type === "player") return source.playerId;
+  if (source.type === "standing") return null;
   const match = matches.get(source.matchId);
   return source.type === "winner" ? match?.winnerId : match?.loserId;
 }

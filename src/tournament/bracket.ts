@@ -4,6 +4,11 @@ import {
   randomBracketSlots,
   seedPlayers,
 } from "./seeding";
+import { validateTournamentField } from "./editing";
+import {
+  createRoundRobinTournament,
+  resolveRoundRobinMatches,
+} from "./round-robin";
 import { calculateMatchCap } from "./timing";
 import type {
   Match,
@@ -19,6 +24,7 @@ function sideFromSource(
   matches: Map<string, Match>,
 ): MatchSide | null {
   if (source.type === "player") return { memberIds: [source.playerId] };
+  if (source.type === "standing") return null;
   const sourceMatch = matches.get(source.matchId);
   if (!sourceMatch || sourceMatch.status !== "complete") return null;
   const playerId =
@@ -60,25 +66,11 @@ function makeMatch(input: {
   };
 }
 
-function validatePlayers(players: Player[]): void {
-  if (players.length < 4 || players.length > 16) {
-    throw new Error("Tournament entrants must be between 4 and 16.");
-  }
-  const ids = new Set(players.map(({ id }) => id));
-  const names = new Set(players.map(({ name }) => name.trim().toLowerCase()));
-  if (ids.size !== players.length || names.size !== players.length) {
-    throw new Error("Player ids and names must be unique.");
-  }
-  if (players.some(({ name }) => !name.trim())) {
-    throw new Error("Player names are required.");
-  }
-}
-
 export function createTournamentBracket(
   players: Player[],
   config: TournamentConfig,
 ): TournamentBracket {
-  validatePlayers(players);
+  validateTournamentField(players);
   const seeded = seedPlayers(players, config.randomSeed);
   const bracketSize = nextPowerOfTwo(seeded.length);
   const roundCount = Math.log2(bracketSize);
@@ -86,6 +78,7 @@ export function createTournamentBracket(
     config.timingMode === "timed"
       ? calculateMatchCap({
           entrantCount: seeded.length,
+          format: "knockout",
           bookingMinutes: config.bookingMinutes,
           warmupMinutes: config.warmupMinutes,
           transitionSeconds: config.transitionSeconds,
@@ -152,6 +145,7 @@ export function createTournamentBracket(
   matches.set(bronze.id, bronze);
 
   return {
+    format: "knockout",
     bracketSize,
     roundCount,
     players: seeded,
@@ -160,6 +154,15 @@ export function createTournamentBracket(
     bronzeMatchId: bronze.id,
     amendments: [],
   };
+}
+
+export function createTournament(
+  players: Player[],
+  config: TournamentConfig,
+): TournamentBracket {
+  return config.format === "round-robin-finals"
+    ? createRoundRobinTournament(players, config)
+    : createTournamentBracket(players, config);
 }
 
 export function resolveBracketMatches(matches: Match[]): Match[] {
@@ -175,6 +178,14 @@ export function resolveBracketMatches(matches: Match[]): Match[] {
       status: sideA && sideB ? "ready" : "waiting",
     };
   });
+}
+
+export function resolveTournamentMatches(
+  tournament: TournamentBracket,
+): Match[] {
+  return tournament.format === "round-robin-finals"
+    ? resolveRoundRobinMatches(tournament)
+    : resolveBracketMatches(tournament.matches);
 }
 
 export function resetTournamentBracket(
@@ -193,7 +204,8 @@ export function resetTournamentBracket(
     completedAt: null,
     comebackDeficit: 0,
   }));
-  return { ...bracket, matches: resolveBracketMatches(cleared) };
+  const reset = { ...bracket, matches: cleared };
+  return { ...reset, matches: resolveTournamentMatches(reset) };
 }
 
 export function completeMatch(
@@ -212,7 +224,7 @@ export function completeMatch(
   if (liveMatch && liveMatch.id !== matchId) {
     throw new Error("Another match is already live on this court.");
   }
-  if (target.kind === "elimination") {
+  if (bracket.format === "knockout" && target.kind === "elimination") {
     const unfinishedRounds = bracket.matches
       .filter(
         (match) => match.kind === "elimination" && match.status !== "complete",
@@ -220,6 +232,19 @@ export function completeMatch(
       .map(({ round }) => round);
     const earliestRound = Math.min(...unfinishedRounds);
     if (target.round !== earliestRound) {
+      throw new Error("Complete the current round before advancing.");
+    }
+  }
+  if (
+    bracket.format === "round-robin-finals" &&
+    target.kind === "round-robin"
+  ) {
+    const unfinishedRounds = bracket.matches
+      .filter(
+        (match) => match.kind === "round-robin" && match.status !== "complete",
+      )
+      .map(({ round }) => round);
+    if (target.round !== Math.min(...unfinishedRounds)) {
       throw new Error("Complete the current round before advancing.");
     }
   }
@@ -270,5 +295,6 @@ export function completeMatch(
         }
       : match,
   );
-  return { ...bracket, matches: resolveBracketMatches(matches) };
+  const completed = { ...bracket, matches };
+  return { ...completed, matches: resolveTournamentMatches(completed) };
 }

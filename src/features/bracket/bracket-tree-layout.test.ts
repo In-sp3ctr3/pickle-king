@@ -12,6 +12,7 @@ function players(count: number): Player[] {
 
 function bracket(count: number) {
   return createTournamentBracket(players(count), {
+    format: "knockout",
     drawStyle: "ranked",
     bookingMinutes: 120,
     randomSeed: "tree-layout",
@@ -79,6 +80,7 @@ describe("connected bracket tree layout", () => {
 
   it("places the actual random-draw bye recipients in the connected tree", () => {
     const tournament = createTournamentBracket(players(6), {
+      format: "knockout",
       drawStyle: "random",
       bookingMinutes: 120,
       randomSeed: "tree-random-byes",

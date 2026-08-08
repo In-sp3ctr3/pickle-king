@@ -1,12 +1,12 @@
 # Frontend Design QA
 
 Status: passed
-Last updated: 2026-08-04
+Last updated: 2026-08-07
 
 ## Environment
 
 - Commit/source state:
-  codex/fix/bracket-balance-story-tree@base-0bf6906 + reviewed working tree
+  Feature 014 round-robin implementation + reviewed working tree
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -20,34 +20,44 @@ Last updated: 2026-08-04
 
 ## Evidence
 
-| Route/state       | Viewport | Source capture                                              | Render capture                                               | Combined comparison                                             | Interaction run | Axe result |
-| ----------------- | -------- | ----------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------- | --------------- | ---------- |
-| home              | desktop  | docs/frontend/evidence/home-desktop-source.png              | test-results/frontend-captures/home-desktop.png              | test-results/frontend-comparisons/home-desktop.png              | passed          | passed     |
-| home              | mobile   | docs/frontend/evidence/home-mobile-source.png               | test-results/frontend-captures/home-mobile.png               | test-results/frontend-comparisons/home-mobile.png               | passed          | passed     |
-| home-completed    | desktop  | docs/frontend/evidence/home-completed-desktop-source.png    | test-results/frontend-captures/home-completed-desktop.png    | test-results/frontend-comparisons/home-completed-desktop.png    | passed          | passed     |
-| home-completed    | mobile   | docs/frontend/evidence/home-completed-mobile-source.png     | test-results/frontend-captures/home-completed-mobile.png     | test-results/frontend-comparisons/home-completed-mobile.png     | passed          | passed     |
-| setup             | desktop  | docs/frontend/evidence/setup-desktop-source.png             | test-results/frontend-captures/setup-desktop.png             | test-results/frontend-comparisons/setup-desktop.png             | passed          | passed     |
-| setup             | mobile   | docs/frontend/evidence/setup-mobile-source.png              | test-results/frontend-captures/setup-mobile.png              | test-results/frontend-comparisons/setup-mobile.png              | passed          | passed     |
-| bracket           | desktop  | docs/frontend/evidence/bracket-desktop-source.png           | test-results/frontend-captures/bracket-desktop.png           | test-results/frontend-comparisons/bracket-desktop.png           | passed          | passed     |
-| bracket           | mobile   | docs/frontend/evidence/bracket-mobile-source.png            | test-results/frontend-captures/bracket-mobile.png            | test-results/frontend-comparisons/bracket-mobile.png            | passed          | passed     |
-| bracket-completed | desktop  | docs/frontend/evidence/bracket-completed-desktop-source.png | test-results/frontend-captures/bracket-completed-desktop.png | test-results/frontend-comparisons/bracket-completed-desktop.png | passed          | passed     |
-| bracket-completed | mobile   | docs/frontend/evidence/bracket-completed-mobile-source.png  | test-results/frontend-captures/bracket-completed-mobile.png  | test-results/frontend-comparisons/bracket-completed-mobile.png  | passed          | passed     |
-| quick-setup       | desktop  | docs/frontend/evidence/quick-setup-desktop-source.png       | test-results/frontend-captures/quick-setup-desktop.png       | test-results/frontend-comparisons/quick-setup-desktop.png       | passed          | passed     |
-| quick-setup       | mobile   | docs/frontend/evidence/quick-setup-mobile-source.png        | test-results/frontend-captures/quick-setup-mobile.png        | test-results/frontend-comparisons/quick-setup-mobile.png        | passed          | passed     |
-| quick-idle        | desktop  | docs/frontend/evidence/quick-idle-desktop-source.png        | test-results/frontend-captures/quick-idle-desktop.png        | test-results/frontend-comparisons/quick-idle-desktop.png        | passed          | passed     |
-| quick-idle        | mobile   | docs/frontend/evidence/quick-idle-mobile-source.png         | test-results/frontend-captures/quick-idle-mobile.png         | test-results/frontend-comparisons/quick-idle-mobile.png         | passed          | passed     |
-| quick-live        | desktop  | docs/frontend/evidence/quick-live-desktop-source.png        | test-results/frontend-captures/quick-live-desktop.png        | test-results/frontend-comparisons/quick-live-desktop.png        | passed          | passed     |
-| quick-live        | mobile   | docs/frontend/evidence/quick-live-mobile-source.png         | test-results/frontend-captures/quick-live-mobile.png         | test-results/frontend-comparisons/quick-live-mobile.png         | passed          | passed     |
-| quick-result      | desktop  | docs/frontend/evidence/quick-result-desktop-source.png      | test-results/frontend-captures/quick-result-desktop.png      | test-results/frontend-comparisons/quick-result-desktop.png      | passed          | passed     |
-| quick-result      | mobile   | docs/frontend/evidence/quick-result-mobile-source.png       | test-results/frontend-captures/quick-result-mobile.png       | test-results/frontend-comparisons/quick-result-mobile.png       | passed          | passed     |
-| results           | desktop  | docs/frontend/evidence/results-desktop-source.png           | test-results/frontend-captures/results-desktop.png           | test-results/frontend-comparisons/results-desktop.png           | passed          | passed     |
-| results           | mobile   | docs/frontend/evidence/results-mobile-source.png            | test-results/frontend-captures/results-mobile.png            | test-results/frontend-comparisons/results-mobile.png            | passed          | passed     |
-| history           | desktop  | docs/frontend/evidence/history-desktop-source.png           | test-results/frontend-captures/history-desktop.png           | test-results/frontend-comparisons/history-desktop.png           | passed          | passed     |
-| history           | mobile   | docs/frontend/evidence/history-mobile-source.png            | test-results/frontend-captures/history-mobile.png            | test-results/frontend-comparisons/history-mobile.png            | passed          | passed     |
-| history-populated | desktop  | docs/frontend/evidence/history-populated-desktop-source.png | test-results/frontend-captures/history-populated-desktop.png | test-results/frontend-comparisons/history-populated-desktop.png | passed          | passed     |
-| history-populated | mobile   | docs/frontend/evidence/history-populated-mobile-source.png  | test-results/frontend-captures/history-populated-mobile.png  | test-results/frontend-comparisons/history-populated-mobile.png  | passed          | passed     |
-| history-results   | desktop  | docs/frontend/evidence/history-results-desktop-source.png   | test-results/frontend-captures/history-results-desktop.png   | test-results/frontend-comparisons/history-results-desktop.png   | passed          | passed     |
-| history-results   | mobile   | docs/frontend/evidence/history-results-mobile-source.png    | test-results/frontend-captures/history-results-mobile.png    | test-results/frontend-comparisons/history-results-mobile.png    | passed          | passed     |
+| Route/state                 | Viewport | Source capture                                                        | Render capture                                                         | Combined comparison                                                       | Interaction run | Axe result |
+| --------------------------- | -------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------- | ---------- |
+| home                        | desktop  | docs/frontend/evidence/home-desktop-source.png                        | test-results/frontend-captures/home-desktop.png                        | test-results/frontend-comparisons/home-desktop.png                        | passed          | passed     |
+| home                        | mobile   | docs/frontend/evidence/home-mobile-source.png                         | test-results/frontend-captures/home-mobile.png                         | test-results/frontend-comparisons/home-mobile.png                         | passed          | passed     |
+| home-completed              | desktop  | docs/frontend/evidence/home-completed-desktop-source.png              | test-results/frontend-captures/home-completed-desktop.png              | test-results/frontend-comparisons/home-completed-desktop.png              | passed          | passed     |
+| home-completed              | mobile   | docs/frontend/evidence/home-completed-mobile-source.png               | test-results/frontend-captures/home-completed-mobile.png               | test-results/frontend-comparisons/home-completed-mobile.png               | passed          | passed     |
+| setup                       | desktop  | docs/frontend/evidence/setup-desktop-source.png                       | test-results/frontend-captures/setup-desktop.png                       | test-results/frontend-comparisons/setup-desktop.png                       | passed          | passed     |
+| setup                       | mobile   | docs/frontend/evidence/setup-mobile-source.png                        | test-results/frontend-captures/setup-mobile.png                        | test-results/frontend-comparisons/setup-mobile.png                        | passed          | passed     |
+| bracket                     | desktop  | docs/frontend/evidence/bracket-desktop-source.png                     | test-results/frontend-captures/bracket-desktop.png                     | test-results/frontend-comparisons/bracket-desktop.png                     | passed          | passed     |
+| bracket                     | mobile   | docs/frontend/evidence/bracket-mobile-source.png                      | test-results/frontend-captures/bracket-mobile.png                      | test-results/frontend-comparisons/bracket-mobile.png                      | passed          | passed     |
+| bracket-completed           | desktop  | docs/frontend/evidence/bracket-completed-desktop-source.png           | test-results/frontend-captures/bracket-completed-desktop.png           | test-results/frontend-comparisons/bracket-completed-desktop.png           | passed          | passed     |
+| bracket-completed           | mobile   | docs/frontend/evidence/bracket-completed-mobile-source.png            | test-results/frontend-captures/bracket-completed-mobile.png            | test-results/frontend-comparisons/bracket-completed-mobile.png            | passed          | passed     |
+| quick-setup                 | desktop  | docs/frontend/evidence/quick-setup-desktop-source.png                 | test-results/frontend-captures/quick-setup-desktop.png                 | test-results/frontend-comparisons/quick-setup-desktop.png                 | passed          | passed     |
+| quick-setup                 | mobile   | docs/frontend/evidence/quick-setup-mobile-source.png                  | test-results/frontend-captures/quick-setup-mobile.png                  | test-results/frontend-comparisons/quick-setup-mobile.png                  | passed          | passed     |
+| quick-idle                  | desktop  | docs/frontend/evidence/quick-idle-desktop-source.png                  | test-results/frontend-captures/quick-idle-desktop.png                  | test-results/frontend-comparisons/quick-idle-desktop.png                  | passed          | passed     |
+| quick-idle                  | mobile   | docs/frontend/evidence/quick-idle-mobile-source.png                   | test-results/frontend-captures/quick-idle-mobile.png                   | test-results/frontend-comparisons/quick-idle-mobile.png                   | passed          | passed     |
+| quick-live                  | desktop  | docs/frontend/evidence/quick-live-desktop-source.png                  | test-results/frontend-captures/quick-live-desktop.png                  | test-results/frontend-comparisons/quick-live-desktop.png                  | passed          | passed     |
+| quick-live                  | mobile   | docs/frontend/evidence/quick-live-mobile-source.png                   | test-results/frontend-captures/quick-live-mobile.png                   | test-results/frontend-comparisons/quick-live-mobile.png                   | passed          | passed     |
+| quick-result                | desktop  | docs/frontend/evidence/quick-result-desktop-source.png                | test-results/frontend-captures/quick-result-desktop.png                | test-results/frontend-comparisons/quick-result-desktop.png                | passed          | passed     |
+| quick-result                | mobile   | docs/frontend/evidence/quick-result-mobile-source.png                 | test-results/frontend-captures/quick-result-mobile.png                 | test-results/frontend-comparisons/quick-result-mobile.png                 | passed          | passed     |
+| results                     | desktop  | docs/frontend/evidence/results-desktop-source.png                     | test-results/frontend-captures/results-desktop.png                     | test-results/frontend-comparisons/results-desktop.png                     | passed          | passed     |
+| results                     | mobile   | docs/frontend/evidence/results-mobile-source.png                      | test-results/frontend-captures/results-mobile.png                      | test-results/frontend-comparisons/results-mobile.png                      | passed          | passed     |
+| history                     | desktop  | docs/frontend/evidence/history-desktop-source.png                     | test-results/frontend-captures/history-desktop.png                     | test-results/frontend-comparisons/history-desktop.png                     | passed          | passed     |
+| history                     | mobile   | docs/frontend/evidence/history-mobile-source.png                      | test-results/frontend-captures/history-mobile.png                      | test-results/frontend-comparisons/history-mobile.png                      | passed          | passed     |
+| history-populated           | desktop  | docs/frontend/evidence/history-populated-desktop-source.png           | test-results/frontend-captures/history-populated-desktop.png           | test-results/frontend-comparisons/history-populated-desktop.png           | passed          | passed     |
+| history-populated           | mobile   | docs/frontend/evidence/history-populated-mobile-source.png            | test-results/frontend-captures/history-populated-mobile.png            | test-results/frontend-comparisons/history-populated-mobile.png            | passed          | passed     |
+| history-results             | desktop  | docs/frontend/evidence/history-results-desktop-source.png             | test-results/frontend-captures/history-results-desktop.png             | test-results/frontend-comparisons/history-results-desktop.png             | passed          | passed     |
+| history-results             | mobile   | docs/frontend/evidence/history-results-mobile-source.png              | test-results/frontend-captures/history-results-mobile.png              | test-results/frontend-comparisons/history-results-mobile.png              | passed          | passed     |
+| round-robin-initial         | desktop  | docs/frontend/evidence/round-robin-initial-desktop-source.png         | test-results/frontend-captures/round-robin-initial-desktop.png         | test-results/frontend-comparisons/round-robin-initial-desktop.png         | passed          | passed     |
+| round-robin-initial         | mobile   | docs/frontend/evidence/round-robin-initial-mobile-source.png          | test-results/frontend-captures/round-robin-initial-mobile.png          | test-results/frontend-comparisons/round-robin-initial-mobile.png          | passed          | passed     |
+| round-robin-qualified       | desktop  | docs/frontend/evidence/round-robin-qualified-desktop-source.png       | test-results/frontend-captures/round-robin-qualified-desktop.png       | test-results/frontend-comparisons/round-robin-qualified-desktop.png       | passed          | passed     |
+| round-robin-qualified       | mobile   | docs/frontend/evidence/round-robin-qualified-mobile-source.png        | test-results/frontend-captures/round-robin-qualified-mobile.png        | test-results/frontend-comparisons/round-robin-qualified-mobile.png        | passed          | passed     |
+| round-robin-completed       | desktop  | docs/frontend/evidence/round-robin-completed-desktop-source.png       | test-results/frontend-captures/round-robin-completed-desktop.png       | test-results/frontend-comparisons/round-robin-completed-desktop.png       | passed          | passed     |
+| round-robin-completed       | mobile   | docs/frontend/evidence/round-robin-completed-mobile-source.png        | test-results/frontend-captures/round-robin-completed-mobile.png        | test-results/frontend-comparisons/round-robin-completed-mobile.png        | passed          | passed     |
+| round-robin-results         | desktop  | docs/frontend/evidence/round-robin-results-desktop-source.png         | test-results/frontend-captures/round-robin-results-desktop.png         | test-results/frontend-comparisons/round-robin-results-desktop.png         | passed          | passed     |
+| round-robin-results         | mobile   | docs/frontend/evidence/round-robin-results-mobile-source.png          | test-results/frontend-captures/round-robin-results-mobile.png          | test-results/frontend-comparisons/round-robin-results-mobile.png          | passed          | passed     |
+| round-robin-history-results | desktop  | docs/frontend/evidence/round-robin-history-results-desktop-source.png | test-results/frontend-captures/round-robin-history-results-desktop.png | test-results/frontend-comparisons/round-robin-history-results-desktop.png | passed          | passed     |
+| round-robin-history-results | mobile   | docs/frontend/evidence/round-robin-history-results-mobile-source.png  | test-results/frontend-captures/round-robin-history-results-mobile.png  | test-results/frontend-comparisons/round-robin-history-results-mobile.png  | passed          | passed     |
 
 ## Iteration History
 
@@ -178,6 +188,10 @@ The supplied source hashes are
 | DQA-58 | P2       | bracket/edit     | two-label validation regression                   | a rejected second rename could leave the first label partially saved             | product  | fixed  |
 | DQA-59 | P1       | bracket/nodes    | supplied ready/waiting iPad captures              | one universal grid created uneven optical padding and an empty action lane       | frontend | fixed  |
 | DQA-60 | P1       | bracket/portrait | supplied eight-player Story render                | shared central rails obscured dependencies and did not read as a tournament tree | frontend | fixed  |
+| DQA-61 | P1       | results/names    | legal long-name mobile and desktop captures       | champion and podium names must fit without mid-word wrapping or clipping         | frontend | fixed  |
+| DQA-62 | P2       | round-robin      | five contracted desktop/mobile states             | schedule, standings, placements, results, and archived results needed evidence   | frontend | fixed  |
+| DQA-63 | P2       | phone/landscape  | 844×390 geometry assertion                        | the primary start action needed to remain visible in the initial viewport        | frontend | fixed  |
+| DQA-64 | P2       | results/history  | completed round-robin result captures             | preliminary and placement history needed explicit groups                         | frontend | fixed  |
 
 ## Harness Results
 
@@ -194,7 +208,7 @@ The supplied source hashes are
 
 ## Final Decision
 
-Reviewer: local adversarial frontend review
+Reviewer: design_reviewer
 Reviewer result: passed
 Reviewer evidence: docs/frontend/reviews/design-review.md
 

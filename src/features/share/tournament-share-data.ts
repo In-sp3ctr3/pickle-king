@@ -8,6 +8,12 @@ export function tournamentNames(bracket: TournamentBracket) {
   return new Map(bracket.players.map(({ id, name }) => [id, name]));
 }
 
+export function tournamentFormatLabel(bracket: TournamentBracket) {
+  return bracket.format === "round-robin-finals"
+    ? "ROUND ROBIN + FINALS"
+    : `${bracket.players.length} PLAYER TOURNAMENT`;
+}
+
 export function playerName(
   names: Map<string, string>,
   playerId: string | null | undefined,

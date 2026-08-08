@@ -18,6 +18,7 @@ import type {
 const levels: SkillLevel[] = ["5.5+", "5.0", "4.5", "4.0", "3.5", "3.0", "2.5"];
 
 const config: TournamentConfig = {
+  format: "knockout",
   drawStyle: "ranked",
   timingMode: "timed",
   bookingMinutes: 120,

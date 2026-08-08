@@ -12,6 +12,7 @@ import {
 import type { Player, TournamentBracket, TournamentConfig } from "./types";
 
 const config: TournamentConfig = {
+  format: "knockout",
   drawStyle: "ranked",
   timingMode: "untimed",
   bookingMinutes: 120,

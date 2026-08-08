@@ -9,6 +9,7 @@ const bracket = createTournamentBracket(
     rating: "3.5" as const,
   })),
   {
+    format: "knockout",
     bookingMinutes: 120,
     drawStyle: "ranked",
     randomSeed: "share-key",

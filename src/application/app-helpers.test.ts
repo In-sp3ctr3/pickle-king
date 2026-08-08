@@ -4,7 +4,7 @@ import type { TournamentSnapshotV1 } from "../persistence/schema";
 import { stateFromSnapshot } from "./app-helpers";
 
 const archivedScreen: TournamentSnapshotV1 = {
-  version: 1,
+  version: 2,
   updatedAt: 1,
   screen: "history-results",
   setupDraft: null,

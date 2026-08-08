@@ -4,7 +4,7 @@ import {
   type Player,
   type TournamentConfig,
 } from "../../tournament";
-import { matchSources } from "./bracket-share-layout";
+import { matchDependencySources } from "./bracket-share-layout";
 import type { ShareMatchPosition } from "./bracket-share-layout";
 import {
   portraitBracketGeometry,
@@ -16,6 +16,7 @@ import {
 } from "./bracket-share-portrait-layout";
 
 const config: TournamentConfig = {
+  format: "knockout",
   drawStyle: "ranked",
   timingMode: "untimed",
   bookingMinutes: 120,
@@ -106,8 +107,7 @@ describe("portrait bracket geometry", () => {
         const targetSegments = segments.filter(
           ({ targetId }) => targetId === target.id,
         );
-        const expectedSources = matchSources(bracket, target)
-          .filter((source) => source.type !== "player")
+        const expectedSources = matchDependencySources(bracket, target)
           .map((source) => source.matchId)
           .sort();
         expect(targetSegments.length).toBeGreaterThan(0);
@@ -187,9 +187,9 @@ describe("portrait bracket geometry", () => {
         ({ id, round }) => id !== bracket.finalMatchId && round > 1,
       )) {
         const targetPosition = positions.get(target.id)!;
-        const sources = matchSources(bracket, target)
-          .filter((source) => source.type !== "player")
-          .map((source) => positions.get(source.matchId)!);
+        const sources = matchDependencySources(bracket, target).map((source) =>
+          positions.get(source.matchId)!,
+        );
         const expectedCenterY =
           sources.reduce((sum, source) => sum + centerY(source), 0) /
           sources.length;

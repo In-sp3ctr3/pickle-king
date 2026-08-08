@@ -178,6 +178,9 @@ export function planLateEntry(
   player: Player,
   options: LateEntryPlanOptions,
 ): LateEntryPlan {
+  if (bracket.format === "round-robin-finals") {
+    throw new Error("Late entry is not available for round robin tournaments.");
+  }
   if (bracket.players.length >= 16)
     throw new Error("A tournament is limited to 16 players.");
   if (bracket.amendments.length)

@@ -1,4 +1,8 @@
-import { snapshotV1Schema, type TournamentSnapshotV1 } from "./schema";
+import {
+  snapshotV1Schema,
+  snapshotV2Schema,
+  type TournamentSnapshotV2,
+} from "./schema";
 
 export const SNAPSHOT_KEY = "pickle-king:snapshot";
 
@@ -10,21 +14,41 @@ export interface StorageLike {
 
 export type SnapshotLoad =
   | { status: "empty" }
-  | { status: "ok"; snapshot: TournamentSnapshotV1 }
+  | { status: "ok"; snapshot: TournamentSnapshotV2 }
   | { status: "corrupt"; message: string };
 
-export function migrateSnapshot(value: unknown): TournamentSnapshotV1 {
+export function migrateSnapshot(value: unknown): TournamentSnapshotV2 {
   if (!value || typeof value !== "object") {
     throw new Error("The saved session is not an object.");
   }
   const version = "version" in value ? value.version : undefined;
-  if (version !== 1) {
+  if (version !== 1 && version !== 2) {
     throw new Error(`Saved session version ${String(version)} is unsupported.`);
   }
-  const parsed = snapshotV1Schema.safeParse(migrateLegacyDrawStyle(value));
+  const prepared = migrateLegacyDrawStyle(value);
+  if (version === 2) return parseSnapshotV2(prepared);
+  const parsed = snapshotV1Schema.safeParse(prepared);
   if (!parsed.success) {
     throw new Error("The saved session failed validation.");
   }
+  return parseSnapshotV2({
+    ...parsed.data,
+    version: 2,
+    setupDraft: parsed.data.setupDraft
+      ? {
+          ...parsed.data.setupDraft,
+          config: { ...parsed.data.setupDraft.config, format: "knockout" },
+        }
+      : null,
+    tournament: parsed.data.tournament
+      ? { ...parsed.data.tournament, format: "knockout" }
+      : null,
+  });
+}
+
+function parseSnapshotV2(value: unknown): TournamentSnapshotV2 {
+  const parsed = snapshotV2Schema.safeParse(value);
+  if (!parsed.success) throw new Error("The saved session failed validation.");
   return parsed.data;
 }
 
@@ -68,9 +92,9 @@ export function loadSnapshot(storage: StorageLike): SnapshotLoad {
 
 export function saveSnapshot(
   storage: StorageLike,
-  snapshot: TournamentSnapshotV1,
+  snapshot: TournamentSnapshotV2,
 ): void {
-  const validated = snapshotV1Schema.parse(snapshot);
+  const validated = snapshotV2Schema.parse(snapshot);
   storage.setItem(SNAPSHOT_KEY, JSON.stringify(validated));
 }
 

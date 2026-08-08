@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createScoringState } from "../match/scoring";
 import { createTournamentBracket, startMatch } from "../tournament";
 import type { Player, TournamentConfig } from "../tournament";
-import type { TournamentSnapshotV1 } from "./schema";
+import type { TournamentSnapshotV2 } from "./schema";
 import {
   clearSnapshot,
   loadSnapshot,
@@ -10,6 +10,11 @@ import {
   saveSnapshot,
   type StorageLike,
 } from "./storage";
+import {
+  lateEntryAmendmentFixture,
+  roundRobinSnapshotFixture,
+  roundRobinTournamentFixture,
+} from "./test-fixtures";
 
 class MemoryStorage implements StorageLike {
   value: string | null = null;
@@ -25,6 +30,7 @@ class MemoryStorage implements StorageLike {
 }
 
 const config: TournamentConfig = {
+  format: "knockout",
   drawStyle: "ranked",
   timingMode: "timed",
   bookingMinutes: 120,
@@ -39,13 +45,16 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: "3.5",
 }));
 
-function snapshot(): TournamentSnapshotV1 {
-  let tournament = createTournamentBracket(players, config);
-  let match = tournament.matches.find(({ status }) => status === "ready")!;
-  tournament = startMatch(tournament, match.id, 1_000);
+function snapshot(): TournamentSnapshotV2 {
+  const bracket = createTournamentBracket(players, config);
+  let match = bracket.matches.find(({ status }) => status === "ready")!;
+  const tournament = {
+    ...startMatch(bracket, match.id, 1_000),
+    format: "knockout" as const,
+  };
   match = tournament.matches.find(({ id }) => id === match.id)!;
   return {
-    version: 1,
+    version: 2,
     updatedAt: 1_000,
     screen: "live",
     setupDraft: { players, config },
@@ -66,7 +75,7 @@ function snapshot(): TournamentSnapshotV1 {
 }
 
 describe("snapshot persistence", () => {
-  it("round-trips a validated v1 snapshot", () => {
+  it("round-trips a validated v2 snapshot", () => {
     const storage = new MemoryStorage();
     saveSnapshot(storage, snapshot());
     expect(loadSnapshot(storage)).toEqual({
@@ -91,27 +100,40 @@ describe("snapshot persistence", () => {
   });
 
   it("rejects unsupported versions and clears only when requested", () => {
-    expect(() => migrateSnapshot({ version: 2 })).toThrow(/unsupported/i);
+    expect(() => migrateSnapshot({ version: 3 })).toThrow(/unsupported/i);
     const storage = new MemoryStorage();
     saveSnapshot(storage, snapshot());
     clearSnapshot(storage);
     expect(loadSnapshot(storage)).toEqual({ status: "empty" });
   });
 
-  it("migrates pre-amendment v1 brackets with an empty amendment ledger", () => {
+  it("migrates v1 snapshots to knockout v2 while retaining legacy defaults", () => {
     const legacy = structuredClone(snapshot()) as unknown as {
+      version: number;
+      setupDraft: { config: Record<string, unknown> };
       tournament: Record<string, unknown>;
     };
+    legacy.version = 1;
+    delete legacy.setupDraft.config.format;
+    delete legacy.tournament.format;
     delete legacy.tournament.amendments;
-    expect(migrateSnapshot(legacy).tournament?.amendments).toEqual([]);
+    const migrated = migrateSnapshot(legacy);
+    expect(migrated).toMatchObject({
+      version: 2,
+      setupDraft: { config: { format: "knockout" } },
+      tournament: { format: "knockout", amendments: [] },
+    });
   });
 
   it("adds draw, comeback, and score-event defaults to earlier v1 sessions", () => {
     const legacy = structuredClone(snapshot()) as unknown as {
+      version: number;
       scorer: Record<string, unknown>;
       setupDraft: { config: Record<string, unknown> };
       tournament: { matches: Array<Record<string, unknown>> };
     };
+    legacy.version = 1;
+    delete legacy.setupDraft.config.format;
     delete legacy.setupDraft.config.drawStyle;
     delete legacy.scorer.scoreEvents;
     legacy.tournament.matches.forEach((match) => delete match.comebackDeficit);
@@ -132,12 +154,66 @@ describe("snapshot persistence", () => {
     "migrates the legacy %s draw style to %s",
     (legacyStyle, nextStyle) => {
       const legacy = structuredClone(snapshot()) as unknown as {
+        version: number;
         setupDraft: { config: Record<string, unknown> };
+        tournament: Record<string, unknown>;
       };
+      legacy.version = 1;
+      delete legacy.setupDraft.config.format;
+      delete legacy.tournament.format;
       legacy.setupDraft.config.drawStyle = legacyStyle;
       expect(migrateSnapshot(legacy).setupDraft?.config.drawStyle).toBe(
         nextStyle,
       );
     },
   );
+
+  it("accepts a valid four-player round robin v2 snapshot", () => {
+    expect(migrateSnapshot(roundRobinSnapshotFixture())).toEqual(
+      roundRobinSnapshotFixture(),
+    );
+  });
+
+  it("requires the active setup and tournament formats to agree", () => {
+    const invalid = roundRobinSnapshotFixture();
+    invalid.setupDraft.config.format = "knockout";
+    expect(() => migrateSnapshot(invalid)).toThrow(/validation/i);
+  });
+
+  it("rejects malformed round robin and format-crossed knockout records", () => {
+    const malformed = roundRobinSnapshotFixture();
+    malformed.tournament.matches = malformed.tournament.matches.slice(0, 7);
+    expect(() => migrateSnapshot(malformed)).toThrow(/validation/i);
+
+    const knockout = snapshot();
+    knockout.tournament = roundRobinTournamentFixture();
+    if (!knockout.tournament) throw new Error("Fixture requires tournament.");
+    knockout.tournament.format = "knockout";
+    knockout.setupDraft!.config.format = "knockout";
+    expect(() => migrateSnapshot(knockout)).toThrow(/validation/i);
+  });
+
+  it("enforces round-robin pairings, placement sources, and no amendments", () => {
+    const duplicatePairing = roundRobinSnapshotFixture();
+    duplicatePairing.tournament.matches[5].sourceA = {
+      type: "player",
+      playerId: "p1",
+    };
+    duplicatePairing.tournament.matches[5].sourceB = {
+      type: "player",
+      playerId: "p4",
+    };
+    expect(() => migrateSnapshot(duplicatePairing)).toThrow(/validation/i);
+
+    const badPlacement = roundRobinSnapshotFixture();
+    badPlacement.tournament.matches[6].sourceA = {
+      type: "standing",
+      rank: 2,
+    };
+    expect(() => migrateSnapshot(badPlacement)).toThrow(/validation/i);
+
+    const amended = roundRobinSnapshotFixture();
+    amended.tournament.amendments = [lateEntryAmendmentFixture()];
+    expect(() => migrateSnapshot(amended)).toThrow(/validation/i);
+  });
 });

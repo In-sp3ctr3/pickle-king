@@ -190,6 +190,13 @@
           }
         },
         {
+          "name": "tournament format options",
+          "selector": ".setup-format-choice button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
           "name": "timing options",
           "selector": ".setup-timing-toggle button",
           "auditOnly": true,
@@ -839,6 +846,349 @@
       "reducedMotionChecks": [
         {
           "name": "results remain available",
+          "selector": "[data-qa='results']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-initial",
+      "path": "/",
+      "prepare": "round-robin-initial",
+      "primaryActionSelector": "[data-qa='start-next']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-initial-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-initial-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-initial-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-initial-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-initial-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-initial-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "round robin home",
+          "selector": "[data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "round robin back to setup",
+          "selector": "[data-qa='app-back']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "start first round-robin match",
+          "selector": "[data-qa='start-next']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "round-robin match controls",
+          "selector": ".round-robin-screen .tree-match-card button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "round-robin schedule remains available",
+          "selector": "[data-qa='round-robin-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-qualified",
+      "path": "/",
+      "prepare": "round-robin-qualified",
+      "primaryActionSelector": "[data-qa='start-next']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-qualified-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-qualified-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-qualified-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-qualified-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-qualified-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-qualified-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "qualified schedule home",
+          "selector": "[data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "qualified schedule back",
+          "selector": "[data-qa='app-back']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "start bronze match",
+          "selector": "[data-qa='start-next']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "qualified match controls",
+          "selector": ".round-robin-screen .tree-match-card button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "qualified placements remain available",
+          "selector": ".round-robin-placements",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-completed",
+      "path": "/",
+      "prepare": "round-robin-completed",
+      "primaryActionSelector": "[data-qa='view-tournament-results']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-completed-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-completed-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-completed-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-completed-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-completed-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-completed-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "completed schedule home",
+          "selector": "[data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "completed schedule back",
+          "selector": "[data-qa='app-back']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "view completed round-robin results",
+          "selector": "[data-qa='view-tournament-results']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        },
+        {
+          "name": "completed round-robin match controls",
+          "selector": ".round-robin-screen .tree-match-card button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "completed round-robin schedule remains available",
+          "selector": "[data-qa='round-robin-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-results",
+      "path": "/",
+      "prepare": "round-robin-results",
+      "primaryActionSelector": "[data-qa='share-tournament']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-results-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-results-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-results-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-results-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-results-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-results-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "round-robin results home",
+          "selector": "[data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "round-robin results back",
+          "selector": "[data-qa='app-back']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        },
+        {
+          "name": "share round-robin tournament",
+          "selector": "[data-qa='share-tournament']",
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "round-robin share choices",
+          "selector": ".tournament-share-dialog [role='tab']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "round-robin share formats",
+          "selector": ".tournament-share-dialog .share-format-choice button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "round-robin share output actions",
+          "selector": ".tournament-share-dialog .share-preview-actions button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "close round-robin share",
+          "selector": "button[aria-label='Close share preview']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "replay round-robin tournament",
+          "selector": "[data-qa='replay-tournament']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".replay-dialog" }
+        },
+        {
+          "name": "round-robin replay choices",
+          "selector": ".replay-dialog button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".replay-dialog" }
+        },
+        {
+          "name": "review round-robin schedule",
+          "selector": "[data-qa='view-final-bracket']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "round-robin results remain available",
+          "selector": "[data-qa='results']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-history-results",
+      "path": "/",
+      "prepare": "round-robin-history-results",
+      "primaryActionSelector": "[data-qa='share-tournament']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-history-results-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-history-results-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-history-results-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-history-results-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-history-results-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-history-results-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "archived round-robin results home",
+          "selector": "[data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "archived round-robin results back",
+          "selector": "[data-qa='app-back']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='history-screen']" }
+        },
+        {
+          "name": "share archived round-robin results",
+          "selector": "[data-qa='share-tournament']",
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "archived round-robin share choices",
+          "selector": ".tournament-share-dialog [role='tab']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "archived round-robin share formats",
+          "selector": ".tournament-share-dialog .share-format-choice button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "archived round-robin share output actions",
+          "selector": ".tournament-share-dialog .share-preview-actions button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "close archived round-robin share",
+          "selector": "button[aria-label='Close share preview']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "archived round-robin results remain available",
           "selector": "[data-qa='results']",
           "expect": "visible"
         }

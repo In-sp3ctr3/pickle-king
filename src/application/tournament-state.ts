@@ -10,7 +10,7 @@ import {
   applyLateEntry,
   completeMatch,
   correctMatchResult,
-  createTournamentBracket,
+  createTournament,
   matchStageLabel,
   rebalanceRemainingCap,
   renameTournamentPlayer,
@@ -188,10 +188,7 @@ export function rebuildTournamentInState(
   action: Extract<AppAction, { type: "rebuild-tournament" }>,
 ): AppState {
   if (!state.setupDraft || state.activeMatchId) return state;
-  const tournament = createTournamentBracket(
-    action.players,
-    state.setupDraft.config,
-  );
+  const tournament = createTournament(action.players, state.setupDraft.config);
   return {
     ...state,
     updatedAt: action.now,

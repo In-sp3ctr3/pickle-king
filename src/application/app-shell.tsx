@@ -43,10 +43,10 @@ export function AppShell() {
       winnerIdOverride?: string,
     ) => {
       if (!state.tournament) return false;
-      const lateEntryBlock = lateEntryCorrectionBlockReason(
-        state.tournament,
-        matchId,
-      );
+      const lateEntryBlock =
+        state.tournament.format === "knockout"
+          ? lateEntryCorrectionBlockReason(state.tournament, matchId)
+          : null;
       if (lateEntryBlock) {
         window.alert(lateEntryBlock);
         return false;
@@ -58,7 +58,9 @@ export function AppShell() {
       if (
         needsConfirmation &&
         !window.confirm(
-          "A later match has started. Correcting this result will reset every affected downstream result. Continue?",
+          state.tournament.format === "round-robin-finals"
+            ? "A placement match has started. Correcting this result will recalculate the standings and reset both placement matches. Continue?"
+            : "A later match has started. Correcting this result will reset every affected downstream result. Continue?",
         )
       ) {
         return false;
@@ -124,6 +126,11 @@ export function AppShell() {
       <AppNavigation
         onNavigate={(screen) => dispatch({ type: "navigate", screen })}
         screen={state.screen}
+        tournamentFormat={
+          state.screen === "history-results"
+            ? archivedTournament?.bracket.format
+            : state.tournament?.format
+        }
       />
       {state.screen === "home" ? (
         <HomeScreen
@@ -163,6 +170,7 @@ export function AppShell() {
               type: "create-tournament",
               players: setupPlayers(values),
               config: {
+                format: values.format,
                 timingMode: values.timingMode,
                 drawStyle: values.drawStyle,
                 bookingMinutes: values.bookingMinutes,

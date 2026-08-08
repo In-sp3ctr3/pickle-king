@@ -3,7 +3,7 @@ import { emptySessionHistory } from "../history";
 import type { TournamentSnapshotV1 } from "../persistence/schema";
 import {
   abandonMatch,
-  createTournamentBracket,
+  createTournament,
   resetTournamentBracket,
 } from "../tournament";
 import type { AppAction, AppState } from "./types";
@@ -19,7 +19,7 @@ import {
 
 export function initialAppState(now: number, hydrated = false): AppState {
   return {
-    version: 1,
+    version: 2,
     updatedAt: now,
     screen: "home",
     setupDraft: null,
@@ -49,7 +49,7 @@ function drawSignature(tournament: NonNullable<AppState["tournament"]>) {
 export function toSnapshot(state: AppState): TournamentSnapshotV1 | null {
   if (state.screen === "recovery") return null;
   return {
-    version: 1,
+    version: 2,
     updatedAt: state.updatedAt,
     screen: state.screen,
     setupDraft: state.setupDraft,
@@ -85,7 +85,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         action.now,
       );
     case "create-tournament": {
-      const tournament = createTournamentBracket(action.players, action.config);
+      const tournament = createTournament(action.players, action.config);
       return {
         ...state,
         updatedAt: action.now,
@@ -123,10 +123,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         screen: "bracket",
         tournament: state.tournament
           ? resetTournamentBracket(state.tournament)
-          : createTournamentBracket(
-              state.setupDraft.players,
-              state.setupDraft.config,
-            ),
+          : createTournament(state.setupDraft.players, state.setupDraft.config),
         activeMatchId: null,
         scorer: null,
         sessionDeadline:
@@ -161,10 +158,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const previousDraw = drawSignature(state.tournament);
       let randomSeed = action.randomSeed;
       let config = { ...state.setupDraft.config, randomSeed };
-      let tournament = createTournamentBracket(
-        state.setupDraft.players,
-        config,
-      );
+      let tournament = createTournament(state.setupDraft.players, config);
       for (
         let attempt = 1;
         attempt <= 8 && drawSignature(tournament) === previousDraw;
@@ -172,7 +166,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       ) {
         randomSeed = `${action.randomSeed}:${attempt}`;
         config = { ...state.setupDraft.config, randomSeed };
-        tournament = createTournamentBracket(state.setupDraft.players, config);
+        tournament = createTournament(state.setupDraft.players, config);
       }
       return {
         ...state,

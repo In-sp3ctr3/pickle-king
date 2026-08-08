@@ -5,6 +5,7 @@ import type {
   TournamentResult,
   UpsetResult,
 } from "./types";
+import { calculatePreliminaryStandings } from "./round-robin";
 
 export function calculateTournamentResult(
   bracket: TournamentBracket,
@@ -51,7 +52,7 @@ export function calculateTournamentResult(
     second.pointsAgainst += match.scoreA;
     standings.get(match.winnerId)!.wins += 1;
     standings.get(match.loserId)!.losses += 1;
-    if (match.kind !== "bronze") {
+    if (bracket.format === "knockout" && match.kind !== "bronze") {
       standings.get(match.loserId)!.eliminatedRound = match.round;
     }
     const winnerSeed = seedByPlayer.get(match.winnerId) ?? 0;
@@ -107,6 +108,10 @@ export function calculateTournamentResult(
     }),
     upsetWins,
     eliminationGroups,
+    preliminaryStandings:
+      bracket.format === "round-robin-finals"
+        ? calculatePreliminaryStandings(bracket)
+        : null,
     matchHistory: bracket.matches.map((match) => ({ ...match })),
   };
 }

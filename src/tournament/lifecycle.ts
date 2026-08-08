@@ -66,11 +66,25 @@ function dependentMatchIds(matches: Match[], matchId: string): Set<string> {
   return affected;
 }
 
+function affectedMatchIds(
+  bracket: TournamentBracket,
+  matchId: string,
+): Set<string> {
+  const target = bracket.matches.find(({ id }) => id === matchId);
+  if (
+    bracket.format === "round-robin-finals" &&
+    target?.kind === "round-robin"
+  ) {
+    return new Set([bracket.bronzeMatchId, bracket.finalMatchId]);
+  }
+  return dependentMatchIds(bracket.matches, matchId);
+}
+
 export function correctionNeedsConfirmation(
   bracket: TournamentBracket,
   matchId: string,
 ): boolean {
-  const affected = dependentMatchIds(bracket.matches, matchId);
+  const affected = affectedMatchIds(bracket, matchId);
   return bracket.matches.some(
     (match) =>
       affected.has(match.id) &&
@@ -91,7 +105,7 @@ export function correctMatchResult(
   if (!target || target.status !== "complete") {
     throw new Error("Only a completed match can be corrected.");
   }
-  const affected = dependentMatchIds(bracket.matches, matchId);
+  const affected = affectedMatchIds(bracket, matchId);
   const hasStartedDependent = correctionNeedsConfirmation(bracket, matchId);
   if (hasStartedDependent && !confirmDownstreamReset) {
     throw new Error("Confirm reset of affected downstream results.");

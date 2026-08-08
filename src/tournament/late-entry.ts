@@ -57,6 +57,9 @@ export function applyLateEntry(
   plan: LateEntryPlan,
   options: ApplyOptions,
 ): TournamentBracket {
+  if (bracket.format === "round-robin-finals") {
+    throw new Error("Late entry is not available for round robin tournaments.");
+  }
   if (plan.playerId !== player.id)
     throw new Error("Late-entry plan does not match the player.");
   if (bracket.amendments.length)

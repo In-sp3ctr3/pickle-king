@@ -2,15 +2,15 @@ import type { ScoringState } from "../match/types";
 import type { TournamentBracket } from "../tournament";
 import type {
   QuickMatchRecord,
-  SessionHistoryV1,
+  SessionHistoryV2,
   TournamentArchive,
 } from "./types";
 
 export const QUICK_HISTORY_LIMIT = 50;
 export const TOURNAMENT_HISTORY_LIMIT = 10;
 
-export function emptySessionHistory(): SessionHistoryV1 {
-  return { version: 1, quickMatches: [], tournaments: [] };
+export function emptySessionHistory(): SessionHistoryV2 {
+  return { version: 2, quickMatches: [], tournaments: [] };
 }
 
 function recordFirst<T extends { id: string }>(
@@ -55,9 +55,9 @@ export function quickMatchRecord(
 }
 
 export function recordQuickMatch(
-  history: SessionHistoryV1,
+  history: SessionHistoryV2,
   record: QuickMatchRecord,
-): SessionHistoryV1 {
+): SessionHistoryV2 {
   const quickMatches = recordFirst(
     history.quickMatches,
     record,
@@ -89,9 +89,9 @@ export function tournamentArchive(
 }
 
 export function recordTournament(
-  history: SessionHistoryV1,
+  history: SessionHistoryV2,
   archive: TournamentArchive,
-): SessionHistoryV1 {
+): SessionHistoryV2 {
   const tournaments = recordFirst(
     history.tournaments,
     archive,
@@ -103,7 +103,7 @@ export function recordTournament(
 }
 
 export function rememberedPlayerNames(
-  history: SessionHistoryV1,
+  history: SessionHistoryV2,
   currentNames: string[] = [],
 ): string[] {
   const ordered = [
@@ -144,10 +144,10 @@ function archiveMatches(
 }
 
 export function syncTournamentArchive(
-  history: SessionHistoryV1,
+  history: SessionHistoryV2,
   before: TournamentBracket,
   after: TournamentBracket | null,
-): SessionHistoryV1 {
+): SessionHistoryV2 {
   const index = history.tournaments.findIndex((archive) =>
     archiveMatches(archive, before),
   );

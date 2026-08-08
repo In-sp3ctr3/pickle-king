@@ -1,4 +1,4 @@
-import type { Player, SkillLevel } from "./types";
+import type { DrawStyle, Player, SkillLevel } from "./types";
 
 const RATING_VALUE: Record<SkillLevel, number> = {
   "2.5": 2.5,
@@ -46,6 +46,17 @@ export function seedPlayers(players: Player[], randomSeed: string): Player[] {
     .sort(([left], [right]) => RATING_VALUE[right] - RATING_VALUE[left])
     .flatMap(([, group]) => shuffle(group, random))
     .map((player, index) => ({ ...player, seed: index + 1 }));
+}
+
+export function orderPlayers(
+  players: Player[],
+  drawStyle: DrawStyle,
+  randomSeed: string,
+): Player[] {
+  if (drawStyle === "ranked") return seedPlayers(players, randomSeed);
+  return shuffle(players, randomFrom(`${randomSeed}:player-order`)).map(
+    (player, index) => ({ ...player, seed: index + 1 }),
+  );
 }
 
 export function bracketSeedOrder(size: number): number[] {

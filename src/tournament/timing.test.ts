@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { calculateMatchCap, rebalanceRemainingCap } from "./timing";
+import {
+  calculateMatchCap,
+  plannedMatchCount,
+  rebalanceRemainingCap,
+} from "./timing";
 
 describe("tournament timing", () => {
   it.each(Array.from({ length: 13 }, (_, index) => index + 4))(
@@ -29,6 +33,22 @@ describe("tournament timing", () => {
         transitionSeconds: 60,
       }),
     ).toThrow(/too short/i);
+  });
+
+  it("allocates eight matches and seven transitions for round robin finals", () => {
+    const result = calculateMatchCap({
+      entrantCount: 4,
+      format: "round-robin-finals",
+      bookingMinutes: 120,
+      warmupMinutes: 10,
+      transitionSeconds: 60,
+    });
+    expect(result.totalMatches).toBe(8);
+    expect(result.transitionCount).toBe(7);
+    expect(plannedMatchCount(4, "round-robin-finals")).toBe(8);
+    expect(() => plannedMatchCount(5, "round-robin-finals")).toThrow(
+      /exactly four/i,
+    );
   });
 
   it("rejects negative values that would manufacture play time", () => {

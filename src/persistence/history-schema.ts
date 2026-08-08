@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { tournamentBracketSchema } from "./schema";
+import {
+  tournamentBracketSchema,
+  tournamentBracketV1Schema,
+} from "./tournament-schema";
 
 const namesSchema = z.array(z.string().trim().min(1).max(40)).min(1).max(2);
 
@@ -29,6 +32,20 @@ const quickMatchRecordSchema = z.object({
 
 export const sessionHistoryV1Schema = z.object({
   version: z.literal(1),
+  quickMatches: z.array(quickMatchRecordSchema).max(50),
+  tournaments: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        completedAt: z.number().finite(),
+        bracket: tournamentBracketV1Schema,
+      }),
+    )
+    .max(10),
+});
+
+export const sessionHistoryV2Schema = z.object({
+  version: z.literal(2),
   quickMatches: z.array(quickMatchRecordSchema).max(50),
   tournaments: z
     .array(

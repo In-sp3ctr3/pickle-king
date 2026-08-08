@@ -5,6 +5,7 @@ export * from "./highlights";
 export * from "./late-entry";
 export * from "./late-entry-plan";
 export * from "./results";
+export * from "./round-robin";
 export * from "./schedule";
 export * from "./seeding";
 export * from "./stage";

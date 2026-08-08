@@ -1,5 +1,8 @@
 import type { Match, TournamentBracket } from "../../tournament";
-import { matchSources, type ShareMatchPosition } from "./bracket-share-layout";
+import {
+  matchDependencySources,
+  type ShareMatchPosition,
+} from "./bracket-share-layout";
 import { shareColors } from "./share-canvas";
 import type { ShareFormat } from "./share-format";
 
@@ -131,8 +134,7 @@ export function portraitMatchPositions(
     for (const match of matches.filter(
       (candidate) => candidate.round === round,
     )) {
-      const sources = matchSources(bracket, match)
-        .filter((source) => source.type !== "player")
+      const sources = matchDependencySources(bracket, match)
         .map((source) => positions.get(source.matchId))
         .filter((source): source is ShareMatchPosition => Boolean(source));
       if (sources.length === 0) continue;
@@ -193,8 +195,7 @@ export function portraitConnectorSegments(
   for (const target of matches) {
     const end = positions.get(target.id);
     if (!end) continue;
-    const sources = matchSources(bracket, target)
-      .filter((source) => source.type !== "player")
+    const sources = matchDependencySources(bracket, target)
       .map((source) => ({
         complete: lookup.get(source.matchId)?.status === "complete",
         id: source.matchId,

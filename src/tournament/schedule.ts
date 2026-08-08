@@ -30,6 +30,23 @@ export function getReadySchedule(bracket: TournamentBracket): Match[] {
   const completed = bracket.matches.filter(
     (match) => match.status === "complete",
   );
+  if (bracket.format === "round-robin-finals") {
+    const incomplete = bracket.matches.filter(
+      ({ kind, status }) => kind === "round-robin" && status !== "complete",
+    );
+    const round = Math.min(...incomplete.map((match) => match.round));
+    const ready = incomplete.length
+      ? incomplete.filter(
+          (match) => match.round === round && match.status === "ready",
+        )
+      : bracket.matches.filter(
+          (match) =>
+            match.status === "ready" &&
+            (match.id === bracket.bronzeMatchId ||
+              match.id === bracket.finalMatchId),
+        );
+    return sortByRest(ready, completed);
+  }
   const incompleteElimination = bracket.matches.filter(
     (match) => match.kind === "elimination" && match.status !== "complete",
   );
@@ -48,7 +65,11 @@ export function getReadySchedule(bracket: TournamentBracket): Match[] {
     return true;
   });
   if (!candidates.length) return [];
-  return candidates.sort((left, right) => {
+  return sortByRest(candidates, completed);
+}
+
+function sortByRest(candidates: Match[], completed: Match[]): Match[] {
+  return candidates.toSorted((left, right) => {
     if (left.kind !== right.kind) return left.kind === "bronze" ? -1 : 1;
     const leftRecent = Math.max(
       ...participantIds(left).map((id) => lastPlayedAt(id, completed)),

@@ -1,3 +1,5 @@
+import type { TournamentFormat } from "./types";
+
 export interface CapCalculation {
   totalMatches: number;
   transitionCount: number;
@@ -7,6 +9,7 @@ export interface CapCalculation {
 
 export function calculateMatchCap(input: {
   entrantCount: number;
+  format?: TournamentFormat;
   bookingMinutes: number;
   warmupMinutes: number;
   transitionSeconds: number;
@@ -27,7 +30,10 @@ export function calculateMatchCap(input: {
   }
   const bookingMs = input.bookingMinutes * 60_000;
   const warmupMs = input.warmupMinutes * 60_000;
-  const totalMatches = input.entrantCount;
+  const totalMatches = plannedMatchCount(
+    input.entrantCount,
+    input.format ?? "knockout",
+  );
   const transitionCount = totalMatches - 1;
   const transitionMs = transitionCount * input.transitionSeconds * 1_000;
   const playableMs = bookingMs - warmupMs - transitionMs;
@@ -38,6 +44,22 @@ export function calculateMatchCap(input: {
     );
   }
   return { totalMatches, transitionCount, playableMs, capMs };
+}
+
+export function plannedMatchCount(
+  entrantCount: number,
+  format: TournamentFormat = "knockout",
+): number {
+  if (format === "round-robin-finals") {
+    if (entrantCount !== 4) {
+      throw new Error("Round robin + finals requires exactly four players.");
+    }
+    return 8;
+  }
+  if (entrantCount < 4 || entrantCount > 16) {
+    throw new Error("Tournament entrants must be between 4 and 16.");
+  }
+  return entrantCount;
 }
 
 export function rebalanceRemainingCap(input: {

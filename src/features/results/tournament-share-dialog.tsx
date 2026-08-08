@@ -26,7 +26,7 @@ import {
 
 export type TournamentShareKind = "recap" | "stats" | "bracket";
 
-const options = [
+const allOptions = [
   ["recap", Trophy, "Champion card"],
   ["stats", BarChart3, "Player stats"],
   ["bracket", GitFork, "Full bracket"],
@@ -40,11 +40,16 @@ export function TournamentShareDialog({
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const [kind, setKind] = useState<TournamentShareKind>("recap");
   const [format, setFormat] = useState<ShareFormat>("feed");
   const [bracketFormat, setBracketFormat] =
     useState<BracketShareFormat>("landscape");
   const [expanded, setExpanded] = useState(false);
+  const options =
+    bracket.format === "round-robin-finals"
+      ? allOptions.filter(([value]) => value !== "bracket")
+      : allOptions;
   const imageFormat = kind === "bracket" ? bracketFormat : format;
   const contentKey = tournamentShareContentKey(bracket);
   const preview = useSharePreview(
@@ -59,7 +64,12 @@ export function TournamentShareDialog({
   );
 
   useEffect(() => {
+    triggerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     ref.current?.showModal();
+    return () => triggerRef.current?.focus();
   }, []);
 
   return (

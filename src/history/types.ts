@@ -19,8 +19,11 @@ export interface TournamentArchive {
   bracket: TournamentBracket;
 }
 
-export interface SessionHistoryV1 {
-  version: 1;
+export interface SessionHistoryV2 {
+  version: 2;
   quickMatches: QuickMatchRecord[];
   tournaments: TournamentArchive[];
 }
+
+/** @deprecated Use SessionHistoryV2. */
+export type SessionHistoryV1 = SessionHistoryV2;

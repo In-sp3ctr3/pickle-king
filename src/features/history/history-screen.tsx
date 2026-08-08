@@ -3,6 +3,8 @@
 import { AlertTriangle, Eye, Share2, Trash2, Trophy } from "lucide-react";
 import { useState } from "react";
 import type { SessionHistoryV1 } from "../../history";
+import type { TournamentBracket } from "../../tournament";
+import { TournamentShareDialog } from "../results";
 import {
   bracketShareCanvas,
   quickShareCanvas,
@@ -34,6 +36,8 @@ export function HistoryScreen({
   const [shareRequest, setShareRequest] = useState<ShareImageRequest | null>(
     null,
   );
+  const [shareTournament, setShareTournament] =
+    useState<TournamentBracket | null>(null);
   if (recoveryMessage) {
     return (
       <main className="history-screen" data-qa="history-screen">
@@ -144,7 +148,10 @@ export function HistoryScreen({
                 <div>
                   <span>
                     {dateLabel(item.completedAt)} ·{" "}
-                    {item.bracket.players.length} players
+                    {item.bracket.players.length} players ·{" "}
+                    {item.bracket.format === "round-robin-finals"
+                      ? "Round robin + finals"
+                      : "Fast knockout"}
                   </span>
                   <strong>{champion} took the crown</strong>
                 </div>
@@ -158,26 +165,36 @@ export function HistoryScreen({
                       <Eye aria-hidden="true" size={18} /> View results
                     </button>
                   ) : null}
-                  <button
-                    data-qa="share-archived-bracket"
-                    onClick={() =>
-                      setShareRequest({
-                        alt: `${champion} tournament bracket`,
-                        aspect: "landscape",
-                        build: (format) =>
-                          bracketShareCanvas(item.bracket, format),
-                        fileName: `pickle-king-bracket-${item.completedAt}.png`,
-                        formats: ["landscape", "feed", "story"],
-                        initialFormat: "landscape",
-                        inspectable: true,
-                        key: `tournament:${item.id}:${tournamentShareContentKey(item.bracket)}`,
-                        title: "Tournament bracket",
-                      })
-                    }
-                    type="button"
-                  >
-                    <Share2 aria-hidden="true" size={18} /> Share bracket
-                  </button>
+                  {item.bracket.format === "round-robin-finals" ? (
+                    <button
+                      data-qa="share-archived-results"
+                      onClick={() => setShareTournament(item.bracket)}
+                      type="button"
+                    >
+                      <Share2 aria-hidden="true" size={18} /> Share results
+                    </button>
+                  ) : (
+                    <button
+                      data-qa="share-archived-bracket"
+                      onClick={() =>
+                        setShareRequest({
+                          alt: `${champion} tournament bracket`,
+                          aspect: "landscape",
+                          build: (format) =>
+                            bracketShareCanvas(item.bracket, format),
+                          fileName: `pickle-king-bracket-${item.completedAt}.png`,
+                          formats: ["landscape", "feed", "story"],
+                          initialFormat: "landscape",
+                          inspectable: true,
+                          key: `tournament:${item.id}:${tournamentShareContentKey(item.bracket)}`,
+                          title: "Tournament bracket",
+                        })
+                      }
+                      type="button"
+                    >
+                      <Share2 aria-hidden="true" size={18} /> Share bracket
+                    </button>
+                  )}
                   <button
                     aria-label="Remove tournament from history"
                     onClick={() => onRemove(item.id, "tournament")}
@@ -195,6 +212,12 @@ export function HistoryScreen({
         <ShareImageDialog
           onClose={() => setShareRequest(null)}
           request={shareRequest}
+        />
+      ) : null}
+      {shareTournament ? (
+        <TournamentShareDialog
+          bracket={shareTournament}
+          onClose={() => setShareTournament(null)}
         />
       ) : null}
     </main>

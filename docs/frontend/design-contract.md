@@ -6,7 +6,7 @@ Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-03
+Last updated: 2026-08-07
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -43,19 +43,20 @@ Last updated: 2026-08-03
 
 ## Page Regions
 
-| Region         | Purpose                      | Geometry                                          | Responsive behavior                          | Interaction                        |
-| -------------- | ---------------------------- | ------------------------------------------------- | -------------------------------------------- | ---------------------------------- |
-| Court header   | explicit app navigation      | centered floating island                          | labels contract, actions remain available    | back and home                      |
-| Home hero      | establish identity and begin | asymmetric copy + crowned mascot                  | stacked; CTA first                           | mascot arrival and blink           |
-| Run of show    | next match and time risk     | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match       |
-| Bracket        | advancement overview         | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct         |
-| Scorekeeper    | no-look scoring              | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset |
-| Results        | podium and evidence          | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, review, or replay           |
-| History        | recall a social session      | editorial ledger + strong score rail              | table becomes stacked match rows             | view, share, or remove one record  |
-| Draw editor    | repair the field safely      | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild     |
-| Challenge lane | expose an amended route      | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo  |
-| Share result   | preview a brag artifact      | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download  |
-| Share bracket  | preview the complete draw    | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download  |
+| Region         | Purpose                         | Geometry                                          | Responsive behavior                          | Interaction                        |
+| -------------- | ------------------------------- | ------------------------------------------------- | -------------------------------------------- | ---------------------------------- |
+| Court header   | explicit app navigation         | centered floating island                          | labels contract, actions remain available    | back and home                      |
+| Home hero      | establish identity and begin    | asymmetric copy + crowned mascot                  | stacked; CTA first                           | mascot arrival and blink           |
+| Run of show    | next match and time risk        | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match       |
+| Bracket        | advancement overview            | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct         |
+| Round robin    | participation and qualification | live table + three paired rounds + placement row  | two schedule columns become one              | start, correct, and track rank     |
+| Scorekeeper    | no-look scoring                 | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset |
+| Results        | podium and evidence             | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, review, or replay           |
+| History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows             | view, share, or remove one record  |
+| Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild     |
+| Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo  |
+| Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download  |
+| Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download  |
 
 ## Geometry
 
@@ -116,6 +117,10 @@ Last updated: 2026-08-03
 | VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate                                 |
 | DrawTools         | ready, reroll available, locked          | lives with Full draw heading; 48px controls                                  |
 | ReplayDialog      | same draw, new draw, cancel              | no destructive default; roster choice is explicit                            |
+| FormatChoice      | knockout, round robin, unavailable       | states match field size; exact match/player counts remain visible            |
+| LeagueStandings   | provisional, qualified, complete         | semantic table; wins, points, differential, and deterministic rank           |
+| RoundRobinRound   | waiting, available, complete             | two match nodes per round; one-column phone fallback                         |
+| PlacementMatches  | unresolved, bronze-ready, final-ready    | third place precedes final; standings placeholders explain qualification     |
 
 ## Motion
 
@@ -162,6 +167,30 @@ Last updated: 2026-08-03
 - Late-entry repair must name the protected route, show its added matches and timing impact, and never hide the continue-unchanged action.
 - Result tables are read-only. Corrections and stable-identity renames live in bracket nodes.
 - Ranked and Random draw copy must state whether ratings affect placement. Random draws may be rerolled only before play begins.
+- Round robin + finals is available only at exactly four players and must state
+  `8 matches · 4 per player`; adding a fifth player returns the choice to Fast
+  knockout with a polite status message.
+- The round-robin surface reuses the run of show and match-card anatomy but
+  never imitates a connected elimination tree. The standings table and three
+  rounds carry the hierarchy; placement matches remain visible and unresolved
+  until all six preliminary results exist.
+- Round-robin standings use non-color rank/status text and remain horizontally
+  contained at 390px. Schedule cards form two columns at tablet/desktop sizes
+  and one column on phones.
+- Round-robin completed sharing offers Champion card and Player stats only.
+  Full bracket and in-progress tournament-image actions remain knockout-only.
+
+## Feature 014 visual extension
+
+- Mode: reference-derived product.
+- Identity anchor: the accepted setup, run-of-show, match-node, results, and
+  history evidence already listed in this contract.
+- New surface: a near-black editorial standings table above paired match nodes;
+  lime remains reserved for the one recommended court action.
+- Motion required: no new ornamental motion. Existing choice, match-state, and
+  reduced-motion behavior applies.
+- Assets: existing local fonts, Lucide icons, mascot, and share arena only.
+- Target viewports: 390×844, 844×390, 820×1180, 1180×820, and 1440×1000.
 
 ## Share Export Geometry
 

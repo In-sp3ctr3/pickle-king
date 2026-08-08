@@ -29,8 +29,10 @@ export interface MatchConfig {
 }
 
 export type DrawStyle = "ranked" | "random";
+export type TournamentFormat = "knockout" | "round-robin-finals";
 
 export interface TournamentConfig {
+  format: TournamentFormat;
   drawStyle: DrawStyle;
   timingMode: "timed" | "untimed";
   bookingMinutes: number;
@@ -42,7 +44,8 @@ export interface TournamentConfig {
 
 export type MatchSource =
   | { type: "player"; playerId: string }
-  | { type: "winner" | "loser"; matchId: string };
+  | { type: "winner" | "loser"; matchId: string }
+  | { type: "standing"; rank: 1 | 2 | 3 | 4 };
 
 export type MatchStatus = "waiting" | "ready" | "live" | "complete";
 export type MatchSlot = "A" | "B";
@@ -51,7 +54,7 @@ export type LateEntryMethod =
 
 export interface Match {
   id: string;
-  kind: "elimination" | "bronze" | "challenge";
+  kind: "elimination" | "round-robin" | "bronze" | "challenge";
   round: number;
   ordinal: number;
   sourceA: MatchSource;
@@ -99,6 +102,7 @@ export interface LateEntryAmendment extends LateEntryPlan {
 }
 
 export interface TournamentBracket {
+  format: TournamentFormat;
   bracketSize: number;
   roundCount: number;
   players: Player[];
@@ -137,5 +141,6 @@ export interface TournamentResult {
   standings: PlayerStanding[];
   upsetWins: UpsetResult[];
   eliminationGroups: EliminationGroup[];
+  preliminaryStandings: PlayerStanding[] | null;
   matchHistory: Match[];
 }

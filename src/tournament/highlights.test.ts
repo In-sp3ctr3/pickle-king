@@ -48,9 +48,11 @@ function result(matches: Match[], upsets: TournamentResult["upsetWins"] = []) {
     })),
     upsetWins: upsets,
     eliminationGroups: [],
+    preliminaryStandings: null,
     matchHistory: matches,
   };
   const bracket: TournamentBracket = {
+    format: "knockout",
     bracketSize: 4,
     roundCount: 2,
     players,

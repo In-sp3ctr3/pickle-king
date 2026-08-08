@@ -15,6 +15,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: index === 0 ? "5.0" : "3.5",
 }));
 const config: TournamentConfig = {
+  format: "knockout",
   drawStyle: "ranked",
   timingMode: "timed",
   bookingMinutes: 120,

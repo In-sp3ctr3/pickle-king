@@ -21,9 +21,10 @@ export function validateSetup(
   players: SetupPlayerDraft[],
   numbers: SetupNumberDrafts,
   timingMode: "timed" | "untimed",
+  format: TournamentSetupValues["format"] = "knockout",
 ): {
   errors: SetupErrors;
-  values?: Omit<TournamentSetupValues, "drawStyle">;
+  values?: Omit<TournamentSetupValues, "drawStyle" | "format">;
 } {
   const errors: SetupErrors = { names: {}, ratings: {} };
   const normalizedNames = players.map((player) =>
@@ -32,6 +33,8 @@ export function validateSetup(
 
   if (players.length < 4 || players.length > 16) {
     errors.form = "Add between 4 and 16 players.";
+  } else if (format === "round-robin-finals" && players.length !== 4) {
+    errors.form = "Round robin + finals requires exactly four players.";
   }
 
   players.forEach((player, index) => {
@@ -89,6 +92,7 @@ export function validateSetup(
     try {
       calculateMatchCap({
         entrantCount: players.length,
+        format,
         bookingMinutes,
         warmupMinutes,
         transitionSeconds,

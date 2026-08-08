@@ -2,6 +2,7 @@ import type { TournamentBracket } from "../../tournament";
 
 export function tournamentShareContentKey(bracket: TournamentBracket) {
   return JSON.stringify({
+    format: bracket.format,
     bronzeMatchId: bracket.bronzeMatchId,
     finalMatchId: bracket.finalMatchId,
     matches: bracket.matches.map((match) => ({

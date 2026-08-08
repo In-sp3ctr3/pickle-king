@@ -18,6 +18,7 @@ import { drawExportBackdrop } from "./share-scene";
 import {
   championStanding,
   playerName,
+  tournamentFormatLabel,
   tournamentNames,
 } from "./tournament-share-data";
 
@@ -40,7 +41,7 @@ export async function tournamentStatsCanvas(
     color: shareColors.lime,
     font: "900 24px 'Archivo Black', sans-serif",
   });
-  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 1026, 66, {
+  shareText(context, tournamentFormatLabel(bracket), 1026, 66, {
     align: "right",
     color: shareColors.mist,
     font: "800 18px Manrope, sans-serif",

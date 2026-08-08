@@ -1,5 +1,6 @@
 import type { TournamentSnapshotV1 } from "@/src/persistence/schema";
 import { FloatingAppNav } from "@/src/shared/ui";
+import type { TournamentFormat } from "../tournament";
 
 type Screen = TournamentSnapshotV1["screen"];
 type NavigableScreen =
@@ -49,12 +50,21 @@ const navigation: Record<
 export function AppNavigation({
   onNavigate,
   screen,
+  tournamentFormat,
 }: {
   onNavigate: (screen: Screen) => void;
   screen: Screen;
+  tournamentFormat?: TournamentFormat;
 }) {
   if (!(screen in navigation)) return null;
-  const item = navigation[screen as NavigableScreen];
+  const configured = navigation[screen as NavigableScreen];
+  const roundRobin = tournamentFormat === "round-robin-finals";
+  const item =
+    screen === "bracket" && roundRobin
+      ? { ...configured, currentLabel: "Round robin" }
+      : screen === "results" && roundRobin
+        ? { ...configured, backLabel: "Schedule" }
+        : configured;
   return (
     <FloatingAppNav
       backLabel={item.backLabel}

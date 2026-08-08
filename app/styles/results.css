@@ -7,6 +7,7 @@
 .results-hero {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   justify-items: center;
   margin: 1.5rem auto 4rem;
@@ -31,13 +32,22 @@ html[data-visual-freeze="true"] .champion-mark {
 .results-hero h1 {
   position: relative;
   z-index: 1;
-  max-width: 16ch;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin: 0;
   font-size: clamp(3.8rem, 9vw, 8rem);
   letter-spacing: 0;
   line-height: 0.9;
   text-transform: uppercase;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+}
+
+.results-champion-name {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .results-final-score {
@@ -119,7 +129,7 @@ html[data-visual-freeze="true"] .champion-mark {
 
 .podium {
   display: grid;
-  grid-template-columns: 1fr 1.2fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
   align-items: end;
   gap: 0;
   margin: 3rem auto 5rem;
@@ -145,11 +155,20 @@ html[data-visual-freeze="true"] .champion-mark {
 }
 
 .podium-place strong {
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   margin: 0.7rem 0;
   font-size: clamp(1.25rem, 3vw, 2.25rem);
   text-transform: uppercase;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+}
+
+.podium-place strong .measured-label {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .podium-place.second {
@@ -208,6 +227,10 @@ html[data-visual-freeze="true"] .champion-mark {
   gap: 3rem;
   grid-template-columns: 1.35fr 0.65fr;
   margin-top: 4rem;
+}
+
+.results-grid--round-robin {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .results-grid > * {
@@ -277,6 +300,20 @@ html[data-visual-freeze="true"] .champion-mark {
 
 .match-history {
   margin-top: 4rem;
+}
+
+.match-history__group + .match-history__group {
+  margin-top: 2rem;
+}
+
+.match-history__group h3 {
+  margin: 0;
+  padding: 0.8rem 0;
+  color: var(--lime);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .results-footnote {

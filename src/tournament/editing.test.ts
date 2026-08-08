@@ -9,6 +9,7 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   rating: "3.5",
 }));
 const config: TournamentConfig = {
+  format: "knockout",
   drawStyle: "ranked",
   timingMode: "untimed",
   bookingMinutes: 120,

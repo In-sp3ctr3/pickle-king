@@ -5,9 +5,11 @@ import { motion, useReducedMotion } from "motion/react";
 import { calculateTournamentResult } from "../../tournament";
 import type { TournamentBracket } from "../../tournament";
 import { useState } from "react";
+import { MeasuredLabel } from "../../shared/ui";
 import { VictoryConfetti } from "../live-match/victory-confetti";
 import { ReplayTournamentDialog } from "./replay-tournament-dialog";
 import { TournamentShareDialog } from "./tournament-share-dialog";
+import { MatchHistory } from "./match-history";
 
 function roundName(round: number, total: number) {
   if (round === total) return "Final";
@@ -31,6 +33,7 @@ export function ResultsScreen({
   const [showShare, setShowShare] = useState(false);
   const [showReplay, setShowReplay] = useState(false);
   const result = calculateTournamentResult(bracket);
+  const roundRobin = bracket.format === "round-robin-finals";
   const player = new Map(bracket.players.map((item) => [item.id, item]));
   const name = (id: string) => player.get(id)?.name ?? "Player";
   const champion = result.standings.find(
@@ -58,7 +61,14 @@ export function ResultsScreen({
           transition={{ delay: 0.3, duration: 0.7 }}
         />
         <p className="eyebrow">Tournament champion</p>
-        <h1>{name(result.championId)} wins</h1>
+        <h1>
+          <MeasuredLabel
+            className="results-champion-name"
+            maxSize={128}
+            minSize={18}
+            text={`${name(result.championId)} wins`}
+          />
+        </h1>
         <div
           className="results-final-score"
           aria-label={`Final score ${winnerScore} to ${runnerUpScore}`}
@@ -105,7 +115,8 @@ export function ResultsScreen({
               onClick={onViewBracket}
               type="button"
             >
-              <GitBranch aria-hidden="true" size={18} /> Review bracket
+              <GitBranch aria-hidden="true" size={18} /> Review{" "}
+              {roundRobin ? "schedule" : "bracket"}
             </button>
           ) : null}
         </div>
@@ -116,7 +127,13 @@ export function ResultsScreen({
             aria-label="Silver medal"
             className="podium-medal podium-medal--silver"
           />
-          <strong>{name(result.runnerUpId)}</strong>
+          <strong>
+            <MeasuredLabel
+              maxSize={36}
+              minSize={12}
+              text={name(result.runnerUpId)}
+            />
+          </strong>
           <small>Runner-up</small>
         </div>
         <div className="podium-place first">
@@ -124,7 +141,13 @@ export function ResultsScreen({
             aria-label="Gold medal"
             className="podium-medal podium-medal--gold"
           />
-          <strong>{name(result.championId)}</strong>
+          <strong>
+            <MeasuredLabel
+              maxSize={36}
+              minSize={12}
+              text={name(result.championId)}
+            />
+          </strong>
           <small>Champion</small>
         </div>
         <div className="podium-place third">
@@ -132,80 +155,45 @@ export function ResultsScreen({
             aria-label="Bronze medal"
             className="podium-medal podium-medal--bronze"
           />
-          <strong>{name(result.thirdPlaceId)}</strong>
+          <strong>
+            <MeasuredLabel
+              maxSize={36}
+              minSize={12}
+              text={name(result.thirdPlaceId)}
+            />
+          </strong>
           <small>Third place</small>
         </div>
       </section>
-      <section className="results-grid">
+      <section
+        className={`results-grid${roundRobin ? "results-grid--round-robin" : ""}`}
+      >
         <div>
           <h2>Player stats</h2>
-          <div className="standings-table" role="table">
-            <div className="standings-row standings-head" role="row">
-              <span role="columnheader">Player</span>
-              <span role="columnheader">W–L</span>
-              <span role="columnheader">For</span>
-              <span role="columnheader">
-                <span className="results-header-full">Against</span>
-                <abbr className="results-header-short" title="Against">
-                  PA
-                </abbr>
-              </span>
-              <span role="columnheader">
-                <span className="results-header-full">Diff</span>
-                <abbr
-                  className="results-header-short"
-                  title="Point differential"
-                >
-                  +/−
-                </abbr>
-              </span>
-            </div>
-            {result.standings.map((standing) => (
-              <div className="standings-row" key={standing.playerId} role="row">
-                <strong role="cell">{name(standing.playerId)}</strong>
-                <span role="cell">
-                  {standing.wins}–{standing.losses}
-                </span>
-                <span role="cell">{standing.pointsFor}</span>
-                <span role="cell">{standing.pointsAgainst}</span>
-                <span role="cell">
-                  {standing.differential > 0 ? "+" : ""}
-                  {standing.differential}
-                </span>
-              </div>
-            ))}
-          </div>
+          <StandingsTable name={name} standings={result.standings} />
         </div>
         <div>
-          <h2>How the field finished</h2>
-          <div className="elimination-groups">
-            {result.eliminationGroups.map((group) => (
-              <section key={group.round}>
-                <p>{roundName(group.round, bracket.roundCount)}</p>
-                <strong>{group.playerIds.map(name).join(" · ")}</strong>
-              </section>
-            ))}
-          </div>
+          <h2>
+            {roundRobin ? "Round-robin standings" : "How the field finished"}
+          </h2>
+          {roundRobin && result.preliminaryStandings ? (
+            <StandingsTable
+              name={name}
+              standings={result.preliminaryStandings}
+            />
+          ) : (
+            <div className="elimination-groups">
+              {result.eliminationGroups.map((group) => (
+                <section key={group.round}>
+                  <p>{roundName(group.round, bracket.roundCount)}</p>
+                  <strong>{group.playerIds.map(name).join(" · ")}</strong>
+                </section>
+              ))}
+            </div>
+          )}
         </div>
       </section>
-      <section className="match-history">
-        <h2>Match history</h2>
-        {result.matchHistory.map((match) => (
-          <div className="history-row" key={match.id}>
-            <span>
-              {match.kind === "bronze"
-                ? "Third place"
-                : match.kind === "challenge"
-                  ? "Late-entry challenge"
-                  : roundName(match.round, bracket.roundCount)}
-            </span>
-            <strong>
-              {name(match.sideA!.memberIds[0])} {match.scoreA}–{match.scoreB}{" "}
-              {name(match.sideB!.memberIds[0])}
-            </strong>
-          </div>
-        ))}
-      </section>
+      <MatchHistory bracket={bracket} name={name} />
       <p className="results-footnote">
         Results from this tournament only. Player ratings stay unchanged.
       </p>
@@ -220,8 +208,53 @@ export function ResultsScreen({
           onClose={() => setShowReplay(false)}
           onNewDraw={onNewDraw}
           onSameDraw={onReplaySame}
+          format={bracket.format}
         />
       ) : null}
     </main>
+  );
+}
+
+function StandingsTable({
+  name,
+  standings,
+}: {
+  name: (id: string) => string;
+  standings: ReturnType<typeof calculateTournamentResult>["standings"];
+}) {
+  return (
+    <div className="standings-table" role="table">
+      <div className="standings-row standings-head" role="row">
+        <span role="columnheader">Player</span>
+        <span role="columnheader">W–L</span>
+        <span role="columnheader">For</span>
+        <span role="columnheader">
+          <span className="results-header-full">Against</span>
+          <abbr className="results-header-short" title="Against">
+            PA
+          </abbr>
+        </span>
+        <span role="columnheader">
+          <span className="results-header-full">Diff</span>
+          <abbr className="results-header-short" title="Point differential">
+            +/−
+          </abbr>
+        </span>
+      </div>
+      {standings.map((standing) => (
+        <div className="standings-row" key={standing.playerId} role="row">
+          <strong role="cell">{name(standing.playerId)}</strong>
+          <span role="cell">
+            {standing.wins}–{standing.losses}
+          </span>
+          <span role="cell">{standing.pointsFor}</span>
+          <span role="cell">{standing.pointsAgainst}</span>
+          <span role="cell">
+            {standing.differential > 0 ? "+" : ""}
+            {standing.differential}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }

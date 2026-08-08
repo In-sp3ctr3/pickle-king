@@ -5,7 +5,7 @@ import {
 } from "./bracket-share-extras";
 import {
   eliminationSharePositions,
-  matchSources,
+  matchDependencySources,
   type ShareMatchPosition,
 } from "./bracket-share-layout";
 import { drawBracketMatch } from "./bracket-share-match";
@@ -157,8 +157,7 @@ function drawConnectors(
   for (const target of matches) {
     const targetPosition = positions.get(target.id);
     if (!targetPosition) continue;
-    for (const source of matchSources(bracket, target)) {
-      if (source.type === "player") continue;
+    for (const source of matchDependencySources(bracket, target)) {
       const startPosition = positions.get(source.matchId);
       const sourceMatch = matches.find(({ id }) => id === source.matchId);
       if (!startPosition || !sourceMatch) continue;
