@@ -12,7 +12,12 @@ const routes = [
   "setup",
   "bracket",
   "round-robin-initial",
+  "round-robin-five-initial",
+  "round-robin-six-timed",
+  "round-robin-six-untimed",
   "round-robin-results",
+  "round-robin-six-results",
+  "round-robin-six-history-results",
   "quick-idle",
   "quick-live",
   "quick-result",
@@ -68,7 +73,8 @@ for (const viewport of responsiveViewports) {
         }
 
         if (
-          routeName === "round-robin-initial" &&
+          (routeName === "round-robin-initial" ||
+            routeName === "round-robin-five-initial") &&
           viewport.name === "phone-landscape"
         ) {
           const start = await page

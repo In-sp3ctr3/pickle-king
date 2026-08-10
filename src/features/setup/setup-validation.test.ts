@@ -18,28 +18,39 @@ function players(count: number): SetupPlayerDraft[] {
 }
 
 describe("setup format validation", () => {
-  it("accepts round robin + finals for exactly four players", () => {
+  it.each([4, 5, 6])("accepts round robin + finals for %i players", (count) => {
     const result = validateSetup(
-      players(4),
+      players(count),
       numbers,
       "timed",
       "round-robin-finals",
     );
 
     expect(result.errors.form).toBeUndefined();
-    expect(result.values?.players).toHaveLength(4);
+    expect(result.values?.players).toHaveLength(count);
   });
 
-  it("rejects round robin + finals for any other field size", () => {
+  it("accepts an untimed six-player round robin", () => {
     const result = validateSetup(
-      players(5),
+      players(6),
+      numbers,
+      "untimed",
+      "round-robin-finals",
+    );
+
+    expect(result.errors.form).toBeUndefined();
+  });
+
+  it("rejects round robin + finals above the small-field limit", () => {
+    const result = validateSetup(
+      players(7),
       numbers,
       "timed",
       "round-robin-finals",
     );
 
     expect(result.errors.form).toBe(
-      "Round robin + finals requires exactly four players.",
+      "Round robin + finals supports four to six players.",
     );
   });
 });

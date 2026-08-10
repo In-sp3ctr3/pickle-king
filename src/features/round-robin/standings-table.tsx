@@ -87,5 +87,11 @@ export function StandingsTable({
 
 function positionLabel(index: number, confirmed: boolean): string {
   if (!confirmed) return "Provisional";
-  return index < 2 ? "Final position" : "Third-place position";
+  if (index < 2) return "Final position";
+  if (index < 4) return "Third-place position";
+  return `${placeName(index + 1)} place confirmed`;
+}
+
+function placeName(rank: number): string {
+  return rank === 5 ? "Fifth" : rank === 6 ? "Sixth" : `${rank}th`;
 }

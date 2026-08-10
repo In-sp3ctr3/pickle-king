@@ -15,6 +15,16 @@ const players: Player[] = [
   { id: "d", name: "D", rating: "3.0" },
 ];
 
+const ratings: Player["rating"][] = ["5.5+", "5.0", "4.5", "4.0", "3.5", "3.0"];
+
+function field(size: number): Player[] {
+  return ratings.slice(0, size).map((rating, index) => ({
+    id: `p${index + 1}`,
+    name: `Player ${index + 1}`,
+    rating,
+  }));
+}
+
 const config: TournamentConfig = {
   format: "round-robin-finals",
   drawStyle: "ranked",
@@ -47,7 +57,7 @@ function playPreliminaries(
   return current;
 }
 
-describe("four-player round robin", () => {
+describe("small-field round robin", () => {
   it("creates every pairing once across three locked rounds", () => {
     const tournament = createTournament(players, config);
     expect(tournament.format).toBe("round-robin-finals");
@@ -113,16 +123,109 @@ describe("four-player round robin", () => {
     });
   });
 
-  it("rejects the format for any field other than exactly four", () => {
+  it.each([
+    [4, 6, 8, 3],
+    [5, 10, 12, 5],
+    [6, 15, 17, 5],
+  ])(
+    "creates every pairing once for %i players",
+    (size, preliminaryCount, totalCount, roundCount) => {
+      const tournament = createTournament(field(size), config);
+      const repeated = createTournament(field(size), config);
+      const preliminaries = tournament.matches.filter(
+        ({ kind }) => kind === "round-robin",
+      );
+      const pairings = preliminaries.map(({ sideA, sideB }) =>
+        [sideA!.memberIds[0], sideB!.memberIds[0]].toSorted().join(":"),
+      );
+
+      expect(tournament).toMatchObject({
+        bracketSize: size,
+        roundCount: roundCount + 1,
+      });
+      expect(tournament.matches).toHaveLength(totalCount);
+      expect(
+        repeated.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+      ).toEqual(
+        tournament.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+      );
+      expect(preliminaries).toHaveLength(preliminaryCount);
+      expect(new Set(pairings)).toHaveLength(preliminaryCount);
+      expect(
+        new Set(
+          tournament.matches.map(({ config: matchConfig }) =>
+            JSON.stringify(matchConfig),
+          ),
+        ),
+      ).toHaveLength(1);
+      for (const player of tournament.players) {
+        expect(
+          pairings.filter((pairing) => pairing.includes(player.id)),
+        ).toHaveLength(size - 1);
+      }
+    },
+  );
+
+  it("rotates exactly one real bye through five-player rounds", () => {
+    const tournament = createTournament(field(5), config);
+    for (let round = 1; round <= 5; round += 1) {
+      const matches = tournament.matches.filter(
+        (match) => match.kind === "round-robin" && match.round === round,
+      );
+      const playing = new Set(
+        matches.flatMap(({ sideA, sideB }) => [
+          sideA!.memberIds[0],
+          sideB!.memberIds[0],
+        ]),
+      );
+      expect(matches).toHaveLength(2);
+      expect(playing).toHaveLength(4);
+      expect(
+        tournament.players.filter(({ id }) => !playing.has(id)),
+      ).toHaveLength(1);
+      expect(matches.every(({ sideA, sideB }) => sideA && sideB)).toBe(true);
+    }
+  });
+
+  it("generates the six-player circle schedule deterministically", () => {
+    const tournament = createTournament(field(6), config);
+    expect(
+      tournament.matches
+        .filter(({ kind }) => kind === "round-robin")
+        .map(({ sideA, sideB }) => [sideA!.memberIds[0], sideB!.memberIds[0]]),
+    ).toEqual([
+      ["p1", "p6"],
+      ["p2", "p5"],
+      ["p3", "p4"],
+      ["p1", "p5"],
+      ["p6", "p4"],
+      ["p2", "p3"],
+      ["p1", "p4"],
+      ["p5", "p3"],
+      ["p6", "p2"],
+      ["p1", "p3"],
+      ["p4", "p2"],
+      ["p5", "p6"],
+      ["p1", "p2"],
+      ["p3", "p6"],
+      ["p4", "p5"],
+    ]);
+  });
+
+  it("rejects the format outside four to six players", () => {
     expect(() => createTournament(players.slice(0, 3), config)).toThrow(
-      /exactly four/i,
+      /4 to 6/i,
     );
     expect(() =>
       createTournament(
-        [...players, { id: "e", name: "E", rating: "3.0" }],
+        field(6).concat({
+          id: "p7",
+          name: "Player 7",
+          rating: "2.5",
+        }),
         config,
       ),
-    ).toThrow(/exactly four/i);
+    ).toThrow(/4 to 6/i);
     expect(createTournamentBracket(players, config).format).toBe("knockout");
   });
 

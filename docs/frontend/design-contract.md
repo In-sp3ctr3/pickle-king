@@ -6,7 +6,7 @@ Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-07
+Last updated: 2026-08-08
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -43,20 +43,20 @@ Last updated: 2026-08-07
 
 ## Page Regions
 
-| Region         | Purpose                         | Geometry                                          | Responsive behavior                          | Interaction                        |
-| -------------- | ------------------------------- | ------------------------------------------------- | -------------------------------------------- | ---------------------------------- |
-| Court header   | explicit app navigation         | centered floating island                          | labels contract, actions remain available    | back and home                      |
-| Home hero      | establish identity and begin    | asymmetric copy + crowned mascot                  | stacked; CTA first                           | mascot arrival and blink           |
-| Run of show    | next match and time risk        | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match       |
-| Bracket        | advancement overview            | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct         |
-| Round robin    | participation and qualification | live table + three paired rounds + placement row  | two schedule columns become one              | start, correct, and track rank     |
-| Scorekeeper    | no-look scoring                 | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset |
-| Results        | podium and evidence             | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, review, or replay           |
-| History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows             | view, share, or remove one record  |
-| Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild     |
-| Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo  |
-| Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download  |
-| Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download  |
+| Region         | Purpose                         | Geometry                                          | Responsive behavior                          | Interaction                          |
+| -------------- | ------------------------------- | ------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
+| Court header   | explicit app navigation         | centered floating island                          | labels contract, actions remain available    | back and home                        |
+| Home hero      | establish identity and begin    | asymmetric copy + crowned mascot                  | stacked; CTA first                           | mascot arrival and blink             |
+| Run of show    | next match and time risk        | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match         |
+| Bracket        | advancement overview            | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct           |
+| Round robin    | participation and qualification | live table + 3–5 paired rounds + placement row    | three cards become one; rounds stack         | start, rest, correct, and track rank |
+| Scorekeeper    | no-look scoring                 | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset   |
+| Results        | podium and evidence             | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, review, or replay             |
+| History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows             | view, share, or remove one record    |
+| Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild       |
+| Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo    |
+| Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download    |
+| Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download    |
 
 ## Geometry
 
@@ -167,13 +167,16 @@ Last updated: 2026-08-07
 - Late-entry repair must name the protected route, show its added matches and timing impact, and never hide the continue-unchanged action.
 - Result tables are read-only. Corrections and stable-identity renames live in bracket nodes.
 - Ranked and Random draw copy must state whether ratings affect placement. Random draws may be rerolled only before play begins.
-- Round robin + finals is available only at exactly four players and must state
-  `8 matches · 4 per player`; adding a fifth player returns the choice to Fast
-  knockout with a polite status message.
+- Round robin + finals is available at four through six players and must state
+  the exact `8/12/17 matches` and `4/4–5/5–6 per player` cost. Adding a seventh
+  player returns the choice to Fast knockout with a polite status message.
+- Five-player rounds name the resting player without rendering a fake match.
+- Timed caps below eight minutes receive a prominent advisory near the build
+  summary. Untimed setup never renders duration-risk messaging.
 - The round-robin surface reuses the run of show and match-card anatomy but
-  never imitates a connected elimination tree. The standings table and three
+  never imitates a connected elimination tree. The standings table and 3–5
   rounds carry the hierarchy; placement matches remain visible and unresolved
-  until all six preliminary results exist.
+  until every preliminary result exists.
 - Round-robin standings use non-color rank/status text and remain horizontally
   contained at 390px. Schedule cards form two columns at tablet/desktop sizes
   and one column on phones.

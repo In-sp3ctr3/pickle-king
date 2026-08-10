@@ -89,7 +89,10 @@ function matchLabel(
   match: TournamentBracket["matches"][number],
 ) {
   if (match.kind === "round-robin") {
-    return `Round robin · Match ${(match.round - 1) * 2 + match.ordinal}`;
+    const preliminaryNumber = bracket.matches
+      .filter(({ kind }) => kind === "round-robin")
+      .findIndex(({ id }) => id === match.id);
+    return `Round robin · Match ${preliminaryNumber + 1}`;
   }
   if (match.kind === "bronze") return "Third place";
   if (match.kind === "challenge") return "Late-entry challenge";

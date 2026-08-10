@@ -22,13 +22,22 @@ export function RoundRobinRound({
   readyMatchIds: Set<string>;
   round: number;
 }) {
+  const restingPlayer = findRestingPlayer(matches, players);
+
   return (
     <section
       aria-labelledby={`round-robin-round-${round}`}
       className="round-robin-round"
     >
       <header>
-        <h3 id={`round-robin-round-${round}`}>Round {round}</h3>
+        <div className="round-robin-round__title">
+          <h3 id={`round-robin-round-${round}`}>Round {round}</h3>
+          {restingPlayer ? (
+            <p className="round-robin-round__resting">
+              Resting this round: <strong>{restingPlayer.name}</strong>
+            </p>
+          ) : null}
+        </div>
         <p>{roundState(matches)}</p>
       </header>
       <div className="round-robin-round__matches">
@@ -49,6 +58,17 @@ export function RoundRobinRound({
       </div>
     </section>
   );
+}
+
+function findRestingPlayer(matches: Match[], players: Player[]) {
+  if (players.length % 2 === 0) return undefined;
+  const playingIds = new Set(
+    matches.flatMap((match) => [
+      ...(match.sideA?.memberIds ?? []),
+      ...(match.sideB?.memberIds ?? []),
+    ]),
+  );
+  return players.find(({ id }) => !playingIds.has(id));
 }
 
 function roundState(matches: Match[]): string {

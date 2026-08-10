@@ -33,8 +33,11 @@ export function validateSetup(
 
   if (players.length < 4 || players.length > 16) {
     errors.form = "Add between 4 and 16 players.";
-  } else if (format === "round-robin-finals" && players.length !== 4) {
-    errors.form = "Round robin + finals requires exactly four players.";
+  } else if (
+    format === "round-robin-finals" &&
+    (players.length < 4 || players.length > 6)
+  ) {
+    errors.form = "Round robin + finals supports four to six players.";
   }
 
   players.forEach((player, index) => {
@@ -98,7 +101,7 @@ export function validateSetup(
         transitionSeconds,
       });
     } catch (error) {
-      errors.form =
+      errors.form ??=
         error instanceof Error ? error.message : "This schedule cannot fit.";
     }
   }

@@ -12,6 +12,16 @@ const initialValues = {
   })),
 };
 
+function initialField(count: number, format?: "round-robin-finals") {
+  return {
+    format,
+    players: Array.from({ length: count }, (_, index) => ({
+      name: `Player ${index + 1}`,
+      rating: "3.5" as const,
+    })),
+  };
+}
+
 afterEach(cleanup);
 
 describe("tournament format setup", () => {
@@ -50,7 +60,7 @@ describe("tournament format setup", () => {
     );
   });
 
-  it("returns to knockout after a fifth player and does not auto-restore", async () => {
+  it("keeps round robin for five and six, then falls back at seven", async () => {
     const user = userEvent.setup();
     render(
       <TournamentSetup
@@ -67,6 +77,26 @@ describe("tournament format setup", () => {
     await user.click(
       screen.getByRole("button", { name: "Add another player" }),
     );
+    expect(roundRobin.getAttribute("aria-pressed")).toBe("true");
+    expect(
+      screen.getByText(/12 matches · 4–5 per player · 8 min 15 sec cap each/i),
+    ).toBeTruthy();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add another player" }),
+    );
+    expect(roundRobin.getAttribute("aria-pressed")).toBe("true");
+    expect(
+      screen.getByText(/17 matches · 5–6 per player · 5 min 31 sec cap each/i),
+    ).toBeTruthy();
+    expect(screen.getByText(/Tight timed schedule/i).textContent).toContain(
+      "Tight timed schedule · 5 min 31 sec per match.",
+    );
+    expect(screen.queryByText(/advance automatically/i)).toBeNull();
+
+    await user.click(
+      screen.getByRole("button", { name: "Add another player" }),
+    );
 
     expect(
       screen
@@ -74,12 +104,43 @@ describe("tournament format setup", () => {
         .getAttribute("aria-pressed"),
     ).toBe("true");
     expect(screen.getByRole("status").textContent).toContain(
-      "Fast knockout selected because round robin + finals needs exactly four players.",
+      "Fast knockout selected because round robin + finals supports 4–6 players.",
     );
     expect((roundRobin as HTMLButtonElement).disabled).toBe(true);
 
-    await user.click(screen.getByRole("button", { name: "Remove player 5" }));
+    await user.click(screen.getByRole("button", { name: "Remove player 7" }));
     expect((roundRobin as HTMLButtonElement).disabled).toBe(false);
     expect(roundRobin.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("shows no schedule-risk advisory for an untimed six-player field", async () => {
+    const user = userEvent.setup();
+    render(
+      <TournamentSetup
+        initialValues={initialField(6, "round-robin-finals")}
+        onQuickMatch={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "No time limit" }));
+    expect(screen.getAllByText("17 matches · 5–6 per player")).toHaveLength(2);
+    expect(screen.queryByText(/Tight timed schedule/i)).toBeNull();
+  });
+
+  it.each([5, 6])("restores a prefilled %i-player round robin", (count) => {
+    render(
+      <TournamentSetup
+        initialValues={initialField(count, "round-robin-finals")}
+        onQuickMatch={vi.fn()}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen
+        .getByRole("button", { name: /round robin \+ finals/i })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
   });
 });

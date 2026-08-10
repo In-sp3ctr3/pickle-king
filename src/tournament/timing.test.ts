@@ -35,19 +35,31 @@ describe("tournament timing", () => {
     ).toThrow(/too short/i);
   });
 
-  it("allocates eight matches and seven transitions for round robin finals", () => {
-    const result = calculateMatchCap({
-      entrantCount: 4,
-      format: "round-robin-finals",
-      bookingMinutes: 120,
-      warmupMinutes: 10,
-      transitionSeconds: 60,
-    });
-    expect(result.totalMatches).toBe(8);
-    expect(result.transitionCount).toBe(7);
-    expect(plannedMatchCount(4, "round-robin-finals")).toBe(8);
-    expect(() => plannedMatchCount(5, "round-robin-finals")).toThrow(
-      /exactly four/i,
+  it.each([
+    [4, 8],
+    [5, 12],
+    [6, 17],
+  ])(
+    "allocates every match and transition for %i-player round robin finals",
+    (entrantCount, totalMatches) => {
+      const result = calculateMatchCap({
+        entrantCount,
+        format: "round-robin-finals",
+        bookingMinutes: 120,
+        warmupMinutes: 10,
+        transitionSeconds: 60,
+      });
+      expect(result.totalMatches).toBe(totalMatches);
+      expect(result.transitionCount).toBe(totalMatches - 1);
+      expect(plannedMatchCount(entrantCount, "round-robin-finals")).toBe(
+        totalMatches,
+      );
+    },
+  );
+
+  it.each([3, 7])("rejects a %i-player round robin", (entrantCount) => {
+    expect(() => plannedMatchCount(entrantCount, "round-robin-finals")).toThrow(
+      /4 to 6/i,
     );
   });
 

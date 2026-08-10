@@ -1,7 +1,8 @@
-# ADR 0004: Optional pool play before the knockout draw
+# ADR 0004: Small-field round robin and future pool play
 
 Status: accepted
 Date: 2026-07-31
+Amended: 2026-08-08
 
 ## Context
 
@@ -33,10 +34,12 @@ Sources:
 
 ## Decision
 
-Add `Pools + knockout` as an optional future tournament format for 4–8 players;
-retain fast knockout as a separate option.
+Add `Pools + knockout` as an optional future format for fields above the
+small-field threshold; retain Fast knockout as the default separate option.
 
-For six players:
+### Rejected six-player pool alternative
+
+The earlier six-player pool proposal would:
 
 - create two seeded pools of three;
 - play one round robin inside each pool;
@@ -46,33 +49,45 @@ For six players:
 - rank pool ties by wins, head-to-head for a two-player tie, point
   differential, points scored, then the stored deterministic seed.
 
-The product must say that every entrant receives at least two pool matches. It
-must not say everyone plays everyone. A complete round robin remains unsuitable
-for a normal two-hour, one-court session.
+That format would need to say every entrant receives at least two pool matches,
+not that everyone plays everyone. It remains deferred; the accepted complete
+round robin is available with a timing advisory rather than being replaced by
+this pool structure.
 
-For exactly four players, offer a true round robin as the
-participation-first format: six preliminary matches, followed by a third-place
-match between third and fourth and a final between first and second for eight
-matches total. Every entrant plays four matches. Do not add semifinals that
-advance all four players; that would turn the six preliminary matches into
-little more than seeding and raise the session to ten matches.
+For four through six players, offer a true round robin as the
+participation-first format. Everyone meets once, preliminary ranks three and
+four play bronze, and ranks one and two play the final. Fifth and sixth retain
+their preliminary table positions. Four, five, and six players therefore
+produce 8, 12, and 17 matches.
 
-For a session without a deadline, a separate `Everyone plays everyone` choice
-may use a complete round robin. It must show the calculated match count before
-confirmation: `n × (n - 1) / 2`, before any playoff. This choice is not the
-default for a one-court booking.
+Timed schedules remain selectable when their calculated cap is short. A cap
+below eight minutes receives a prominent advisory before confirmation, but the
+organizer may continue. Untimed schedules show the match count and participation
+range without a duration warning. Seven or more players require pool play or
+Fast knockout; a complete round robin is not offered.
 
 ## Consequences
 
-- Six-player pool play has 10 matches rather than 6.
+- Six-player pool play remains the smaller future alternative at 10 matches.
 - A two-hour booking should recommend play-to-7 or a 9–10 minute cap.
 - The persistence schema, tournament lifecycle, standings UI, correction
   behavior, schedule calculation, migrations, and tests all need an explicit
   domain change.
-- This is not included in the current visual-repair slice; partially adding a
-  setup toggle without the lifecycle is prohibited.
+- The implemented small-field format reuses the existing tournament lifecycle;
+  pool play remains deferred and must not appear as a partial setup option.
 
-## Verification for implementation
+## Implemented small-field verification
+
+- Four, five, and six players create 8, 12, and 17 matches.
+- Every preliminary pairing appears once and every player appears `n - 1`
+  times.
+- Five-player rounds rotate one real rest without persisting a fake match.
+- Placement correction, replay, reload, archived results, sharing, and frozen
+  fifth/sixth-place order remain deterministic.
+- Timed caps below eight minutes advise without blocking; untimed schedules
+  never render the advisory.
+
+## Future pool-play verification
 
 - Every pool pairing appears exactly once.
 - Each six-player entrant plays two pool matches.

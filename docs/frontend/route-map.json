@@ -1196,6 +1196,275 @@
       "canvasChecks": []
     },
     {
+      "name": "round-robin-five-initial",
+      "path": "/",
+      "prepare": "round-robin-five-initial",
+      "primaryActionSelector": "[data-qa='start-next']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-five-initial-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-five-initial-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-five-initial-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-five-initial-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-five-initial-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-five-initial-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "start five-player schedule",
+          "selector": "[data-qa='start-next']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "five-player schedule navigation",
+          "selector": ".floating-app-nav button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        },
+        {
+          "name": "five-player schedule controls",
+          "selector": ".round-robin-screen button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "five-player schedule remains available",
+          "selector": "[data-qa='round-robin-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-six-timed",
+      "path": "/",
+      "prepare": "round-robin-six-timed-setup",
+      "primaryActionSelector": "[data-qa='build-bracket']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-six-timed-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-timed-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-timed-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-six-timed-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-timed-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-timed-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "build timed six-player tournament",
+          "selector": "[data-qa='build-bracket']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        },
+        {
+          "name": "timed setup navigation",
+          "selector": ".floating-app-nav button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "timed setup buttons",
+          "selector": ".setup-form button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "timed setup fields",
+          "selector": ".setup-form input",
+          "auditOnly": true,
+          "action": "fill",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "tight schedule advisory remains available",
+          "selector": "[data-qa='setup-tight-warning']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-six-untimed",
+      "path": "/",
+      "prepare": "round-robin-six-untimed-setup",
+      "primaryActionSelector": "[data-qa='build-bracket']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-six-untimed-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-untimed-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-untimed-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-six-untimed-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-untimed-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-untimed-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "build untimed six-player tournament",
+          "selector": "[data-qa='build-bracket']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='round-robin-screen']" }
+        },
+        {
+          "name": "untimed setup navigation",
+          "selector": ".floating-app-nav button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "untimed setup buttons",
+          "selector": ".setup-form button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        },
+        {
+          "name": "untimed setup fields",
+          "selector": ".setup-form input",
+          "auditOnly": true,
+          "action": "fill",
+          "expect": { "visible": "[data-qa='tournament-setup']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "untimed setup remains available",
+          "selector": "[data-qa='tournament-setup']",
+          "expect": "visible"
+        },
+        {
+          "name": "untimed setup omits schedule advisory",
+          "selector": "[data-qa='setup-tight-warning']",
+          "expect": "hidden"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-six-results",
+      "path": "/",
+      "prepare": "round-robin-six-results",
+      "primaryActionSelector": "[data-qa='share-tournament']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-six-results-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-results-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-results-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-six-results-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-results-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-results-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "share six-player results",
+          "selector": "[data-qa='share-tournament']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "six-player results navigation",
+          "selector": ".floating-app-nav button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        },
+        {
+          "name": "six-player result controls",
+          "selector": "[data-qa='results'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "six-player results remain available",
+          "selector": "[data-qa='results']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "round-robin-six-history-results",
+      "path": "/",
+      "prepare": "round-robin-six-history-results",
+      "primaryActionSelector": "[data-qa='share-tournament']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/round-robin-six-history-results-desktop-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-history-results-desktop.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-history-results-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/round-robin-six-history-results-mobile-source.png",
+          "render": "test-results/frontend-captures/round-robin-six-history-results-mobile.png",
+          "comparison": "test-results/frontend-comparisons/round-robin-six-history-results-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "share archived six-player results",
+          "selector": "[data-qa='share-tournament']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": ".tournament-share-dialog" }
+        },
+        {
+          "name": "archived six-player result navigation",
+          "selector": ".floating-app-nav button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        },
+        {
+          "name": "archived six-player result controls",
+          "selector": "[data-qa='results'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='results']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "archived six-player results remain available",
+          "selector": "[data-qa='results']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
       "name": "history",
       "path": "/",
       "prepare": "history-empty",

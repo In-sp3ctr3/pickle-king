@@ -11,20 +11,27 @@ import type {
   TournamentConfig,
 } from "./types";
 
-const ROUND_PAIRINGS = [
-  [
-    [0, 3],
-    [1, 2],
-  ],
-  [
-    [0, 2],
-    [3, 1],
-  ],
-  [
-    [0, 1],
-    [2, 3],
-  ],
-] as const;
+function createRoundPairings(
+  playerCount: number,
+): Array<Array<[number, number]>> {
+  const positions: Array<number | null> = Array.from(
+    { length: playerCount },
+    (_, index) => index,
+  );
+  if (positions.length % 2) positions.push(null);
+  const rounds: Array<Array<[number, number]>> = [];
+  for (let round = 0; round < positions.length - 1; round += 1) {
+    const pairings: Array<[number, number]> = [];
+    for (let index = 0; index < positions.length / 2; index += 1) {
+      const left = positions[index];
+      const right = positions[positions.length - 1 - index];
+      if (left !== null && right !== null) pairings.push([left, right]);
+    }
+    rounds.push(pairings);
+    positions.splice(1, 0, positions.pop()!);
+  }
+  return rounds;
+}
 
 function emptyStanding(playerId: string): PlayerStanding {
   return {
@@ -99,7 +106,12 @@ function match(input: {
   const sideA = input.sideA ?? null;
   const sideB = input.sideB ?? null;
   return {
-    ...input,
+    id: input.id,
+    kind: input.kind,
+    round: input.round,
+    ordinal: input.ordinal,
+    sourceA: input.sourceA,
+    sourceB: input.sourceB,
     sideA,
     sideB,
     config: { targetScore: input.targetScore, capMs: input.capMs },
@@ -118,22 +130,23 @@ export function createRoundRobinTournament(
   players: Player[],
   config: TournamentConfig,
 ): TournamentBracket {
-  if (players.length !== 4) {
-    throw new Error("Round robin + finals requires exactly four players.");
+  if (players.length < 4 || players.length > 6) {
+    throw new Error("Round robin + finals requires 4 to 6 players.");
   }
   validateTournamentField(players);
   const ordered = orderPlayers(players, config.drawStyle, config.randomSeed);
+  const roundPairings = createRoundPairings(ordered.length);
   const capMs =
     config.timingMode === "timed"
       ? calculateMatchCap({
-          entrantCount: 4,
+          entrantCount: ordered.length,
           format: "round-robin-finals",
           bookingMinutes: config.bookingMinutes,
           warmupMinutes: config.warmupMinutes,
           transitionSeconds: config.transitionSeconds,
         }).capMs
       : null;
-  const preliminaries = ROUND_PAIRINGS.flatMap((pairings, roundIndex) =>
+  const preliminaries = roundPairings.flatMap((pairings, roundIndex) =>
     pairings.map(([left, right], matchIndex) =>
       match({
         id: `rr-r${roundIndex + 1}-m${matchIndex + 1}`,
@@ -149,11 +162,12 @@ export function createRoundRobinTournament(
       }),
     ),
   );
+  const placementRound = roundPairings.length + 1;
   const placement = [
     match({
       id: "bronze",
       kind: "bronze",
-      round: 4,
+      round: placementRound,
       ordinal: 1,
       sourceA: { type: "standing", rank: 3 },
       sourceB: { type: "standing", rank: 4 },
@@ -163,7 +177,7 @@ export function createRoundRobinTournament(
     match({
       id: "final",
       kind: "elimination",
-      round: 4,
+      round: placementRound,
       ordinal: 2,
       sourceA: { type: "standing", rank: 1 },
       sourceB: { type: "standing", rank: 2 },
@@ -173,8 +187,8 @@ export function createRoundRobinTournament(
   ];
   return {
     format: "round-robin-finals",
-    bracketSize: 4,
-    roundCount: 4,
+    bracketSize: ordered.length,
+    roundCount: placementRound,
     players: ordered,
     matches: [...preliminaries, ...placement],
     finalMatchId: "final",

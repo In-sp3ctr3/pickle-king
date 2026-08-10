@@ -69,6 +69,9 @@ export function RoundRobinScreen({
   const preliminariesComplete = preliminaries.every(
     ({ status }) => status === "complete",
   );
+  const preliminaryRounds = [
+    ...new Set(preliminaries.map(({ round }) => round)),
+  ].toSorted((left, right) => left - right);
   const untouched = bracket.matches.every(
     ({ startedAt }) => startedAt === null,
   );
@@ -83,7 +86,9 @@ export function RoundRobinScreen({
           <h1>Every point shapes the table.</h1>
         </div>
         <div className="round-robin-screen__header-meta">
-          <p>{completedCount} of 8 matches complete</p>
+          <p>
+            {completedCount} of {bracket.matches.length} matches complete
+          </p>
           <div className="round-robin-screen__actions">
             {completedCount === bracket.matches.length && onViewResults ? (
               <BracketResultsAction onView={onViewResults} />
@@ -126,13 +131,13 @@ export function RoundRobinScreen({
       >
         <div className="round-robin-section-heading">
           <div>
-            <p>Six preliminary matches</p>
+            <p>{preliminaryCountLabel(preliminaries.length)}</p>
             <h2 id="round-robin-schedule-title">Round-robin schedule</h2>
           </div>
-          <p>Complete both matches to unlock the next round.</p>
+          <p>Complete every match to unlock the next round.</p>
         </div>
         <div className="round-robin-schedule__rounds">
-          {[1, 2, 3].map((round) => (
+          {preliminaryRounds.map((round) => (
             <RoundRobinRound
               key={round}
               matches={preliminaries.filter((match) => match.round === round)}
@@ -240,4 +245,13 @@ function placementSideLabel(
 
 function ordinal(rank: number): string {
   return rank === 1 ? "1st" : rank === 2 ? "2nd" : rank === 3 ? "3rd" : "4th";
+}
+
+function preliminaryCountLabel(count: number): string {
+  const words: Record<number, string> = {
+    6: "Six",
+    10: "Ten",
+    15: "Fifteen",
+  };
+  return `${words[count] ?? count} preliminary matches`;
 }

@@ -27,6 +27,14 @@ const players: Player[] = ["Maya", "Rae", "Kai", "Noah"].map((name, index) => ({
   rating: "3.5",
 }));
 
+function field(count: number): Player[] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `field-${index + 1}`,
+    name: `Player ${index + 1}`,
+    rating: "3.5",
+  }));
+}
+
 const config: TournamentConfig = {
   format: "round-robin-finals",
   drawStyle: "random",
@@ -132,6 +140,54 @@ describe("round robin tournament screen", () => {
     expect(onRerollRandomDraw).toHaveBeenCalledOnce();
     await user.click(screen.getByRole("button", { name: /start next match/i }));
     expect(onStartMatch).toHaveBeenCalledWith(getNextMatch(current)!.id);
+  });
+
+  it("shows five rounds and each resting player for an odd field", () => {
+    render(
+      <RoundRobinScreen
+        bracket={createTournament(field(5), config)}
+        onCorrectMatch={vi.fn()}
+        onRenamePlayer={vi.fn(() => true)}
+        onStartMatch={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("0 of 12 matches complete")).toBeTruthy();
+    expect(screen.getByText("Ten preliminary matches")).toBeTruthy();
+    expect(screen.getAllByText(/Resting this round:/i)).toHaveLength(5);
+    expect(
+      new Set(
+        screen
+          .getAllByText(/Resting this round:/i)
+          .map(({ textContent }) => textContent),
+      ).size,
+    ).toBe(5);
+    for (const round of [1, 2, 3, 4, 5]) {
+      expect(
+        screen.getByRole("heading", { name: `Round ${round}` }),
+      ).toBeTruthy();
+    }
+  });
+
+  it("renders a six-player table and five three-match rounds", () => {
+    render(
+      <RoundRobinScreen
+        bracket={createTournament(field(6), config)}
+        onCorrectMatch={vi.fn()}
+        onRenamePlayer={vi.fn(() => true)}
+        onStartMatch={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("0 of 17 matches complete")).toBeTruthy();
+    expect(screen.getByText("Fifteen preliminary matches")).toBeTruthy();
+    expect(
+      screen.getAllByRole("heading", { name: /Round [1-5]/ }),
+    ).toHaveLength(5);
+    expect(
+      screen.getByRole("table", { name: /preliminary standings/i }),
+    ).toBeTruthy();
+    expect(screen.queryByText(/Resting this round:/i)).toBeNull();
   });
 
   it("announces qualified standings and exposes results after all eight matches", async () => {

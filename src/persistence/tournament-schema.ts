@@ -124,20 +124,41 @@ function validateRoundRobin(
   bracket: z.infer<typeof tournamentBracketBaseSchema>,
   issue: (message: string, path?: PropertyKey[]) => void,
 ): void {
+  const playerCount = bracket.players.length;
+  const preliminaryRounds = playerCount === 4 ? 3 : 5;
+  const preliminaryCount = (playerCount * (playerCount - 1)) / 2;
+  const placementRound = preliminaryRounds + 1;
   const preliminary = bracket.matches.filter(
     ({ kind }) => kind === "round-robin",
   );
   const bronze = bracket.matches.find(({ id }) => id === bracket.bronzeMatchId);
   const final = bracket.matches.find(({ id }) => id === bracket.finalMatchId);
-  if (bracket.players.length !== 4 || bracket.matches.length !== 8) {
-    issue("Round robin requires four players and eight matches.");
+  if (
+    playerCount < 4 ||
+    playerCount > 6 ||
+    new Set(bracket.players.map(({ id }) => id)).size !== playerCount
+  ) {
+    issue("Round robin requires four to six unique players.", ["players"]);
   }
   if (
-    preliminary.length !== 6 ||
-    bronze?.kind !== "bronze" ||
-    final?.kind !== "elimination"
+    bracket.bracketSize !== playerCount ||
+    bracket.roundCount !== placementRound
   ) {
-    issue("Round robin requires six preliminaries, bronze, and final.", [
+    issue("Round-robin bracket metadata must match its field and rounds.");
+  }
+  if (bracket.matches.length !== preliminaryCount + 2) {
+    issue("Round-robin match count must cover every pairing and placement.", [
+      "matches",
+    ]);
+  }
+  if (
+    preliminary.length !== preliminaryCount ||
+    bronze?.kind !== "bronze" ||
+    bronze.round !== placementRound ||
+    final?.kind !== "elimination" ||
+    final.round !== placementRound
+  ) {
+    issue("Round robin requires every preliminary, bronze, and final.", [
       "matches",
     ]);
   }
@@ -146,6 +167,9 @@ function validateRoundRobin(
   }
   const playerIds = new Set(bracket.players.map(({ id }) => id));
   const pairings = new Set<string>();
+  const appearances = new Map<string, number>(
+    bracket.players.map(({ id }) => [id, 0] as const),
+  );
   for (const match of preliminary) {
     if (match.sourceA.type !== "player" || match.sourceB.type !== "player") {
       issue("Round-robin preliminaries require direct player sources.", [
@@ -160,9 +184,36 @@ function validateRoundRobin(
       ]);
     }
     pairings.add(ids.sort().join("|"));
+    for (const id of ids) {
+      if (appearances.has(id)) appearances.set(id, appearances.get(id)! + 1);
+    }
   }
-  if (pairings.size !== 6) {
-    issue("Round robin must contain all six unique player pairings.", [
+  if (
+    pairings.size !== preliminaryCount ||
+    [...appearances.values()].some((count) => count !== playerCount - 1)
+  ) {
+    issue("Round robin must contain every unique player pairing once.", [
+      "matches",
+    ]);
+  }
+  for (let round = 1; round <= preliminaryRounds; round += 1) {
+    const matches = preliminary.filter((match) => match.round === round);
+    const roundPlayers = matches.flatMap((match) =>
+      [match.sourceA, match.sourceB].flatMap((source) =>
+        source.type === "player" ? [source.playerId] : [],
+      ),
+    );
+    if (
+      matches.length !== Math.floor(playerCount / 2) ||
+      new Set(roundPlayers).size !== roundPlayers.length
+    ) {
+      issue("Each preliminary round must schedule each player at most once.", [
+        "matches",
+      ]);
+    }
+  }
+  if (preliminary.some(({ round }) => round < 1 || round > preliminaryRounds)) {
+    issue("Preliminary matches must use the expected round range.", [
       "matches",
     ]);
   }

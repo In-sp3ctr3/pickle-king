@@ -59,7 +59,7 @@ export function TournamentSetup({
     makeInitialPlayers(initialValues),
   );
   const [format, setFormat] = useState<TournamentSetupValues["format"]>(() =>
-    initialValues?.format === "round-robin-finals" && players.length === 4
+    initialValues?.format === "round-robin-finals" && players.length <= 6
       ? "round-robin-finals"
       : "knockout",
   );
@@ -95,10 +95,10 @@ export function TournamentSetup({
     if (players.length >= 16) return;
     const id = `added-${nextPlayerId.current}`;
     nextPlayerId.current += 1;
-    if (format === "round-robin-finals") {
+    if (format === "round-robin-finals" && players.length >= 6) {
       setFormat("knockout");
       setFormatStatus(
-        "Fast knockout selected because round robin + finals needs exactly four players.",
+        "Fast knockout selected because round robin + finals supports 4–6 players.",
       );
     }
     setPlayers((current) => [...current, { id, name: "", rating: "" }]);

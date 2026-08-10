@@ -76,6 +76,13 @@ export function calculateTournamentResult(
     [bronze.winnerId, 2],
     [bronze.loserId, 3],
   ]);
+  const preliminaryStandings =
+    bracket.format === "round-robin-finals"
+      ? calculatePreliminaryStandings(bracket)
+      : null;
+  const preliminaryRank = new Map(
+    preliminaryStandings?.map(({ playerId }, index) => [playerId, index]),
+  );
   const elimination = Map.groupBy(
     values.filter(({ eliminatedRound }) => eliminatedRound !== null) as Array<
       PlayerStanding & { eliminatedRound: number }
@@ -98,6 +105,12 @@ export function calculateTournamentResult(
       if (leftPodium !== undefined || rightPodium !== undefined) {
         return (leftPodium ?? 99) - (rightPodium ?? 99);
       }
+      if (bracket.format === "round-robin-finals") {
+        return (
+          preliminaryRank.get(left.playerId)! -
+          preliminaryRank.get(right.playerId)!
+        );
+      }
       return (
         (right.eliminatedRound ?? 0) - (left.eliminatedRound ?? 0) ||
         right.wins - left.wins ||
@@ -108,10 +121,7 @@ export function calculateTournamentResult(
     }),
     upsetWins,
     eliminationGroups,
-    preliminaryStandings:
-      bracket.format === "round-robin-finals"
-        ? calculatePreliminaryStandings(bracket)
-        : null,
+    preliminaryStandings,
     matchHistory: bracket.matches.map((match) => ({ ...match })),
   };
 }

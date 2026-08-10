@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { roundRobinSummary } from "./setup-schedule";
 import type { TournamentSetupValues } from "./setup-types";
 
 interface FormatFieldProps {
@@ -15,7 +16,7 @@ export function FormatField({
   value,
 }: FormatFieldProps) {
   const indicatorId = useId();
-  const roundRobinAvailable = playerCount === 4;
+  const roundRobinAvailable = playerCount >= 4 && playerCount <= 6;
   const unavailableId = `${indicatorId}-unavailable`;
 
   return (
@@ -26,7 +27,7 @@ export function FormatField({
         </span>
         <span className="setup-section-title">Tournament format</span>
       </legend>
-      <p>Choose a fast draw or give a four-player field more court time.</p>
+      <p>Choose a fast draw or give a small field more court time.</p>
 
       <div
         aria-label="Tournament format"
@@ -47,7 +48,11 @@ export function FormatField({
           describedBy={!roundRobinAvailable ? unavailableId : undefined}
           disabled={!roundRobinAvailable}
           label="Round robin + finals"
-          meta="8 matches · 4 per player"
+          meta={
+            roundRobinAvailable
+              ? roundRobinSummary(playerCount)
+              : "Available for 4–6 players"
+          }
           onClick={() => onChange("round-robin-finals")}
           selected={value === "round-robin-finals"}
         />
@@ -56,9 +61,11 @@ export function FormatField({
       <p className="setup-format__note" id={unavailableId}>
         {roundRobinAvailable
           ? value === "round-robin-finals"
-            ? "Everyone meets once, then ranks 3–4 play for bronze before ranks 1–2 play the final."
-            : "Two semifinals lead to a bronze match and the final."
-          : "Round robin + finals is available only with exactly four players."}
+            ? playerCount === 5
+              ? "Everyone meets once, with one resting player named each round. Then ranks 3–4 play for bronze before ranks 1–2 play the final."
+              : "Everyone meets once, then ranks 3–4 play for bronze before ranks 1–2 play the final."
+            : "Fast knockout keeps the one-court schedule short."
+          : "Round robin + finals supports four to six players."}
       </p>
     </fieldset>
   );

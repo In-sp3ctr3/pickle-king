@@ -1,10 +1,11 @@
 import type {
   LateEntryAmendment,
-  MatchSource,
   TournamentBracket,
   TournamentConfig,
   TournamentFormat,
 } from "../tournament";
+import { createRoundRobinTournament, startMatch } from "../tournament";
+import { createScoringState } from "../match/scoring";
 
 const player = (index: number) => ({
   id: `p${index}`,
@@ -13,96 +14,11 @@ const player = (index: number) => ({
   seed: index,
 });
 
-const match = (
-  id: string,
-  kind: "round-robin" | "bronze" | "elimination",
-  round: number,
-  sourceA: MatchSource,
-  sourceB: MatchSource,
-) => ({
-  id,
-  kind,
-  round,
-  ordinal: Number(id.match(/\d+$/)?.[0] ?? 0),
-  sourceA,
-  sourceB,
-  sideA: null,
-  sideB: null,
-  config: { targetScore: 11, capMs: 300_000 },
-  scoreA: 0,
-  scoreB: 0,
-  status: "waiting" as const,
-  winnerId: null,
-  loserId: null,
-  startedAt: null,
-  completedAt: null,
-  comebackDeficit: 0,
-});
-
-export function roundRobinTournamentFixture(): TournamentBracket {
-  const playerSource = (playerId: string): MatchSource => ({
-    type: "player",
-    playerId,
-  });
-  const standingSource = (rank: 1 | 2 | 3 | 4): MatchSource => ({
-    type: "standing",
-    rank,
-  });
-  return {
-    format: "round-robin-finals" as const,
-    bracketSize: 4,
-    roundCount: 4,
-    players: [1, 2, 3, 4].map(player),
-    matches: [
-      match(
-        "rr-r1-m1",
-        "round-robin",
-        1,
-        playerSource("p1"),
-        playerSource("p4"),
-      ),
-      match(
-        "rr-r1-m2",
-        "round-robin",
-        1,
-        playerSource("p2"),
-        playerSource("p3"),
-      ),
-      match(
-        "rr-r2-m1",
-        "round-robin",
-        2,
-        playerSource("p1"),
-        playerSource("p3"),
-      ),
-      match(
-        "rr-r2-m2",
-        "round-robin",
-        2,
-        playerSource("p4"),
-        playerSource("p2"),
-      ),
-      match(
-        "rr-r3-m1",
-        "round-robin",
-        3,
-        playerSource("p1"),
-        playerSource("p2"),
-      ),
-      match(
-        "rr-r3-m2",
-        "round-robin",
-        3,
-        playerSource("p3"),
-        playerSource("p4"),
-      ),
-      match("bronze", "bronze", 4, standingSource(3), standingSource(4)),
-      match("final", "elimination", 4, standingSource(1), standingSource(2)),
-    ],
-    finalMatchId: "final",
-    bronzeMatchId: "bronze",
-    amendments: [],
-  };
+export function roundRobinTournamentFixture(size = 4): TournamentBracket {
+  return createRoundRobinTournament(
+    Array.from({ length: size }, (_, index) => player(index + 1)),
+    setupConfigFixture(),
+  );
 }
 
 export function setupConfigFixture(
@@ -159,6 +75,34 @@ export function roundRobinSnapshotFixture() {
     tournament,
     activeMatchId: null,
     scorer: null,
+    sessionDeadline: 8_000_000,
+    quickMatch: false,
+    historyTournamentId: null,
+  };
+}
+
+export function liveRoundRobinSnapshotFixture(size: 5 | 6) {
+  const setupConfig = setupConfigFixture();
+  const created = roundRobinTournamentFixture(size);
+  const players = created.players;
+  const ready = created.matches.find(({ status }) => status === "ready")!;
+  const tournament = startMatch(created, ready.id, 1_000);
+  const current = tournament.matches.find(({ id }) => id === ready.id)!;
+  return {
+    version: 2 as const,
+    updatedAt: 1_000,
+    screen: "live" as const,
+    setupDraft: { players, config: setupConfig },
+    tournament,
+    activeMatchId: current.id,
+    scorer: createScoringState({
+      sideA: current.sideA!,
+      sideB: current.sideB!,
+      labelA: current.sideA!.memberIds[0],
+      labelB: current.sideB!.memberIds[0],
+      targetScore: current.config.targetScore,
+      durationMs: current.config.capMs,
+    }),
     sessionDeadline: 8_000_000,
     quickMatch: false,
     historyTournamentId: null,

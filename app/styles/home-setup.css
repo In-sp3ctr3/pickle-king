@@ -747,6 +747,17 @@
   color: var(--lime) !important;
 }
 
+.setup-tight-warning {
+  max-width: 62ch;
+  margin-top: 0.55rem !important;
+  border-radius: 12px;
+  background: #2a2110;
+  padding: 0.65rem 0.8rem;
+  color: #ffd98a !important;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .minimum-players-dialog {
   width: min(92vw, 520px);
   max-width: none;

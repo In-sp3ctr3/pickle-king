@@ -85,23 +85,26 @@ describe("history persistence", () => {
     });
   });
 
-  it("round-trips valid v2 round-robin history with the bracket key", () => {
-    const storage = new MemoryStorage();
-    const history = {
-      version: 2 as const,
-      quickMatches: [],
-      tournaments: [
-        {
-          id: "round-robin-archive",
-          completedAt: 10,
-          bracket: roundRobinTournamentFixture(),
-        },
-      ],
-    };
-    saveHistory(storage, history);
-    expect(loadHistory(storage)).toEqual({ status: "ok", history });
-    expect(JSON.parse(storage.values.get(HISTORY_KEY) ?? "{}")).toHaveProperty(
-      "tournaments.0.bracket",
-    );
-  });
+  it.each([4, 5, 6])(
+    "round-trips valid v2 %i-player round-robin history with the bracket key",
+    (size) => {
+      const storage = new MemoryStorage();
+      const history = {
+        version: 2 as const,
+        quickMatches: [],
+        tournaments: [
+          {
+            id: "round-robin-archive",
+            completedAt: 10,
+            bracket: roundRobinTournamentFixture(size),
+          },
+        ],
+      };
+      saveHistory(storage, history);
+      expect(loadHistory(storage)).toEqual({ status: "ok", history });
+      expect(
+        JSON.parse(storage.values.get(HISTORY_KEY) ?? "{}"),
+      ).toHaveProperty("tournaments.0.bracket");
+    },
+  );
 });

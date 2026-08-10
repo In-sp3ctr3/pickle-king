@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  calculatePreliminaryStandings,
   calculateTournamentResult,
   completeMatch,
   correctionNeedsConfirmation,
@@ -18,6 +19,15 @@ const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   name: `Player ${index + 1}`,
   rating: ["5.0", "4.0", "3.5", "3.0"][index] as Player["rating"],
 }));
+const ratings: Player["rating"][] = ["5.5+", "5.0", "4.5", "4.0", "3.5", "3.0"];
+
+function field(size: number): Player[] {
+  return ratings.slice(0, size).map((rating, index) => ({
+    id: `p${index + 1}`,
+    name: `Player ${index + 1}`,
+    rating,
+  }));
+}
 const config: TournamentConfig = {
   format: "round-robin-finals",
   drawStyle: "ranked",
@@ -36,8 +46,13 @@ function completeNext(tournament: TournamentBracket, at: number) {
 
 function finishPreliminaries(tournament: TournamentBracket) {
   let current = tournament;
-  for (let index = 0; index < 6; index += 1) {
-    current = completeNext(current, index + 1);
+  let completedAt = 1;
+  while (
+    current.matches.some(
+      ({ kind, status }) => kind === "round-robin" && status !== "complete",
+    )
+  ) {
+    current = completeNext(current, completedAt++);
   }
   return current;
 }
@@ -70,9 +85,48 @@ describe("round-robin lifecycle", () => {
     expect(getReadySchedule(tournament).map(({ id }) => id)).toEqual(["final"]);
   });
 
+  it.each([5, 6])(
+    "gates all preliminary rounds and placements for %i players",
+    (size) => {
+      let tournament = createTournament(field(size), config);
+      const preliminaryRounds = Math.max(
+        ...tournament.matches
+          .filter(({ kind }) => kind === "round-robin")
+          .map(({ round }) => round),
+      );
+      let completedAt = 1;
+      for (let round = 1; round <= preliminaryRounds; round += 1) {
+        const roundMatches = tournament.matches.filter(
+          (match) => match.kind === "round-robin" && match.round === round,
+        );
+        expect(
+          getReadySchedule(tournament).every((match) => match.round === round),
+        ).toBe(true);
+        for (const match of roundMatches) {
+          tournament = completeMatch(
+            tournament,
+            match.id,
+            11,
+            5,
+            completedAt++,
+          );
+        }
+      }
+      expect(getReadySchedule(tournament).map(({ id }) => id)).toEqual([
+        "bronze",
+      ]);
+      expect(tournament.matches.find(({ id }) => id === "final")?.status).toBe(
+        "waiting",
+      );
+      tournament = completeNext(tournament, completedAt++);
+      expect(getReadySchedule(tournament).map(({ id }) => id)).toEqual([
+        "final",
+      ]);
+    },
+  );
+
   it("recalculates placements and resets both only after confirmation when play started", () => {
-    let tournament = finishPreliminaries(createTournament(players, config));
-    const originalFinal = tournament.matches.find(({ id }) => id === "final")!;
+    let tournament = finishPreliminaries(createTournament(field(6), config));
     tournament = startMatch(tournament, "bronze", 7);
     expect(correctionNeedsConfirmation(tournament, "rr-r1-m1")).toBe(true);
     expect(() => correctMatchResult(tournament, "rr-r1-m1", 5, 11, 8)).toThrow(
@@ -90,7 +144,7 @@ describe("round-robin lifecycle", () => {
       corrected.matches.filter(
         ({ kind, status }) => kind === "round-robin" && status === "complete",
       ),
-    ).toHaveLength(6);
+    ).toHaveLength(15);
     expect(corrected.matches.find(({ id }) => id === "bronze")).toMatchObject({
       status: "ready",
       scoreA: 0,
@@ -103,20 +157,24 @@ describe("round-robin lifecycle", () => {
       scoreB: 0,
       startedAt: null,
     });
-    expect(
-      corrected.matches.find(({ id }) => id === "final")?.sideA,
-    ).not.toEqual(originalFinal.sideA);
+    const standings = calculatePreliminaryStandings(corrected);
+    expect(corrected.matches.find(({ id }) => id === "final")?.sideA).toEqual({
+      memberIds: [standings[0].playerId],
+    });
+    expect(corrected.matches.find(({ id }) => id === "bronze")?.sideA).toEqual({
+      memberIds: [standings[2].playerId],
+    });
   });
 
   it("corrects a preliminary without confirmation before placement starts", () => {
-    const tournament = finishPreliminaries(createTournament(players, config));
+    const tournament = finishPreliminaries(createTournament(field(5), config));
     expect(correctionNeedsConfirmation(tournament, "rr-r1-m1")).toBe(false);
     const corrected = correctMatchResult(tournament, "rr-r1-m1", 5, 11, 8);
     expect(
       corrected.matches.filter(
         ({ kind, status }) => kind === "round-robin" && status === "complete",
       ),
-    ).toHaveLength(6);
+    ).toHaveLength(10);
     expect(corrected.matches.find(({ id }) => id === "bronze")?.status).toBe(
       "ready",
     );
@@ -145,6 +203,19 @@ describe("round-robin lifecycle", () => {
     expect(
       replay.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
     ).toEqual(sources);
+    expect(getNextMatch(replay)?.id).toBe("rr-r1-m1");
+  });
+
+  it("replays the exact six-player schedule", () => {
+    let tournament = finishPreliminaries(createTournament(field(6), config));
+    tournament = completeNext(tournament, 20);
+    tournament = completeNext(tournament, 21);
+    const replay = resetTournamentBracket(tournament);
+    expect(
+      replay.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+    ).toEqual(
+      tournament.matches.map(({ sourceA, sourceB }) => [sourceA, sourceB]),
+    );
     expect(getNextMatch(replay)?.id).toBe("rr-r1-m1");
   });
 

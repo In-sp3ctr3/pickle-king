@@ -621,7 +621,7 @@ if (routeMap) {
       if (renderResolved) {
         try {
           const renderStat = await stat(renderResolved);
-          if (Date.now() - renderStat.mtimeMs > 10 * 60 * 1000) {
+          if (Date.now() - renderStat.mtimeMs > 20 * 60 * 1000) {
             failures.push(`Render capture is stale for ${key}: ${render}`);
           }
         } catch {

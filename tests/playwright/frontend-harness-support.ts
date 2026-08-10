@@ -1,6 +1,10 @@
 import { expect, type Page } from "@playwright/test";
 import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
+import {
+  completeScheduledMatches,
+  fillRoundRobinSetup,
+} from "./small-field-harness";
 
 export type ExpectedOutcome = {
   url?: string;
@@ -59,6 +63,11 @@ export type Route = {
     | "round-robin-completed"
     | "round-robin-results"
     | "round-robin-history-results"
+    | "round-robin-five-initial"
+    | "round-robin-six-timed-setup"
+    | "round-robin-six-untimed-setup"
+    | "round-robin-six-results"
+    | "round-robin-six-history-results"
     | "quick-setup"
     | "quick-idle"
     | "quick-live"
@@ -114,38 +123,6 @@ async function fillFourPlayerSetup(page: Page, target = 11) {
   await page.locator("[data-qa='build-bracket']").click();
 }
 
-async function fillRoundRobinSetup(page: Page, target = 1) {
-  await page.locator("[data-qa='start-tournament']").click();
-  await page.getByRole("button", { name: "No time limit" }).click();
-  const names = ["Maya", "Rae", "Kai", "Noah"];
-  const ratings = ["5.5+", "4.5", "3.5", "2.5"];
-  for (let index = 0; index < names.length; index += 1) {
-    await page.getByLabel("Player name").nth(index).fill(names[index]);
-    await page.getByLabel("Rating").nth(index).click();
-    await page
-      .getByRole("option", { name: ratings[index], exact: true })
-      .click();
-  }
-  await page.getByRole("button", { name: /Round robin \+ finals/i }).click();
-  await page
-    .getByRole("spinbutton", { name: "Every match plays to", exact: true })
-    .fill(String(target));
-  await page.locator("[data-qa='build-bracket']").click();
-  await expect(page.locator("[data-qa='round-robin-screen']")).toBeVisible();
-}
-
-async function completeScheduledMatches(page: Page, count: number) {
-  for (let match = 0; match < count; match += 1) {
-    await page.locator("[data-qa='start-next']").click();
-    await page
-      .getByRole("button", { name: "Start match", exact: true })
-      .click();
-    await page.locator("[data-qa='score-a-add']").click();
-    await page.locator("[data-qa='score-a-add']").click();
-    await page.locator("[data-qa='confirm-result']").click();
-  }
-}
-
 async function fillQuickMatch(page: Page, target = 11) {
   await page.locator("[data-qa='quick-match']").click();
   await page.getByLabel("Side A").fill("Alex");
@@ -184,6 +161,37 @@ export async function openRoute(page: Page, route: Route) {
     route.prepare === "round-robin-history-results"
   ) {
     await fillRoundRobinSetup(page);
+  }
+  if (route.prepare === "round-robin-five-initial") {
+    await fillRoundRobinSetup(page, { playerCount: 5 });
+  }
+  if (route.prepare === "round-robin-six-timed-setup") {
+    await fillRoundRobinSetup(page, {
+      build: false,
+      playerCount: 6,
+      timed: true,
+    });
+    await expect(page.locator("[data-qa='setup-tight-warning']")).toBeVisible();
+  }
+  if (route.prepare === "round-robin-six-untimed-setup") {
+    await fillRoundRobinSetup(page, { build: false, playerCount: 6 });
+    await expect(page.locator("[data-qa='setup-tight-warning']")).toHaveCount(
+      0,
+    );
+  }
+  if (
+    route.prepare === "round-robin-six-results" ||
+    route.prepare === "round-robin-six-history-results"
+  ) {
+    await fillRoundRobinSetup(page, { playerCount: 6 });
+    await completeScheduledMatches(page, 17);
+    await expect(page.locator("[data-qa='results']")).toBeVisible();
+  }
+  if (route.prepare === "round-robin-six-history-results") {
+    await page.locator("[data-qa='brand-home']").click();
+    await page.locator("[data-qa='match-history']").click();
+    await page.getByRole("button", { name: "View results" }).click();
+    await expect(page.locator("[data-qa='results']")).toBeVisible();
   }
   if (route.prepare === "round-robin-qualified") {
     await completeScheduledMatches(page, 6);

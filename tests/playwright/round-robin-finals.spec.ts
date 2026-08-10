@@ -9,13 +9,16 @@ async function openFresh(page: Page) {
   await page.reload({ waitUntil: "networkidle" });
 }
 
-async function buildRoundRobin(page: Page) {
+async function buildRoundRobin(page: Page, playerCount = 4) {
   await openFresh(page);
   await page.getByRole("button", { name: "Start tournament" }).click();
   await page.getByRole("button", { name: "No time limit" }).click();
-  const names = ["Maya", "Rae", "Kai", "Noah"];
-  const ratings = ["5.5+", "4.5", "3.5", "2.5"];
-  for (let index = 0; index < names.length; index += 1) {
+  const names = ["Maya", "Rae", "Kai", "Noah", "Ari", "Zoe"];
+  const ratings = ["5.5+", "4.5", "4.0", "3.5", "3.0", "2.5"];
+  for (let index = 4; index < playerCount; index += 1) {
+    await page.getByRole("button", { name: "Add another player" }).click();
+  }
+  for (let index = 0; index < playerCount; index += 1) {
     await page.getByLabel("Player name").nth(index).fill(names[index]);
     await page.getByLabel("Rating").nth(index).click();
     await page
@@ -38,7 +41,7 @@ async function completeNext(page: Page) {
   await page.locator("[data-qa='confirm-result']").click();
 }
 
-test("a fifth player falls back to fast knockout with an announcement", async ({
+test("a seventh player falls back to fast knockout with an announcement", async ({
   page,
 }) => {
   await openFresh(page);
@@ -48,37 +51,74 @@ test("a fifth player falls back to fast knockout with an announcement", async ({
   });
   await roundRobin.click();
   await page.getByRole("button", { name: "Add another player" }).click();
+  await expect(roundRobin).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Add another player" }).click();
+  await expect(roundRobin).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Add another player" }).click();
 
   await expect(
     page.getByRole("button", { name: /Fast knockout/i }),
   ).toHaveAttribute("aria-pressed", "true");
   await expect(roundRobin).toBeDisabled();
   await expect(page.getByRole("status")).toContainText(
-    "Fast knockout selected because round robin + finals needs exactly four players.",
+    "Fast knockout selected because round robin + finals supports 4–6 players.",
   );
 });
 
-test("the eight-match schedule refreshes, corrects placements, archives, shares, and replays", async ({
+test("timed six-player setup warns below eight minutes but untimed does not", async ({
   page,
 }) => {
-  await buildRoundRobin(page);
+  await openFresh(page);
+  await page.getByRole("button", { name: "Start tournament" }).click();
+  await page.getByRole("button", { name: "Add another player" }).click();
+  await page.getByRole("button", { name: "Add another player" }).click();
+  await page.getByRole("button", { name: /Round robin \+ finals/i }).click();
+  await expect(page.getByText(/Tight timed schedule/i)).toContainText(
+    "Tight timed schedule · 5 min 31 sec per match.",
+  );
+  await page.getByRole("button", { name: "No time limit" }).click();
+  await expect(
+    page.locator(".setup-submit-row").getByText("17 matches · 5–6 per player"),
+  ).toBeVisible();
+  await expect(page.getByText(/Tight timed schedule/i)).toHaveCount(0);
+});
+
+test("a five-player field rotates one resting player through five rounds", async ({
+  page,
+}) => {
+  await buildRoundRobin(page, 5);
   await expect(
     page.locator(".round-robin-screen .tree-match-card"),
-  ).toHaveCount(8);
-  await expect(page.getByText("0 of 8 matches complete")).toBeVisible();
+  ).toHaveCount(12);
+  const resting = page.getByText(/Resting this round:/i);
+  await expect(resting).toHaveCount(5);
+  expect(new Set(await resting.allTextContents()).size).toBe(5);
+  for (let match = 0; match < 12; match += 1) await completeNext(page);
+  await expect(page.locator("[data-qa='results']")).toBeVisible();
+  await expect(page.getByText("Round-robin standings")).toBeVisible();
+});
+
+test("the 17-match schedule refreshes, corrects placements, archives, shares, and replays", async ({
+  page,
+}) => {
+  await buildRoundRobin(page, 6);
+  await expect(
+    page.locator(".round-robin-screen .tree-match-card"),
+  ).toHaveCount(17);
+  await expect(page.getByText("0 of 17 matches complete")).toBeVisible();
   await expect(page.getByText("1st in standings")).toBeVisible();
   await expect(page.getByText("3rd in standings")).toBeVisible();
 
   await completeNext(page);
   await page.reload({ waitUntil: "networkidle" });
-  await expect(page.getByText("1 of 8 matches complete")).toBeVisible();
+  await expect(page.getByText("1 of 17 matches complete")).toBeVisible();
   await page.locator("[data-qa='brand-home']").click();
   await page.locator("[data-qa='resume-tournament']").click();
   await expect(page.locator("[data-qa='round-robin-screen']")).toBeVisible();
 
-  for (let match = 1; match < 7; match += 1) await completeNext(page);
+  for (let match = 1; match < 16; match += 1) await completeNext(page);
   await expect(page.getByText("Positions confirmed")).toBeVisible();
-  await expect(page.getByText("7 of 8 matches complete")).toBeVisible();
+  await expect(page.getByText("16 of 17 matches complete")).toBeVisible();
 
   const firstPreliminary = page
     .locator(".round-robin-round")
@@ -93,7 +133,7 @@ test("the eight-match schedule refreshes, corrects placements, archives, shares,
   await firstPreliminary
     .getByRole("button", { name: "Save corrected score" })
     .click();
-  await expect(page.getByText("6 of 8 matches complete")).toBeVisible();
+  await expect(page.getByText("15 of 17 matches complete")).toBeVisible();
   await expect(
     page.locator(
       ".round-robin-placements .tree-match-card[data-match-status='complete']",
@@ -115,7 +155,7 @@ test("the eight-match schedule refreshes, corrects placements, archives, shares,
   await expect(shareTrigger).toBeFocused();
 
   await page.getByRole("button", { name: "Review schedule" }).click();
-  await expect(page.getByText("8 of 8 matches complete")).toBeVisible();
+  await expect(page.getByText("17 of 17 matches complete")).toBeVisible();
   await page.locator("[data-qa='view-tournament-results']").click();
   const replayTrigger = page.locator("[data-qa='replay-tournament']");
   await replayTrigger.click();
@@ -123,12 +163,12 @@ test("the eight-match schedule refreshes, corrects placements, archives, shares,
   await expect(replayTrigger).toBeFocused();
   await replayTrigger.click();
   await page.getByRole("button", { name: "Replay same schedule" }).click();
-  await expect(page.getByText("0 of 8 matches complete")).toBeVisible();
+  await expect(page.getByText("0 of 17 matches complete")).toBeVisible();
 
   await page.locator("[data-qa='brand-home']").click();
   await page.locator("[data-qa='match-history']").click();
   await expect(
-    page.getByText(/4 players · Round robin \+ finals/i),
+    page.getByText(/6 players · Round robin \+ finals/i),
   ).toBeVisible();
   await page.getByRole("button", { name: "Share results" }).click();
   await expect(

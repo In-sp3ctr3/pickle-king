@@ -51,10 +51,10 @@ export function plannedMatchCount(
   format: TournamentFormat = "knockout",
 ): number {
   if (format === "round-robin-finals") {
-    if (entrantCount !== 4) {
-      throw new Error("Round robin + finals requires exactly four players.");
+    if (entrantCount < 4 || entrantCount > 6) {
+      throw new Error("Round robin + finals requires 4 to 6 players.");
     }
-    return 8;
+    return (entrantCount * (entrantCount - 1)) / 2 + 2;
   }
   if (entrantCount < 4 || entrantCount > 16) {
     throw new Error("Tournament entrants must be between 4 and 16.");

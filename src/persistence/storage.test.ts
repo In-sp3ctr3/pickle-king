@@ -12,6 +12,7 @@ import {
 } from "./storage";
 import {
   lateEntryAmendmentFixture,
+  liveRoundRobinSnapshotFixture,
   roundRobinSnapshotFixture,
   roundRobinTournamentFixture,
 } from "./test-fixtures";
@@ -174,6 +175,19 @@ describe("snapshot persistence", () => {
     );
   });
 
+  it.each([5, 6] as const)(
+    "round-trips a live %i-player round-robin snapshot",
+    (size) => {
+      const storage = new MemoryStorage();
+      const current = liveRoundRobinSnapshotFixture(size);
+      saveSnapshot(storage, current);
+      expect(loadSnapshot(storage)).toEqual({
+        status: "ok",
+        snapshot: current,
+      });
+    },
+  );
+
   it("requires the active setup and tournament formats to agree", () => {
     const invalid = roundRobinSnapshotFixture();
     invalid.setupDraft.config.format = "knockout";
@@ -215,5 +229,52 @@ describe("snapshot persistence", () => {
     const amended = roundRobinSnapshotFixture();
     amended.tournament.amendments = [lateEntryAmendmentFixture()];
     expect(() => migrateSnapshot(amended)).toThrow(/validation/i);
+  });
+
+  it("rejects seven players plus duplicate or missing pairings", () => {
+    const sevenPlayers = roundRobinSnapshotFixture();
+    sevenPlayers.tournament.players.push(
+      { id: "p5", name: "Player 5", rating: "3.5", seed: 5 },
+      { id: "p6", name: "Player 6", rating: "3.5", seed: 6 },
+      { id: "p7", name: "Player 7", rating: "3.5", seed: 7 },
+    );
+    expect(() => migrateSnapshot(sevenPlayers)).toThrow(/validation/i);
+
+    const duplicate = liveRoundRobinSnapshotFixture(6);
+    const preliminaries = duplicate.tournament.matches.filter(
+      ({ kind }) => kind === "round-robin",
+    );
+    preliminaries.at(-1)!.sourceA = preliminaries[0].sourceA;
+    preliminaries.at(-1)!.sourceB = preliminaries[0].sourceB;
+    expect(() => migrateSnapshot(duplicate)).toThrow(/validation/i);
+
+    const missing = liveRoundRobinSnapshotFixture(5);
+    missing.tournament.matches = missing.tournament.matches.filter(
+      ({ id }) => id !== "rr-r5-m2",
+    );
+    expect(() => migrateSnapshot(missing)).toThrow(/validation/i);
+  });
+
+  it("rejects inconsistent round structure and bracket metadata", () => {
+    const badRound = liveRoundRobinSnapshotFixture(5);
+    const fifthRound = badRound.tournament.matches.find(
+      ({ id }) => id === "rr-r5-m1",
+    )!;
+    fifthRound.round = 1;
+    expect(() => migrateSnapshot(badRound)).toThrow(/validation/i);
+
+    const badMetadata = liveRoundRobinSnapshotFixture(6);
+    badMetadata.tournament.bracketSize = 5;
+    expect(() => migrateSnapshot(badMetadata)).toThrow(/validation/i);
+
+    const badPlacement = liveRoundRobinSnapshotFixture(6);
+    badPlacement.tournament.roundCount = 5;
+    expect(() => migrateSnapshot(badPlacement)).toThrow(/validation/i);
+
+    const badPlacementRound = liveRoundRobinSnapshotFixture(6);
+    badPlacementRound.tournament.matches.find(
+      ({ id }) => id === "bronze",
+    )!.round = 5;
+    expect(() => migrateSnapshot(badPlacementRound)).toThrow(/validation/i);
   });
 });
