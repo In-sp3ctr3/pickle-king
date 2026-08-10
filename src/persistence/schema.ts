@@ -58,6 +58,33 @@ const scoringSchema = z.object({
     ])
     .nullable(),
   scoreEvents: z.array(z.enum(["A", "B"])).default([]),
+  service: z
+    .object({
+      startingTeam: z.enum(["A", "B"]),
+      servingTeam: z.enum(["A", "B"]),
+      serverId: z.string().min(1),
+      turn: z.enum(["opening", "first", "second"]),
+      rightAtZero: z.object({ A: z.string().min(1), B: z.string().min(1) }),
+    })
+    .nullable()
+    .default(null),
+  rallyHistory: z
+    .array(
+      z.object({
+        scoreA: z.number().int().nonnegative(),
+        scoreB: z.number().int().nonnegative(),
+        service: z.object({
+          startingTeam: z.enum(["A", "B"]),
+          servingTeam: z.enum(["A", "B"]),
+          serverId: z.string().min(1),
+          turn: z.enum(["opening", "first", "second"]),
+          rightAtZero: z.object({ A: z.string().min(1), B: z.string().min(1) }),
+        }),
+        scoredTeam: z.enum(["A", "B"]).nullable(),
+      }),
+    )
+    .default([]),
+  rightEndTeam: z.enum(["A", "B"]).default("A"),
 });
 
 const screenSchema = z.enum([

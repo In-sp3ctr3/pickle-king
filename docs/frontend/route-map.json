@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "baseUrl": "http://127.0.0.1:3000",
   "viewports": [
     { "name": "desktop", "width": 1440, "height": 1000 },
@@ -592,8 +592,23 @@
           "expect": { "visible": "[data-qa='live-match']" }
         },
         {
+          "name": "serving team choices",
+          "selector": ".serve-dialog input",
+          "auditOnly": true,
+          "action": "check",
+          "expect": { "visible": "[data-qa='serve-setup-dialog']" }
+        },
+        {
           "name": "start match overlay",
           "selector": "[data-qa='match-start']",
+          "sequence": "idle-start",
+          "action": "click",
+          "expect": { "visible": "[data-qa='serve-setup-dialog']" }
+        },
+        {
+          "name": "confirm serving order",
+          "selector": "[data-qa='confirm-serve-setup']",
+          "sequence": "idle-start",
           "action": "click",
           "expect": { "visible": "[data-qa='match-toggle']" }
         },
@@ -652,10 +667,52 @@
           "expect": { "visible": "[data-qa='live-match']" }
         },
         {
+          "name": "animate service transition",
+          "selector": "[data-qa='score-a-add']",
+          "sequence": "serve-guide-transition",
+          "action": "click",
+          "expect": { "visible": "[data-qa='serve-guide']" }
+        },
+        {
           "name": "pause live match",
           "selector": "[data-qa='match-toggle']",
           "action": "click",
           "expect": { "visible": "[data-qa='live-match']" }
+        },
+        {
+          "name": "swap live court sides",
+          "selector": "[data-qa='swap-court-ends']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='serve-guide']" }
+        },
+        {
+          "name": "open Fix serve for keyboard close",
+          "selector": "button:has-text('Fix serve')",
+          "sequence": "fix-serve-keyboard",
+          "action": "click",
+          "expect": { "visible": "[data-qa='serve-fix-dialog']" }
+        },
+        {
+          "name": "close Fix serve with Escape",
+          "selector": "[data-qa='serve-fix-dialog'] [data-initial-focus]",
+          "sequence": "fix-serve-keyboard",
+          "action": "press",
+          "value": "Escape",
+          "expect": { "visible": "[data-qa='serve-guide']" }
+        },
+        {
+          "name": "open Fix serve for side out",
+          "selector": "button:has-text('Fix serve')",
+          "sequence": "fix-serve-side-out",
+          "action": "click",
+          "expect": { "visible": "[data-qa='serve-fix-dialog']" }
+        },
+        {
+          "name": "apply side out correction",
+          "selector": "[data-qa='serve-fix-dialog'] button:has-text('Side out')",
+          "sequence": "fix-serve-side-out",
+          "action": "click",
+          "expect": { "visible": "[data-qa='serve-guide']" }
         },
         {
           "name": "open restart dialog",
@@ -670,7 +727,17 @@
           "expect": { "visible": ".match-control-dialog" }
         }
       ],
-      "motionChecks": [],
+      "motionChecks": [
+        {
+          "name": "service box and marker transition",
+          "selector": ".serve-court",
+          "stateAttribute": "data-motion-state",
+          "requiredStates": ["far-right", "near-left"],
+          "reducedMotionState": "static",
+          "observationMs": 300,
+          "triggerSequence": "serve-guide-transition"
+        }
+      ],
       "reducedMotionChecks": [
         {
           "name": "live scorer remains available",

@@ -13,6 +13,8 @@ import {
   type Control,
 } from "./frontend-harness-support";
 
+test.describe.configure({ mode: "parallel" });
+
 async function installDeterministicBrowserState(page: Page) {
   await page.addInitScript(() => {
     window.localStorage.clear();
@@ -31,6 +33,7 @@ for (const viewport of routeMap.viewports) {
       test(`${route.name}: route, controls, console, focus, axe, and screenshot`, async ({
         page,
       }) => {
+        if (route.name === "results") test.slow();
         await installDeterministicBrowserState(page);
         const consoleErrors: string[] = [];
         page.on("console", (message) => {

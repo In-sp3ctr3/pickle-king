@@ -16,6 +16,26 @@ async function openQuickMatch(page: Page, target = 11) {
   await page.getByRole("button", { name: "Open scorer" }).click();
   await expect(page.getByText("Untimed", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
+}
+
+async function winPoint(page: Page, side: "a" | "b") {
+  const name = side === "a" ? "Alex" : "Blair";
+  const score = page.locator(`section[aria-label^='${name},']`);
+  const before = Number(
+    (await score.getAttribute("aria-label"))?.match(/\d+/)?.[0],
+  );
+  const rallyWinner = page.locator(`[data-qa='score-${side}-add']`);
+
+  for (let rally = 0; rally < 3; rally += 1) {
+    await rallyWinner.click();
+    const current = Number(
+      (await score.getAttribute("aria-label"))?.match(/\d+/)?.[0],
+    );
+    if (current > before) return;
+  }
+
+  throw new Error(`${name} did not score after three rally wins`);
 }
 
 test("quick setup points to each invalid field and animates the timed rule", async ({
@@ -70,15 +90,14 @@ test("play-to-seven continues through a tie and one-point lead", async ({
 }) => {
   await openQuickMatch(page, 7);
   const addA = page.locator("[data-qa='score-a-add']");
-  const addB = page.locator("[data-qa='score-b-add']");
   for (let point = 0; point < 7; point += 1) {
-    await addA.click();
-    await addB.click();
+    await winPoint(page, "a");
+    await winPoint(page, "b");
   }
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await addA.click();
+  await winPoint(page, "a");
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await addA.click();
+  await winPoint(page, "a");
   await expect(page.getByRole("heading", { name: "Alex wins" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Confirm result" }),
@@ -86,7 +105,7 @@ test("play-to-seven continues through a tie and one-point lead", async ({
 
   await page.getByRole("button", { name: "Edit score" }).click();
   await expect(addA).toBeFocused();
-  for (let point = 0; point < 4; point += 1) await addB.click();
+  for (let point = 0; point < 4; point += 1) await winPoint(page, "b");
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button", { name: "Review corrected result" }).click();
   await expect(page.getByRole("heading", { name: "Blair wins" })).toBeVisible();
@@ -115,11 +134,9 @@ test("a burst of score taps locks at the winning point", async ({ page }) => {
 test("double-digit scores stay legible at tablet size", async ({ page }) => {
   await page.setViewportSize({ width: 1180, height: 820 });
   await openQuickMatch(page, 11);
-  const addA = page.locator("[data-qa='score-a-add']");
-  const addB = page.locator("[data-qa='score-b-add']");
   for (let point = 0; point < 10; point += 1) {
-    await addA.click();
-    await addB.click();
+    await winPoint(page, "a");
+    await winPoint(page, "b");
   }
   await expect(
     page.locator("section[aria-label='Alex, 10 points']"),
@@ -138,9 +155,7 @@ test("restart, tied early finish, and operator-selected winner are explicit", as
   page,
 }) => {
   await openQuickMatch(page);
-  const addA = page.locator("[data-qa='score-a-add']");
-  const addB = page.locator("[data-qa='score-b-add']");
-  await addA.click();
+  await winPoint(page, "a");
   await page.getByRole("button", { name: "Restart" }).click();
   await expect(
     page.getByRole("heading", { name: "Start this match over?" }),
@@ -151,8 +166,9 @@ test("restart, tied early finish, and operator-selected winner are explicit", as
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Start match", exact: true }).click();
-  await addA.click();
-  await addB.click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
+  await winPoint(page, "a");
+  await winPoint(page, "b");
   await page.getByRole("button", { name: "End match" }).click();
   await expect(
     page.getByRole("heading", { name: "This match needs a winner." }),

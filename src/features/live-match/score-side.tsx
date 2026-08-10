@@ -10,7 +10,7 @@ export function ScoreSide({
   leader,
   showHint,
   disabled,
-  onAdd,
+  onRallyWon,
   onSubtract,
 }: {
   team: "A" | "B";
@@ -19,9 +19,10 @@ export function ScoreSide({
   leader: boolean;
   showHint: boolean;
   disabled: boolean;
-  onAdd: () => void;
+  onRallyWon: () => void;
   onSubtract: () => void;
 }) {
+  const displayLabel = label.replace(/\s+\+\s+/g, " / ");
   return (
     <section
       className={`score-side score-side-${team.toLowerCase()} ${leader ? "is-leading" : ""}`}
@@ -31,31 +32,33 @@ export function ScoreSide({
         className="score-add"
         data-qa={`score-${team.toLowerCase()}-add`}
         disabled={disabled}
-        onClick={onAdd}
+        onClick={onRallyWon}
         type="button"
       >
-        <span className="score-player">{label}</span>
+        <span className="score-player">{displayLabel}</span>
         <AnimatedNumber className="score-number" value={score} />
-        {showHint ? <span className="score-hint">Tap court to add</span> : null}
+        {showHint ? (
+          <span className="score-hint">Tap court for rally winner</span>
+        ) : null}
       </button>
       <div className="score-stepper" aria-label={`${label} score controls`}>
         <button
-          aria-label={`Undo one point from ${label}`}
-          disabled={disabled || score === 0}
+          aria-label="Undo last rally"
+          disabled={disabled}
           onClick={onSubtract}
           type="button"
         >
           <Minus aria-hidden="true" size={20} />
-          <span>Undo −1</span>
+          <span>Undo rally</span>
         </button>
         <button
-          aria-label={`Add one point to ${label}`}
+          aria-label={`Record ${label} as the rally winner`}
           disabled={disabled}
-          onClick={onAdd}
+          onClick={onRallyWon}
           type="button"
         >
           <Plus aria-hidden="true" size={20} />
-          <span>+1 point</span>
+          <span>Won rally</span>
         </button>
       </div>
     </section>

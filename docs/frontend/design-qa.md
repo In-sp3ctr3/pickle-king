@@ -1,12 +1,12 @@
 # Frontend Design QA
 
+Pipeline version: 2
 Status: passed
-Last updated: 2026-08-08
+Last updated: 2026-08-10
 
 ## Environment
 
-- Commit/source state:
-  Feature 015 small-field round-robin implementation + reviewed working tree
+- Commit/source state: small-field round-robin + serve-tracker release candidate
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -204,6 +204,38 @@ The supplied source hashes are
 | DQA-63 | P2       | phone/landscape   | 844×390 geometry assertion                                      | the primary start action needed to remain visible in the initial viewport        | frontend | fixed  |
 | DQA-64 | P2       | results/history   | completed round-robin result captures                           | preliminary and placement history needed explicit groups                         | frontend | fixed  |
 | DQA-65 | P2       | round-robin/setup | five/six-player desktop, mobile, tablet, and landscape captures | schedule density, rotating rests, and timed-only advisory needed explicit proof  | frontend | fixed  |
+| DQA-66 | P1       | scorer/serve      | browser comments and 319px scorer capture                       | full-court cue, active box, server marker, score spacing, and cross-net side out | frontend | fixed  |
+
+## Feedback Loop
+
+- Mechanism: screenshot-comments
+- Availability/status: available; all serve-tracker comments resolved
+- Annotation/comment evidence: `docs/frontend/evidence/serve-tracker-feedback.md`
+- Resolution evidence: `tests/playwright/serve-tracker.spec.ts`,
+  `test-results/frontend-captures/quick-live-mobile.png`, and
+  `docs/frontend/evidence/serve-tracker-swapped-mobile.png`
+
+## Performance Evidence
+
+| Surface                 | Numeric target    | Numeric result | Conditions                                        | Evidence                                 | Result |
+| ----------------------- | ----------------- | -------------- | ------------------------------------------------- | ---------------------------------------- | ------ |
+| Production PWA precache | ≤ 3.0 MB          | 2.66 MB        | Minified production build with service worker     | `npm run build` output                   | passed |
+| Serve transition thread | ≤ 50 ms long task | 0 ms longest   | Chromium at 319×768 during one service transition | `tests/playwright/serve-tracker.spec.ts` | passed |
+
+## Anti-Template Review
+
+| Surface     | Risk                        | Evidence                           | Finding                                                           | Resolution                                                           | Result |
+| ----------- | --------------------------- | ---------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------- | ------ |
+| Live scorer | Generic dashboard treatment | quick-live desktop/mobile captures | Court-first split scoring remains the dominant composition        | Compact rule-specific serve strip uses the existing court identity   | passed |
+| Serve guide | Decorative sports diagram   | serve-tracker browser flow         | Every line, box, label, and marker communicates legal serve state | Full court mirrors teams across the net and highlights one legal box | passed |
+
+## Authorship Evidence
+
+| Decision              | Visible evidence                                       | Product outcome                                                        |
+| --------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Legal service-box cue | One pulsing lime box on the full mini-court            | The scorer sees where the next serve begins without calculating parity |
+| Solid server marker   | Lime head-and-torso marker outside the active baseline | The active server remains distinct without implying live formation     |
+| Rally-winner scoring  | Two large court targets paired with whole-rally undo   | One tap records either a point or a service transition correctly       |
 
 ## Harness Results
 

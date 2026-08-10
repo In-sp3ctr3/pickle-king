@@ -2,16 +2,29 @@
 
 Status: ready
 
+Pipeline version: 2
+
 Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-08
+Last updated: 2026-08-10
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
 - Primary user job: Run a fair single-court tournament without back-to-back fatigue
 - Primary action: Build or resume the next tournament match
+- Visual thesis: A near-black courtside score surface where acid lime identifies
+  the one live state that matters and the serve guide reads as court anatomy,
+  not dashboard chrome.
+- Content narrative: Set the opening serve once, tap the rally winner, then
+  glance at the legal next server without taking attention from the score.
+- Selected direction: Extend the existing split-score court identity with a
+  compact outlined service strip below the top bar.
+- Selected by: Product owner through the serve-tracker feature brief.
+- Selection evidence: `specs/015-serve-tracker/research.md` and current
+  quick-live desktop/mobile evidence.
+- Selection status: approved
 
 ## Authority
 
@@ -33,6 +46,13 @@ Last updated: 2026-08-08
 | Skiper v107                         | rejection reference | Confirms Pro source must not be copied        | rejected as source        |
 | Product specification               | product authority   | Flow, content, constraints, and accessibility | accepted                  |
 | Product plan                        | immutable           | Flows, controls, content, accessibility       |
+
+## Reference Atlas
+
+| Reference                    | Borrow                                              | Do not borrow                                   | Evidence                                               |
+| ---------------------------- | --------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------ |
+| Existing quick-live scorer   | Split court scoring scale and restrained lime state | Extra dashboard panels or reduced score targets | `docs/frontend/evidence/quick-live-desktop-source.png` |
+| USA Pickleball serving rules | Legal service sequence and terminology              | Live formation or stacking movement claims      | `specs/015-serve-tracker/research.md`                  |
 
 ## Product and UX
 
@@ -57,6 +77,15 @@ Last updated: 2026-08-08
 | Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo    |
 | Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download    |
 | Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download    |
+| Serve guide    | identify legal next server      | compact strip under scorer top bar                | remains above score targets                  | read-only court cue and Fix serve    |
+
+## Page Rhythm Map
+
+| Region        | Entry                | Dominant cue                      | Exit               | Mobile treatment                |
+| ------------- | -------------------- | --------------------------------- | ------------------ | ------------------------------- |
+| Match top bar | navigation and clock | time and match context            | serving guide      | compact three-column header     |
+| Serve guide   | legal next serve     | named player plus highlighted box | score targets      | two-line text beside mini-court |
+| Score targets | rally winner choice  | large team score                  | pause/end controls | remains full-width half-court   |
 
 ## Geometry
 
@@ -121,22 +150,24 @@ Last updated: 2026-08-08
 | LeagueStandings   | provisional, qualified, complete         | semantic table; wins, points, differential, and deterministic rank           |
 | RoundRobinRound   | waiting, available, complete             | two match nodes per round; one-column phone fallback                         |
 | PlacementMatches  | unresolved, bronze-ready, final-ready    | third place precedes final; standings placeholders explain qualification     |
+| ServeGuide        | opening, first, second, swapped          | one legal box and one solid player marker; never a live formation map        |
 
 ## Motion
 
-| Motion              | Purpose                       | Trigger             | Timing              | Reduced motion |
-| ------------------- | ----------------------------- | ------------------- | ------------------- | -------------- |
-| score digit flow    | preserve number location      | score/time update   | spring, about 320ms | immediate text |
-| mascot arrival      | establish product identity    | home entry          | 720ms ease-out      | static mascot  |
-| mascot blink        | give the mark restrained life | idle                | 100ms every 5.2s    | no blink       |
-| selected choice     | preserve toggle context       | option change       | 240ms spring        | immediate fill |
-| rating popup        | connect trigger and menu      | open/select         | 180ms ease-out      | immediate menu |
-| bracket advancement | show dependency               | result confirmation | 420ms ease-out      | crossfade      |
-| connector reveal    | show advancement path         | result confirmation | 280ms ease-out      | immediate      |
-| mascot arrival      | celebrate tournament champion | results entry       | 700ms spring        | static mascot  |
-| result confetti     | mark confirmed performance    | result review       | two bursts, 1.2s    | static scatter |
-| suggestion reveal   | retain typing context         | input filtering     | 160ms ease-out      | immediate list |
-| press response      | confirm touch                 | pointer/keyboard    | 90ms                | color only     |
+| Motion              | Purpose                        | Trigger             | Timing              | Reduced motion |
+| ------------------- | ------------------------------ | ------------------- | ------------------- | -------------- |
+| score digit flow    | preserve number location       | score/time update   | spring, about 320ms | immediate text |
+| mascot arrival      | establish product identity     | home entry          | 720ms ease-out      | static mascot  |
+| mascot blink        | give the mark restrained life  | idle                | 100ms every 5.2s    | no blink       |
+| selected choice     | preserve toggle context        | option change       | 240ms spring        | immediate fill |
+| rating popup        | connect trigger and menu       | open/select         | 180ms ease-out      | immediate menu |
+| bracket advancement | show dependency                | result confirmation | 420ms ease-out      | crossfade      |
+| connector reveal    | show advancement path          | result confirmation | 280ms ease-out      | immediate      |
+| mascot arrival      | celebrate tournament champion  | results entry       | 700ms spring        | static mascot  |
+| result confetti     | mark confirmed performance     | result review       | two bursts, 1.2s    | static scatter |
+| suggestion reveal   | retain typing context          | input filtering     | 160ms ease-out      | immediate list |
+| press response      | confirm touch                  | pointer/keyboard    | 90ms                | color only     |
+| service-box pulse   | keep legal position glanceable | legal serve change  | 1.8s soft pulse     | static fill    |
 
 ## Anti-generic constraints
 
@@ -194,6 +225,28 @@ Last updated: 2026-08-08
   reduced-motion behavior applies.
 - Assets: existing local fonts, Lucide icons, mascot, and share arena only.
 - Target viewports: 390×844, 844×390, 820×1180, 1180×820, and 1440×1000.
+
+## Feature 015 serve-tracker extension
+
+- The serving guide is a short court strip rather than a third score panel. Its
+  horizontal court includes the net, both kitchens, and four service boxes,
+  highlighting only the active legal box.
+- One solid lime head-and-torso marker identifies the server without implying
+  live doubles formation. It sits outside the active baseline without a halo.
+- The active box softly pulses; reduced-motion renders a static fill.
+- Mobile score zones keep the team name, rally instruction, large centered
+  numeral, and two 48px controls vertically separated at 320–390px widths.
+- A side out moves the highlighted service box and marker to the opposing court
+  end. `Swap sides` reverses screen orientation without changing identity,
+  scores, service history, or tournament results.
+
+## Authorship Decisions
+
+| Decision                  | Product-specific reason                                           | Visible result                                                           |
+| ------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Legal-position mini-court | Players forget a serving side, not a generic score statistic      | Horizontal full-court diagram with one highlighted box and server marker |
+| Rally-winner score zones  | Side-out scoring makes receiver wins meaningful without a point   | Large targets communicate rally outcome rather than blind increment      |
+| Stacking-safe wording     | Physical formations vary while rules position only active players | Guide states the legal box without claiming a live player map            |
 
 ## Share Export Geometry
 

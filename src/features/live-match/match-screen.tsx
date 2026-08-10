@@ -1,7 +1,15 @@
 "use client";
 
-import { Check, Flag, Pause, Play, RotateCcw } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Check,
+  Flag,
+  Pause,
+  Play,
+  RotateCcw,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { activeServer } from "../../match/service";
 import type { ScoringAction, ScoringState } from "../../match/types";
 import { prewarmShareAssets } from "../share";
 import {
@@ -11,7 +19,9 @@ import {
 import { MatchClock } from "./match-clock";
 import { playBuzzer } from "./match-feedback";
 import { ResultConfirmationDialog } from "./result-confirmation-dialog";
-import { ScoreSide } from "./score-side";
+import { MatchScoreboard } from "./match-scoreboard";
+import { ServeGuide } from "./serve-guide";
+import { ServeTrackerDialogs } from "./serve-tracker-dialogs";
 import { useWakeLock } from "./use-wake-lock";
 
 export function MatchScreen({
@@ -30,6 +40,8 @@ export function MatchScreen({
   onExit: () => void;
 }) {
   const [controlMode, setControlMode] = useState<MatchControlMode | null>(null);
+  const [serveDialog, setServeDialog] = useState<"fix" | "setup" | null>(null);
+  const [serveStatus, setServeStatus] = useState("");
   const startButtonRef = useRef<HTMLButtonElement>(null);
   const send = useCallback(
     (action: ScoringAction) => onAction(action),
@@ -56,19 +68,32 @@ export function MatchScreen({
   const wakeLock = useWakeLock(
     ["running", "paused", "golden-point"].includes(scorer.status),
   );
+  const live = ["running", "paused", "golden-point"].includes(scorer.status);
   const canScore =
-    ["running", "paused", "golden-point"].includes(scorer.status) ||
-    scorer.status === "editing-result";
+    scorer.status === "editing-result" || (live && Boolean(scorer.service));
+  const server = scorer.service
+    ? activeServer({
+        scores: { A: scorer.scoreA, B: scorer.scoreB },
+        service: scorer.service,
+        sides: scorer,
+      })
+    : null;
+  const serverName = server
+    ? ((server.team === "A"
+        ? scorer.participantNames?.sideA
+        : scorer.participantNames?.sideB)?.[
+        (server.team === "A" ? scorer.sideA : scorer.sideB).memberIds.indexOf(
+          server.playerId,
+        )
+      ] ?? server.playerId)
+    : null;
+  const rightEndTeam = scorer.rightEndTeam ?? "A";
   const toggle =
     scorer.status === "complete"
       ? onExit
       : scorer.status === "running"
         ? () => send({ type: "pause", now: Date.now() })
-        : () =>
-            send({
-              type: scorer.status === "idle" ? "start" : "resume",
-              now: Date.now(),
-            });
+        : () => send({ type: "resume", now: Date.now() });
   return (
     <main className="match-screen" data-qa="live-match">
       <h1 className="sr-only">
@@ -97,58 +122,48 @@ export function MatchScreen({
           Golden point · next point wins
         </div>
       ) : null}
-      <div className="scoreboard">
-        <ScoreSide
-          disabled={!canScore}
-          label={scorer.labelA}
-          leader={scorer.scoreA > scorer.scoreB}
-          onAdd={() =>
-            send({ type: "adjust", team: "A", delta: 1, now: Date.now() })
+      {server && serverName ? (
+        <ServeGuide
+          courtEnd={server.team === rightEndTeam ? "right" : "left"}
+          isOpeningServe={
+            scorer.scoreA === 0 &&
+            scorer.scoreB === 0 &&
+            server.turn === "opening"
           }
-          onSubtract={() =>
-            send({ type: "adjust", team: "A", delta: -1, now: Date.now() })
-          }
-          score={scorer.scoreA}
-          showHint={scorer.status !== "idle"}
-          team="A"
+          server={{
+            name: serverName,
+            side: server.side,
+            team: server.team === "A" ? scorer.labelA : scorer.labelB,
+            turn: server.turn,
+          }}
         />
-        <ScoreSide
-          disabled={!canScore}
-          label={scorer.labelB}
-          leader={scorer.scoreB > scorer.scoreA}
-          onAdd={() =>
-            send({ type: "adjust", team: "B", delta: 1, now: Date.now() })
-          }
-          onSubtract={() =>
-            send({ type: "adjust", team: "B", delta: -1, now: Date.now() })
-          }
-          score={scorer.scoreB}
-          showHint={scorer.status !== "idle"}
-          team="B"
-        />
-        {scorer.status === "idle" ? (
-          <div className="match-start-overlay">
-            <button
-              aria-label="Start match"
-              className="match-start-button"
-              data-qa="match-start"
-              data-screen-initial-focus
-              onClick={() => send({ type: "start", now: Date.now() })}
-              ref={startButtonRef}
-              type="button"
-            >
-              <Play aria-hidden="true" fill="currentColor" size={28} />
-              <strong>Start match</strong>
-              <span>
-                Play to {scorer.targetScore}
-                {scorer.durationMs === null
-                  ? ""
-                  : ` · ${Math.round(scorer.durationMs / 60_000)} min`}
-              </span>
-            </button>
-          </div>
-        ) : null}
-      </div>
+      ) : null}
+      {serveStatus ? (
+        <p className="sr-only" role="status">
+          {serveStatus}
+        </p>
+      ) : null}
+      <MatchScoreboard
+        canScore={canScore}
+        onRally={(team) =>
+          send(
+            scorer.status === "editing-result"
+              ? { type: "adjust", team, delta: 1, now: Date.now() }
+              : { type: "rally", team, now: Date.now() },
+          )
+        }
+        onStart={() => setServeDialog("setup")}
+        onUndo={(team) =>
+          send(
+            scorer.status === "editing-result"
+              ? { type: "adjust", team, delta: -1, now: Date.now() }
+              : { type: "undo-rally", now: Date.now() },
+          )
+        }
+        scorer={scorer}
+        startButtonRef={startButtonRef}
+        teamOrder={rightEndTeam === "A" ? ["A", "B"] : ["B", "A"]}
+      />
       {scorer.status === "editing-result" ? (
         <footer className="match-controls match-controls--editing">
           <span>Editing score · review when it is correct</span>
@@ -193,9 +208,39 @@ export function MatchScreen({
                     : "Start"}
             </button>
           ) : null}
-          {!["idle", "complete"].includes(scorer.status) ? (
+          {live && scorer.service ? (
             <button
               className="control-button"
+              onClick={() => setServeDialog("fix")}
+              type="button"
+            >
+              Fix serve
+            </button>
+          ) : null}
+          {live && !scorer.service ? (
+            <button
+              className="control-button"
+              onClick={() => setServeDialog("setup")}
+              type="button"
+            >
+              Set serve
+            </button>
+          ) : null}
+          {live ? (
+            <button
+              aria-label="Swap sides"
+              className="control-button"
+              data-qa="swap-court-ends"
+              onClick={() => send({ type: "swap-court-ends" })}
+              type="button"
+            >
+              <ArrowLeftRight aria-hidden="true" />
+              Swap
+            </button>
+          ) : null}
+          {!["idle", "complete"].includes(scorer.status) ? (
+            <button
+              className="control-button control-button--bottom"
               onClick={() => setControlMode("restart")}
               type="button"
             >
@@ -205,7 +250,7 @@ export function MatchScreen({
           ) : null}
           {["running", "paused", "golden-point"].includes(scorer.status) ? (
             <button
-              className="control-button control-button-danger"
+              className="control-button control-button--bottom control-button-danger"
               onClick={() => setControlMode("end")}
               type="button"
             >
@@ -231,6 +276,13 @@ export function MatchScreen({
           scorer={scorer}
         />
       ) : null}
+      <ServeTrackerDialogs
+        mode={serveDialog}
+        onAction={send}
+        onClose={() => setServeDialog(null)}
+        onStatus={setServeStatus}
+        scorer={scorer}
+      />
       {scorer.status === "awaiting-confirmation" ? (
         <ResultConfirmationDialog
           onConfirm={onConfirm}
