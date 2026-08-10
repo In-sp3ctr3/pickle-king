@@ -35,12 +35,9 @@ the schedule, and save or share the result—all on the device in your hands.
 ## Screens
 
 <p align="center">
-  <img src="docs/frontend/evidence/home-desktop-source.png" width="72%" alt="Pickle King home screen with tournament and quick-match actions">
-</p>
-
-<p align="center">
-  <img src="docs/frontend/evidence/quick-live-desktop-source.png" width="48%" alt="Pickle King live scoring screen with two player scores and match controls">
-  <img src="docs/frontend/evidence/bracket-desktop-source.png" width="48%" alt="Pickle King tournament bracket with the next match and full draw">
+  <img src="docs/images/readme/home.png" width="32%" alt="Pickle King home screen with tournament and quick-match actions">
+  <img src="docs/images/readme/scoring.png" width="32%" alt="Pickle King live scoring screen with two player scores and match controls">
+  <img src="docs/images/readme/bracket.png" width="32%" alt="Pickle King tournament bracket with the next match and full draw">
 </p>
 
 ## Run it locally
