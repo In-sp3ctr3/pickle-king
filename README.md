@@ -1,81 +1,113 @@
-# Pickle King
+<p align="center">
+  <img src="public/brand/pickle-king-mark.png" width="132" alt="Pickle King crowned pickleball logo">
+</p>
 
-An offline-first tournament director and scorekeeper for a weekly pickleball
-crew. Seed 4–16 players, finish a fair one-court knockout inside the booking,
-and crown a winner without sending player data anywhere.
+<h1 align="center">Pickle King</h1>
 
-> Pickle King is under active v1 development. Ratings shape Competitive or
-> Social draws; the app does not calculate an official pickleball rating.
+<p align="center">
+  <strong>Run the court. Crown the best.</strong><br>
+  An offline-first tournament director and scorekeeper for pickleball nights.
+</p>
+
+<p align="center">
+  <a href="#run-it-locally">Get started</a> ·
+  <a href="#contributing">Contributing</a> ·
+  <a href="SECURITY.md">Security</a> ·
+  <a href="LICENSE">MIT License</a>
+</p>
+
+Pickle King helps a group run a fair one-court pickleball tournament without
+accounts, trackers, or a connection. Build the draw, keep the score, manage
+the schedule, and save or share the result—all on the device in your hands.
 
 ## What it does
 
-- Connected, double-sided singles brackets with automatic byes
-- Competitive seeding or closer-rated Social opening matchups
-- One-court, round-by-round scheduling with protected rest
-- Mandatory third-place match before the final
-- Optional booking timer for tournaments and Quick Match
-- Win-by-two scoring, buzzer finishes, and golden point for timed ties
-- Explicit restart, early-finish, tied-winner, and discard controls
-- Standalone Quick Match for singles or doubles
-- Recent Quick Match and tournament history, stored only on this device
-- Remembered-name suggestions for faster rematches
-- Safe player-name corrections and explicit draw rebuilds for roster changes
-- One procedurally fair late-entry challenge before placement play begins
-- Branded result, champion/podium, player-stat, and full-bracket PNGs
-- Exact-draw replay or a prefilled fresh draw after a tournament
-- Results, point differential, match history, and upset highlights
-- Offline recovery across refresh, sleep, and network loss
-- Local-only storage: names and scores never leave the device
+- Builds 4–16 player knockout brackets with automatic byes and protected rest.
+- Offers Competitive and Social draws, plus round-robin finals for 4–6 players.
+- Runs timed or untimed scoring with win-by-two, golden point, corrections, and
+  restart controls.
+- Includes a standalone Quick Match for singles or doubles.
+- Keeps a bounded local history, name suggestions, match statistics, and
+  replayable results.
+- Creates shareable champion, recap, player-stat, and full-bracket PNGs on the
+  device.
 
-## Local development
+## Screens
 
-Requirements: Node.js 22.13 or newer.
+<p align="center">
+  <img src="docs/frontend/evidence/home-desktop-source.png" width="48%" alt="Pickle King home screen with tournament and quick-match actions">
+  <img src="docs/frontend/evidence/round-robin-results-desktop-source.png" width="48%" alt="Completed Pickle King round-robin tournament with champion and standings">
+</p>
+
+## Run it locally
+
+Requires Node.js 22.13 or newer.
 
 ```bash
+git clone https://github.com/In-sp3ctr3/pickle-king.git
+cd pickle-king
 npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000`.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). For a deployed instance,
+copy `.env.example` and set `NEXT_PUBLIC_SITE_URL` to its canonical public URL.
 
-## Quality checks
+## Quality
+
+The repository uses strict TypeScript, ESLint, Prettier, unit tests, browser
+workflow coverage, a rendered HTML check, PWA artifact tests, CodeQL, and
+dependency review. Run the same core gate locally before opening a pull
+request:
 
 ```bash
-npm run vinext:check
-npm run lint
-npm run typecheck
-npm run check:lines
-npm run test
-npm run build
+npm run check
+npm run format:check
 npm audit --audit-level=high
-npm run frontend:test
-npm run frontend:test:workflows
-npm run test:pwa
 ```
 
-See the [v1 product specification](specs/001-offline-tournament-pwa/spec.md),
-[session continuity specification](specs/002-session-continuity-sharing/spec.md),
-[late-entry specification](specs/003-late-entry-challenge/spec.md),
-[victory and scorer polish specification](specs/004-victory-sharing-scorer-polish/spec.md),
-[tournament control and sharing specification](specs/005-tournament-control-sharing/spec.md),
-[architecture decisions](docs/architecture), and the
-[verification records](specs).
+For browser checks, keep `npm run dev` running in another terminal:
+
+```bash
+npm run frontend:test
+npm run frontend:test:workflows
+```
+
+`npm run test:pwa` verifies the production service-worker artifacts directly.
 
 ## Privacy
 
-Tournament data and the bounded recent-history ledger are stored only in your
-browser. There is no account, analytics, cloud database, or server API. Share
-images are rendered on the device and leave it only when you use the Share
-control. Clearing site storage deletes local sessions and history.
+Pickle King is local-first by design. Player names, scores, and recent history
+stay in browser storage; the app has no accounts, analytics, cloud database,
+or server API. Share images are generated locally and leave the device only
+when someone chooses to share or download them. Clearing site data removes the
+saved local sessions and history.
+
+## Project structure
+
+- `app/` — thin application shell and route metadata.
+- `src/tournament/` and `src/match/` — deterministic tournament and scoring
+  rules.
+- `src/features/` — user-facing tournament, scoring, sharing, and history
+  flows.
+- `src/persistence/` — validated browser-storage boundary.
+- `tests/` — integration, browser, rendered-output, and PWA checks.
+
+Architecture decisions and feature specifications live in
+[docs/architecture](docs/architecture) and [specs](specs).
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[Code of Conduct](CODE_OF_CONDUCT.md). Please report vulnerabilities privately
-as described in [SECURITY.md](SECURITY.md).
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for
+local setup, branch and pull-request expectations, and required verification.
+By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+For bugs and ideas, use the repository’s issue templates. For responsible
+vulnerability reporting, follow [SECURITY.md](SECURITY.md) rather than opening
+a public issue.
 
 ## License
 
-Pickle King is available under the [MIT License](LICENSE). Third-party software
+Pickle King is released under the [MIT License](LICENSE). Third-party software
 and design acknowledgements are listed in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
