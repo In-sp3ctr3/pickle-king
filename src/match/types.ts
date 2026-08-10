@@ -1,6 +1,23 @@
 import type { MatchSide } from "../tournament";
 
 export type MatchTeam = "A" | "B";
+export type ServiceTurn = "opening" | "first" | "second";
+export type ServiceSide = "left" | "right";
+
+export interface ServiceState {
+  startingTeam: MatchTeam;
+  servingTeam: MatchTeam;
+  serverId: string;
+  turn: ServiceTurn;
+  rightAtZero: Record<MatchTeam, string>;
+}
+
+export interface RallySnapshot {
+  scoreA: number;
+  scoreB: number;
+  service: ServiceState;
+  scoredTeam: MatchTeam | null;
+}
 export type FinishReason =
   "target" | "buzzer" | "golden-point" | "ended-early" | "operator-selection";
 export type ScoringStatus =
@@ -29,11 +46,20 @@ export interface ScoringState {
   winner: MatchTeam | null;
   finishReason: FinishReason | null;
   scoreEvents: MatchTeam[];
+  service: ServiceState | null;
+  rallyHistory: RallySnapshot[];
+  rightEndTeam: MatchTeam;
 }
 
 export type ScoringAction =
   | { type: "start"; now: number }
+  | { type: "start"; now: number; service: ServiceState }
+  | { type: "configure-serve"; service: ServiceState }
   | { type: "adjust"; team: MatchTeam; delta: 1 | -1; now: number }
+  | { type: "rally"; team: MatchTeam; now: number }
+  | { type: "undo-rally"; now: number }
+  | { type: "repair-serve"; turn: "second" | "side-out" }
+  | { type: "swap-court-ends" }
   | { type: "tick"; now: number }
   | { type: "pause"; now: number }
   | { type: "resume"; now: number }

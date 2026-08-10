@@ -3,6 +3,7 @@ import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
 import {
   completeScheduledMatches,
+  confirmServeSetup,
   fillRoundRobinSetup,
 } from "./small-field-harness";
 
@@ -227,6 +228,7 @@ export async function openRoute(page: Page, route: Route) {
       await page
         .getByRole("button", { name: "Start match", exact: true })
         .click();
+      await confirmServeSetup(page);
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='confirm-result']").click();
@@ -270,6 +272,7 @@ export async function openRoute(page: Page, route: Route) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await confirmServeSetup(page);
     await page.locator("[data-qa='score-a-add']").click();
     if (route.prepare === "quick-live") {
       await page.locator("[data-qa='score-b-add']").click();

@@ -3,6 +3,11 @@ import { expect, type Page } from "@playwright/test";
 const NAMES = ["Maya", "Rae", "Kai", "Noah", "Ivy", "Zane"];
 const RATINGS = ["5.5+", "4.5", "4.0", "3.5", "3.0", "2.5"];
 
+export async function confirmServeSetup(page: Page) {
+  await expect(page.locator("[data-qa='serve-setup-dialog']")).toBeVisible();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
+}
+
 export async function fillRoundRobinSetup(
   page: Page,
   options: {
@@ -40,6 +45,7 @@ export async function completeScheduledMatches(page: Page, count: number) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await confirmServeSetup(page);
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='confirm-result']").click();

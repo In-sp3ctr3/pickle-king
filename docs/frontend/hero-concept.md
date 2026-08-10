@@ -1,12 +1,15 @@
 # Home Mascot Hero
 
 Status: ready
+Pipeline version: 2
 Research required: yes
 Motion required: yes
 Motion reason: the existing Pickle King mascot arrives as the product identity
 and blinks without introducing a separate product-demo illustration.
 
 ## Product Story
+
+Experience type: static
 
 - Input: a friend group needs to settle who runs the court.
 - Transformation: the crowned mascot arrives and comes alive with one
@@ -39,6 +42,9 @@ hero.
 - Selected rung: semantic HTML, the supplied raster mark, and CSS animation.
 - Why this rung is necessary: it animates the requested existing logo without
   adding canvas, WebGL, video, or another generated asset.
+- Rejected simpler options: a static logo would not preserve the approved
+  restrained mascot-arrival identity.
+- Prototype required: no
 - Desktop: copy and mascot share the viewport.
 - Mobile: actions remain before the mascot in a single reading column.
 - `prefers-reduced-motion` behavior: no entrance or blink.

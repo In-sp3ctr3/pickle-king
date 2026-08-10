@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { confirmServeSetup } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -36,6 +37,7 @@ async function buildRoundRobin(page: Page, playerCount = 4) {
 async function completeNext(page: Page) {
   await page.locator("[data-qa='start-next']").click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await confirmServeSetup(page);
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='confirm-result']").click();

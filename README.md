@@ -35,9 +35,12 @@ the schedule, and save or share the result—all on the device in your hands.
 ## Screens
 
 <p align="center">
-  <img src="docs/images/readme/home.png" width="32%" alt="Pickle King home screen with tournament and quick-match actions">
-  <img src="docs/images/readme/scoring.png" width="32%" alt="Pickle King live scoring screen with two player scores and match controls">
-  <img src="docs/images/readme/bracket.png" width="32%" alt="Pickle King tournament bracket with the next match and full draw">
+  <img src="docs/images/readme/home.png" width="49%" alt="Pickle King home screen with tournament and quick-match actions">
+  <img src="docs/images/readme/scoring.png" width="49%" alt="Pickle King live doubles scoring screen with the active server and court position">
+</p>
+<p align="center">
+  <img src="docs/images/readme/bracket.png" width="49%" alt="Pickle King six-player tournament bracket with the final ready">
+  <img src="docs/images/readme/results.png" width="49%" alt="Pickle King completed tournament results screen showing the champion">
 </p>
 
 ## Run it locally

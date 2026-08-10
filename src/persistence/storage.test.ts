@@ -85,6 +85,15 @@ describe("snapshot persistence", () => {
     });
   });
 
+  it("defaults a saved scorer without court orientation to side A on the right", () => {
+    const legacy = structuredClone(snapshot()) as unknown as {
+      scorer: { rightEndTeam?: "A" | "B" };
+    };
+    delete legacy.scorer.rightEndTeam;
+
+    expect(migrateSnapshot(legacy).scorer?.rightEndTeam).toBe("A");
+  });
+
   it("reports corrupt JSON and invalid shapes without discarding them", () => {
     const storage = new MemoryStorage();
     storage.value = "{not-json";
@@ -126,7 +135,7 @@ describe("snapshot persistence", () => {
     });
   });
 
-  it("adds draw, comeback, and score-event defaults to earlier v1 sessions", () => {
+  it("adds draw, comeback, scoring, and serve defaults to earlier v1 sessions", () => {
     const legacy = structuredClone(snapshot()) as unknown as {
       version: number;
       scorer: Record<string, unknown>;
@@ -137,10 +146,14 @@ describe("snapshot persistence", () => {
     delete legacy.setupDraft.config.format;
     delete legacy.setupDraft.config.drawStyle;
     delete legacy.scorer.scoreEvents;
+    delete legacy.scorer.service;
+    delete legacy.scorer.rallyHistory;
     legacy.tournament.matches.forEach((match) => delete match.comebackDeficit);
     const migrated = migrateSnapshot(legacy);
     expect(migrated.setupDraft?.config.drawStyle).toBe("ranked");
     expect(migrated.scorer?.scoreEvents).toEqual([]);
+    expect(migrated.scorer?.service).toBeNull();
+    expect(migrated.scorer?.rallyHistory).toEqual([]);
     expect(
       migrated.tournament?.matches.every(
         ({ comebackDeficit }) => comebackDeficit === 0,

@@ -1,18 +1,24 @@
 # Frontend Design Review
 
+Pipeline version: 2
+
 The setup and completed-results reference frames were refreshed after adding the approved tournament-format controls and round-robin result sections. The captures preserve the existing reference-derived visual identity and represent the accepted post-implementation layouts.
 
 Reviewer: design_reviewer
 Result: passed
-Source state:
-Feature 015 small-field round-robin implementation + reviewed working tree
-Reviewed at: 2026-08-08
+Source state: small-field round-robin + serve-tracker release candidate
+Reviewed at: 2026-08-10
 
 Open P0: 0
 Open P1: 0
 Open P2: 0
 
 ## Evidence
+
+- Anti-template evidence: the compact rule-specific court cue extends the existing split-court scorer without adding dashboard cards or decorative sports chrome.
+- Authorship evidence: one legal service box, a solid baseline marker, mirrored court ends, rally-winner targets, and whole-rally undo are visible product-specific decisions.
+- Mobile art-direction evidence: `test-results/frontend-captures/quick-idle-mobile.png` and `test-results/frontend-captures/quick-live-mobile.png` preserve dominant scores and two-row controls at 390×844; the focused browser flow also passes at 319×768.
+- Signature-experience evidence: `tests/playwright/serve-tracker.spec.ts` covers setup, same-server parity switch, cross-net side out, undo, swap, persistence, and reduced-motion-compatible feedback.
 
 <!-- prettier-ignore -->
 - Source captures: docs/frontend/evidence/home-desktop-source.png, docs/frontend/evidence/home-mobile-source.png, docs/frontend/evidence/home-completed-desktop-source.png, docs/frontend/evidence/home-completed-mobile-source.png, docs/frontend/evidence/setup-desktop-source.png, docs/frontend/evidence/setup-mobile-source.png, docs/frontend/evidence/bracket-desktop-source.png, docs/frontend/evidence/bracket-mobile-source.png, docs/frontend/evidence/bracket-completed-desktop-source.png, docs/frontend/evidence/bracket-completed-mobile-source.png, docs/frontend/evidence/quick-setup-desktop-source.png, docs/frontend/evidence/quick-setup-mobile-source.png, docs/frontend/evidence/quick-idle-desktop-source.png, docs/frontend/evidence/quick-idle-mobile-source.png, docs/frontend/evidence/quick-live-desktop-source.png, docs/frontend/evidence/quick-live-mobile-source.png, docs/frontend/evidence/quick-result-desktop-source.png, docs/frontend/evidence/quick-result-mobile-source.png, docs/frontend/evidence/results-desktop-source.png, docs/frontend/evidence/results-mobile-source.png, docs/frontend/evidence/history-desktop-source.png, docs/frontend/evidence/history-mobile-source.png, docs/frontend/evidence/history-populated-desktop-source.png, docs/frontend/evidence/history-populated-mobile-source.png, docs/frontend/evidence/history-results-desktop-source.png, docs/frontend/evidence/history-results-mobile-source.png, docs/frontend/evidence/round-robin-initial-desktop-source.png, docs/frontend/evidence/round-robin-initial-mobile-source.png, docs/frontend/evidence/round-robin-qualified-desktop-source.png, docs/frontend/evidence/round-robin-qualified-mobile-source.png, docs/frontend/evidence/round-robin-completed-desktop-source.png, docs/frontend/evidence/round-robin-completed-mobile-source.png, docs/frontend/evidence/round-robin-results-desktop-source.png, docs/frontend/evidence/round-robin-results-mobile-source.png, docs/frontend/evidence/round-robin-history-results-desktop-source.png, docs/frontend/evidence/round-robin-history-results-mobile-source.png, docs/frontend/evidence/round-robin-five-initial-desktop-source.png, docs/frontend/evidence/round-robin-five-initial-mobile-source.png, docs/frontend/evidence/round-robin-six-timed-desktop-source.png, docs/frontend/evidence/round-robin-six-timed-mobile-source.png, docs/frontend/evidence/round-robin-six-untimed-desktop-source.png, docs/frontend/evidence/round-robin-six-untimed-mobile-source.png, docs/frontend/evidence/round-robin-six-results-desktop-source.png, docs/frontend/evidence/round-robin-six-results-mobile-source.png, docs/frontend/evidence/round-robin-six-history-results-desktop-source.png, docs/frontend/evidence/round-robin-six-history-results-mobile-source.png
@@ -100,6 +106,7 @@ Open P2: 0
 | DR-50 | P2       | phone/landscape   | 844×390 geometry assertion                    | compacted the header and Run of Show while keeping the primary action inside the viewport       | fixed  |
 | DR-51 | P2       | results/history   | completed round-robin captures                | grouped the ledger into Round robin and Placement matches                                       | fixed  |
 | DR-52 | P2       | round-robin/setup | five/six-player route and responsive captures | removed knockout-only advance copy, proved rotating rests, and kept the cap advisory timed-only | fixed  |
+| DR-53 | P1       | scorer/serve      | desktop/mobile serve flow and comparisons     | added the legal full-court cue, solid server marker, rally undo, and persistent side swap       | fixed  |
 
 ## Decision
 
@@ -113,3 +120,5 @@ remain full width. Portrait connector groups are isolated and converge once per
 dependency. The adversarial review has no open P0/P1/P2 finding.
 The 4–6-player round-robin schedule and its expanded contracted states also
 pass desktop, portrait phone, tablet, and landscape-phone review.
+The serve guide, recovery flow, whole-rally undo, and court-side swap also pass
+desktop, 319–390px mobile, reduced-motion, and independent comparison review.

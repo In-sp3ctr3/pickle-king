@@ -1,4 +1,14 @@
-import type { MatchTeam, ScoringAction, ScoringState } from "./types";
+import { repairedService } from "./service";
+import {
+  adjust,
+  finish,
+  rally,
+  remainingMs,
+  tick,
+} from "./scoring-transitions";
+import type { ScoringAction, ScoringState } from "./types";
+
+export { remainingMs } from "./scoring-transitions";
 
 export function createScoringState(input: {
   sideA: ScoringState["sideA"];
@@ -36,94 +46,10 @@ export function createScoringState(input: {
     winner: null,
     finishReason: null,
     scoreEvents: [],
+    service: null,
+    rallyHistory: [],
+    rightEndTeam: "A",
   };
-}
-
-export function remainingMs(state: ScoringState, now: number): number | null {
-  if (state.durationMs === null) return null;
-  if (state.status === "running" && state.deadline !== null) {
-    return Math.max(0, state.deadline - now);
-  }
-  return Math.max(0, state.pausedRemainingMs ?? 0);
-}
-
-function finish(
-  state: ScoringState,
-  winner: MatchTeam,
-  reason: ScoringState["finishReason"],
-  now: number,
-): ScoringState {
-  return {
-    ...state,
-    status: "awaiting-confirmation",
-    deadline: null,
-    pausedRemainingMs: remainingMs(state, now),
-    winner,
-    finishReason: reason,
-  };
-}
-
-function tick(state: ScoringState, now: number): ScoringState {
-  if (
-    state.status !== "running" ||
-    state.durationMs === null ||
-    state.deadline === null ||
-    now < state.deadline
-  ) {
-    return state;
-  }
-  if (state.scoreA === state.scoreB) {
-    return {
-      ...state,
-      status: "golden-point",
-      deadline: null,
-      pausedRemainingMs: 0,
-      finishReason: null,
-    };
-  }
-  return finish(state, state.scoreA > state.scoreB ? "A" : "B", "buzzer", now);
-}
-
-function adjust(
-  initial: ScoringState,
-  team: MatchTeam,
-  delta: 1 | -1,
-  now: number,
-): ScoringState {
-  if (initial.status === "editing-result") {
-    const key = team === "A" ? "scoreA" : "scoreB";
-    return {
-      ...initial,
-      [key]: Math.max(0, initial[key] + delta),
-      scoreEvents: [],
-    };
-  }
-  const state = tick(initial, now);
-  if (!["running", "paused", "golden-point"].includes(state.status)) {
-    return state;
-  }
-  const key = team === "A" ? "scoreA" : "scoreB";
-  const nextScore = Math.max(0, state[key] + delta);
-  if (nextScore === state[key]) return state;
-  const scoreEvents = [...state.scoreEvents];
-  if (delta > 0) scoreEvents.push(team);
-  else {
-    const lastTeamPoint = scoreEvents.lastIndexOf(team);
-    if (lastTeamPoint >= 0) scoreEvents.splice(lastTeamPoint, 1);
-  }
-  const next = { ...state, [key]: nextScore, scoreEvents };
-  if (state.status === "golden-point" && delta < 0) {
-    return finish(next, next.scoreA > next.scoreB ? "A" : "B", "buzzer", now);
-  }
-  if (delta < 0) return next;
-  if (state.status === "golden-point") {
-    return finish(next, team, "golden-point", now);
-  }
-  const lead = Math.abs(next.scoreA - next.scoreB);
-  if (nextScore >= state.targetScore && lead >= 2) {
-    return finish(next, team, "target", now);
-  }
-  return next;
 }
 
 export function scoringReducer(
@@ -135,16 +61,64 @@ export function scoringReducer(
       if (state.status !== "idle") return state;
       return {
         ...state,
+        service: "service" in action ? action.service : state.service,
         status: "running",
         deadline:
           state.pausedRemainingMs === null
             ? null
             : action.now + state.pausedRemainingMs,
       };
+    case "configure-serve":
+      return ["running", "paused", "golden-point"].includes(state.status)
+        ? { ...state, service: action.service, rallyHistory: [] }
+        : state;
     case "tick":
       return tick(state, action.now);
     case "adjust":
       return adjust(state, action.team, action.delta, action.now);
+    case "rally":
+      return rally(state, action.team, action.now);
+    case "undo-rally": {
+      const previous = state.rallyHistory.at(-1);
+      if (
+        !previous ||
+        !["running", "paused", "golden-point"].includes(state.status)
+      )
+        return state;
+      return {
+        ...state,
+        scoreA: previous.scoreA,
+        scoreB: previous.scoreB,
+        service: previous.service,
+        scoreEvents:
+          previous.scoredTeam === null
+            ? state.scoreEvents
+            : state.scoreEvents.slice(0, -1),
+        rallyHistory: state.rallyHistory.slice(0, -1),
+      };
+    }
+    case "repair-serve":
+      return state.service &&
+        ["running", "paused", "golden-point"].includes(state.status)
+        ? {
+            ...state,
+            service: repairedService(
+              {
+                scores: { A: state.scoreA, B: state.scoreB },
+                service: state.service,
+                sides: state,
+              },
+              action.turn,
+            ),
+          }
+        : state;
+    case "swap-court-ends":
+      return ["running", "paused", "golden-point"].includes(state.status)
+        ? {
+            ...state,
+            rightEndTeam: (state.rightEndTeam ?? "A") === "A" ? "B" : "A",
+          }
+        : state;
     case "pause":
       if (state.status !== "running") return state;
       {
@@ -201,6 +175,8 @@ export function scoringReducer(
         winner: null,
         finishReason: null,
         scoreEvents: [],
+        service: null,
+        rallyHistory: [],
       };
     case "review-result": {
       if (state.status !== "editing-result" || state.scoreA === state.scoreB) {
@@ -229,6 +205,8 @@ export function scoringReducer(
         winner: null,
         finishReason: null,
         scoreEvents: [],
+        service: null,
+        rallyHistory: [],
       };
     case "confirm":
       return state.status === "awaiting-confirmation"

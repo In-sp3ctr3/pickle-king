@@ -29,8 +29,13 @@
     "frontend:test": "playwright test tests/playwright/frontend-harness.spec.ts",
     "frontend:test:responsive": "playwright test tests/playwright/responsive-layout.spec.ts",
     "frontend:test:workflows": "playwright test tests/playwright/product-workflows.spec.ts",
-    "frontend:qa": "node scripts/raw-svg-audit.mjs && node scripts/frontend-dead-click-audit.mjs && node scripts/frontend-evidence-preflight.mjs && playwright test tests/playwright/frontend-harness.spec.ts && node scripts/frontend-contract-audit.mjs",
-    "frontend:compare": "node scripts/frontend-visual-compare.mjs"
+    "frontend:qa": "node scripts/raw-svg-audit.mjs && node scripts/frontend-dead-click-audit.mjs && node scripts/frontend-evidence-preflight.mjs && playwright test tests/playwright/frontend-harness.spec.ts && node scripts/frontend-phase-audit.mjs --phase release",
+    "frontend:compare": "node scripts/frontend-visual-compare.mjs",
+    "frontend:audit:capabilities": "node scripts/frontend-capability-preflight.mjs",
+    "frontend:gate": "node scripts/frontend-phase-audit.mjs",
+    "frontend:gate:direction": "node scripts/frontend-phase-audit.mjs --phase direction",
+    "frontend:gate:prototype": "node scripts/frontend-phase-audit.mjs --phase prototype",
+    "frontend:gate:release": "node scripts/frontend-phase-audit.mjs --phase release"
   },
   "repository": {
     "type": "git",

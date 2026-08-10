@@ -1,6 +1,7 @@
 # Frontend Asset Manifest
 
 Status: ready
+Pipeline version: 2
 
 ## Asset Register
 
@@ -57,6 +58,14 @@ Status: ready
 | 21st.dev `tournament bracket podium leaderboard`                                | Leaderboard Podium `13057`                                       | registry metadata; source retrieval quota reached          | React metadata        | confirms center-high podium scale      | visual reference only; no source copied                           |
 | 21st.dev `image preview share download dialog`                                  | Image Preview `19197`; Share Menu `23636`                        | registry metadata; source retrieval quota reached          | React metadata        | useful preview pattern                 | preview pattern only; menu rejected                               |
 | React Bits Spotlight/background families                                        | animated spotlight and backdrop effects                          | MIT plus Commons Clause                                    | varies                | repeats generic glow failure           | rejected; no source copied                                        |
+
+## Capability Plan
+
+| Capability | Purpose                               | Readiness        | Cost/auth/license           | Fallback                  | Verification                                     | Decision |
+| ---------- | ------------------------------------- | ---------------- | --------------------------- | ------------------------- | ------------------------------------------------ | -------- |
+| `dom-css`  | Semantic service guide and mini-court | available        | built-in browser capability | none                      | native browser capability                        | selected |
+| `motion`   | Existing bounded feedback only        | available        | declared project dependency | CSS color/status feedback | `motion` declared in package.json                | selected |
+| `21st`     | Reusable court or scorer candidate    | install-required | optional registry/login     | focused local DOM/CSS     | command unavailable; no generic candidate needed | rejected |
 
 ## Dependencies
 
