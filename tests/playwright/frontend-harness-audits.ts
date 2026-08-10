@@ -80,13 +80,13 @@ export async function observeMotion(
         attributeFilter: [attribute],
       });
       const probeWindow = window as typeof window & {
-        __codexMotionProbe?: {
+        __motionProbe?: {
           states: Set<string>;
           observer: MutationObserver;
           capture: () => void;
         };
       };
-      probeWindow.__codexMotionProbe = { states, observer, capture };
+      probeWindow.__motionProbe = { states, observer, capture };
       return true;
     },
     { selector: check.selector, attribute: check.stateAttribute },
@@ -105,17 +105,17 @@ export async function observeMotion(
   await page.waitForTimeout(check.observationMs);
   const observedStates = await page.evaluate(() => {
     const probeWindow = window as typeof window & {
-      __codexMotionProbe?: {
+      __motionProbe?: {
         states: Set<string>;
         observer: MutationObserver;
         capture: () => void;
       };
     };
-    const probe = probeWindow.__codexMotionProbe;
+    const probe = probeWindow.__motionProbe;
     if (!probe) return [];
     probe.capture();
     probe.observer.disconnect();
-    delete probeWindow.__codexMotionProbe;
+    delete probeWindow.__motionProbe;
     return [...probe.states];
   });
   for (const state of check.requiredStates) {

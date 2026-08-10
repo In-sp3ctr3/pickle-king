@@ -4,9 +4,7 @@ Status: passed locally; deployment pending
 
 ## Evidence
 
-- Supplied result references:
-  `ChatGPT Image Aug 3, 2026, 02_46_25 AM (1).png` and
-  `ChatGPT Image Aug 3, 2026, 02_46_25 AM (2).png`.
+- Supplied result references were used only for visual direction.
 - Generated text-free arena:
   `public/brand/pickle-king-arena.webp`, 1254×1254.
 - Supplied-reference comparison sheets:

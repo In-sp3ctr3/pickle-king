@@ -6,4 +6,4 @@
 3. Replace portrait bracket geometry and compact the statistics composition.
 4. Capture iPad and PNG evidence, then run repository, responsive, Vinext, and
    PWA gates.
-5. Deliver through a verified `codex/` branch and deploy the merged commit.
+5. Deliver through a verified feature branch and deploy the merged commit.

@@ -1,6 +1,6 @@
 # Starter Evaluation
 
-Starter: connected Sites Vinext starter  
+Starter: Vinext application starter
 Decision: adopt selectively
 
 ## Keep
@@ -18,7 +18,7 @@ Decision: adopt selectively
 ## Remove
 
 - D1/Drizzle schema, examples, database dependency, and generation config
-- ChatGPT authentication example
+- unused authentication example
 
 ## Risk checks
 

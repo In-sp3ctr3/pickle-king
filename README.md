@@ -47,6 +47,7 @@ npm run typecheck
 npm run check:lines
 npm run test
 npm run build
+npm audit --audit-level=high
 npm run frontend:test
 npm run frontend:test:workflows
 npm run test:pwa

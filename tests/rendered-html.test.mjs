@@ -28,5 +28,5 @@ test("server-renders the public landing shell", async () => {
     html,
     /home-product-sequence|pickle-king-hero|splatter-mask/,
   );
-  assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/);
+  assert.doesNotMatch(html, /react-loading-skeleton/);
 });

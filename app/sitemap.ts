@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pickle-king.openai-sites.com";
+import { siteUrl } from "./site-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  if (!siteUrl) return [];
+
   return [
     {
       url: siteUrl,

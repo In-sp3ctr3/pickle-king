@@ -1,11 +1,9 @@
 import type { MetadataRoute } from "next";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pickle-king.openai-sites.com";
+import { siteUrl } from "./site-url";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/" },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: siteUrl ? `${siteUrl}/sitemap.xml` : undefined,
   };
 }

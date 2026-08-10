@@ -4,12 +4,10 @@ import "@fontsource/manrope/latin-400.css";
 import "@fontsource/manrope/latin-700.css";
 import "@fontsource/manrope/latin-800.css";
 import "./globals.css";
-
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://pickle-king.openai-sites.com";
+import { siteUrl } from "./site-url";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
   title: {
     default: "Pickle King | Run the court. Crown the best.",
     template: "%s · Pickle King",

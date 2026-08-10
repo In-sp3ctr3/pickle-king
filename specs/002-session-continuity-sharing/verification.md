@@ -33,8 +33,6 @@ Status: released
 - First-load hydration correction: [#14](https://github.com/In-sp3ctr3/pickle-king/pull/14),
   squash-merged after the same protected checks passed.
 - Released source commit: `f247eaf65ad12018f775fd3babf4801ca8332110`.
-- Sites project: `appgprj_6a6bc1d6202c819180f194d1a520816b`, version 9.
-- Production URL: <https://pickle-king.spectrecodehub.chatgpt.site>.
 - Post-deploy smoke: draw editing, result and bracket PNG downloads, iPad
   editor layout, Quick Match history, and remembered-name reuse passed against
   the live deployment. The shell keeps visible home controls disabled until
