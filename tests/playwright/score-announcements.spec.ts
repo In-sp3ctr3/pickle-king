@@ -18,7 +18,8 @@ test("announces the next serve and remembers mute", async ({ page }) => {
       pause() {}
 
       play() {
-        target.__announcerClips.push(this.src.split("/").at(-1) ?? this.src);
+        const parts = this.src.split("/");
+        target.__announcerClips.push(parts.slice(-2).join("/"));
         window.sessionStorage.setItem(
           "announcer-clips",
           JSON.stringify(target.__announcerClips),
@@ -50,11 +51,13 @@ test("announces the next serve and remembers mute", async ({ page }) => {
     );
   const sound = page.locator("[data-qa='score-sound-toggle']");
 
-  await expect.poll(announcerClips).toEqual(["0.mp3", "0.mp3"]);
+  await expect
+    .poll(announcerClips)
+    .toEqual(["continue-a/0.mp3", "end-b/0.mp3"]);
   await sound.click();
   await expect(sound).toHaveAttribute("aria-pressed", "true");
   await page.locator("[data-qa='score-a-add']").click();
-  expect(await announcerClips()).toEqual(["0.mp3", "0.mp3"]);
+  expect(await announcerClips()).toEqual(["continue-a/0.mp3", "end-b/0.mp3"]);
 
   await page.reload({ waitUntil: "networkidle" });
   await expect(sound).toHaveAccessibleName("Unmute score announcements");
@@ -62,5 +65,10 @@ test("announces the next serve and remembers mute", async ({ page }) => {
   await page.locator("[data-qa='score-a-add']").click();
   await expect
     .poll(announcerClips)
-    .toEqual(["0.mp3", "0.mp3", "2.mp3", "0.mp3"]);
+    .toEqual([
+      "continue-a/0.mp3",
+      "end-b/0.mp3",
+      "continue-a/2.mp3",
+      "end-b/0.mp3",
+    ]);
 });

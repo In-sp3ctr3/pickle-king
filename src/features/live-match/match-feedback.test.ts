@@ -42,14 +42,14 @@ describe("score announcements", () => {
     };
 
     expect(clips(null, opening)).toEqual([
-      ["0", 180],
-      ["0", 180],
-      ["2", 0],
+      ["continue-a/0", 0],
+      ["continue-b/0", 0],
+      ["end-a/2", 0],
     ]);
     expect(clips(null, receivingTeamNowServes)).toEqual([
-      ["2", 180],
-      ["1", 180],
-      ["1", 0],
+      ["continue-a/2", 0],
+      ["continue-b/1", 0],
+      ["end-a/1", 0],
     ]);
   });
 
@@ -75,8 +75,24 @@ describe("score announcements", () => {
     });
 
     expect(clips(null, live)).toEqual([
-      ["0", 180],
-      ["0", 0],
+      ["continue-a/0", 0],
+      ["end-b/0", 0],
+    ]);
+    expect(
+      clips(null, {
+        ...live,
+        rallyHistory: [
+          {
+            scoreA: 0,
+            scoreB: 0,
+            scoredTeam: null,
+            service: live.service!,
+          },
+        ],
+      }),
+    ).toEqual([
+      ["continue-b/0", 0],
+      ["end-a/0", 0],
     ]);
   });
 
@@ -101,11 +117,11 @@ describe("score announcements", () => {
     };
 
     expect(clips(previous, next)).toEqual([
-      ["side-out", 480],
-      ["match-point", 480],
-      ["10", 180],
-      ["8", 180],
-      ["1", 0],
+      ["side-out", 160],
+      ["match-point", 160],
+      ["continue-a/10", 0],
+      ["continue-b/8", 0],
+      ["end-a/1", 0],
     ]);
   });
 
@@ -127,10 +143,11 @@ describe("score announcements", () => {
     };
 
     expect(clips(previous, finished)).toEqual([
-      ["game", 520],
-      ["final-score", 420],
-      ["11", 260],
-      ["7", 0],
+      ["game", 160],
+      ["final-score", 140],
+      ["continue-a/11", 0],
+      ["to", 0],
+      ["end-b/7", 0],
     ]);
   });
 });

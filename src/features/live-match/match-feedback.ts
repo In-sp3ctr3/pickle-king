@@ -36,7 +36,7 @@ function isMatchPoint(scorer: ScoringState): boolean {
 
 function numberClips(
   values: number[],
-  pauseAfterMs: number,
+  scorer: ScoringState,
 ): AnnouncementClip[] {
   // ponytail: bundled clips cover real-world scores through 109; extend the
   // generated pack if Pickle King ever supports longer-format scoring.
@@ -48,10 +48,18 @@ function numberClips(
   ) {
     return [];
   }
-  return values.map((value, index) => ({
-    name: String(value),
-    pauseAfterMs: index === values.length - 1 ? 0 : pauseAfterMs,
-  }));
+  return values.map((value, index) => {
+    const last = index === values.length - 1;
+    const variation =
+      (scorer.rallyHistory.length + index) % 2 === 0 ? "a" : "b";
+    return {
+      name:
+        value <= 21
+          ? `${last ? "end" : "continue"}-${variation}/${value}`
+          : String(value),
+      pauseAfterMs: 0,
+    };
+  });
 }
 
 export function announcementSequence(
@@ -63,23 +71,30 @@ export function announcementSequence(
       scorer.winner === "A"
         ? [scorer.scoreA, scorer.scoreB]
         : [scorer.scoreB, scorer.scoreA];
+    const finalScores = numberClips(scores, scorer);
+    if (finalScores.length !== 2) {
+      return [{ name: "game", pauseAfterMs: 0 }];
+    }
+    const [winnerScore, loserScore] = finalScores;
     return [
-      { name: "game", pauseAfterMs: 520 },
-      { name: "final-score", pauseAfterMs: 420 },
-      ...numberClips(scores, 260),
+      { name: "game", pauseAfterMs: 160 },
+      { name: "final-score", pauseAfterMs: 140 },
+      winnerScore,
+      { name: "to", pauseAfterMs: 0 },
+      loserScore,
     ];
   }
-  const score = numberClips(scoreValues(scorer), 180);
+  const score = numberClips(scoreValues(scorer), scorer);
   if (score.length === 0) return [];
   const calls: AnnouncementClip[] = [];
   if (
     previous?.service &&
     previous.service.servingTeam !== scorer.service?.servingTeam
   ) {
-    calls.push({ name: "side-out", pauseAfterMs: 480 });
+    calls.push({ name: "side-out", pauseAfterMs: 160 });
   }
   if (isMatchPoint(scorer)) {
-    calls.push({ name: "match-point", pauseAfterMs: 480 });
+    calls.push({ name: "match-point", pauseAfterMs: 160 });
   }
   return [...calls, ...score];
 }
