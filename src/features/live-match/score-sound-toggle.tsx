@@ -13,17 +13,24 @@ const SCORE_MUTED_KEY = "pickle-king:score-muted";
 export function ScoreSoundToggle({ scorer }: { scorer: ScoringState }) {
   const [muted, setMuted] = useState(false);
   const previousAnnouncement = useRef<string | null | undefined>(undefined);
-  const announcementKey = scorer.service
-    ? [
-        scorer.scoreA,
-        scorer.scoreB,
-        scorer.service.servingTeam,
-        scorer.service.serverId,
-        scorer.service.turn,
-      ].join(":")
-    : null;
+  const previousScorer = useRef<ScoringState | null>(null);
+  const finished = ["awaiting-confirmation", "complete"].includes(
+    scorer.status,
+  );
+  const announcementKey = finished
+    ? ["finished", scorer.scoreA, scorer.scoreB, scorer.winner].join(":")
+    : scorer.service
+      ? [
+          scorer.scoreA,
+          scorer.scoreB,
+          scorer.service.servingTeam,
+          scorer.service.serverId,
+          scorer.service.turn,
+        ].join(":")
+      : null;
 
   useEffect(() => {
+    window.speechSynthesis?.getVoices();
     const frame = requestAnimationFrame(() => {
       setMuted(window.localStorage.getItem(SCORE_MUTED_KEY) === "true");
     });
@@ -32,10 +39,12 @@ export function ScoreSoundToggle({ scorer }: { scorer: ScoringState }) {
 
   useEffect(() => {
     const initial = previousAnnouncement.current === undefined;
+    const previous = previousScorer.current;
+    previousScorer.current = scorer;
     if (previousAnnouncement.current === announcementKey) return;
     previousAnnouncement.current = announcementKey;
     if (!initial && announcementKey && !muted) {
-      speakScoreAnnouncement(scorer);
+      speakScoreAnnouncement(scorer, previous);
     }
   }, [announcementKey, muted, scorer]);
 

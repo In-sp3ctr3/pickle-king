@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createScoringState, scoringReducer } from "../../match/scoring";
 import type { ScoringState, ServiceState } from "../../match/types";
-import { scoreAnnouncement, speakScoreAnnouncement } from "./match-feedback";
+import {
+  matchAnnouncement,
+  scoreAnnouncement,
+  speakScoreAnnouncement,
+} from "./match-feedback";
 
 function liveScorer(service: ServiceState): ScoringState {
   const scorer = createScoringState({
@@ -65,15 +69,88 @@ describe("score announcements", () => {
     expect(scoreAnnouncement(live)).toBe("0, 0");
   });
 
+  it("adds side-out and match-point calls when the service changes", () => {
+    const previous = liveScorer({
+      startingTeam: "B",
+      servingTeam: "B",
+      serverId: "b2",
+      turn: "second",
+      rightAtZero: { A: "a1", B: "b1" },
+    });
+    const next: ScoringState = {
+      ...previous,
+      scoreA: 10,
+      scoreB: 8,
+      service: {
+        ...previous.service!,
+        servingTeam: "A",
+        serverId: "a1",
+        turn: "first",
+      },
+    };
+
+    expect(matchAnnouncement(previous, next)).toBe(
+      "That's a side out. Match point. 10, 8, 1.",
+    );
+  });
+
+  it("announces the winner and final score when the game ends", () => {
+    const previous = liveScorer({
+      startingTeam: "A",
+      servingTeam: "A",
+      serverId: "a1",
+      turn: "first",
+      rightAtZero: { A: "a1", B: "b1" },
+    });
+    const finished: ScoringState = {
+      ...previous,
+      labelA: "Alex and Casey",
+      scoreA: 11,
+      scoreB: 7,
+      status: "awaiting-confirmation",
+      winner: "A",
+      finishReason: "target",
+    };
+
+    expect(matchAnnouncement(previous, finished)).toBe(
+      "Game! The win goes to Alex and Casey, 11 to 7.",
+    );
+  });
+
   it("replaces queued speech with the latest score", () => {
     const cancel = vi.fn();
     const speak = vi.fn();
+    const naturalVoice = {
+      default: false,
+      lang: "en-US",
+      localService: true,
+      name: "Ava",
+      voiceURI: "Ava",
+    } as SpeechSynthesisVoice;
     class Utterance {
+      pitch = 1;
+      rate = 1;
+      voice: SpeechSynthesisVoice | null = null;
+
       constructor(public text: string) {}
     }
     vi.stubGlobal("window", {
-      speechSynthesis: { cancel, speak },
+      navigator: { language: "en-US" },
+      speechSynthesis: {
+        cancel,
+        getVoices: () => [
+          {
+            ...naturalVoice,
+            default: true,
+            name: "Plain Voice",
+            voiceURI: "Plain Voice",
+          },
+          naturalVoice,
+        ],
+        speak,
+      },
     });
+    vi.stubGlobal("navigator", { language: "en-US" });
     vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
     const scorer = liveScorer({
       startingTeam: "A",
@@ -87,7 +164,12 @@ describe("score announcements", () => {
 
     expect(cancel).toHaveBeenCalledOnce();
     expect(speak).toHaveBeenCalledWith(
-      expect.objectContaining({ text: "0, 0, 2" }),
+      expect.objectContaining({
+        pitch: 1.04,
+        rate: 1.03,
+        text: "0, 0, 2",
+        voice: naturalVoice,
+      }),
     );
   });
 });

@@ -14,12 +14,87 @@ export function scoreAnnouncement(scorer: ScoringState): string | null {
   return scores.join(", ");
 }
 
+function isMatchPoint(scorer: ScoringState): boolean {
+  if (!scorer.service) return false;
+  const servingScore =
+    scorer.service.servingTeam === "A" ? scorer.scoreA : scorer.scoreB;
+  const receivingScore =
+    scorer.service.servingTeam === "A" ? scorer.scoreB : scorer.scoreA;
+  return (
+    servingScore + 1 >= scorer.targetScore &&
+    servingScore + 1 - receivingScore >= 2
+  );
+}
+
+export function matchAnnouncement(
+  previous: ScoringState | null,
+  scorer: ScoringState,
+): string | null {
+  if (scorer.status === "awaiting-confirmation" && scorer.winner) {
+    const winner = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
+    return `Game! The win goes to ${winner}, ${scorer.scoreA} to ${scorer.scoreB}.`;
+  }
+  const score = scoreAnnouncement(scorer);
+  if (!score) return null;
+  const calls = [];
+  if (
+    previous?.service &&
+    previous.service.servingTeam !== scorer.service?.servingTeam
+  ) {
+    calls.push("That's a side out.");
+  }
+  if (isMatchPoint(scorer)) calls.push("Match point.");
+  calls.push(`${score}.`);
+  return calls.join(" ");
+}
+
+function preferredVoice(
+  voices: SpeechSynthesisVoice[],
+  locale: string,
+): SpeechSynthesisVoice | undefined {
+  const preferredNames = [
+    "natural",
+    "premium",
+    "enhanced",
+    "siri",
+    "ava",
+    "zoe",
+    "serena",
+    "aria",
+    "jenny",
+    "google",
+  ];
+  const language = locale.toLowerCase();
+  return voices
+    .filter((voice) => voice.lang.toLowerCase().startsWith("en"))
+    .map((voice) => {
+      const name = voice.name.toLowerCase();
+      const preference = preferredNames.findIndex((value) =>
+        name.includes(value),
+      );
+      const voiceLanguage = voice.lang.toLowerCase();
+      const score =
+        (preference < 0 ? 0 : 100 - preference) +
+        (voiceLanguage === language ? 20 : 0) +
+        (voiceLanguage.split("-")[0] === language.split("-")[0] ? 10 : 0) +
+        (voice.localService ? 2 : 0) +
+        (voice.default ? 1 : 0);
+      return { score, voice };
+    })
+    .sort((left, right) => right.score - left.score)[0]?.voice;
+}
+
 export function stopScoreAnnouncement(): void {
   if (typeof window !== "undefined") window.speechSynthesis?.cancel();
 }
 
-export function speakScoreAnnouncement(scorer: ScoringState): void {
-  const message = scoreAnnouncement(scorer);
+export function speakScoreAnnouncement(
+  scorer: ScoringState,
+  previous: ScoringState | null = null,
+): void {
+  const message = previous
+    ? matchAnnouncement(previous, scorer)
+    : scoreAnnouncement(scorer);
   if (
     !message ||
     typeof window === "undefined" ||
@@ -30,7 +105,18 @@ export function speakScoreAnnouncement(scorer: ScoringState): void {
   }
   try {
     stopScoreAnnouncement();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(message));
+    const utterance = new SpeechSynthesisUtterance(message);
+    const voice = preferredVoice(
+      window.speechSynthesis.getVoices(),
+      window.navigator.language,
+    );
+    if (voice) {
+      utterance.voice = voice;
+      utterance.lang = voice.lang;
+    }
+    utterance.rate = 1.03;
+    utterance.pitch = 1.04;
+    window.speechSynthesis.speak(utterance);
   } catch {
     // The visible score remains available when speech is blocked.
   }

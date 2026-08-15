@@ -19,6 +19,9 @@ test("announces the next serve and remembers mute", async ({ page }) => {
       configurable: true,
       value: {
         cancel() {},
+        getVoices() {
+          return [];
+        },
         speak(utterance: TestUtterance) {
           target.__spokenScores.push(utterance.text);
           window.sessionStorage.setItem(
@@ -46,15 +49,15 @@ test("announces the next serve and remembers mute", async ({ page }) => {
     );
   const sound = page.locator("[data-qa='score-sound-toggle']");
 
-  await expect.poll(spokenScores).toEqual(["0, 0"]);
+  await expect.poll(spokenScores).toEqual(["0, 0."]);
   await sound.click();
   await expect(sound).toHaveAttribute("aria-pressed", "true");
   await page.locator("[data-qa='score-a-add']").click();
-  expect(await spokenScores()).toEqual(["0, 0"]);
+  expect(await spokenScores()).toEqual(["0, 0."]);
 
   await page.reload({ waitUntil: "networkidle" });
   await expect(sound).toHaveAccessibleName("Unmute score announcements");
   await sound.click();
   await page.locator("[data-qa='score-a-add']").click();
-  await expect.poll(spokenScores).toEqual(["0, 0", "2, 0"]);
+  await expect.poll(spokenScores).toEqual(["0, 0.", "2, 0."]);
 });
