@@ -20,6 +20,7 @@ import { MatchClock } from "./match-clock";
 import { playBuzzer } from "./match-feedback";
 import { ResultConfirmationDialog } from "./result-confirmation-dialog";
 import { MatchScoreboard } from "./match-scoreboard";
+import { ScoreSoundToggle } from "./score-sound-toggle";
 import { ServeGuide } from "./serve-guide";
 import { ServeTrackerDialogs } from "./serve-tracker-dialogs";
 import { useWakeLock } from "./use-wake-lock";
@@ -100,9 +101,12 @@ export function MatchScreen({
         Live match: {scorer.labelA} versus {scorer.labelB}
       </h1>
       <header className="match-topbar">
-        <button className="text-button" onClick={onExit} type="button">
-          Exit
-        </button>
+        <div className="match-topbar__actions">
+          <button className="text-button" onClick={onExit} type="button">
+            Exit
+          </button>
+          <ScoreSoundToggle scorer={scorer} />
+        </div>
         <MatchClock
           onExpire={(now) => send({ type: "tick", now })}
           scorer={scorer}
