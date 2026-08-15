@@ -1,11 +1,13 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createScoringState, scoringReducer } from "../../match/scoring";
 import type { ScoringState, ServiceState } from "../../match/types";
-import {
-  matchAnnouncement,
-  scoreAnnouncement,
-  speakScoreAnnouncement,
-} from "./match-feedback";
+import { announcementSequence } from "./match-feedback";
+
+function clips(previous: ScoringState | null, scorer: ScoringState) {
+  return announcementSequence(previous, scorer).map(
+    ({ name, pauseAfterMs }) => [name, pauseAfterMs] as const,
+  );
+}
 
 function liveScorer(service: ServiceState): ScoringState {
   const scorer = createScoringState({
@@ -20,8 +22,6 @@ function liveScorer(service: ServiceState): ScoringState {
 }
 
 describe("score announcements", () => {
-  afterEach(() => vi.unstubAllGlobals());
-
   it("calls the serving score first and maps the opening turn to Server 2", () => {
     const opening = liveScorer({
       startingTeam: "A",
@@ -41,8 +41,16 @@ describe("score announcements", () => {
       },
     };
 
-    expect(scoreAnnouncement(opening)).toBe("0, 0, 2");
-    expect(scoreAnnouncement(receivingTeamNowServes)).toBe("2, 1, 1");
+    expect(clips(null, opening)).toEqual([
+      ["0", 180],
+      ["0", 180],
+      ["2", 0],
+    ]);
+    expect(clips(null, receivingTeamNowServes)).toEqual([
+      ["2", 180],
+      ["1", 180],
+      ["1", 0],
+    ]);
   });
 
   it("omits the server number for singles", () => {
@@ -66,7 +74,10 @@ describe("score announcements", () => {
       },
     });
 
-    expect(scoreAnnouncement(live)).toBe("0, 0");
+    expect(clips(null, live)).toEqual([
+      ["0", 180],
+      ["0", 0],
+    ]);
   });
 
   it("adds side-out and match-point calls when the service changes", () => {
@@ -89,9 +100,13 @@ describe("score announcements", () => {
       },
     };
 
-    expect(matchAnnouncement(previous, next)).toBe(
-      "That's a side out. Match point. 10, 8, 1.",
-    );
+    expect(clips(previous, next)).toEqual([
+      ["side-out", 480],
+      ["match-point", 480],
+      ["10", 180],
+      ["8", 180],
+      ["1", 0],
+    ]);
   });
 
   it("announces the winner and final score when the game ends", () => {
@@ -104,72 +119,18 @@ describe("score announcements", () => {
     });
     const finished: ScoringState = {
       ...previous,
-      labelA: "Alex and Casey",
-      scoreA: 11,
-      scoreB: 7,
+      scoreA: 7,
+      scoreB: 11,
       status: "awaiting-confirmation",
-      winner: "A",
+      winner: "B",
       finishReason: "target",
     };
 
-    expect(matchAnnouncement(previous, finished)).toBe(
-      "Game! The win goes to Alex and Casey, 11 to 7.",
-    );
-  });
-
-  it("replaces queued speech with the latest score", () => {
-    const cancel = vi.fn();
-    const speak = vi.fn();
-    const naturalVoice = {
-      default: false,
-      lang: "en-US",
-      localService: true,
-      name: "Ava",
-      voiceURI: "Ava",
-    } as SpeechSynthesisVoice;
-    class Utterance {
-      pitch = 1;
-      rate = 1;
-      voice: SpeechSynthesisVoice | null = null;
-
-      constructor(public text: string) {}
-    }
-    vi.stubGlobal("window", {
-      navigator: { language: "en-US" },
-      speechSynthesis: {
-        cancel,
-        getVoices: () => [
-          {
-            ...naturalVoice,
-            default: true,
-            name: "Plain Voice",
-            voiceURI: "Plain Voice",
-          },
-          naturalVoice,
-        ],
-        speak,
-      },
-    });
-    vi.stubGlobal("navigator", { language: "en-US" });
-    vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
-    const scorer = liveScorer({
-      startingTeam: "A",
-      servingTeam: "A",
-      serverId: "a1",
-      turn: "opening",
-      rightAtZero: { A: "a1", B: "b1" },
-    });
-
-    speakScoreAnnouncement(scorer);
-
-    expect(cancel).toHaveBeenCalledOnce();
-    expect(speak).toHaveBeenCalledWith(
-      expect.objectContaining({
-        pitch: 1.04,
-        rate: 1.03,
-        text: "0, 0, 2",
-        voice: naturalVoice,
-      }),
-    );
+    expect(clips(previous, finished)).toEqual([
+      ["game", 520],
+      ["final-score", 420],
+      ["11", 260],
+      ["7", 0],
+    ]);
   });
 });

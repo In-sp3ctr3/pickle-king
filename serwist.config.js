@@ -3,7 +3,7 @@ const config = {
   esbuildOptions: { format: "iife" },
   globDirectory: "dist/client",
   globIgnores: ["**/*.map", "sw.js"],
-  globPatterns: ["**/*.{css,html,ico,js,json,png,svg,webp,woff,woff2,xml}"],
+  globPatterns: ["**/*.{css,html,ico,js,json,mp3,png,svg,webp,woff,woff2,xml}"],
   injectionPoint: "self.__SW_MANIFEST",
   maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
   swDest: "dist/client/sw.js",

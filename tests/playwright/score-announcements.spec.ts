@@ -4,32 +4,32 @@ const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
 test("announces the next serve and remembers mute", async ({ page }) => {
   await page.addInitScript(() => {
-    const target = window as typeof window & { __spokenScores: string[] };
-    target.__spokenScores = JSON.parse(
-      window.sessionStorage.getItem("spoken-scores") ?? "[]",
+    const target = window as typeof window & { __announcerClips: string[] };
+    target.__announcerClips = JSON.parse(
+      window.sessionStorage.getItem("announcer-clips") ?? "[]",
     ) as string[];
-    class TestUtterance {
-      constructor(public text: string) {}
+    class TestAudio {
+      onended: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      preload = "";
+
+      constructor(public src: string) {}
+
+      pause() {}
+
+      play() {
+        target.__announcerClips.push(this.src.split("/").at(-1) ?? this.src);
+        window.sessionStorage.setItem(
+          "announcer-clips",
+          JSON.stringify(target.__announcerClips),
+        );
+        setTimeout(() => this.onended?.(), 0);
+        return Promise.resolve();
+      }
     }
-    Object.defineProperty(window, "SpeechSynthesisUtterance", {
+    Object.defineProperty(window, "Audio", {
       configurable: true,
-      value: TestUtterance,
-    });
-    Object.defineProperty(window, "speechSynthesis", {
-      configurable: true,
-      value: {
-        cancel() {},
-        getVoices() {
-          return [];
-        },
-        speak(utterance: TestUtterance) {
-          target.__spokenScores.push(utterance.text);
-          window.sessionStorage.setItem(
-            "spoken-scores",
-            JSON.stringify(target.__spokenScores),
-          );
-        },
-      },
+      value: TestAudio,
     });
   });
   await page.goto(baseUrl, { waitUntil: "networkidle" });
@@ -42,22 +42,25 @@ test("announces the next serve and remembers mute", async ({ page }) => {
   await page.getByRole("button", { name: "Start match", exact: true }).click();
   await page.locator("[data-qa='confirm-serve-setup']").click();
 
-  const spokenScores = () =>
+  const announcerClips = () =>
     page.evaluate(
       () =>
-        (window as typeof window & { __spokenScores: string[] }).__spokenScores,
+        (window as typeof window & { __announcerClips: string[] })
+          .__announcerClips,
     );
   const sound = page.locator("[data-qa='score-sound-toggle']");
 
-  await expect.poll(spokenScores).toEqual(["0, 0."]);
+  await expect.poll(announcerClips).toEqual(["0.mp3", "0.mp3"]);
   await sound.click();
   await expect(sound).toHaveAttribute("aria-pressed", "true");
   await page.locator("[data-qa='score-a-add']").click();
-  expect(await spokenScores()).toEqual(["0, 0."]);
+  expect(await announcerClips()).toEqual(["0.mp3", "0.mp3"]);
 
   await page.reload({ waitUntil: "networkidle" });
   await expect(sound).toHaveAccessibleName("Unmute score announcements");
   await sound.click();
   await page.locator("[data-qa='score-a-add']").click();
-  await expect.poll(spokenScores).toEqual(["0, 0.", "2, 0."]);
+  await expect
+    .poll(announcerClips)
+    .toEqual(["0.mp3", "0.mp3", "2.mp3", "0.mp3"]);
 });

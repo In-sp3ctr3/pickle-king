@@ -3,10 +3,7 @@
 import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ScoringState } from "../../match/types";
-import {
-  speakScoreAnnouncement,
-  stopScoreAnnouncement,
-} from "./match-feedback";
+import { playScoreAnnouncement, stopScoreAnnouncement } from "./match-feedback";
 
 const SCORE_MUTED_KEY = "pickle-king:score-muted";
 
@@ -30,11 +27,13 @@ export function ScoreSoundToggle({ scorer }: { scorer: ScoringState }) {
       : null;
 
   useEffect(() => {
-    window.speechSynthesis?.getVoices();
     const frame = requestAnimationFrame(() => {
       setMuted(window.localStorage.getItem(SCORE_MUTED_KEY) === "true");
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      stopScoreAnnouncement();
+    };
   }, []);
 
   useEffect(() => {
@@ -44,7 +43,7 @@ export function ScoreSoundToggle({ scorer }: { scorer: ScoringState }) {
     if (previousAnnouncement.current === announcementKey) return;
     previousAnnouncement.current = announcementKey;
     if (!initial && announcementKey && !muted) {
-      speakScoreAnnouncement(scorer, previous);
+      playScoreAnnouncement(scorer, previous);
     }
   }, [announcementKey, muted, scorer]);
 

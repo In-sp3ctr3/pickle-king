@@ -1,9 +1,17 @@
 import { isDoubles } from "../../match/service";
 import type { ScoringState } from "../../match/types";
 
-export function scoreAnnouncement(scorer: ScoringState): string | null {
+const ANNOUNCER_ROOT = "/audio/announcer/fenrir";
+const NUMBER_CLIP_MAX = 109;
+
+export interface AnnouncementClip {
+  name: string;
+  pauseAfterMs: number;
+}
+
+function scoreValues(scorer: ScoringState): number[] {
   const team = scorer.service?.servingTeam;
-  if (!team || !scorer.service) return null;
+  if (!team || !scorer.service) return [];
   const scores =
     team === "A"
       ? [scorer.scoreA, scorer.scoreB]
@@ -11,7 +19,7 @@ export function scoreAnnouncement(scorer: ScoringState): string | null {
   if (isDoubles(scorer, team)) {
     scores.push(scorer.service.turn === "first" ? 1 : 2);
   }
-  return scores.join(", ");
+  return scores;
 }
 
 function isMatchPoint(scorer: ScoringState): boolean {
@@ -26,100 +34,105 @@ function isMatchPoint(scorer: ScoringState): boolean {
   );
 }
 
-export function matchAnnouncement(
+function numberClips(
+  values: number[],
+  pauseAfterMs: number,
+): AnnouncementClip[] {
+  // ponytail: bundled clips cover real-world scores through 109; extend the
+  // generated pack if Pickle King ever supports longer-format scoring.
+  if (
+    values.some(
+      (value) =>
+        !Number.isInteger(value) || value < 0 || value > NUMBER_CLIP_MAX,
+    )
+  ) {
+    return [];
+  }
+  return values.map((value, index) => ({
+    name: String(value),
+    pauseAfterMs: index === values.length - 1 ? 0 : pauseAfterMs,
+  }));
+}
+
+export function announcementSequence(
   previous: ScoringState | null,
   scorer: ScoringState,
-): string | null {
+): AnnouncementClip[] {
   if (scorer.status === "awaiting-confirmation" && scorer.winner) {
-    const winner = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
-    return `Game! The win goes to ${winner}, ${scorer.scoreA} to ${scorer.scoreB}.`;
+    const scores =
+      scorer.winner === "A"
+        ? [scorer.scoreA, scorer.scoreB]
+        : [scorer.scoreB, scorer.scoreA];
+    return [
+      { name: "game", pauseAfterMs: 520 },
+      { name: "final-score", pauseAfterMs: 420 },
+      ...numberClips(scores, 260),
+    ];
   }
-  const score = scoreAnnouncement(scorer);
-  if (!score) return null;
-  const calls = [];
+  const score = numberClips(scoreValues(scorer), 180);
+  if (score.length === 0) return [];
+  const calls: AnnouncementClip[] = [];
   if (
     previous?.service &&
     previous.service.servingTeam !== scorer.service?.servingTeam
   ) {
-    calls.push("That's a side out.");
+    calls.push({ name: "side-out", pauseAfterMs: 480 });
   }
-  if (isMatchPoint(scorer)) calls.push("Match point.");
-  calls.push(`${score}.`);
-  return calls.join(" ");
+  if (isMatchPoint(scorer)) {
+    calls.push({ name: "match-point", pauseAfterMs: 480 });
+  }
+  return [...calls, ...score];
 }
 
-function preferredVoice(
-  voices: SpeechSynthesisVoice[],
-  locale: string,
-): SpeechSynthesisVoice | undefined {
-  const preferredNames = [
-    "natural",
-    "premium",
-    "enhanced",
-    "siri",
-    "ava",
-    "zoe",
-    "serena",
-    "aria",
-    "jenny",
-    "google",
-  ];
-  const language = locale.toLowerCase();
-  return voices
-    .filter((voice) => voice.lang.toLowerCase().startsWith("en"))
-    .map((voice) => {
-      const name = voice.name.toLowerCase();
-      const preference = preferredNames.findIndex((value) =>
-        name.includes(value),
-      );
-      const voiceLanguage = voice.lang.toLowerCase();
-      const score =
-        (preference < 0 ? 0 : 100 - preference) +
-        (voiceLanguage === language ? 20 : 0) +
-        (voiceLanguage.split("-")[0] === language.split("-")[0] ? 10 : 0) +
-        (voice.localService ? 2 : 0) +
-        (voice.default ? 1 : 0);
-      return { score, voice };
-    })
-    .sort((left, right) => right.score - left.score)[0]?.voice;
-}
+let activeAudio: HTMLAudioElement | null = null;
+let finishActiveClip: (() => void) | null = null;
+let announcementRun = 0;
 
 export function stopScoreAnnouncement(): void {
-  if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+  announcementRun += 1;
+  activeAudio?.pause();
+  finishActiveClip?.();
+  activeAudio = null;
+  finishActiveClip = null;
 }
 
-export function speakScoreAnnouncement(
+function playClip(name: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const audio = new Audio(`${ANNOUNCER_ROOT}/${name}.mp3`);
+    activeAudio = audio;
+    audio.preload = "auto";
+    let settled = false;
+    const finish = (played: boolean) => {
+      if (settled) return;
+      settled = true;
+      if (activeAudio === audio) activeAudio = null;
+      if (finishActiveClip === cancel) finishActiveClip = null;
+      resolve(played);
+    };
+    const cancel = () => finish(false);
+    finishActiveClip = cancel;
+    audio.onended = () => finish(true);
+    audio.onerror = () => finish(false);
+    void audio.play().catch(() => finish(false));
+  });
+}
+
+export function playScoreAnnouncement(
   scorer: ScoringState,
   previous: ScoringState | null = null,
 ): void {
-  const message = previous
-    ? matchAnnouncement(previous, scorer)
-    : scoreAnnouncement(scorer);
-  if (
-    !message ||
-    typeof window === "undefined" ||
-    !window.speechSynthesis ||
-    typeof SpeechSynthesisUtterance === "undefined"
-  ) {
-    return;
-  }
-  try {
-    stopScoreAnnouncement();
-    const utterance = new SpeechSynthesisUtterance(message);
-    const voice = preferredVoice(
-      window.speechSynthesis.getVoices(),
-      window.navigator.language,
-    );
-    if (voice) {
-      utterance.voice = voice;
-      utterance.lang = voice.lang;
+  const sequence = announcementSequence(previous, scorer);
+  if (sequence.length === 0 || typeof Audio === "undefined") return;
+  stopScoreAnnouncement();
+  const run = announcementRun;
+  void (async () => {
+    for (const clip of sequence) {
+      if (run !== announcementRun || !(await playClip(clip.name))) return;
+      if (clip.pauseAfterMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, clip.pauseAfterMs));
+      }
     }
-    utterance.rate = 1.03;
-    utterance.pitch = 1.04;
-    window.speechSynthesis.speak(utterance);
-  } catch {
-    // The visible score remains available when speech is blocked.
-  }
+  })();
 }
 
 export function playBuzzer(): void {
