@@ -47,7 +47,7 @@
   "homepage": "https://github.com/In-sp3ctr3/pickle-king#readme",
   "overrides": {
     "fast-uri": "3.1.5",
-    "nanoid": "3.3.17",
+    "nanoid": "3.3.18",
     "miniflare": {
       "undici": "7.29.0"
     },
