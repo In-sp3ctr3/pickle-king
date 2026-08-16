@@ -1,8 +1,10 @@
 import { isDoubles } from "../../match/service";
 import type { ScoringState } from "../../match/types";
 
-const ANNOUNCER_ROOT = "/audio/announcer/fenrir";
+const ANNOUNCER_ROOT = "/audio/announcer";
 const NUMBER_CLIP_MAX = 109;
+const CONVERSATIONAL_TARGET_MAX = 11;
+const CONVERSATIONAL_SCORE_MAX = 21;
 
 export interface AnnouncementClip {
   name: string;
@@ -55,11 +57,38 @@ function numberClips(
     return {
       name:
         value <= 21
-          ? `${last ? "end" : "continue"}-${variation}/${value}`
-          : String(value),
+          ? `fenrir/${last ? "end" : "continue"}-${variation}/${value}`
+          : `fenrir/${value}`,
       pauseAfterMs: 0,
     };
   });
+}
+
+function conversationalScore(
+  values: number[],
+  scorer: ScoringState,
+): AnnouncementClip[] | null {
+  if (
+    scorer.targetScore > CONVERSATIONAL_TARGET_MAX ||
+    (values.length !== 2 && values.length !== 3)
+  ) {
+    return null;
+  }
+  const [servingScore, receivingScore] = values;
+  const high = Math.max(servingScore, receivingScore);
+  const supported =
+    high <= 10 ||
+    (high <= CONVERSATIONAL_SCORE_MAX &&
+      Math.min(servingScore, receivingScore) >= 10 &&
+      Math.abs(servingScore - receivingScore) <= 1);
+  if (!supported) return null;
+  const format = values.length === 3 ? "doubles" : "singles";
+  return [
+    {
+      name: `chatterbox/scores/${format}/${values.join("-")}`,
+      pauseAfterMs: 0,
+    },
+  ];
 }
 
 export function announcementSequence(
@@ -71,32 +100,51 @@ export function announcementSequence(
       scorer.winner === "A"
         ? [scorer.scoreA, scorer.scoreB]
         : [scorer.scoreB, scorer.scoreA];
+    if (
+      scorer.targetScore <= CONVERSATIONAL_TARGET_MAX &&
+      scores[0] <= CONVERSATIONAL_SCORE_MAX &&
+      scores[0] >= scorer.targetScore &&
+      scores[0] - scores[1] >= 2
+    ) {
+      return [
+        {
+          name: `chatterbox/game/${scores.join("-")}`,
+          pauseAfterMs: 0,
+        },
+      ];
+    }
     const finalScores = numberClips(scores, scorer);
     if (finalScores.length !== 2) {
-      return [{ name: "game", pauseAfterMs: 0 }];
+      return [{ name: "fenrir/game", pauseAfterMs: 0 }];
     }
     const [winnerScore, loserScore] = finalScores;
     return [
-      { name: "game", pauseAfterMs: 160 },
-      { name: "final-score", pauseAfterMs: 140 },
+      { name: "fenrir/game", pauseAfterMs: 160 },
+      { name: "fenrir/final-score", pauseAfterMs: 140 },
       winnerScore,
-      { name: "to", pauseAfterMs: 0 },
+      { name: "fenrir/to", pauseAfterMs: 0 },
       loserScore,
     ];
   }
-  const score = numberClips(scoreValues(scorer), scorer);
+  const values = scoreValues(scorer);
+  const score =
+    conversationalScore(values, scorer) ?? numberClips(values, scorer);
   if (score.length === 0) return [];
-  const calls: AnnouncementClip[] = [];
-  if (
+  const sideOut = Boolean(
     previous?.service &&
-    previous.service.servingTeam !== scorer.service?.servingTeam
-  ) {
-    calls.push({ name: "side-out", pauseAfterMs: 160 });
+    previous.service.servingTeam !== scorer.service?.servingTeam,
+  );
+  const matchPoint = isMatchPoint(scorer);
+  if (sideOut && matchPoint) {
+    return [
+      { name: "chatterbox/side-out-match-point", pauseAfterMs: 120 },
+      ...score,
+    ];
   }
-  if (isMatchPoint(scorer)) {
-    calls.push({ name: "match-point", pauseAfterMs: 160 });
-  }
-  return [...calls, ...score];
+  const call = sideOut ? "side-out" : matchPoint ? "match-point" : null;
+  return call
+    ? [{ name: `chatterbox/${call}`, pauseAfterMs: 120 }, ...score]
+    : score;
 }
 
 let activeAudio: HTMLAudioElement | null = null;

@@ -42,14 +42,10 @@ describe("score announcements", () => {
     };
 
     expect(clips(null, opening)).toEqual([
-      ["continue-a/0", 0],
-      ["continue-b/0", 0],
-      ["end-a/2", 0],
+      ["chatterbox/scores/doubles/0-0-2", 0],
     ]);
     expect(clips(null, receivingTeamNowServes)).toEqual([
-      ["continue-a/2", 0],
-      ["continue-b/1", 0],
-      ["end-a/1", 0],
+      ["chatterbox/scores/doubles/2-1-1", 0],
     ]);
   });
 
@@ -74,10 +70,7 @@ describe("score announcements", () => {
       },
     });
 
-    expect(clips(null, live)).toEqual([
-      ["continue-a/0", 0],
-      ["end-b/0", 0],
-    ]);
+    expect(clips(null, live)).toEqual([["chatterbox/scores/singles/0-0", 0]]);
     expect(
       clips(null, {
         ...live,
@@ -90,10 +83,7 @@ describe("score announcements", () => {
           },
         ],
       }),
-    ).toEqual([
-      ["continue-b/0", 0],
-      ["end-a/0", 0],
-    ]);
+    ).toEqual([["chatterbox/scores/singles/0-0", 0]]);
   });
 
   it("adds side-out and match-point calls when the service changes", () => {
@@ -117,11 +107,38 @@ describe("score announcements", () => {
     };
 
     expect(clips(previous, next)).toEqual([
-      ["side-out", 160],
-      ["match-point", 160],
-      ["continue-a/10", 0],
-      ["continue-b/8", 0],
-      ["end-a/1", 0],
+      ["chatterbox/side-out-match-point", 120],
+      ["chatterbox/scores/doubles/10-8-1", 0],
+    ]);
+  });
+
+  it("uses standalone callouts when only one condition applies", () => {
+    const serving = liveScorer({
+      startingTeam: "A",
+      servingTeam: "A",
+      serverId: "a1",
+      turn: "first",
+      rightAtZero: { A: "a1", B: "b1" },
+    });
+    const sideOut: ScoringState = {
+      ...serving,
+      scoreA: 2,
+      scoreB: 1,
+      service: { ...serving.service!, servingTeam: "B", serverId: "b1" },
+    };
+    const matchPoint: ScoringState = {
+      ...serving,
+      scoreA: 10,
+      scoreB: 8,
+    };
+
+    expect(clips(serving, sideOut)).toEqual([
+      ["chatterbox/side-out", 120],
+      ["chatterbox/scores/doubles/1-2-1", 0],
+    ]);
+    expect(clips(serving, matchPoint)).toEqual([
+      ["chatterbox/match-point", 120],
+      ["chatterbox/scores/doubles/10-8-1", 0],
     ]);
   });
 
@@ -142,12 +159,27 @@ describe("score announcements", () => {
       finishReason: "target",
     };
 
-    expect(clips(previous, finished)).toEqual([
-      ["game", 160],
-      ["final-score", 140],
-      ["continue-a/11", 0],
-      ["to", 0],
-      ["end-b/7", 0],
+    expect(clips(previous, finished)).toEqual([["chatterbox/game/11-7", 0]]);
+  });
+
+  it("keeps custom formats audible when a conversational phrase is unavailable", () => {
+    const custom: ScoringState = {
+      ...liveScorer({
+        startingTeam: "A",
+        servingTeam: "A",
+        serverId: "a1",
+        turn: "first",
+        rightAtZero: { A: "a1", B: "b1" },
+      }),
+      scoreA: 12,
+      scoreB: 4,
+      targetScore: 15,
+    };
+
+    expect(clips(null, custom)).toEqual([
+      ["fenrir/continue-a/12", 0],
+      ["fenrir/continue-b/4", 0],
+      ["fenrir/end-a/1", 0],
     ]);
   });
 });
