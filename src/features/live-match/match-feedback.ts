@@ -3,6 +3,13 @@ import type { ScoringState } from "../../match/types";
 
 const ANNOUNCER_ROOT = "/audio/announcer";
 const CONVERSATIONAL_SCORE_MAX = 21;
+const SIDE_OUT_CALLS = [
+  "side-out-1",
+  "side-out-2",
+  "side-out-3",
+  "side-out",
+  "thats-a-side-out-2",
+] as const;
 
 export interface AnnouncementClip {
   name: string;
@@ -46,16 +53,13 @@ function conversationalScore(values: number[]): AnnouncementClip[] | null {
       Math.min(servingScore, receivingScore) >= 10 &&
       Math.abs(servingScore - receivingScore) <= 1);
   if (!supported) return null;
-  const clips: AnnouncementClip[] = [
+  const format = values.length === 3 ? "doubles" : "singles";
+  return [
     {
-      name: `chatterbox/scores/singles/${servingScore}-${receivingScore}`,
+      name: `chatterbox/scores/${format}/${values.join("-")}`,
       pauseAfterMs: 0,
     },
   ];
-  if (values.length === 3) {
-    clips.push({ name: `chatterbox/server-${values[2]}`, pauseAfterMs: 0 });
-  }
-  return clips;
 }
 
 function hasConversationalGame(scores: number[]): boolean {
@@ -104,7 +108,11 @@ export function announcementSequence(
       ...score,
     ];
   }
-  const call = sideOut ? "side-out" : matchPoint ? "match-point" : null;
+  const call = sideOut
+    ? SIDE_OUT_CALLS[scorer.rallyHistory.length % SIDE_OUT_CALLS.length]
+    : matchPoint
+      ? "match-point"
+      : null;
   return call
     ? [{ name: `chatterbox/${call}`, pauseAfterMs: 120 }, ...score]
     : score;

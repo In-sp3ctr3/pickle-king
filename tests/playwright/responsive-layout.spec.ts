@@ -80,10 +80,10 @@ for (const viewport of responsiveViewports) {
                 const hint = side
                   .querySelector<HTMLElement>(".score-hint")!
                   .getBoundingClientRect();
-                const controls = side
-                  .querySelector<HTMLElement>(".score-stepper")!
+                const score = side
+                  .querySelector<HTMLElement>(".score-number")!
                   .getBoundingClientRect();
-                return controls.top - hint.bottom;
+                return score.top - hint.bottom;
               }),
             );
           expect(Math.min(...hintGaps)).toBeGreaterThanOrEqual(8);

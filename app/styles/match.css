@@ -165,7 +165,6 @@
   width: 216.4px;
   height: 82px;
   flex: 0 0 auto;
-  transform: scaleX(-1);
 }
 
 .serve-court__surface,
@@ -541,11 +540,18 @@
 }
 
 .score-hint {
+  position: absolute;
+  top: 3.75rem;
+  left: 50%;
+  z-index: 1;
+  width: calc(100% - 2rem);
   color: var(--mist);
   font-size: 0.66rem;
   font-weight: 900;
   letter-spacing: 0.13em;
+  text-align: center;
   text-transform: uppercase;
+  translate: -50% 0;
 }
 
 .score-stepper {
@@ -906,21 +912,18 @@ html[data-visual-freeze="true"] .victory-confetti__static {
     align-self: center;
     justify-self: center;
     margin: 0;
-    font-size: clamp(7.5rem, 37vw, 8.5rem);
+    font-size: clamp(5.75rem, 30vw, 8.5rem);
+    translate: 0 0.6rem;
   }
 
   .score-hint {
-    justify-self: start;
+    top: 2.35rem;
     line-height: 1.1;
-    text-align: left;
+    text-align: center;
   }
 
   .score-player {
     top: 0.5rem;
-  }
-
-  .score-hint {
-    grid-row: 2;
   }
 
   .score-stepper {
@@ -986,6 +989,12 @@ html[data-visual-freeze="true"] .victory-confetti__static {
   .match-controls--editing {
     align-items: stretch;
     flex-direction: column;
+  }
+}
+
+@media (min-width: 701px) and (max-height: 850px) {
+  .score-number {
+    font-size: clamp(10rem, 31dvh, 20rem);
   }
 }
 

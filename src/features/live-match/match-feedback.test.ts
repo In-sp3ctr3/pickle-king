@@ -42,16 +42,14 @@ describe("score announcements", () => {
     };
 
     expect(clips(null, opening)).toEqual([
-      ["chatterbox/scores/singles/0-0", 0],
-      ["chatterbox/server-2", 0],
+      ["chatterbox/scores/doubles/0-0-2", 0],
     ]);
     expect(clips(null, receivingTeamNowServes)).toEqual([
-      ["chatterbox/scores/singles/2-1", 0],
-      ["chatterbox/server-1", 0],
+      ["chatterbox/scores/doubles/2-1-1", 0],
     ]);
   });
 
-  it("composes doubles scores so every spoken value is present", () => {
+  it("uses one complete recording for a natural doubles score call", () => {
     const scorer = liveScorer({
       startingTeam: "A",
       servingTeam: "A",
@@ -61,8 +59,7 @@ describe("score announcements", () => {
     });
 
     expect(clips(null, { ...scorer, scoreA: 8, scoreB: 7 })).toEqual([
-      ["chatterbox/scores/singles/8-7", 0],
-      ["chatterbox/server-1", 0],
+      ["chatterbox/scores/doubles/8-7-1", 0],
     ]);
     expect(
       clips(null, {
@@ -71,10 +68,7 @@ describe("score announcements", () => {
         scoreB: 2,
         service: { ...scorer.service!, turn: "second" },
       }),
-    ).toEqual([
-      ["chatterbox/scores/singles/5-2", 0],
-      ["chatterbox/server-2", 0],
-    ]);
+    ).toEqual([["chatterbox/scores/doubles/5-2-2", 0]]);
   });
 
   it("omits the server number for singles", () => {
@@ -136,8 +130,7 @@ describe("score announcements", () => {
 
     expect(clips(previous, next)).toEqual([
       ["chatterbox/side-out-match-point", 120],
-      ["chatterbox/scores/singles/10-8", 0],
-      ["chatterbox/server-1", 0],
+      ["chatterbox/scores/doubles/10-8-1", 0],
     ]);
   });
 
@@ -162,14 +155,47 @@ describe("score announcements", () => {
     };
 
     expect(clips(serving, sideOut)).toEqual([
-      ["chatterbox/side-out", 120],
-      ["chatterbox/scores/singles/1-2", 0],
-      ["chatterbox/server-1", 0],
+      ["chatterbox/side-out-1", 120],
+      ["chatterbox/scores/doubles/1-2-1", 0],
     ]);
     expect(clips(serving, matchPoint)).toEqual([
       ["chatterbox/match-point", 120],
-      ["chatterbox/scores/singles/10-8", 0],
-      ["chatterbox/server-1", 0],
+      ["chatterbox/scores/doubles/10-8-1", 0],
+    ]);
+  });
+
+  it("varies standalone side-out calls across five recordings", () => {
+    const serving = liveScorer({
+      startingTeam: "A",
+      servingTeam: "A",
+      serverId: "a1",
+      turn: "first",
+      rightAtZero: { A: "a1", B: "b1" },
+    });
+    const names = Array.from({ length: 5 }, (_, rallyCount) => {
+      const next: ScoringState = {
+        ...serving,
+        rallyHistory: Array.from({ length: rallyCount }, () => ({
+          scoreA: 0,
+          scoreB: 0,
+          scoredTeam: null,
+          service: serving.service!,
+        })),
+        service: {
+          ...serving.service!,
+          servingTeam: "B",
+          serverId: "b1",
+        },
+      };
+      return announcementSequence(serving, next)[0]?.name;
+    });
+
+    expect(names).toEqual([
+      "chatterbox/side-out-1",
+      "chatterbox/side-out-2",
+      "chatterbox/side-out-3",
+      "chatterbox/side-out",
+      "chatterbox/thats-a-side-out-2",
     ]);
   });
 

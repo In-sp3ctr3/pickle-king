@@ -31,7 +31,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
       return (
-        marker.left + marker.width / 2 <
+        marker.left + marker.width / 2 >
         courtBounds.left + courtBounds.width / 2
       );
     }),
@@ -112,7 +112,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
       const marker = element
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
-      return marker.left - surface.right;
+      return surface.left - marker.right;
     }),
   ).toBeGreaterThanOrEqual(1);
   await page.getByRole("button", { name: "Undo last rally" }).first().click();
@@ -130,7 +130,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
       const marker = element
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
-      return surface.left - marker.right;
+      return marker.left - surface.right;
     }),
   ).toBeGreaterThanOrEqual(1);
   await expect(
@@ -197,7 +197,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
     };
   });
   expect(scoreLayout.centerDelta).toBeLessThanOrEqual(2);
-  expect(scoreLayout.fontSize).toBeGreaterThanOrEqual(120);
+  expect(scoreLayout.fontSize).toBeGreaterThanOrEqual(90);
   expect(scoreLayout.nameTop - scoreLayout.sideTop).toBeGreaterThanOrEqual(8);
   expect(scoreLayout.nameBottom).toBeLessThanOrEqual(scoreLayout.scoreTop);
   expect(scoreLayout.hintBottom).toBeLessThanOrEqual(scoreLayout.scoreTop);
