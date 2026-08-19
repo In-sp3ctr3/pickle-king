@@ -247,14 +247,20 @@ Last updated: 2026-08-19
 - The Full draw remains semantic DOM/CSS; no bitmap canvas or WebGL replaces
   match cards, connectors, labels, focus order, or node actions.
 - Pinch, modifier-wheel, and horizontal drag pan or zoom within finite board
-  bounds. Zoom controls provide equivalent single-pointer and keyboard access.
-- Fit shows the complete draw at the largest scale that fits the viewport.
-  Below 100%, the board is an overview and its tiny match controls are inert;
-  returning to 100% or more restores every Start/Edit control at its contracted
-  48px minimum target.
+  bounds, including gestures that begin over a match action. A tap remains a
+  tap; only movement past the drag threshold suppresses its action. Zoom
+  controls provide equivalent single-pointer and keyboard access. Vertical
+  swipes at the viewport boundary continue scrolling the page.
+- Fit shows the complete draw at the largest scale that fits the viewport. It
+  remains an inspection state because scaled controls are below the 48px touch
+  contract. The first tap centers that match at 100%; its normal-size Play/Edit
+  control then performs the action. Reset and section navigation remain 48px
+  alternatives.
 - The viewport clamps between the computed fit scale and 200%. Reset returns to
   100% and centers the championship match. Reduced motion changes immediately.
 - Left, championship, and right navigation remain available at every scale.
+- Continuous pinch updates are coalesced into animation frames without
+  cancelling an already queued frame; scale and anchored scroll paint together.
 - Target viewports: 390×844, 844×390, 820×1180, 1180×820, and
   1440×1000.
 

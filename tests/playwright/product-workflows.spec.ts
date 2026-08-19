@@ -283,9 +283,8 @@ test("a six-player draw stays connected and exposes the ready opening courts", a
   await page.getByRole("button", { name: "Show championship match" }).click();
   await page.getByRole("button", { name: "Fit", exact: true }).click();
   await expect(viewport).toHaveAttribute("data-bracket-mode", "overview");
-  await expect(page.locator(".bracket-tree-scaled-board")).toHaveAttribute(
+  await expect(page.locator(".bracket-tree-scaled-board")).not.toHaveAttribute(
     "inert",
-    "",
   );
   await page.getByRole("button", { name: "Reset zoom to 100%" }).click();
   await expect(viewport).toHaveAttribute("data-bracket-mode", "readable");
@@ -297,10 +296,13 @@ test("a six-player draw stays connected and exposes the ready opening courts", a
   await viewport.press("0");
   await expect(viewport).toHaveAttribute("data-bracket-mode", "readable");
   await page.screenshot({
-    animations: "disabled",
-    fullPage: true,
     path: "output/playwright/six-player-bracket.png",
   });
+  await page.getByRole("button", { name: "Fit", exact: true }).click();
+  await page.locator("[data-qa='bracket-node-start']").first().click();
+  await expect(viewport).toHaveAttribute("data-bracket-mode", "readable");
+  await page.locator("[data-qa='bracket-node-start']").first().click();
+  await expect(page.locator("[data-qa='live-match']")).toBeVisible();
 });
 
 test("the installed shell reopens offline", async ({ context, page }) => {

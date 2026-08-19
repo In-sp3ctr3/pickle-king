@@ -22,14 +22,14 @@ Experience type: functional
 
 The existing connected DOM bracket is placed inside a finite scaled stage.
 Native Pointer Events support pinch and horizontal drag; explicit controls
-cover zoom out, fit, reset, and zoom in. A fitted scale below 100% is read-only
-because scaled controls cannot retain the 48px touch-target contract.
+cover zoom out, fit, reset, and zoom in. Fit remains actionable: tapping a
+match centers it at readable size, where Play/Edit retains a safe 48px target.
 
 ## Storyboard
 
 | Stage    | Time       | Visual state                                   | QA signal                      | Reduced motion |
 | -------- | ---------- | ---------------------------------------------- | ------------------------------ | -------------- |
-| Overview | immediate  | Complete draw fitted; node actions inert       | `data-bracket-mode="overview"` | same           |
+| Overview | immediate  | Complete draw fitted; tap-to-inspect nodes     | `data-bracket-mode="overview"` | same           |
 | Readable | immediate  | Board at 100%; node actions restored           | `data-bracket-mode="readable"` | same           |
 | Detail   | continuous | Pinch or controls enlarge around a fixed point | zoom percentage output         | same           |
 
@@ -42,8 +42,9 @@ because scaled controls cannot retain the 48px touch-target contract.
   browser page zoom changes the entire app instead of the bracket.
 - Prototype required: yes
 - Prototype route/artifact: isolated BracketTree viewport interaction.
-- Prototype acceptance criteria: bounded pinch/pan, fitted overview, 100% reset,
-  preserved match actions, keyboard alternatives, and no stuck gesture state.
+- Prototype acceptance criteria: bounded fluid pinch/pan, fitted tap-to-inspect
+  overview, gestures beginning over controls, centered 100% inspection,
+  preserved taps, keyboard alternatives, and no starved animation frame.
 - Prototype evidence: docs/frontend/evidence/bracket-zoom-prototype.md
 - Prototype decision: passed
 - Approved by: frontend prototype gate and targeted interaction tests.
@@ -60,12 +61,12 @@ because scaled controls cannot retain the 48px touch-target contract.
 
 ## State Model
 
-| State    | Entry                        | Behavior                         | Exit                         | Accessibility                           |
-| -------- | ---------------------------- | -------------------------------- | ---------------------------- | --------------------------------------- |
-| overview | Fit or zoom below 100%       | complete draw; actions inert     | zoom to 100%                 | labelled read-only state                |
-| readable | Reset or scale equals 100%   | normal scroll and match controls | fit, pinch, or zoom controls | 48px targets restored                   |
-| detail   | zoom above 100%              | anchored pan and magnification   | reset, fit, or zoom out      | percent output and controls             |
-| panning  | pointer moves past threshold | bounded horizontal stage pan     | pointer up/cancel            | tap targets suppressed only during drag |
+| State    | Entry                        | Behavior                          | Exit                         | Accessibility                           |
+| -------- | ---------------------------- | --------------------------------- | ---------------------------- | --------------------------------------- |
+| overview | Fit or zoom below 100%       | complete draw; inspect-only nodes | tap node centers it at 100%  | avoids undersized action targets        |
+| readable | Reset or scale equals 100%   | normal scroll and match controls  | fit, pinch, or zoom controls | 48px targets restored                   |
+| detail   | zoom above 100%              | anchored pan and magnification    | reset, fit, or zoom out      | percent output and controls             |
+| panning  | pointer moves past threshold | bounded horizontal stage pan      | pointer up/cancel            | tap targets suppressed only during drag |
 
 ## Performance Budget
 

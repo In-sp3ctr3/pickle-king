@@ -32,7 +32,10 @@ export function BracketViewport({
     overview,
     reset,
     scale,
+    scaledBoardRef,
     showFit,
+    showReadableAt,
+    stageRef,
     viewportRef,
     zoomIn,
     zoomOut,
@@ -125,9 +128,20 @@ export function BracketViewport({
         className="bracket-tree-viewport"
         data-bracket-mode={mode}
         onClickCapture={(event) => {
-          if (!clearDraggedClick()) return;
-          event.preventDefault();
-          event.stopPropagation();
+          if (clearDraggedClick()) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          const node =
+            event.target instanceof Element
+              ? event.target.closest<HTMLElement>(".bracket-tree-node")
+              : null;
+          if (overview && node) {
+            event.preventDefault();
+            event.stopPropagation();
+            showReadableAt(node);
+          }
         }}
         onKeyDown={handleKey}
         onLostPointerCapture={endPointer}
@@ -142,16 +156,17 @@ export function BracketViewport({
       >
         <div
           className="bracket-tree-stage"
+          ref={stageRef}
           style={{ height: board.height * scale, width: board.width * scale }}
         >
           <div
             aria-label={
               overview
-                ? "Bracket overview. Return to 100% to use match controls."
+                ? "Fitted bracket overview. Tap a match to inspect it at full size."
                 : undefined
             }
             className="bracket-tree-scaled-board"
-            inert={overview || undefined}
+            ref={scaledBoardRef}
             style={{
               height: board.height,
               transform: `scale(${scale})`,
@@ -164,7 +179,7 @@ export function BracketViewport({
       </div>
       {overview ? (
         <p className="bracket-tree-overview-note">
-          Overview only · Reset to use matches
+          Fit view · Tap a match, then use its controls
         </p>
       ) : null}
     </div>

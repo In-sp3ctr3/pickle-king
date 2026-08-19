@@ -7,41 +7,16 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
-import {
-  BRACKET_DRAG_THRESHOLD,
-  BRACKET_MAX_SCALE,
-  BRACKET_ZOOM_STEP,
-  bracketAnchoredScroll,
-  bracketFitScale,
-  clamp,
-  isBracketControl,
-  pointerDistance,
-  pointerMidpoint,
-  type ViewportPoint,
-  type ViewportSize,
-} from "./bracket-viewport-geometry";
+import * as geometry from "./bracket-viewport-geometry";
 
-interface DragGesture {
-  kind: "drag";
-  last: ViewportPoint;
-  moved: boolean;
-  start: ViewportPoint;
-}
-
-interface PinchGesture {
-  anchor: ViewportPoint;
-  distance: number;
-  kind: "pinch";
-  scale: number;
-}
-
-type Gesture = DragGesture | PinchGesture;
-
-export function useBracketViewport(board: ViewportSize) {
+export function useBracketViewport(board: geometry.ViewportSize) {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const pointers = useRef(new Map<number, ViewportPoint>());
-  const gesture = useRef<Gesture | null>(null);
+  const pointers = useRef(new Map<number, geometry.ViewportPoint>());
+  const gesture = useRef<geometry.BracketGesture | null>(null);
   const raf = useRef(0);
+  const pendingView = useRef<geometry.PendingBracketView | null>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const scaledBoardRef = useRef<HTMLDivElement>(null);
   const suppressClickTimer = useRef(0);
   const scaleRef = useRef(1);
   const fitRef = useRef(1);
@@ -53,35 +28,60 @@ export function useBracketViewport(board: ViewportSize) {
   const [panning, setPanning] = useState(false);
 
   function viewportSize() {
-    const viewport = viewportRef.current;
+    const { clientHeight = 0, clientWidth = 0 } = viewportRef.current ?? {};
     return {
-      height: viewport?.clientHeight ?? 0,
-      width: viewport?.clientWidth ?? 0,
+      height: clientHeight,
+      width: clientWidth,
     };
   }
 
-  function queueView(nextScale: number, nextScroll: ViewportPoint) {
+  function queueView(
+    nextScale: number,
+    nextScroll: geometry.ViewportPoint | "center",
+  ) {
     const viewport = viewportRef.current;
     if (!viewport) return;
     scaleRef.current = nextScale;
-    setScale(nextScale);
-    window.cancelAnimationFrame(raf.current);
-    raf.current = window.requestAnimationFrame(() => {
+    pendingView.current = { scale: nextScale, scroll: nextScroll };
+    if (raf.current) return;
+    raf.current = -1;
+    const frame = window.requestAnimationFrame(() => {
+      raf.current = 0;
+      const next = pendingView.current;
+      pendingView.current = null;
+      if (!next) return;
+      if (stageRef.current)
+        Object.assign(stageRef.current.style, {
+          height: `${board.height * next.scale}px`,
+          width: `${board.width * next.scale}px`,
+        });
+      if (scaledBoardRef.current)
+        scaledBoardRef.current.style.transform = `scale(${next.scale})`;
+      const nextScroll =
+        next.scroll === "center"
+          ? geometry.bracketCenteredScroll(viewport)
+          : next.scroll;
       viewport.scrollLeft = nextScroll.x;
       viewport.scrollTop = nextScroll.y;
+      setScale(next.scale);
     });
+    if (raf.current === -1) raf.current = frame;
   }
 
-  function scaleAround(next: number, local?: ViewportPoint) {
+  function scaleAround(next: number, local?: geometry.ViewportPoint) {
     const viewport = viewportRef.current;
     if (!viewport) return;
     fitted.current = false;
     const size = viewportSize();
-    const nextScale = clamp(next, fitRef.current, BRACKET_MAX_SCALE);
+    const nextScale = geometry.clamp(
+      next,
+      fitRef.current,
+      geometry.BRACKET_MAX_SCALE,
+    );
     const point = local ?? { x: size.width / 2, y: size.height / 2 };
     queueView(
       nextScale,
-      bracketAnchoredScroll({
+      geometry.bracketAnchoredScroll({
         anchor: {
           x: (viewport.scrollLeft + point.x) / scaleRef.current,
           y: (viewport.scrollTop + point.y) / scaleRef.current,
@@ -100,26 +100,15 @@ export function useBracketViewport(board: ViewportSize) {
   }
 
   function reset() {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
     fitted.current = false;
-    scaleRef.current = 1;
-    setScale(1);
-    window.cancelAnimationFrame(raf.current);
-    raf.current = window.requestAnimationFrame(() => {
-      viewport.scrollLeft = (viewport.scrollWidth - viewport.clientWidth) / 2;
-      viewport.scrollTop = Math.max(
-        0,
-        (viewport.scrollHeight - viewport.clientHeight) / 2,
-      );
-    });
+    queueView(1, "center");
   }
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
     const measure = () => {
-      const nextFit = bracketFitScale(viewportSize(), board);
+      const nextFit = geometry.bracketFitScale(viewportSize(), board);
       fitRef.current = nextFit;
       setFit(nextFit);
       if (!measured.current) {
@@ -138,7 +127,7 @@ export function useBracketViewport(board: ViewportSize) {
       if (!event.ctrlKey && !event.metaKey) return;
       event.preventDefault();
       scaleAround(
-        scaleRef.current - Math.sign(event.deltaY) * BRACKET_ZOOM_STEP,
+        scaleRef.current - Math.sign(event.deltaY) * geometry.BRACKET_ZOOM_STEP,
         localPoint({ x: event.clientX, y: event.clientY }),
       );
     };
@@ -147,12 +136,13 @@ export function useBracketViewport(board: ViewportSize) {
       observer.disconnect();
       viewport.removeEventListener("wheel", wheel);
       window.cancelAnimationFrame(raf.current);
+      pendingView.current = null;
       window.clearTimeout(suppressClickTimer.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset closes over this board revision.
   }, [board]);
 
-  function localPoint(point: ViewportPoint) {
+  function localPoint(point: geometry.ViewportPoint) {
     const bounds = viewportRef.current?.getBoundingClientRect();
     return {
       x: point.x - (bounds?.left ?? 0),
@@ -161,9 +151,7 @@ export function useBracketViewport(board: ViewportSize) {
   }
 
   function beginPointer(event: PointerEvent<HTMLDivElement>) {
-    if (isBracketControl(event.target)) return;
     const point = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture(event.pointerId);
     pointers.current.set(event.pointerId, point);
     const points = [...pointers.current.values()];
     if (points.length === 1) {
@@ -175,44 +163,37 @@ export function useBracketViewport(board: ViewportSize) {
       };
       return;
     }
-    const center = localPoint(pointerMidpoint(points));
+    for (const pointerId of pointers.current.keys()) {
+      if (!event.currentTarget.hasPointerCapture(pointerId)) {
+        event.currentTarget.setPointerCapture(pointerId);
+      }
+    }
     const viewport = viewportRef.current!;
-    gesture.current = {
-      anchor: {
-        x: (viewport.scrollLeft + center.x) / scaleRef.current,
-        y: (viewport.scrollTop + center.y) / scaleRef.current,
-      },
-      distance: Math.max(1, pointerDistance(points)),
-      kind: "pinch",
-      scale: scaleRef.current,
-    };
+    gesture.current = geometry.bracketPinchGesture(
+      points,
+      localPoint(geometry.pointerMidpoint(points)),
+      { x: viewport.scrollLeft, y: viewport.scrollTop },
+      scaleRef.current,
+    );
     setPanning(true);
   }
 
   function movePinch(
     event: PointerEvent<HTMLDivElement>,
-    points: ViewportPoint[],
+    points: geometry.ViewportPoint[],
   ) {
     if (gesture.current?.kind !== "pinch" || points.length < 2) return false;
     event.preventDefault();
-    const center = localPoint(pointerMidpoint(points));
-    const nextScale = clamp(
-      gesture.current.scale *
-        (pointerDistance(points) / gesture.current.distance),
-      fitRef.current,
-      BRACKET_MAX_SCALE,
-    );
+    const next = geometry.bracketPinchView({
+      board,
+      center: localPoint(geometry.pointerMidpoint(points)),
+      fit: fitRef.current,
+      gesture: gesture.current,
+      points,
+      viewport: viewportSize(),
+    });
     fitted.current = false;
-    queueView(
-      nextScale,
-      bracketAnchoredScroll({
-        anchor: gesture.current.anchor,
-        board,
-        local: center,
-        nextScale,
-        viewport: viewportSize(),
-      }),
-    );
+    queueView(next.scale, next.scroll);
     return true;
   }
 
@@ -222,26 +203,40 @@ export function useBracketViewport(board: ViewportSize) {
     pointers.current.set(event.pointerId, point);
     if (movePinch(event, [...pointers.current.values()])) return;
     if (gesture.current.kind !== "drag") return;
-    const deltaX = point.x - gesture.current.start.x;
-    const deltaY = point.y - gesture.current.start.y;
-    if (
-      !gesture.current.moved &&
-      (Math.hypot(deltaX, deltaY) < BRACKET_DRAG_THRESHOLD ||
-        Math.abs(deltaY) > Math.abs(deltaX))
-    ) {
-      return;
-    }
+    if (!geometry.hasHorizontalDragStarted(gesture.current, point)) return;
     event.preventDefault();
     gesture.current.moved = true;
     setPanning(true);
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
     const viewport = viewportRef.current!;
     const size = viewportSize();
-    viewport.scrollLeft = clamp(
-      viewport.scrollLeft - (point.x - gesture.current.last.x),
-      0,
-      Math.max(0, board.width * scaleRef.current - size.width),
+    viewport.scrollLeft = geometry.bracketDragScroll(
+      viewport.scrollLeft,
+      point.x - gesture.current.last.x,
+      board.width,
+      scaleRef.current,
+      size.width,
     );
     gesture.current.last = point;
+  }
+
+  function showReadableAt(node: HTMLElement) {
+    const boardBounds = scaledBoardRef.current?.getBoundingClientRect();
+    const nodeBounds = node.getBoundingClientRect();
+    if (!boardBounds) return;
+    fitted.current = false;
+    queueView(
+      1,
+      geometry.bracketNodeScroll(
+        boardBounds,
+        nodeBounds,
+        scaleRef.current,
+        board,
+        viewportSize(),
+      ),
+    );
   }
 
   function endPointer(event: PointerEvent<HTMLDivElement>, cancelled = false) {
@@ -271,12 +266,13 @@ export function useBracketViewport(board: ViewportSize) {
   }
 
   function handleKey(event: KeyboardEvent<HTMLDivElement>) {
-    if (isBracketControl(event.target)) return;
+    if (geometry.isBracketControl(event.target)) return;
     const viewport = viewportRef.current!;
     const key = event.key.toLowerCase();
     if (["+", "="].includes(key))
-      scaleAround(scaleRef.current + BRACKET_ZOOM_STEP);
-    else if (key === "-") scaleAround(scaleRef.current - BRACKET_ZOOM_STEP);
+      scaleAround(scaleRef.current + geometry.BRACKET_ZOOM_STEP);
+    else if (key === "-")
+      scaleAround(scaleRef.current - geometry.BRACKET_ZOOM_STEP);
     else if (key === "0") reset();
     else if (key === "f") showFit();
     else if (key === "arrowleft") viewport.scrollLeft -= 48;
@@ -300,20 +296,17 @@ export function useBracketViewport(board: ViewportSize) {
     endPointer,
     fit,
     handleKey,
-    mode: panning
-      ? "panning"
-      : scale < 1
-        ? "overview"
-        : scale > 1
-          ? "detail"
-          : "readable",
+    mode: geometry.bracketViewportMode(scale, panning),
     movePointer,
     overview: scale < 1,
     reset,
     scale,
+    scaledBoardRef,
     showFit,
+    showReadableAt,
+    stageRef,
     viewportRef,
-    zoomIn: () => scaleAround(scaleRef.current + BRACKET_ZOOM_STEP),
-    zoomOut: () => scaleAround(scaleRef.current - BRACKET_ZOOM_STEP),
+    zoomIn: () => scaleAround(scaleRef.current + geometry.BRACKET_ZOOM_STEP),
+    zoomOut: () => scaleAround(scaleRef.current - geometry.BRACKET_ZOOM_STEP),
   };
 }

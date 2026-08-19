@@ -20,8 +20,8 @@
   }
 
   .bracket-tree-viewport {
+    width: calc(100% + 2.5rem);
     margin-inline: -1.25rem;
-    padding-inline: 1.25rem;
   }
 
   .bracket-tree-toolbar {

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -29,11 +30,14 @@ function renderViewport(onMatchAction = vi.fn()) {
   render(
     <BracketViewport board={BOARD}>
       <div className="bracket-tree-board" role="list">
-        <article role="listitem">
-          <button onClick={onMatchAction} type="button">
-            Start match
-          </button>
-        </article>
+        <div className="bracket-tree-node" role="listitem">
+          <article>
+            <span>Match details</span>
+            <button onClick={onMatchAction} type="button">
+              Start match
+            </button>
+          </article>
+        </div>
       </div>
     </BracketViewport>,
   );
@@ -52,7 +56,7 @@ beforeEach(() => {
     hasPointerCapture: { configurable: true, value: () => true },
     releasePointerCapture: { configurable: true, value: vi.fn() },
     scrollHeight: { configurable: true, get: () => BOARD.height },
-    scrollWidth: { configurable: true, get: () => BOARD.width },
+    scrollWidth: { configurable: true, get: () => BOARD.width + 40 },
     scrollTo: {
       configurable: true,
       value(options: ScrollToOptions) {
@@ -83,8 +87,9 @@ describe("bounded bracket viewport", () => {
     ).toEqual({ x: 800, y: 350 });
   });
 
-  it("opens centered at 100%, then makes the fitted overview inert", async () => {
-    renderViewport();
+  it("opens centered and keeps fitted match actions available", async () => {
+    const onMatchAction = vi.fn();
+    renderViewport(onMatchAction);
     await waitFor(() =>
       expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
         "100%",
@@ -99,21 +104,34 @@ describe("bounded bracket viewport", () => {
     const viewport = screen.getByRole("region", {
       name: /connected tournament bracket/i,
     });
-    expect(viewport.scrollLeft).toBe(300);
+    expect(viewport.scrollLeft).toBe(320);
     fireEvent.click(screen.getByRole("button", { name: "Fit" }));
     expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
       "35%",
     );
-    expect(board.hasAttribute("inert")).toBe(true);
+    expect(board.hasAttribute("inert")).toBe(false);
     expect(
-      screen.getByText("Overview only · Reset to use matches"),
+      screen.getByText("Fit view · Tap a match, then use its controls"),
     ).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Start match" }));
+    expect(onMatchAction).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
+      "100%",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Start match" }));
+    expect(onMatchAction).toHaveBeenCalledOnce();
+
+    fireEvent.click(screen.getByRole("button", { name: "Fit" }));
+    fireEvent.click(screen.getByText("Match details"));
+    expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
+      "100%",
+    );
     fireEvent.click(screen.getByRole("button", { name: "Reset zoom to 100%" }));
     expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
       "100%",
     );
     expect(board.hasAttribute("inert")).toBe(false);
-    expect(viewport.scrollLeft).toBe(300);
+    expect(viewport.scrollLeft).toBe(320);
 
     for (let index = 0; index < 5; index += 1) {
       fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
@@ -129,6 +147,12 @@ describe("bounded bracket viewport", () => {
 
   it("anchors pinch zoom and clears horizontal drag on pointer cancellation", async () => {
     renderViewport();
+    const frames: FrameRequestCallback[] = [];
+    const requestFrame = vi.fn((callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    vi.stubGlobal("requestAnimationFrame", requestFrame);
     const viewport = await screen.findByRole("region", {
       name: /connected tournament bracket/i,
     });
@@ -143,14 +167,24 @@ describe("bounded bracket viewport", () => {
       pointerId: 2,
     });
     fireEvent.pointerMove(viewport, {
+      clientX: 220,
+      clientY: 100,
+      pointerId: 2,
+    });
+    fireEvent.pointerMove(viewport, {
       clientX: 250,
       clientY: 100,
       pointerId: 2,
     });
+    expect(requestFrame).toHaveBeenCalledOnce();
+    expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
+      "100%",
+    );
+    act(() => frames[0](0));
     expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
       "150%",
     );
-    expect(viewport.scrollLeft).toBe(500);
+    expect(viewport.scrollLeft).toBe(530);
     expect(viewport.dataset.bracketMode).toBe("panning");
 
     fireEvent.pointerCancel(viewport, { pointerId: 2 });
@@ -177,7 +211,7 @@ describe("bounded bracket viewport", () => {
     expect(viewport.dataset.bracketMode).toBe("detail");
   });
 
-  it("supports controls, wheel, keyboard, and leaves nested controls alone", async () => {
+  it("supports controls, wheel, keyboard, and control-origin gestures", async () => {
     renderViewport();
     const viewport = await screen.findByRole("region", {
       name: /connected tournament bracket/i,
@@ -193,6 +227,8 @@ describe("bounded bracket viewport", () => {
       clientY: 100,
       pointerId: 4,
     });
+    expect(viewport.dataset.bracketMode).toBe("panning");
+    fireEvent.pointerCancel(viewport, { pointerId: 4 });
     expect(viewport.dataset.bracketMode).toBe("readable");
 
     fireEvent.keyDown(viewport, { key: "+" });
@@ -227,21 +263,21 @@ describe("bounded bracket viewport", () => {
   it("suppresses only the click produced by a drag", async () => {
     const onMatchAction = vi.fn();
     renderViewport(onMatchAction);
-    const viewport = await screen.findByRole("region", {
+    await screen.findByRole("region", {
       name: /connected tournament bracket/i,
     });
     const matchButton = screen.getByRole("button", { name: "Start match" });
-    fireEvent.pointerDown(viewport, {
+    fireEvent.pointerDown(matchButton, {
       clientX: 200,
       clientY: 100,
       pointerId: 5,
     });
-    fireEvent.pointerMove(viewport, {
+    fireEvent.pointerMove(matchButton, {
       clientX: 170,
       clientY: 100,
       pointerId: 5,
     });
-    fireEvent.pointerUp(viewport, { pointerId: 5 });
+    fireEvent.pointerUp(matchButton, { pointerId: 5 });
     fireEvent.click(matchButton);
     expect(onMatchAction).not.toHaveBeenCalled();
 

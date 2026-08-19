@@ -6,7 +6,7 @@ Last updated: 2026-08-19
 
 ## Environment
 
-- Commit/source state: v1.9.0-alpha.1 bracket viewport and announcer repair
+- Commit/source state: v1.9.0-alpha.2 iPad bracket gesture repair
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -211,17 +211,21 @@ The supplied source hashes are
 | DQA-69 | P2       | bracket/overview  | fitted browser captures                                         | the fitted draw was top-aligned and its read-only state was not visible          | frontend | fixed  |
 | DQA-70 | P2       | bracket/wheel     | Chromium console matrix                                         | React's passive wheel listener could not cancel browser zoom                     | frontend | fixed  |
 | DQA-71 | P2       | bracket/centering | 390×844 geometry assertion                                      | the initial championship view was 20px off center on the mobile full-bleed lane  | frontend | fixed  |
+| DQA-72 | P1       | bracket/iPad      | production field report and rapid-pointer regression            | repeated pointer moves starved the queued frame and card controls blocked drag   | frontend | fixed  |
+| DQA-73 | P1       | bracket/overview  | 820×1180 and 1180×820 fitted interaction review                 | scaled 21–30px actions were unsafe and a tapped node did not center at 100%      | frontend | fixed  |
+| DQA-74 | P1       | bracket/iPad      | three-size real-touch swipe matrix                              | contained vertical overscroll trapped page navigation over the bracket           | frontend | fixed  |
+| DQA-75 | P2       | bracket/phone     | 390×844 final-node inspection                                   | mobile viewport padding shifted the selected match 20px left after inspect       | frontend | fixed  |
 
 ## Feedback Loop
 
 - Mechanism: screenshot-comments
 - Availability/status: screenshot annotation was unavailable for this isolated
-  viewport review; reviewer findings were recorded as DQA-67–71 and resolved.
+  viewport review; reviewer findings were recorded as DQA-67–75 and resolved.
 - Annotation/comment evidence: `docs/frontend/evidence/bracket-zoom-prototype.md`
-  and the DQA-67–71 finding rows above
+  and the DQA-67–75 finding rows above
 - Resolution evidence: `tests/playwright/bracket-viewport.spec.ts`,
   `src/features/bracket/bracket-viewport.test.tsx`, and
-  `output/playwright/bracket-qa-phone-fit-repaired.png`
+  `output/playwright/design-review-alpha2-ipad-portrait-readable.png`
 
 ## Performance Evidence
 
