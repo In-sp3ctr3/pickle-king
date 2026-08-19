@@ -24,6 +24,18 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
     /right service box on the right end/,
   );
   await expect(court).toHaveClass(/serve-court--near-right/);
+  expect(
+    await court.evaluate((element) => {
+      const courtBounds = element.getBoundingClientRect();
+      const marker = element
+        .querySelector<HTMLElement>(".serve-court__player-marker")!
+        .getBoundingClientRect();
+      return (
+        marker.left + marker.width / 2 <
+        courtBounds.left + courtBounds.width / 2
+      );
+    }),
+  ).toBe(true);
   await expect(guide.locator(".serve-court__service-box")).toHaveCount(4);
   await expect(guide.locator(".serve-court__nvz")).toHaveCount(2);
   await expect(guide.locator(".serve-court__player-head")).toHaveCount(1);
@@ -100,7 +112,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
       const marker = element
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
-      return surface.left - marker.right;
+      return marker.left - surface.right;
     }),
   ).toBeGreaterThanOrEqual(1);
   await page.getByRole("button", { name: "Undo last rally" }).first().click();
@@ -118,7 +130,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
       const marker = element
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
-      return marker.left - surface.right;
+      return surface.left - marker.right;
     }),
   ).toBeGreaterThanOrEqual(1);
   await expect(

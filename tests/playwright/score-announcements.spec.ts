@@ -70,4 +70,16 @@ test("announces the next serve and remembers mute", async ({ page }) => {
       "chatterbox/scores/singles/0-0.mp3",
       "chatterbox/scores/singles/2-0.mp3",
     ]);
+
+  await page.locator("[data-qa='score-b-add']").click();
+  await page.locator("[data-qa='score-b-add']").click();
+  await page.locator("[data-qa='score-b-add']").click();
+  await page.getByRole("button", { name: "End match" }).click();
+  await page.getByRole("button", { name: "Award Alex" }).click();
+  await expect
+    .poll(async () => (await announcerClips()).slice(-2))
+    .toEqual([
+      "chatterbox/game-final-score.mp3",
+      "chatterbox/scores/singles/2-2.mp3",
+    ]);
 });

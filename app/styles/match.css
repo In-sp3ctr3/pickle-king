@@ -165,6 +165,7 @@
   width: 216.4px;
   height: 82px;
   flex: 0 0 auto;
+  transform: scaleX(-1);
 }
 
 .serve-court__surface,
@@ -443,7 +444,7 @@
   border: 0;
   background: transparent;
   color: var(--chalk);
-  padding: 2rem 1rem 5.5rem;
+  padding: 2rem 1rem 7rem;
   overflow: hidden;
 }
 
@@ -514,7 +515,11 @@
 }
 
 .score-player {
-  max-width: 16ch;
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  z-index: 1;
+  width: calc(100% - 2rem);
   overflow: hidden;
   font-size: clamp(1rem, 2.5vw, 1.6rem);
   font-weight: 900;
@@ -522,6 +527,7 @@
   text-align: center;
   text-overflow: ellipsis;
   text-transform: uppercase;
+  translate: -50% 0;
   white-space: nowrap;
 }
 
@@ -903,7 +909,6 @@ html[data-visual-freeze="true"] .victory-confetti__static {
     font-size: clamp(7.5rem, 37vw, 8.5rem);
   }
 
-  .score-player,
   .score-hint {
     justify-self: start;
     line-height: 1.1;
@@ -911,7 +916,7 @@ html[data-visual-freeze="true"] .victory-confetti__static {
   }
 
   .score-player {
-    grid-row: 1;
+    top: 0.5rem;
   }
 
   .score-hint {

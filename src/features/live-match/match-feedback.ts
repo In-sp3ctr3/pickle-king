@@ -2,8 +2,6 @@ import { isDoubles } from "../../match/service";
 import type { ScoringState } from "../../match/types";
 
 const ANNOUNCER_ROOT = "/audio/announcer";
-const NUMBER_CLIP_MAX = 109;
-const CONVERSATIONAL_TARGET_MAX = 11;
 const CONVERSATIONAL_SCORE_MAX = 21;
 
 export interface AnnouncementClip {
@@ -36,42 +34,8 @@ function isMatchPoint(scorer: ScoringState): boolean {
   );
 }
 
-function numberClips(
-  values: number[],
-  scorer: ScoringState,
-): AnnouncementClip[] {
-  // ponytail: bundled clips cover real-world scores through 109; extend the
-  // generated pack if Pickle King ever supports longer-format scoring.
-  if (
-    values.some(
-      (value) =>
-        !Number.isInteger(value) || value < 0 || value > NUMBER_CLIP_MAX,
-    )
-  ) {
-    return [];
-  }
-  return values.map((value, index) => {
-    const last = index === values.length - 1;
-    const variation =
-      (scorer.rallyHistory.length + index) % 2 === 0 ? "a" : "b";
-    return {
-      name:
-        value <= 21
-          ? `fenrir/${last ? "end" : "continue"}-${variation}/${value}`
-          : `fenrir/${value}`,
-      pauseAfterMs: 0,
-    };
-  });
-}
-
-function conversationalScore(
-  values: number[],
-  scorer: ScoringState,
-): AnnouncementClip[] | null {
-  if (
-    scorer.targetScore > CONVERSATIONAL_TARGET_MAX ||
-    (values.length !== 2 && values.length !== 3)
-  ) {
+function conversationalScore(values: number[]): AnnouncementClip[] | null {
+  if (values.length !== 2 && values.length !== 3) {
     return null;
   }
   const [servingScore, receivingScore] = values;
@@ -82,13 +46,24 @@ function conversationalScore(
       Math.min(servingScore, receivingScore) >= 10 &&
       Math.abs(servingScore - receivingScore) <= 1);
   if (!supported) return null;
-  const format = values.length === 3 ? "doubles" : "singles";
-  return [
+  const clips: AnnouncementClip[] = [
     {
-      name: `chatterbox/scores/${format}/${values.join("-")}`,
+      name: `chatterbox/scores/singles/${servingScore}-${receivingScore}`,
       pauseAfterMs: 0,
     },
   ];
+  if (values.length === 3) {
+    clips.push({ name: `chatterbox/server-${values[2]}`, pauseAfterMs: 0 });
+  }
+  return clips;
+}
+
+function hasConversationalGame(scores: number[]): boolean {
+  const [winner, loser] = scores;
+  return (
+    (winner >= 2 && winner <= 11 && loser <= winner - 2) ||
+    (winner >= 12 && winner <= 21 && loser === winner - 2)
+  );
 }
 
 export function announcementSequence(
@@ -100,12 +75,7 @@ export function announcementSequence(
       scorer.winner === "A"
         ? [scorer.scoreA, scorer.scoreB]
         : [scorer.scoreB, scorer.scoreA];
-    if (
-      scorer.targetScore <= CONVERSATIONAL_TARGET_MAX &&
-      scores[0] <= CONVERSATIONAL_SCORE_MAX &&
-      scores[0] >= scorer.targetScore &&
-      scores[0] - scores[1] >= 2
-    ) {
+    if (hasConversationalGame(scores)) {
       return [
         {
           name: `chatterbox/game/${scores.join("-")}`,
@@ -113,22 +83,15 @@ export function announcementSequence(
         },
       ];
     }
-    const finalScores = numberClips(scores, scorer);
-    if (finalScores.length !== 2) {
-      return [{ name: "fenrir/game", pauseAfterMs: 0 }];
-    }
-    const [winnerScore, loserScore] = finalScores;
-    return [
-      { name: "fenrir/game", pauseAfterMs: 160 },
-      { name: "fenrir/final-score", pauseAfterMs: 140 },
-      winnerScore,
-      { name: "fenrir/to", pauseAfterMs: 0 },
-      loserScore,
-    ];
+    const finalScore = conversationalScore(scores);
+    return finalScore
+      ? [
+          { name: "chatterbox/game-final-score", pauseAfterMs: 0 },
+          ...finalScore,
+        ]
+      : [];
   }
-  const values = scoreValues(scorer);
-  const score =
-    conversationalScore(values, scorer) ?? numberClips(values, scorer);
+  const score = conversationalScore(scoreValues(scorer)) ?? [];
   if (score.length === 0) return [];
   const sideOut = Boolean(
     previous?.service &&

@@ -42,10 +42,38 @@ describe("score announcements", () => {
     };
 
     expect(clips(null, opening)).toEqual([
-      ["chatterbox/scores/doubles/0-0-2", 0],
+      ["chatterbox/scores/singles/0-0", 0],
+      ["chatterbox/server-2", 0],
     ]);
     expect(clips(null, receivingTeamNowServes)).toEqual([
-      ["chatterbox/scores/doubles/2-1-1", 0],
+      ["chatterbox/scores/singles/2-1", 0],
+      ["chatterbox/server-1", 0],
+    ]);
+  });
+
+  it("composes doubles scores so every spoken value is present", () => {
+    const scorer = liveScorer({
+      startingTeam: "A",
+      servingTeam: "A",
+      serverId: "a1",
+      turn: "first",
+      rightAtZero: { A: "a1", B: "b1" },
+    });
+
+    expect(clips(null, { ...scorer, scoreA: 8, scoreB: 7 })).toEqual([
+      ["chatterbox/scores/singles/8-7", 0],
+      ["chatterbox/server-1", 0],
+    ]);
+    expect(
+      clips(null, {
+        ...scorer,
+        scoreA: 5,
+        scoreB: 2,
+        service: { ...scorer.service!, turn: "second" },
+      }),
+    ).toEqual([
+      ["chatterbox/scores/singles/5-2", 0],
+      ["chatterbox/server-2", 0],
     ]);
   });
 
@@ -108,7 +136,8 @@ describe("score announcements", () => {
 
     expect(clips(previous, next)).toEqual([
       ["chatterbox/side-out-match-point", 120],
-      ["chatterbox/scores/doubles/10-8-1", 0],
+      ["chatterbox/scores/singles/10-8", 0],
+      ["chatterbox/server-1", 0],
     ]);
   });
 
@@ -134,11 +163,13 @@ describe("score announcements", () => {
 
     expect(clips(serving, sideOut)).toEqual([
       ["chatterbox/side-out", 120],
-      ["chatterbox/scores/doubles/1-2-1", 0],
+      ["chatterbox/scores/singles/1-2", 0],
+      ["chatterbox/server-1", 0],
     ]);
     expect(clips(serving, matchPoint)).toEqual([
       ["chatterbox/match-point", 120],
-      ["chatterbox/scores/doubles/10-8-1", 0],
+      ["chatterbox/scores/singles/10-8", 0],
+      ["chatterbox/server-1", 0],
     ]);
   });
 
@@ -162,7 +193,30 @@ describe("score announcements", () => {
     expect(clips(previous, finished)).toEqual([["chatterbox/game/11-7", 0]]);
   });
 
-  it("keeps custom formats audible when a conversational phrase is unavailable", () => {
+  it("uses the Chatterbox final call for an early tied score without old pauses", () => {
+    const previous = liveScorer({
+      startingTeam: "A",
+      servingTeam: "A",
+      serverId: "a1",
+      turn: "first",
+      rightAtZero: { A: "a1", B: "b1" },
+    });
+    const finished: ScoringState = {
+      ...previous,
+      scoreA: 2,
+      scoreB: 2,
+      status: "awaiting-confirmation",
+      winner: "A",
+      finishReason: "operator-selection",
+    };
+
+    expect(clips(previous, finished)).toEqual([
+      ["chatterbox/game-final-score", 0],
+      ["chatterbox/scores/singles/2-2", 0],
+    ]);
+  });
+
+  it("never falls back to the old voice for an unsupported custom score", () => {
     const custom: ScoringState = {
       ...liveScorer({
         startingTeam: "A",
@@ -176,10 +230,6 @@ describe("score announcements", () => {
       targetScore: 15,
     };
 
-    expect(clips(null, custom)).toEqual([
-      ["fenrir/continue-a/12", 0],
-      ["fenrir/continue-b/4", 0],
-      ["fenrir/end-a/1", 0],
-    ]);
+    expect(clips(null, custom)).toEqual([]);
   });
 });

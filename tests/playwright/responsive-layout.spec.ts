@@ -72,6 +72,47 @@ for (const viewport of responsiveViewports) {
             .toBeLessThan(6);
         }
 
+        if (routeName === "quick-live" && viewport.name.startsWith("ipad")) {
+          const hintGaps = await page
+            .locator(".score-side")
+            .evaluateAll((sides) =>
+              sides.map((side) => {
+                const hint = side
+                  .querySelector<HTMLElement>(".score-hint")!
+                  .getBoundingClientRect();
+                const controls = side
+                  .querySelector<HTMLElement>(".score-stepper")!
+                  .getBoundingClientRect();
+                return controls.top - hint.bottom;
+              }),
+            );
+          expect(Math.min(...hintGaps)).toBeGreaterThanOrEqual(8);
+          const labelPositions = await page
+            .locator(".score-side")
+            .evaluateAll((sides) =>
+              sides.map((side) => {
+                const bounds = side.getBoundingClientRect();
+                const label = side
+                  .querySelector<HTMLElement>(".score-player")!
+                  .getBoundingClientRect();
+                return {
+                  centerDelta: Math.abs(
+                    label.left +
+                      label.width / 2 -
+                      (bounds.left + bounds.width / 2),
+                  ),
+                  topGap: label.top - bounds.top,
+                };
+              }),
+            );
+          expect(
+            labelPositions.every(
+              ({ centerDelta, topGap }) =>
+                centerDelta <= 2 && topGap >= 8 && topGap <= 32,
+            ),
+          ).toBe(true);
+        }
+
         if (
           (routeName === "round-robin-initial" ||
             routeName === "round-robin-five-initial") &&
