@@ -51,22 +51,32 @@
   margin-top: 1rem;
 }
 
-.bracket-tree-nav {
+.bracket-tree-toolbar {
   position: sticky;
   z-index: 12;
   top: 84px;
-  display: grid;
-  width: max-content;
-  grid-template-columns: repeat(3, 48px);
-  gap: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: 100%;
   margin: 0 auto 0.75rem;
+}
+
+.bracket-tree-nav,
+.bracket-tree-zoom {
+  display: flex;
+  width: max-content;
+  gap: 0.25rem;
   border-radius: 999px;
   background: #1a2017;
   padding: 0.3rem;
   box-shadow: 0 14px 32px rgb(0 0 0 / 38%);
 }
 
-.bracket-tree-nav button {
+.bracket-tree-nav button,
+.bracket-tree-zoom button {
   display: grid;
   width: 48px;
   height: 48px;
@@ -82,17 +92,72 @@
   color: var(--lime);
 }
 
+.bracket-tree-zoom button:nth-of-type(2),
+.bracket-tree-zoom button:nth-of-type(3) {
+  width: auto;
+  min-width: 48px;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.bracket-tree-zoom button:disabled {
+  opacity: 0.38;
+}
+
+.bracket-tree-zoom output {
+  display: grid;
+  min-width: 52px;
+  height: 48px;
+  place-items: center;
+  color: var(--chalk);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
 .bracket-tree-viewport {
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  scroll-behavior: smooth;
-  scroll-snap-type: x proximity;
+  overflow: auto;
+  overscroll-behavior: contain;
   scrollbar-color: var(--lime-deep) var(--baseline);
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.bracket-tree-viewport[data-bracket-mode="panning"] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.bracket-tree-viewport[data-bracket-mode="overview"] {
+  display: grid;
+  place-items: center;
+}
+
+.bracket-tree-overview-note {
+  margin: 0.65rem 0 0;
+  color: var(--mist);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.bracket-tree-stage {
+  position: relative;
+  margin-inline: auto;
+}
+
+.bracket-tree-scaled-board {
+  transform-origin: 0 0;
+}
+
+.bracket-tree-scaled-board[inert] {
+  pointer-events: none;
 }
 
 .bracket-tree-board {
   position: relative;
-  margin-inline: auto;
 }
 
 .bracket-tree-node {

@@ -2,11 +2,11 @@
 
 Pipeline version: 2
 Status: passed
-Last updated: 2026-08-10
+Last updated: 2026-08-19
 
 ## Environment
 
-- Commit/source state: small-field round-robin + serve-tracker release candidate
+- Commit/source state: v1.9.0-alpha.1 bracket viewport and announcer repair
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -71,40 +71,41 @@ Last updated: 2026-08-10
 
 ## Iteration History
 
-| Iteration | Region                  | Pixel signal                                         | Human finding                                                                          | Change                                                                                                        | Result |
-| --------- | ----------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ |
-| 1         | Typography              | glyph crowding                                       | condensed display face joined double-digit scores                                      | introduced Archivo Black with positive score tracking                                                         | passed |
-| 2         | Home hero               | concept rejection                                    | product-demo imagery kept replacing the requested identity                             | made the existing crowned mascot the sole visual with a restrained blink                                      | passed |
-| 3         | Navigation              | misplaced controls                                   | corner navigation lacked a reliable bracket-to-setup path                              | added one solid centered island with explicit Back and Home                                                   | passed |
-| 4         | Setup                   | control imbalance                                    | generic controls and uneven timing fields felt unfinished                              | added custom select, spring choices, field-local errors, and aligned rows                                     | passed |
-| 5         | Bracket                 | node-model mismatch                                  | players and actions occupied separate nodes                                            | rebuilt each node as a wide two-contender match converging on a trophy final                                  | passed |
-| 6         | Queue state             | scheduling ambiguity                                 | every dependency-ready match appeared ready                                            | reserved lime and `Next` for the one-court eligible match; marked the rest queued                             | passed |
-| 7         | Responsive QA           | missing target screens                               | tablet and phone landscape behavior had not been proven                                | added executable layout tests for all three target viewports                                                  | passed |
-| 8         | Bracket repair          | unclear six-player draw                              | `BYE` looked like an unregistered participant                                          | named automatic advances in setup/draw and removed the fake contender row                                     | passed |
-| 9         | Result repair           | correction interruption                              | completed scores opened browser prompts                                                | added compact in-node score editing with explicit tied-result winner selection                                | passed |
-| 10        | Score motion            | uncontrolled digit reel                              | rapid taps appeared to overshoot and subtraction spun forward                          | removed continuous cycling, restored delta direction, and bounded countdown digits                            | passed |
-| 11        | Draw repair             | destructive ambiguity                                | a forgotten entrant could not be added honestly after play                             | split safe name edits from a guarded full reseed                                                              | passed |
-| 12        | Result moment           | weak share state                                     | final scores were difficult to screenshot or share                                     | made score/name/crown dominant and added local PNG sharing                                                    | passed |
-| 13        | Session recall          | no durable visual record                             | Quick Matches disappeared after confirmation                                           | added a bounded courtside ledger with per-record sharing                                                      | passed |
-| 14        | Name entry              | repeated typing                                      | recurring doubles players had to be entered every match                                | added an accessible custom remembered-name combobox                                                           | passed |
-| 15        | Result review           | cramped celebration                                  | the winning score and product identity lacked presence                                 | expanded the review surface around one crowned mascot, dominant score, and context                            | passed |
-| 16        | Share output            | generic exported identity                            | PNG exports used a generic crown instead of the product mark                           | made both async builders decode and draw the local mascot before export                                       | passed |
-| 17        | Scorer fit              | clipped idle controls                                | the footer start action fell below short landscape viewports                           | moved Start match into the score stage and fixed the scorer to `100dvh`                                       | passed |
-| 18        | Draw utilities          | detached actions                                     | Edit draw and Share bracket competed with the page hero                                | grouped both actions beside Full draw with a narrow-screen stack                                              | passed |
-| 19        | Mixed-skill draw        | opening-round humiliation                            | standard seeding was the only recreational option                                      | added explicit Competitive and Social draw choices                                                            | passed |
-| 20        | Scorer controls         | ambiguous correction                                 | the floating minus control was missed on court                                         | retained court tap and added labeled add/undo controls                                                        | passed |
-| 21        | Results                 | mutable summary                                      | correction actions made the final report feel unstable                                 | moved correction and rename to bracket nodes; kept results static                                             | passed |
-| 22        | Tournament share        | one oversized story                                  | podium, standings, and draw compete at one aspect ratio                                | added focused recap, statistics, and full-bracket exports                                                     | passed |
-| 23        | Result preview          | blind native sharing                                 | desktop users could not inspect or explicitly save the PNG                             | placed the exact generated image in review with separate Share and Download actions                           | passed |
-| 24        | Share typography        | score collision                                      | a 4 to 11 score crowded its separator and hid player identity                          | split both scores and names into measured lanes using the supplied reference hierarchy                        | passed |
-| 25        | Scorer idle             | oversized misplaced start                            | the Start surface read as a top card rather than an overlay                            | reduced it to a compact control centered over the viewport                                                    | passed |
-| 26        | Bracket repair          | clipped names and oversized final                    | long opponents collided and the championship node wasted space                         | bounded every participant lane, separated the run-of-show names, and rebuilt a compact trophy final           | passed |
-| 27        | Draw setup              | unclear seeded/social language                       | players could not predict how ratings affected placement                               | renamed the choices Ranked and Random, added plain-language copy, migration, and a pre-start reroll           | passed |
-| 28        | Share identity          | generic glow and weak podium                         | exports did not carry the supplied reference's athletic hierarchy                      | added an original text-free arena and rebuilt feed, story, recap, stats, and bracket compositions             | passed |
-| 29        | Share workflow          | cropped and blind output                             | users could not inspect the whole artifact or revisit completed results                | added contained previews, native share/download states, and read-only archived results                        | passed |
-| 30        | Responsive input        | clipped steppers and undersized actions              | compact controls overlapped and missed the 48px contract                               | rebuilt number-control geometry and normalized setup, format, navigation, and bracket targets                 | passed |
-| 31        | Adversarial QA          | transient long-name overflow and incomplete evidence | async fallback and 16-player geometry were not proven                                  | contained the fallback, removed scale-shrunk hit targets, and added geometry plus current comparison evidence | passed |
-| 32        | Small-field round robin | missing five/six-player and warning-state evidence   | the four-player screen contract did not prove longer fields or untimed warning absence | added dynamic schedules, rotating rests, five new route states, and responsive browser coverage               | passed |
+| Iteration | Region                  | Pixel signal                                          | Human finding                                                                          | Change                                                                                                        | Result |
+| --------- | ----------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ |
+| 1         | Typography              | glyph crowding                                        | condensed display face joined double-digit scores                                      | introduced Archivo Black with positive score tracking                                                         | passed |
+| 2         | Home hero               | concept rejection                                     | product-demo imagery kept replacing the requested identity                             | made the existing crowned mascot the sole visual with a restrained blink                                      | passed |
+| 3         | Navigation              | misplaced controls                                    | corner navigation lacked a reliable bracket-to-setup path                              | added one solid centered island with explicit Back and Home                                                   | passed |
+| 4         | Setup                   | control imbalance                                     | generic controls and uneven timing fields felt unfinished                              | added custom select, spring choices, field-local errors, and aligned rows                                     | passed |
+| 5         | Bracket                 | node-model mismatch                                   | players and actions occupied separate nodes                                            | rebuilt each node as a wide two-contender match converging on a trophy final                                  | passed |
+| 6         | Queue state             | scheduling ambiguity                                  | every dependency-ready match appeared ready                                            | reserved lime and `Next` for the one-court eligible match; marked the rest queued                             | passed |
+| 7         | Responsive QA           | missing target screens                                | tablet and phone landscape behavior had not been proven                                | added executable layout tests for all three target viewports                                                  | passed |
+| 8         | Bracket repair          | unclear six-player draw                               | `BYE` looked like an unregistered participant                                          | named automatic advances in setup/draw and removed the fake contender row                                     | passed |
+| 9         | Result repair           | correction interruption                               | completed scores opened browser prompts                                                | added compact in-node score editing with explicit tied-result winner selection                                | passed |
+| 10        | Score motion            | uncontrolled digit reel                               | rapid taps appeared to overshoot and subtraction spun forward                          | removed continuous cycling, restored delta direction, and bounded countdown digits                            | passed |
+| 11        | Draw repair             | destructive ambiguity                                 | a forgotten entrant could not be added honestly after play                             | split safe name edits from a guarded full reseed                                                              | passed |
+| 12        | Result moment           | weak share state                                      | final scores were difficult to screenshot or share                                     | made score/name/crown dominant and added local PNG sharing                                                    | passed |
+| 13        | Session recall          | no durable visual record                              | Quick Matches disappeared after confirmation                                           | added a bounded courtside ledger with per-record sharing                                                      | passed |
+| 14        | Name entry              | repeated typing                                       | recurring doubles players had to be entered every match                                | added an accessible custom remembered-name combobox                                                           | passed |
+| 15        | Result review           | cramped celebration                                   | the winning score and product identity lacked presence                                 | expanded the review surface around one crowned mascot, dominant score, and context                            | passed |
+| 16        | Share output            | generic exported identity                             | PNG exports used a generic crown instead of the product mark                           | made both async builders decode and draw the local mascot before export                                       | passed |
+| 17        | Scorer fit              | clipped idle controls                                 | the footer start action fell below short landscape viewports                           | moved Start match into the score stage and fixed the scorer to `100dvh`                                       | passed |
+| 18        | Draw utilities          | detached actions                                      | Edit draw and Share bracket competed with the page hero                                | grouped both actions beside Full draw with a narrow-screen stack                                              | passed |
+| 19        | Mixed-skill draw        | opening-round humiliation                             | standard seeding was the only recreational option                                      | added explicit Competitive and Social draw choices                                                            | passed |
+| 20        | Scorer controls         | ambiguous correction                                  | the floating minus control was missed on court                                         | retained court tap and added labeled add/undo controls                                                        | passed |
+| 21        | Results                 | mutable summary                                       | correction actions made the final report feel unstable                                 | moved correction and rename to bracket nodes; kept results static                                             | passed |
+| 22        | Tournament share        | one oversized story                                   | podium, standings, and draw compete at one aspect ratio                                | added focused recap, statistics, and full-bracket exports                                                     | passed |
+| 23        | Result preview          | blind native sharing                                  | desktop users could not inspect or explicitly save the PNG                             | placed the exact generated image in review with separate Share and Download actions                           | passed |
+| 24        | Share typography        | score collision                                       | a 4 to 11 score crowded its separator and hid player identity                          | split both scores and names into measured lanes using the supplied reference hierarchy                        | passed |
+| 25        | Scorer idle             | oversized misplaced start                             | the Start surface read as a top card rather than an overlay                            | reduced it to a compact control centered over the viewport                                                    | passed |
+| 26        | Bracket repair          | clipped names and oversized final                     | long opponents collided and the championship node wasted space                         | bounded every participant lane, separated the run-of-show names, and rebuilt a compact trophy final           | passed |
+| 27        | Draw setup              | unclear seeded/social language                        | players could not predict how ratings affected placement                               | renamed the choices Ranked and Random, added plain-language copy, migration, and a pre-start reroll           | passed |
+| 28        | Share identity          | generic glow and weak podium                          | exports did not carry the supplied reference's athletic hierarchy                      | added an original text-free arena and rebuilt feed, story, recap, stats, and bracket compositions             | passed |
+| 29        | Share workflow          | cropped and blind output                              | users could not inspect the whole artifact or revisit completed results                | added contained previews, native share/download states, and read-only archived results                        | passed |
+| 30        | Responsive input        | clipped steppers and undersized actions               | compact controls overlapped and missed the 48px contract                               | rebuilt number-control geometry and normalized setup, format, navigation, and bracket targets                 | passed |
+| 31        | Adversarial QA          | transient long-name overflow and incomplete evidence  | async fallback and 16-player geometry were not proven                                  | contained the fallback, removed scale-shrunk hit targets, and added geometry plus current comparison evidence | passed |
+| 32        | Small-field round robin | missing five/six-player and warning-state evidence    | the four-player screen contract did not prove longer fields or untimed warning absence | added dynamic schedules, rotating rests, five new route states, and responsive browser coverage               | passed |
+| 33        | Full bracket viewport   | horizontal-only navigation and a top-aligned fit view | the complete draw could not be inspected at once and the fitted state was unclear      | added bounded native pan, pinch, wheel, keyboard zoom, centered Fit, and a visible read-only overview state   | passed |
 
 The route-level source/render pairs remain regression baselines. Reference
 fidelity is reviewed separately against both supplied victory cards. The cards
@@ -205,29 +206,38 @@ The supplied source hashes are
 | DQA-64 | P2       | results/history   | completed round-robin result captures                           | preliminary and placement history needed explicit groups                         | frontend | fixed  |
 | DQA-65 | P2       | round-robin/setup | five/six-player desktop, mobile, tablet, and landscape captures | schedule density, rotating rests, and timed-only advisory needed explicit proof  | frontend | fixed  |
 | DQA-66 | P1       | scorer/serve      | browser comments and 319px scorer capture                       | full-court cue, active box, server marker, score spacing, and cross-net side out | frontend | fixed  |
+| DQA-67 | P2       | bracket/viewport  | phone, desktop, and both iPad orientations                      | horizontal scrolling alone prevented a complete-draw overview                    | frontend | fixed  |
+| DQA-68 | P1       | home/version      | Axe contrast result at 390×844                                  | the discreet version label measured 3.48:1 instead of 4.5:1                      | frontend | fixed  |
+| DQA-69 | P2       | bracket/overview  | fitted browser captures                                         | the fitted draw was top-aligned and its read-only state was not visible          | frontend | fixed  |
+| DQA-70 | P2       | bracket/wheel     | Chromium console matrix                                         | React's passive wheel listener could not cancel browser zoom                     | frontend | fixed  |
+| DQA-71 | P2       | bracket/centering | 390×844 geometry assertion                                      | the initial championship view was 20px off center on the mobile full-bleed lane  | frontend | fixed  |
 
 ## Feedback Loop
 
 - Mechanism: screenshot-comments
-- Availability/status: available; all serve-tracker comments resolved
-- Annotation/comment evidence: `docs/frontend/evidence/serve-tracker-feedback.md`
-- Resolution evidence: `tests/playwright/serve-tracker.spec.ts`,
-  `test-results/frontend-captures/quick-live-mobile.png`, and
-  `docs/frontend/evidence/serve-tracker-swapped-mobile.png`
+- Availability/status: screenshot annotation was unavailable for this isolated
+  viewport review; reviewer findings were recorded as DQA-67–71 and resolved.
+- Annotation/comment evidence: `docs/frontend/evidence/bracket-zoom-prototype.md`
+  and the DQA-67–71 finding rows above
+- Resolution evidence: `tests/playwright/bracket-viewport.spec.ts`,
+  `src/features/bracket/bracket-viewport.test.tsx`, and
+  `output/playwright/bracket-qa-phone-fit-repaired.png`
 
 ## Performance Evidence
 
-| Surface                 | Numeric target    | Numeric result | Conditions                                        | Evidence                                 | Result |
-| ----------------------- | ----------------- | -------------- | ------------------------------------------------- | ---------------------------------------- | ------ |
-| Production PWA precache | ≤ 3.0 MB          | 2.66 MB        | Minified production build with service worker     | `npm run build` output                   | passed |
-| Serve transition thread | ≤ 50 ms long task | 0 ms longest   | Chromium at 319×768 during one service transition | `tests/playwright/serve-tracker.spec.ts` | passed |
+| Surface                 | Numeric target    | Numeric result | Conditions                                                        | Evidence                                    | Result |
+| ----------------------- | ----------------- | -------------- | ----------------------------------------------------------------- | ------------------------------------------- | ------ |
+| Production PWA precache | ≤ 10 MB           | 8.82 MB        | Minified production build including the offline Chatterbox corpus | `npm run build` output                      | passed |
+| Serve transition thread | ≤ 50 ms long task | 0 ms longest   | Chromium at 319×768 during one service transition                 | `tests/playwright/serve-tracker.spec.ts`    | passed |
+| Bracket viewport thread | ≤ 50 ms long task | 0 ms longest   | Chromium at 390×844 across Fit, Reset, zoom, and keyboard input   | `tests/playwright/bracket-viewport.spec.ts` | passed |
 
 ## Anti-Template Review
 
-| Surface     | Risk                        | Evidence                           | Finding                                                           | Resolution                                                           | Result |
-| ----------- | --------------------------- | ---------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------- | ------ |
-| Live scorer | Generic dashboard treatment | quick-live desktop/mobile captures | Court-first split scoring remains the dominant composition        | Compact rule-specific serve strip uses the existing court identity   | passed |
-| Serve guide | Decorative sports diagram   | serve-tracker browser flow         | Every line, box, label, and marker communicates legal serve state | Full court mirrors teams across the net and highlights one legal box | passed |
+| Surface      | Risk                        | Evidence                           | Finding                                                           | Resolution                                                           | Result |
+| ------------ | --------------------------- | ---------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------- | ------ |
+| Live scorer  | Generic dashboard treatment | quick-live desktop/mobile captures | Court-first split scoring remains the dominant composition        | Compact rule-specific serve strip uses the existing court identity   | passed |
+| Serve guide  | Decorative sports diagram   | serve-tracker browser flow         | Every line, box, label, and marker communicates legal serve state | Full court mirrors teams across the net and highlights one legal box | passed |
+| Full bracket | Generic canvas/dashboard    | phone, desktop, and iPad captures  | Existing semantic match cards and connectors remain the product   | Native DOM/CSS transform and scrolling add no canvas or dependency   | passed |
 
 ## Authorship Evidence
 
@@ -236,6 +246,7 @@ The supplied source hashes are
 | Legal service-box cue | One pulsing lime box on the full mini-court            | The scorer sees where the next serve begins without calculating parity |
 | Solid server marker   | Lime head-and-torso marker outside the active baseline | The active server remains distinct without implying live formation     |
 | Rally-winner scoring  | Two large court targets paired with whole-rally undo   | One tap records either a point or a service transition correctly       |
+| Read-only overview    | Centered complete draw plus an explicit overview note  | Fit reveals the tournament shape without exposing undersized controls  |
 
 ## Harness Results
 
@@ -265,4 +276,7 @@ latest iPad evidence proves state-specific ordinary nodes: compact equal-inset
 startable cards and full-width waiting cards with no phantom action lane.
 Current portrait exports use isolated mirrored dependency rails and one final
 convergence, with intersection tests for 8- and 16-player draws. No P0/P1/P2
-design finding remains open.
+design finding remains open. The bracket viewport additionally passes bounded
+20–200% zoom, exact phone and tablet championship centering, native non-passive
+modifier-wheel handling, visible read-only Fit mode, keyboard operation, and a
+0 ms longest-task interaction check.

@@ -6,8 +6,8 @@ The setup and completed-results reference frames were refreshed after adding the
 
 Reviewer: design_reviewer
 Result: passed
-Source state: small-field round-robin + serve-tracker release candidate
-Reviewed at: 2026-08-10
+Source state: v1.9.0-alpha.1 bracket viewport and announcer repair
+Reviewed at: 2026-08-19
 
 Open P0: 0
 Open P1: 0
@@ -107,6 +107,11 @@ Open P2: 0
 | DR-51 | P2       | results/history   | completed round-robin captures                | grouped the ledger into Round robin and Placement matches                                       | fixed  |
 | DR-52 | P2       | round-robin/setup | five/six-player route and responsive captures | removed knockout-only advance copy, proved rotating rests, and kept the cap advisory timed-only | fixed  |
 | DR-53 | P1       | scorer/serve      | desktop/mobile serve flow and comparisons     | added the legal full-court cue, solid server marker, rally undo, and persistent side swap       | fixed  |
+| DR-54 | P2       | bracket/viewport  | desktop, phone, and iPad viewport captures    | added bounded pan, pinch, wheel, keyboard zoom, Fit, and Reset without replacing semantic cards | fixed  |
+| DR-55 | P2       | bracket/overview  | fitted viewport captures                      | centered the complete draw and made its read-only state explicit                                | fixed  |
+| DR-56 | P1       | home/version      | Axe contrast run                              | kept the version label discreet while raising contrast from 3.48:1 to 5.17:1                    | fixed  |
+| DR-57 | P2       | bracket/wheel     | Chromium console matrix                       | moved modifier-wheel cancellation to a native non-passive listener                              | fixed  |
+| DR-58 | P2       | bracket/centering | 390×844 geometry assertion                    | centered the championship from actual viewport scroll geometry                                  | fixed  |
 
 ## Decision
 
@@ -122,3 +127,7 @@ The 4–6-player round-robin schedule and its expanded contracted states also
 pass desktop, portrait phone, tablet, and landscape-phone review.
 The serve guide, recovery flow, whole-rally undo, and court-side swap also pass
 desktop, 319–390px mobile, reduced-motion, and independent comparison review.
+The bounded bracket viewport also passes complete-draw Fit, 100% Reset,
+20–200% limits, exact phone/tablet centering, keyboard and pointer interaction,
+zero Axe violations, and a 0 ms longest-task measurement. No open P0/P1/P2
+finding remains.

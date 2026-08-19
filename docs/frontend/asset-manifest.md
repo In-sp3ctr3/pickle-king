@@ -16,7 +16,7 @@ Pipeline version: 2
 | Manrope                 | body/UI                            | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | no remote request                                                              |
 | Archivo Black           | display/numerals                   | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | heavy, separated glyphs                                                        |
 | icons                   | controls/status                    | React icon package | Lucide                   | ISC                       | accepted | tree-shaken components  | no hand-authored SVG                                                           |
-| bracket                 | tournament draw                    | DOM/CSS            | original implementation  | MIT project code          | accepted | no canvas/WebGL         | no Skiper Pro source                                                           |
+| bracket                 | tournament draw                    | DOM/CSS            | original implementation  | MIT project code          | accepted | bounded native pan/zoom | semantic cards remain; no canvas/WebGL                                         |
 | small-field schedule    | five/six-player round robin        | DOM/CSS            | existing design contract | MIT project code          | accepted | no new asset            | dynamic rounds, resting label, and timed advisory reuse existing identity      |
 | result/recap/stats PNGs | result and tournament sharing      | Canvas             | original implementation  | MIT project code          | accepted | 1080×1350 + 1080×1920   | format-specific Post and Story / Reel layouts; generated and previewed locally |
 | bracket-share PNG       | live and completed draw sharing    | Canvas             | original implementation  | MIT project code          | accepted | 1600×1200 + portrait    | dedicated Full draw, Post, and Story / Reel geometry                           |
@@ -61,11 +61,11 @@ Pipeline version: 2
 
 ## Capability Plan
 
-| Capability | Purpose                               | Readiness        | Cost/auth/license           | Fallback                  | Verification                                     | Decision |
-| ---------- | ------------------------------------- | ---------------- | --------------------------- | ------------------------- | ------------------------------------------------ | -------- |
-| `dom-css`  | Semantic service guide and mini-court | available        | built-in browser capability | none                      | native browser capability                        | selected |
-| `motion`   | Existing bounded feedback only        | available        | declared project dependency | CSS color/status feedback | `motion` declared in package.json                | selected |
-| `21st`     | Reusable court or scorer candidate    | install-required | optional registry/login     | focused local DOM/CSS     | command unavailable; no generic candidate needed | rejected |
+| Capability | Purpose                                                 | Readiness               | Cost/auth/license           | Fallback                   | Verification                                      | Decision |
+| ---------- | ------------------------------------------------------- | ----------------------- | --------------------------- | -------------------------- | ------------------------------------------------- | -------- |
+| `dom-css`  | Service guide plus bracket pan, zoom, fit, and controls | available               | built-in browser capability | existing horizontal scroll | pointer, wheel, keyboard, and browser tests       | selected |
+| `motion`   | Existing bounded feedback; viewport stays native        | available               | declared dependency; MIT    | CSS color/status feedback  | `motion` declared in package.json                 | selected |
+| `21st`     | Reusable bracket viewport interaction                   | authentication-required | optional registry/login     | native DOM/CSS             | CLI found; search returned HTTP 401 on 2026-08-19 | rejected |
 
 ## Dependencies
 

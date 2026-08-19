@@ -24,7 +24,7 @@
     padding-inline: 1.25rem;
   }
 
-  .bracket-tree-nav {
+  .bracket-tree-toolbar {
     top: 76px;
   }
 
@@ -57,7 +57,7 @@
     font-size: 2.5rem;
   }
 
-  .bracket-tree-nav {
+  .bracket-tree-toolbar {
     position: relative;
     top: auto;
   }

@@ -281,6 +281,21 @@ test("a six-player draw stays connected and exposes the ready opening courts", a
     .poll(() => viewport.evaluate((element) => element.scrollLeft))
     .toBeGreaterThan(0);
   await page.getByRole("button", { name: "Show championship match" }).click();
+  await page.getByRole("button", { name: "Fit", exact: true }).click();
+  await expect(viewport).toHaveAttribute("data-bracket-mode", "overview");
+  await expect(page.locator(".bracket-tree-scaled-board")).toHaveAttribute(
+    "inert",
+    "",
+  );
+  await page.getByRole("button", { name: "Reset zoom to 100%" }).click();
+  await expect(viewport).toHaveAttribute("data-bracket-mode", "readable");
+  await page.getByRole("button", { name: "Zoom in" }).click();
+  await expect(viewport).toHaveAttribute("data-bracket-mode", "detail");
+  await expect(page.getByLabel("Current bracket zoom")).toHaveText("125%");
+  await viewport.press("f");
+  await expect(viewport).toHaveAttribute("data-bracket-mode", "overview");
+  await viewport.press("0");
+  await expect(viewport).toHaveAttribute("data-bracket-mode", "readable");
   await page.screenshot({
     animations: "disabled",
     fullPage: true,

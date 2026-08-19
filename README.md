@@ -79,6 +79,14 @@ npm run frontend:test:workflows
 
 `npm run test:pwa` verifies the production service-worker artifacts directly.
 
+## Release versions
+
+The version in `package.json` is the release source of truth and appears
+discreetly on the home screen. New work starts as `x.y.z-alpha.1`, advances to
+`x.y.z-beta.1` for field testing, and drops the suffix only for a stable
+production release. Every release commit bumps that value before verification
+and deployment.
+
 ## Privacy
 
 Pickle King is local-first by design. Player names, scores, and recent history

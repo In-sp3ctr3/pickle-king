@@ -8,7 +8,7 @@ Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-10
+Last updated: 2026-08-19
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -17,13 +17,13 @@ Last updated: 2026-08-10
 - Visual thesis: A near-black courtside score surface where acid lime identifies
   the one live state that matters and the serve guide reads as court anatomy,
   not dashboard chrome.
-- Content narrative: Set the opening serve once, tap the rally winner, then
-  glance at the legal next server without taking attention from the score.
-- Selected direction: Extend the existing split-score court identity with a
-  compact outlined service strip below the top bar.
-- Selected by: Product owner through the serve-tracker feature brief.
-- Selection evidence: `specs/015-serve-tracker/research.md` and current
-  quick-live desktop/mobile evidence.
+- Content narrative: Build the draw, inspect the complete route at a glance,
+  then zoom to a readable match before starting or correcting it.
+- Selected direction: Preserve the connected semantic bracket while adding a
+  bounded native pan-and-zoom viewport with an explicit overview state.
+- Selected by: Product owner through the bracket canvas request.
+- Selection evidence: current bracket implementation and
+  `docs/frontend/evidence/bracket-zoom-prototype.md`.
 - Selection status: approved
 
 ## Authority
@@ -63,21 +63,21 @@ Last updated: 2026-08-10
 
 ## Page Regions
 
-| Region         | Purpose                         | Geometry                                          | Responsive behavior                          | Interaction                          |
-| -------------- | ------------------------------- | ------------------------------------------------- | -------------------------------------------- | ------------------------------------ |
-| Court header   | explicit app navigation         | centered floating island                          | labels contract, actions remain available    | back and home                        |
-| Home hero      | establish identity and begin    | asymmetric copy + crowned mascot                  | stacked; CTA first                           | mascot arrival and blink             |
-| Run of show    | next match and time risk        | lime court slab + ordered queue                   | horizontal queue becomes list                | start the one eligible match         |
-| Bracket        | advancement overview            | connected two-sided elimination tree              | full tree desktop; preserved overflow mobile | scroll, start, and correct           |
-| Round robin    | participation and qualification | live table + 3–5 paired rounds + placement row    | three cards become one; rounds stack         | start, rest, correct, and track rank |
-| Scorekeeper    | no-look scoring                 | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns   | start, add, subtract, pause, reset   |
-| Results        | podium and evidence             | crowned-ball focal point + grouped tables         | stacked podium then tables                   | share, review, or replay             |
-| History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows             | view, share, or remove one record    |
-| Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                    | rename, late entry, or rebuild       |
-| Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile             | start, correct, or pre-start undo    |
-| Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview         | native share or explicit download    |
-| Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview               | native share or explicit download    |
-| Serve guide    | identify legal next server      | compact strip under scorer top bar                | remains above score targets                  | read-only court cue and Fix serve    |
+| Region         | Purpose                         | Geometry                                          | Responsive behavior                        | Interaction                          |
+| -------------- | ------------------------------- | ------------------------------------------------- | ------------------------------------------ | ------------------------------------ |
+| Court header   | explicit app navigation         | centered floating island                          | labels contract, actions remain available  | back and home                        |
+| Home hero      | establish identity and begin    | asymmetric copy + crowned mascot                  | stacked; CTA first                         | mascot arrival and blink             |
+| Run of show    | next match and time risk        | lime court slab + ordered queue                   | horizontal queue becomes list              | start the one eligible match         |
+| Bracket        | advancement overview            | connected two-sided elimination tree              | bounded pan/zoom with fitted overview      | pan, zoom, fit, start, and correct   |
+| Round robin    | participation and qualification | live table + 3–5 paired rounds + placement row    | three cards become one; rounds stack       | start, rest, correct, and track rank |
+| Scorekeeper    | no-look scoring                 | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns | start, add, subtract, pause, reset   |
+| Results        | podium and evidence             | crowned-ball focal point + grouped tables         | stacked podium then tables                 | share, review, or replay             |
+| History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows           | view, share, or remove one record    |
+| Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                  | rename, late entry, or rebuild       |
+| Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile           | start, correct, or pre-start undo    |
+| Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview       | native share or explicit download    |
+| Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview             | native share or explicit download    |
+| Serve guide    | identify legal next server      | compact strip under scorer top bar                | remains above score targets                | read-only court cue and Fix serve    |
 
 ## Page Rhythm Map
 
@@ -118,7 +118,7 @@ Last updated: 2026-08-10
 
 | Name             | Range      | Layout                                       | Verification |
 | ---------------- | ---------- | -------------------------------------------- | ------------ |
-| Mobile portrait  | 320–639px  | stacked flows and scroll-preserved bracket   | 390×844      |
+| Mobile portrait  | 320–639px  | stacked flows and bounded bracket viewport   | 390×844      |
 | Phone landscape  | short/wide | compact header, two-column forms when viable | 844×390      |
 | Tablet portrait  | 640–1023px | primary setup and bracket canvas             | 820×1180     |
 | Tablet landscape | 1024px+    | primary full draw and court controls         | 1180×820     |
@@ -151,23 +151,25 @@ Last updated: 2026-08-10
 | RoundRobinRound   | waiting, available, complete             | two match nodes per round; one-column phone fallback                         |
 | PlacementMatches  | unresolved, bronze-ready, final-ready    | third place precedes final; standings placeholders explain qualification     |
 | ServeGuide        | opening, first, second, swapped          | one legal box and one solid player marker; never a live formation map        |
+| BracketViewport   | fitted, readable, zoomed, panning        | fitted views are read-only below 100%; match controls activate at 100%+      |
 
 ## Motion
 
-| Motion              | Purpose                        | Trigger             | Timing              | Reduced motion |
-| ------------------- | ------------------------------ | ------------------- | ------------------- | -------------- |
-| score digit flow    | preserve number location       | score/time update   | spring, about 320ms | immediate text |
-| mascot arrival      | establish product identity     | home entry          | 720ms ease-out      | static mascot  |
-| mascot blink        | give the mark restrained life  | idle                | 100ms every 5.2s    | no blink       |
-| selected choice     | preserve toggle context        | option change       | 240ms spring        | immediate fill |
-| rating popup        | connect trigger and menu       | open/select         | 180ms ease-out      | immediate menu |
-| bracket advancement | show dependency                | result confirmation | 420ms ease-out      | crossfade      |
-| connector reveal    | show advancement path          | result confirmation | 280ms ease-out      | immediate      |
-| mascot arrival      | celebrate tournament champion  | results entry       | 700ms spring        | static mascot  |
-| result confetti     | mark confirmed performance     | result review       | two bursts, 1.2s    | static scatter |
-| suggestion reveal   | retain typing context          | input filtering     | 160ms ease-out      | immediate list |
-| press response      | confirm touch                  | pointer/keyboard    | 90ms                | color only     |
-| service-box pulse   | keep legal position glanceable | legal serve change  | 1.8s soft pulse     | static fill    |
+| Motion              | Purpose                          | Trigger               | Timing              | Reduced motion |
+| ------------------- | -------------------------------- | --------------------- | ------------------- | -------------- |
+| score digit flow    | preserve number location         | score/time update     | spring, about 320ms | immediate text |
+| mascot arrival      | establish product identity       | home entry            | 720ms ease-out      | static mascot  |
+| mascot blink        | give the mark restrained life    | idle                  | 100ms every 5.2s    | no blink       |
+| selected choice     | preserve toggle context          | option change         | 240ms spring        | immediate fill |
+| rating popup        | connect trigger and menu         | open/select           | 180ms ease-out      | immediate menu |
+| bracket advancement | show dependency                  | result confirmation   | 420ms ease-out      | crossfade      |
+| connector reveal    | show advancement path            | result confirmation   | 280ms ease-out      | immediate      |
+| mascot arrival      | celebrate tournament champion    | results entry         | 700ms spring        | static mascot  |
+| result confetti     | mark confirmed performance       | result review         | two bursts, 1.2s    | static scatter |
+| suggestion reveal   | retain typing context            | input filtering       | 160ms ease-out      | immediate list |
+| press response      | confirm touch                    | pointer/keyboard      | 90ms                | color only     |
+| service-box pulse   | keep legal position glanceable   | legal serve change    | 1.8s soft pulse     | static fill    |
+| bracket zoom        | move between overview and detail | pinch or zoom control | direct manipulation | immediate      |
 
 ## Anti-generic constraints
 
@@ -240,13 +242,30 @@ Last updated: 2026-08-10
   end. `Swap sides` reverses screen orientation without changing identity,
   scores, service history, or tournament results.
 
+## Feature 016 bracket viewport extension
+
+- The Full draw remains semantic DOM/CSS; no bitmap canvas or WebGL replaces
+  match cards, connectors, labels, focus order, or node actions.
+- Pinch, modifier-wheel, and horizontal drag pan or zoom within finite board
+  bounds. Zoom controls provide equivalent single-pointer and keyboard access.
+- Fit shows the complete draw at the largest scale that fits the viewport.
+  Below 100%, the board is an overview and its tiny match controls are inert;
+  returning to 100% or more restores every Start/Edit control at its contracted
+  48px minimum target.
+- The viewport clamps between the computed fit scale and 200%. Reset returns to
+  100% and centers the championship match. Reduced motion changes immediately.
+- Left, championship, and right navigation remain available at every scale.
+- Target viewports: 390×844, 844×390, 820×1180, 1180×820, and
+  1440×1000.
+
 ## Authorship Decisions
 
-| Decision                  | Product-specific reason                                           | Visible result                                                           |
-| ------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Legal-position mini-court | Players forget a serving side, not a generic score statistic      | Horizontal full-court diagram with one highlighted box and server marker |
-| Rally-winner score zones  | Side-out scoring makes receiver wins meaningful without a point   | Large targets communicate rally outcome rather than blind increment      |
-| Stacking-safe wording     | Physical formations vary while rules position only active players | Guide states the legal box without claiming a live player map            |
+| Decision                   | Product-specific reason                                             | Visible result                                                           |
+| -------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Legal-position mini-court  | Players forget a serving side, not a generic score statistic        | Horizontal full-court diagram with one highlighted box and server marker |
+| Rally-winner score zones   | Side-out scoring makes receiver wins meaningful without a point     | Large targets communicate rally outcome rather than blind increment      |
+| Stacking-safe wording      | Physical formations vary while rules position only active players   | Guide states the legal box without claiming a live player map            |
+| Read-only bracket overview | A fully fitted draw makes embedded controls too small to tap safely | Overview below 100%; readable interactive cards at 100% and above        |
 
 ## Share Export Geometry
 

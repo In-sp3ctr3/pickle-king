@@ -331,6 +331,34 @@
           "expect": { "visible": "[data-qa='bracket-screen']" }
         },
         {
+          "name": "zoom bracket out",
+          "selector": "[data-qa='bracket-zoom-out']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
+        },
+        {
+          "name": "fit full bracket",
+          "selector": "[data-qa='bracket-fit']",
+          "sequence": "bracket-fit-overview",
+          "action": "click",
+          "expect": { "visible": "[data-bracket-mode='overview']" }
+        },
+        {
+          "name": "reset bracket zoom",
+          "selector": "[data-qa='bracket-reset']",
+          "sequence": "bracket-fit-overview",
+          "action": "click",
+          "expect": { "visible": "[data-bracket-mode='readable']" }
+        },
+        {
+          "name": "zoom bracket in",
+          "selector": "[data-qa='bracket-zoom-in']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
+        },
+        {
           "name": "edit draw",
           "selector": "[data-qa='edit-draw']",
           "auditOnly": true,
@@ -440,6 +468,13 @@
         {
           "name": "completed bracket navigation",
           "selector": ".bracket-tree-nav button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='bracket-screen']" }
+        },
+        {
+          "name": "completed bracket zoom controls",
+          "selector": ".bracket-tree-zoom button",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
@@ -614,9 +649,17 @@
         },
         {
           "name": "exit idle scorer",
-          "selector": ".match-topbar > .text-button",
+          "selector": ".match-topbar .text-button",
+          "sequence": "idle-exit",
           "action": "click",
-          "expect": { "visible": "[data-qa='start-tournament']" }
+          "expect": { "visible": ".match-control-dialog" }
+        },
+        {
+          "name": "confirm idle scorer exit",
+          "selector": "button:has-text('Exit and discard')",
+          "sequence": "idle-exit",
+          "action": "click",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
         }
       ],
       "motionChecks": [],
@@ -656,9 +699,17 @@
         },
         {
           "name": "exit live match",
-          "selector": ".match-topbar > .text-button",
+          "selector": ".match-topbar .text-button",
+          "sequence": "live-exit",
           "action": "click",
-          "expect": { "visible": "[data-qa='start-tournament']" }
+          "expect": { "visible": ".match-control-dialog" }
+        },
+        {
+          "name": "confirm live match exit",
+          "selector": "button:has-text('Exit and discard')",
+          "sequence": "live-exit",
+          "action": "click",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
         },
         {
           "name": "add side A",
@@ -732,7 +783,7 @@
           "name": "service box and marker transition",
           "selector": ".serve-court",
           "stateAttribute": "data-motion-state",
-          "requiredStates": ["far-right", "near-left"],
+          "requiredStates": ["near-right", "far-left"],
           "reducedMotionState": "static",
           "observationMs": 300,
           "triggerSequence": "serve-guide-transition"

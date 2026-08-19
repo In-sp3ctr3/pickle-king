@@ -7,7 +7,9 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await page.evaluate(() => window.localStorage.clear());
   await page.reload({ waitUntil: "networkidle" });
-  await expect(page.locator("[data-qa='app-version']")).toHaveText("v1.8.0");
+  await expect(page.locator("[data-qa='app-version']")).toHaveText(
+    "v1.9.0-alpha.1",
+  );
   await page.getByRole("button", { name: "Quick match" }).click();
   await page.getByLabel("Side A").fill("Alex");
   await page.getByLabel("Side B").fill("Blair");
