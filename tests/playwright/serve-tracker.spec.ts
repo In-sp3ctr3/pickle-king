@@ -7,6 +7,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   await page.evaluate(() => window.localStorage.clear());
   await page.reload({ waitUntil: "networkidle" });
+  await expect(page.locator("[data-qa='app-version']")).toHaveText("v1.8.0");
   await page.getByRole("button", { name: "Quick match" }).click();
   await page.getByLabel("Side A").fill("Alex");
   await page.getByLabel("Side B").fill("Blair");
@@ -21,9 +22,9 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
   await expect(guide).toContainText("Opening serve · Server 2");
   await expect(court).toHaveAttribute(
     "aria-label",
-    /right service box on the right end/,
+    /right service box on the left end/,
   );
-  await expect(court).toHaveClass(/serve-court--near-right/);
+  await expect(court).toHaveClass(/serve-court--far-right/);
   expect(
     await court.evaluate((element) => {
       const courtBounds = element.getBoundingClientRect();
@@ -31,7 +32,7 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
       return (
-        marker.left + marker.width / 2 >
+        marker.left + marker.width / 2 <
         courtBounds.left + courtBounds.width / 2
       );
     }),
@@ -93,35 +94,17 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
   await expect(guide).not.toContainText("Opening serve");
   await expect(court).toHaveAttribute(
     "aria-label",
-    /left service box on the right end/,
+    /left service box on the left end/,
   );
-  await expect(court).toHaveClass(/serve-court--near-left/);
+  await expect(court).toHaveClass(/serve-court--far-left/);
   await page.locator("[data-qa='score-b-add']").click();
   await expect(guide).toContainText("Blair");
   await expect(guide).toContainText("Server 1");
   await expect(court).toHaveAttribute(
     "aria-label",
-    /right service box on the left end/,
+    /right service box on the right end/,
   );
-  await expect(court).toHaveClass(/serve-court--far-right/);
-  expect(
-    await court.evaluate((element) => {
-      const surface = element
-        .querySelector<HTMLElement>(".serve-court__surface")!
-        .getBoundingClientRect();
-      const marker = element
-        .querySelector<HTMLElement>(".serve-court__player-marker")!
-        .getBoundingClientRect();
-      return surface.left - marker.right;
-    }),
-  ).toBeGreaterThanOrEqual(1);
-  await page.getByRole("button", { name: "Undo last rally" }).first().click();
-  await expect(guide).toContainText("Alex");
-  await expect(court).toHaveAttribute(
-    "aria-label",
-    /left service box on the right end/,
-  );
-  await expect(court).toHaveClass(/serve-court--near-left/);
+  await expect(court).toHaveClass(/serve-court--near-right/);
   expect(
     await court.evaluate((element) => {
       const surface = element
@@ -131,6 +114,24 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
         .querySelector<HTMLElement>(".serve-court__player-marker")!
         .getBoundingClientRect();
       return marker.left - surface.right;
+    }),
+  ).toBeGreaterThanOrEqual(1);
+  await page.getByRole("button", { name: "Undo last rally" }).first().click();
+  await expect(guide).toContainText("Alex");
+  await expect(court).toHaveAttribute(
+    "aria-label",
+    /left service box on the left end/,
+  );
+  await expect(court).toHaveClass(/serve-court--far-left/);
+  expect(
+    await court.evaluate((element) => {
+      const surface = element
+        .querySelector<HTMLElement>(".serve-court__surface")!
+        .getBoundingClientRect();
+      const marker = element
+        .querySelector<HTMLElement>(".serve-court__player-marker")!
+        .getBoundingClientRect();
+      return surface.left - marker.right;
     }),
   ).toBeGreaterThanOrEqual(1);
   await expect(
@@ -217,13 +218,13 @@ test("shows the legal server, side-out, and undo state", async ({ page }) => {
   await expect(page.locator(".score-side").last()).toContainText("1");
   await expect(court).toHaveAttribute(
     "aria-label",
-    /left service box on the left end/,
+    /left service box on the right end/,
   );
-  await expect(court).toHaveClass(/serve-court--far-left/);
+  await expect(court).toHaveClass(/serve-court--near-left/);
   await page.waitForTimeout(100);
   await page.reload({ waitUntil: "networkidle" });
   await expect(page.locator(".score-side").first()).toContainText("Blair");
-  await expect(court).toHaveClass(/serve-court--far-left/);
+  await expect(court).toHaveClass(/serve-court--near-left/);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollHeight <= window.innerHeight,

@@ -190,6 +190,27 @@ test("discarding an early finish returns without a result", async ({
   await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
 });
 
+test("exit warns before discarding an unfinished match", async ({ page }) => {
+  await openQuickMatch(page);
+  await winPoint(page, "a");
+
+  await page.getByRole("button", { name: "Exit", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Exit and discard this match?" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Exiting now will discard this unfinished match"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Keep playing" }).click();
+  await expect(
+    page.locator("section[aria-label='Alex, 1 points']"),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Exit", exact: true }).click();
+  await page.getByRole("button", { name: "Exit and discard" }).click();
+  await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
+});
+
 test("setup explains the four-player minimum and builds an untimed centered draw", async ({
   page,
 }) => {

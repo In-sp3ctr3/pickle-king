@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { MatchTeam, ScoringState } from "../../match/types";
 
-export type MatchControlMode = "end" | "restart";
+export type MatchControlMode = "end" | "exit" | "restart";
 
 export function MatchControlDialog({
   mode,
@@ -49,23 +49,29 @@ export function MatchControlDialog({
       <p className="eyebrow">
         {mode === "restart"
           ? "Restart match"
-          : scorer.status === "editing-result"
-            ? "Resolve corrected score"
-            : "End match early"}
+          : mode === "exit"
+            ? "Exit match"
+            : scorer.status === "editing-result"
+              ? "Resolve corrected score"
+              : "End match early"}
       </p>
       <h2 id="match-control-title">
         {mode === "restart"
           ? "Start this match over?"
-          : tied
-            ? "This match needs a winner."
-            : `${leaderLabel} leads.`}
+          : mode === "exit"
+            ? "Exit and discard this match?"
+            : tied
+              ? "This match needs a winner."
+              : `${leaderLabel} leads.`}
       </h2>
       <p>
         {mode === "restart"
           ? "Both scores and the match clock return to their starting values."
-          : tied
-            ? `The score is ${scorer.scoreA}–${scorer.scoreB}. Choose who advances with this score, or discard this attempt.`
-            : `Keeping ${scorer.scoreA}–${scorer.scoreB} awards the match to ${leaderLabel}. Discarding returns without a result.`}
+          : mode === "exit"
+            ? "Exiting now will discard this unfinished match and its current score. This cannot be undone."
+            : tied
+              ? `The score is ${scorer.scoreA}–${scorer.scoreB}. Choose who advances with this score, or discard this attempt.`
+              : `Keeping ${scorer.scoreA}–${scorer.scoreB} awards the match to ${leaderLabel}. Discarding returns without a result.`}
       </p>
       <div className="match-control-actions">
         {mode === "restart" ? (
@@ -75,6 +81,14 @@ export function MatchControlDialog({
             type="button"
           >
             Restart match
+          </button>
+        ) : mode === "exit" ? (
+          <button
+            className="danger-button"
+            onClick={() => close(onDiscard)}
+            type="button"
+          >
+            Exit and discard
           </button>
         ) : tied ? (
           <>

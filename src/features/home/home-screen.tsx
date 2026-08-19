@@ -2,6 +2,7 @@
 
 import { ActionButton } from "@/src/shared/ui";
 import { ArrowRight, Download, History, Play, RotateCcw } from "lucide-react";
+import { version } from "../../../package.json";
 import { HomeMascot } from "./home-mascot";
 
 export interface HomeScreenProps {
@@ -87,6 +88,13 @@ export function HomeScreen({
         </div>
 
         <p className="home-proof">Your names and scores stay on this device</p>
+        <p
+          aria-label={`Version ${version}`}
+          className="home-version"
+          data-qa="app-version"
+        >
+          v{version}
+        </p>
       </section>
 
       <section className="home-mechanism" aria-label="Pickle King mascot">

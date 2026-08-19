@@ -44,6 +44,7 @@ export function MatchScreen({
   const [serveDialog, setServeDialog] = useState<"fix" | "setup" | null>(null);
   const [serveStatus, setServeStatus] = useState("");
   const startButtonRef = useRef<HTMLButtonElement>(null);
+  const openExit = () => setControlMode("exit");
   const send = useCallback(
     (action: ScoringAction) => onAction(action),
     [onAction],
@@ -89,6 +90,8 @@ export function MatchScreen({
       ] ?? server.playerId)
     : null;
   const rightEndTeam = scorer.rightEndTeam ?? "A";
+  const teamOrder =
+    rightEndTeam === "A" ? (["A", "B"] as const) : (["B", "A"] as const);
   const toggle =
     scorer.status === "complete"
       ? onExit
@@ -102,7 +105,7 @@ export function MatchScreen({
       </h1>
       <header className="match-topbar">
         <div className="match-topbar__actions">
-          <button className="text-button" onClick={onExit} type="button">
+          <button className="text-button" onClick={openExit} type="button">
             Exit
           </button>
           <ScoreSoundToggle scorer={scorer} />
@@ -128,7 +131,7 @@ export function MatchScreen({
       ) : null}
       {server && serverName ? (
         <ServeGuide
-          courtEnd={server.team === rightEndTeam ? "right" : "left"}
+          courtEnd={server.team === teamOrder[0] ? "left" : "right"}
           isOpeningServe={
             scorer.scoreA === 0 &&
             scorer.scoreB === 0 &&
@@ -166,7 +169,7 @@ export function MatchScreen({
         }
         scorer={scorer}
         startButtonRef={startButtonRef}
-        teamOrder={rightEndTeam === "A" ? ["A", "B"] : ["B", "A"]}
+        teamOrder={teamOrder}
       />
       {scorer.status === "editing-result" ? (
         <footer className="match-controls match-controls--editing">

@@ -72,6 +72,14 @@
   text-transform: uppercase;
 }
 
+.home-version {
+  margin: 0.55rem 0 0;
+  color: #62695e;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .home-mechanism {
   display: grid;
   min-width: 0;
