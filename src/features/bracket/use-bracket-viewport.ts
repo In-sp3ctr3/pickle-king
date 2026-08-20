@@ -13,6 +13,7 @@ export function useBracketViewport(board: geometry.ViewportSize) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const pointers = useRef(new Map<number, geometry.ViewportPoint>());
   const gesture = useRef<geometry.BracketGesture | null>(null);
+  const touchGesture = useRef<geometry.PinchGesture | null>(null);
   const raf = useRef(0);
   const pendingView = useRef<geometry.PendingBracketView | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -104,6 +105,14 @@ export function useBracketViewport(board: geometry.ViewportSize) {
     queueView(1, "center");
   }
 
+  function suppressNextClick(timeout = 0) {
+    dragged.current = true;
+    window.clearTimeout(suppressClickTimer.current);
+    suppressClickTimer.current = window.setTimeout(() => {
+      dragged.current = false;
+    }, timeout);
+  }
+
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
     if (!viewport) return;
@@ -131,10 +140,64 @@ export function useBracketViewport(board: geometry.ViewportSize) {
         localPoint({ x: event.clientX, y: event.clientY }),
       );
     };
+    const touchPoints = (touches: TouchList) =>
+      [touches[0], touches[1]].map(({ clientX, clientY }) => ({
+        x: clientX,
+        y: clientY,
+      }));
+    const endTouchPinch = () => {
+      if (!touchGesture.current) return;
+      touchGesture.current = null;
+      setPanning(false);
+      suppressNextClick(350);
+    };
+    const touchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 2) {
+        endTouchPinch();
+        return;
+      }
+      event.preventDefault();
+      const points = touchPoints(event.touches);
+      touchGesture.current = geometry.bracketPinchGesture(
+        points,
+        localPoint(geometry.pointerMidpoint(points)),
+        { x: viewport.scrollLeft, y: viewport.scrollTop },
+        scaleRef.current,
+      );
+      setPanning(true);
+    };
+    const touchMove = (event: TouchEvent) => {
+      const current = touchGesture.current;
+      if (!current || event.touches.length !== 2) return;
+      event.preventDefault();
+      const points = touchPoints(event.touches);
+      const next = geometry.bracketPinchView({
+        board,
+        center: localPoint(geometry.pointerMidpoint(points)),
+        fit: fitRef.current,
+        gesture: current,
+        points,
+        viewport: viewportSize(),
+      });
+      fitted.current = false;
+      queueView(next.scale, next.scroll);
+    };
+    const touchEnd = (event: TouchEvent) => {
+      if (event.touches.length !== 2) endTouchPinch();
+    };
     viewport.addEventListener("wheel", wheel, { passive: false });
+    viewport.addEventListener("touchstart", touchStart, { passive: false });
+    viewport.addEventListener("touchmove", touchMove, { passive: false });
+    viewport.addEventListener("touchend", touchEnd);
+    viewport.addEventListener("touchcancel", endTouchPinch);
     return () => {
       observer.disconnect();
       viewport.removeEventListener("wheel", wheel);
+      viewport.removeEventListener("touchstart", touchStart);
+      viewport.removeEventListener("touchmove", touchMove);
+      viewport.removeEventListener("touchend", touchEnd);
+      viewport.removeEventListener("touchcancel", endTouchPinch);
+      touchGesture.current = null;
       window.cancelAnimationFrame(raf.current);
       pendingView.current = null;
       window.clearTimeout(suppressClickTimer.current);
@@ -151,6 +214,7 @@ export function useBracketViewport(board: geometry.ViewportSize) {
   }
 
   function beginPointer(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType === "touch") return;
     const point = { x: event.clientX, y: event.clientY };
     pointers.current.set(event.pointerId, point);
     const points = [...pointers.current.values()];
@@ -198,6 +262,7 @@ export function useBracketViewport(board: geometry.ViewportSize) {
   }
 
   function movePointer(event: PointerEvent<HTMLDivElement>) {
+    if (event.pointerType === "touch") return;
     if (!pointers.current.has(event.pointerId) || !gesture.current) return;
     const point = { x: event.clientX, y: event.clientY };
     pointers.current.set(event.pointerId, point);
@@ -240,6 +305,7 @@ export function useBracketViewport(board: geometry.ViewportSize) {
   }
 
   function endPointer(event: PointerEvent<HTMLDivElement>, cancelled = false) {
+    if (event.pointerType === "touch") return;
     const shouldSuppressClick =
       !cancelled &&
       (gesture.current?.kind === "pinch" || gesture.current?.moved === true);
@@ -256,13 +322,7 @@ export function useBracketViewport(board: geometry.ViewportSize) {
       ? { kind: "drag", last: remaining[0], moved: false, start: remaining[0] }
       : null;
     setPanning(false);
-    if (shouldSuppressClick) {
-      dragged.current = true;
-      window.clearTimeout(suppressClickTimer.current);
-      suppressClickTimer.current = window.setTimeout(() => {
-        dragged.current = false;
-      }, 0);
-    }
+    if (shouldSuppressClick) suppressNextClick();
   }
 
   function handleKey(event: KeyboardEvent<HTMLDivElement>) {

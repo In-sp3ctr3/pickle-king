@@ -246,11 +246,12 @@ Last updated: 2026-08-19
 
 - The Full draw remains semantic DOM/CSS; no bitmap canvas or WebGL replaces
   match cards, connectors, labels, focus order, or node actions.
-- Pinch, modifier-wheel, and horizontal drag pan or zoom within finite board
-  bounds, including gestures that begin over a match action. A tap remains a
-  tap; only movement past the drag threshold suppresses its action. Zoom
-  controls provide equivalent single-pointer and keyboard access. Vertical
-  swipes at the viewport boundary continue scrolling the page.
+- One-finger touch uses the browser's native horizontal overflow and momentum;
+  vertical touch movement continues to the page because the viewport has no
+  vertical scroll range. A dedicated two-touch handler owns bounded pinch.
+  Mouse/pen drag and modifier-wheel remain available, including gestures that
+  begin over a match action. A tap remains a tap; only movement suppresses its
+  action. Zoom controls provide equivalent single-pointer and keyboard access.
 - Fit shows the complete draw at the largest scale that fits the viewport. It
   remains an inspection state because scaled controls are below the 48px touch
   contract. The first tap centers that match at 100%; its normal-size Play/Edit

@@ -96,6 +96,14 @@ describe("score announcements", () => {
     expect(
       clips(null, {
         ...live,
+        scoreA: 9,
+        scoreB: 7,
+        service: { ...live.service!, servingTeam: "A", serverId: "a1" },
+      }),
+    ).toEqual([["chatterbox/scores/singles/9-7", 0]]);
+    expect(
+      clips(null, {
+        ...live,
         rallyHistory: [
           {
             scoreA: 0,

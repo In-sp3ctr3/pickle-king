@@ -118,11 +118,12 @@
 }
 
 .bracket-tree-viewport {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   overscroll-behavior-y: auto;
   scrollbar-color: var(--lime-deep) var(--baseline);
-  touch-action: pan-y;
+  touch-action: pan-x pan-y;
   cursor: grab;
 }
 

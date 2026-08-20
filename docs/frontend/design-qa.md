@@ -2,11 +2,11 @@
 
 Pipeline version: 2
 Status: passed
-Last updated: 2026-08-19
+Last updated: 2026-08-20
 
 ## Environment
 
-- Commit/source state: v1.9.0-alpha.2 iPad bracket gesture repair
+- Commit/source state: v1.9.0-alpha.3 native iPad bracket scrolling repair
 - Browser: Playwright Chromium 1.62.1
 - Base URL: development harness on localhost; offline workflow repeated against
   the production Vinext server at http://127.0.0.1:3020
@@ -215,6 +215,7 @@ The supplied source hashes are
 | DQA-73 | P1       | bracket/overview  | 820×1180 and 1180×820 fitted interaction review                 | scaled 21–30px actions were unsafe and a tapped node did not center at 100%      | frontend | fixed  |
 | DQA-74 | P1       | bracket/iPad      | three-size real-touch swipe matrix                              | contained vertical overscroll trapped page navigation over the bracket           | frontend | fixed  |
 | DQA-75 | P2       | bracket/phone     | 390×844 final-node inspection                                   | mobile viewport padding shifted the selected match 20px left after inspect       | frontend | fixed  |
+| DQA-76 | P1       | bracket/iPad      | field report, touch contract, and three-size browser review     | manual Pointer Event drag competed with WebKit scrolling and removed momentum    | frontend | fixed  |
 
 ## Feedback Loop
 
@@ -283,4 +284,6 @@ convergence, with intersection tests for 8- and 16-player draws. No P0/P1/P2
 design finding remains open. The bracket viewport additionally passes bounded
 20–200% zoom, exact phone and tablet championship centering, native non-passive
 modifier-wheel handling, visible read-only Fit mode, keyboard operation, and a
-0 ms longest-task interaction check.
+0 ms longest-task interaction check. One-finger iPad pan now stays on native
+horizontal overflow while vertical movement chains directly to the page; only
+two-touch pinch uses the bounded custom gesture path.

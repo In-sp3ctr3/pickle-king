@@ -21,9 +21,11 @@ Experience type: functional
 ## Direction
 
 The existing connected DOM bracket is placed inside a finite scaled stage.
-Native Pointer Events support pinch and horizontal drag; explicit controls
-cover zoom out, fit, reset, and zoom in. Fit remains actionable: tapping a
-match centers it at readable size, where Play/Edit retains a safe 48px target.
+Native horizontal overflow provides one-finger touch momentum; a two-touch
+handler owns pinch while Pointer Events retain mouse and pen drag. Explicit
+controls cover zoom out, fit, reset, and zoom in. Fit remains actionable:
+tapping a match centers it at readable size, where Play/Edit retains a safe
+48px target.
 
 ## Storyboard
 
@@ -35,7 +37,8 @@ match centers it at readable size, where Play/Edit retains a safe 48px target.
 
 ## Implementation
 
-- Selected rung: semantic DOM/CSS transforms with native Pointer Events.
+- Selected rung: semantic DOM/CSS transforms with native touch overflow and
+  Pointer Events for mouse and pen.
 - Why this rung is necessary: it preserves accessible match cards while adding
   bounded pinch, pan, fit, wheel, and keyboard interaction without a dependency.
 - Rejected simpler options: horizontal scrolling cannot show the whole draw;
@@ -50,8 +53,8 @@ match centers it at readable size, where Play/Edit retains a safe 48px target.
 - Approved by: frontend prototype gate and targeted interaction tests.
 - Desktop: 100% centered championship view with mouse, wheel, keyboard, Fit,
   and Reset controls.
-- Mobile: 100% centered championship view with bounded drag, pinch, Fit, and
-  48px toolbar controls.
+- Mobile: 100% centered championship view with native momentum pan, bounded
+  two-finger pinch, Fit, and 48px toolbar controls.
 - `prefers-reduced-motion` behavior: direct manipulation remains immediate;
   decorative transitions are removed.
 - Static fallback: the existing semantic bracket remains horizontally
@@ -61,12 +64,12 @@ match centers it at readable size, where Play/Edit retains a safe 48px target.
 
 ## State Model
 
-| State    | Entry                        | Behavior                          | Exit                         | Accessibility                           |
-| -------- | ---------------------------- | --------------------------------- | ---------------------------- | --------------------------------------- |
-| overview | Fit or zoom below 100%       | complete draw; inspect-only nodes | tap node centers it at 100%  | avoids undersized action targets        |
-| readable | Reset or scale equals 100%   | normal scroll and match controls  | fit, pinch, or zoom controls | 48px targets restored                   |
-| detail   | zoom above 100%              | anchored pan and magnification    | reset, fit, or zoom out      | percent output and controls             |
-| panning  | pointer moves past threshold | bounded horizontal stage pan      | pointer up/cancel            | tap targets suppressed only during drag |
+| State    | Entry                                               | Behavior                          | Exit                         | Accessibility                              |
+| -------- | --------------------------------------------------- | --------------------------------- | ---------------------------- | ------------------------------------------ |
+| overview | Fit or zoom below 100%                              | complete draw; inspect-only nodes | tap node centers it at 100%  | avoids undersized action targets           |
+| readable | Reset or scale equals 100%                          | normal scroll and match controls  | fit, pinch, or zoom controls | 48px targets restored                      |
+| detail   | zoom above 100%                                     | anchored pan and magnification    | reset, fit, or zoom out      | percent output and controls                |
+| panning  | mouse/pen moves past threshold or two touches pinch | bounded stage interaction         | pointer/touch end or cancel  | tap targets suppressed only after movement |
 
 ## Performance Budget
 

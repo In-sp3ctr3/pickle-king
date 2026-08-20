@@ -61,11 +61,11 @@ Pipeline version: 2
 
 ## Capability Plan
 
-| Capability | Purpose                                                       | Readiness               | Cost/auth/license           | Fallback                   | Verification                                          | Decision |
-| ---------- | ------------------------------------------------------------- | ----------------------- | --------------------------- | -------------------------- | ----------------------------------------------------- | -------- |
-| `dom-css`  | Service guide plus fluid bracket pan, zoom, fit, and controls | available               | built-in browser capability | existing horizontal scroll | pointer, wheel, keyboard, and iPad-size browser tests | selected |
-| `motion`   | Existing bounded feedback; viewport stays native              | available               | declared dependency; MIT    | CSS color/status feedback  | `motion` declared in package.json                     | selected |
-| `21st`     | Reusable bracket viewport interaction                         | authentication-required | optional registry/login     | native DOM/CSS             | CLI found; search returned HTTP 401 on 2026-08-19     | rejected |
+| Capability | Purpose                                                       | Readiness               | Cost/auth/license           | Fallback                   | Verification                                                                                  | Decision |
+| ---------- | ------------------------------------------------------------- | ----------------------- | --------------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | -------- |
+| `dom-css`  | Service guide plus fluid bracket pan, zoom, fit, and controls | available               | built-in browser capability | existing horizontal scroll | native touch overflow, two-touch pinch, pointer, wheel, keyboard, and iPad-size browser tests | selected |
+| `motion`   | Existing bounded feedback; viewport stays native              | available               | declared dependency; MIT    | CSS color/status feedback  | `motion` declared in package.json                                                             | selected |
+| `21st`     | Reusable bracket viewport interaction                         | authentication-required | optional registry/login     | native DOM/CSS             | CLI found; search returned HTTP 401 on 2026-08-19                                             | rejected |
 
 ## Dependencies
 

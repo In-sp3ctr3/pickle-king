@@ -211,6 +211,65 @@ describe("bounded bracket viewport", () => {
     expect(viewport.dataset.bracketMode).toBe("detail");
   });
 
+  it("leaves one-finger touch native and handles only two-touch pinch", async () => {
+    const onMatchAction = vi.fn();
+    renderViewport(onMatchAction);
+    const frames: FrameRequestCallback[] = [];
+    const requestFrame = vi.fn((callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    vi.stubGlobal("requestAnimationFrame", requestFrame);
+    const viewport = await screen.findByRole("region", {
+      name: /connected tournament bracket/i,
+    });
+    const oneTouch = [{ clientX: 100, clientY: 100 }];
+    expect(fireEvent.touchStart(viewport, { touches: oneTouch })).toBe(true);
+    expect(fireEvent.touchMove(viewport, { touches: oneTouch })).toBe(true);
+    fireEvent.pointerDown(viewport, {
+      clientX: 100,
+      clientY: 100,
+      pointerId: 10,
+      pointerType: "touch",
+    });
+    fireEvent.pointerMove(viewport, {
+      clientX: 50,
+      clientY: 100,
+      pointerId: 10,
+      pointerType: "touch",
+    });
+    expect(viewport.dataset.bracketMode).toBe("readable");
+    expect(requestFrame).not.toHaveBeenCalled();
+
+    const start = [
+      { clientX: 100, clientY: 100 },
+      { clientX: 200, clientY: 100 },
+    ];
+    expect(fireEvent.touchStart(viewport, { touches: start })).toBe(false);
+    expect(viewport.dataset.bracketMode).toBe("panning");
+    expect(
+      fireEvent.touchMove(viewport, {
+        touches: [start[0], { clientX: 250, clientY: 100 }],
+      }),
+    ).toBe(false);
+    expect(requestFrame).toHaveBeenCalledOnce();
+    act(() => frames[0](0));
+    expect(screen.getByLabelText("Current bracket zoom").textContent).toBe(
+      "150%",
+    );
+    expect(viewport.scrollLeft).toBe(530);
+
+    fireEvent.touchEnd(viewport, { touches: oneTouch });
+    expect(viewport.dataset.bracketMode).toBe("detail");
+    fireEvent.click(screen.getByRole("button", { name: "Start match" }));
+    expect(onMatchAction).not.toHaveBeenCalled();
+
+    fireEvent.touchStart(viewport, { touches: start });
+    expect(viewport.dataset.bracketMode).toBe("panning");
+    fireEvent.touchCancel(viewport, { touches: [] });
+    expect(viewport.dataset.bracketMode).toBe("detail");
+  });
+
   it("supports controls, wheel, keyboard, and control-origin gestures", async () => {
     renderViewport();
     const viewport = await screen.findByRole("region", {

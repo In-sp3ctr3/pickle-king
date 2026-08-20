@@ -79,6 +79,20 @@ describe("tournament replay", () => {
         now: 4_000,
       }),
     ).toBe(started);
+
+    const ranked = appReducer(initialAppState(0), {
+      type: "create-tournament",
+      players: entrants,
+      config: { ...config, drawStyle: "ranked" },
+      now: 5_000,
+    });
+    expect(
+      appReducer(ranked, {
+        type: "reroll-random-draw",
+        randomSeed: "must-stay-ranked",
+        now: 6_000,
+      }),
+    ).toBe(ranked);
   });
 
   it("opens an archived result without replacing the active tournament", () => {
