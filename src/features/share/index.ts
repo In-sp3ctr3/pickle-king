@@ -3,6 +3,7 @@ export * from "./share-content-key";
 export * from "./share-file";
 export * from "./share-format";
 export * from "./share-image-dialog";
+export * from "./session-recap-dialog";
 export * from "./share-preview-actions";
 export * from "./share-preview-cache";
 export * from "./share-preview-skeleton";

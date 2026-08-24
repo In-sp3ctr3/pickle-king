@@ -1,0 +1,230 @@
+import AxeBuilder from "@axe-core/playwright";
+import { expect, test, type Page } from "@playwright/test";
+
+const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
+
+function record(
+  id: string,
+  completedAt: number,
+  format: "singles" | "doubles",
+  sideA: string[],
+  sideB: string[],
+) {
+  return {
+    id,
+    completedAt,
+    finishReason: "target",
+    format,
+    labels: { sideA: sideA.join(" + "), sideB: sideB.join(" + ") },
+    participants: { sideA, sideB },
+    score: { sideA: 11, sideB: 7 },
+    targetScore: 11,
+    winner: "A",
+  };
+}
+
+function historyFixture() {
+  const day = new Date(2026, 7, 22, 18).getTime();
+  return {
+    version: 2,
+    quickMatches: [
+      record("d4", day + 6_000, "doubles", ["Uma", "Vic"], ["Maya", "Rae"]),
+      record("d3", day + 5_000, "doubles", ["Sol", "Taj"], ["Quin", "Rin"]),
+      record("d2", day + 4_000, "doubles", ["Maya", "Rae"], ["Sol", "Taj"]),
+      record("d1", day + 3_000, "doubles", ["Quin", "Rin"], ["Uma", "Vic"]),
+      record("s2", day + 2_000, "singles", ["Maya"], ["Rae"]),
+      record("s1", day + 1_000, "singles", ["Maya"], ["Sol"]),
+      record(
+        "old",
+        new Date(2026, 7, 21, 18).getTime(),
+        "singles",
+        ["Old A"],
+        ["Old B"],
+      ),
+    ],
+    tournaments: [],
+  };
+}
+
+async function openSeededHistory(
+  page: Page,
+  shareMode: "supported" | "unsupported" | "cancelled" = "supported",
+) {
+  const history = historyFixture();
+  await page.addInitScript(
+    ({ history, shareMode }) => {
+      localStorage.clear();
+      localStorage.setItem("pickle-king:history", JSON.stringify(history));
+      Object.defineProperty(navigator, "canShare", {
+        configurable: true,
+        value: () => shareMode !== "unsupported",
+      });
+      Object.defineProperty(navigator, "share", {
+        configurable: true,
+        value: async (data: ShareData) => {
+          if (shareMode === "cancelled") {
+            throw new DOMException("Closed", "AbortError");
+          }
+          (window as Window & { __sharedFiles?: string[] }).__sharedFiles =
+            data.files?.map(({ name }) => name) ?? [];
+        },
+      });
+      const click = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = function () {
+        const state = window as Window & { __downloads?: string[] };
+        state.__downloads ??= [];
+        state.__downloads.push(this.download);
+        if (!this.download) click.call(this);
+      };
+    },
+    { history, shareMode },
+  );
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Match history" }).click();
+  await expect(page.locator("[data-qa='history-screen']")).toBeVisible();
+}
+
+async function openDoublesRecap(page: Page) {
+  await page.getByRole("button", { name: "Create recap" }).click();
+  await expect(page.getByText("6 selected")).toBeVisible();
+  await page.getByRole("button", { name: "Preview recap" }).click();
+  await page.getByRole("button", { name: "Doubles" }).click();
+  await expect(page.getByText("Page 1 of 2")).toBeVisible();
+  await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
+}
+
+test("selects the latest day and exports paginated Singles and Doubles receipts", async ({
+  page,
+}) => {
+  await openSeededHistory(page);
+  await page.getByRole("button", { name: "Create recap" }).click();
+  expect(await page.getByRole("checkbox", { checked: true }).count()).toBe(6);
+  expect(await page.getByRole("checkbox", { checked: false }).count()).toBe(1);
+  await expect(page.getByRole("button", { name: "Share" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(
+    page.getByRole("button", { name: "Share" }).first(),
+  ).toBeVisible();
+  await openDoublesRecap(page);
+
+  await page.screenshot({
+    animations: "disabled",
+    path: "output/playwright/session-recap-doubles-multipage.png",
+  });
+
+  const preview = page.locator("[data-qa='share-preview']");
+  expect(
+    await preview.evaluate((image: HTMLImageElement) => [
+      image.naturalWidth,
+      image.naturalHeight,
+    ]),
+  ).toEqual([1080, 1350]);
+  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await expect
+    .poll(() =>
+      preview.evaluate((image: HTMLImageElement) => image.naturalHeight),
+    )
+    .toBe(1920);
+  expect(
+    await preview.evaluate((image: HTMLImageElement) => image.naturalWidth),
+  ).toBe(1080);
+  await page.screenshot({
+    animations: "disabled",
+    path: "output/playwright/session-recap-story.png",
+  });
+
+  await page.getByRole("button", { name: "Next page" }).click();
+  await expect(page.getByText("Page 2 of 2")).toBeVisible();
+  await page.getByRole("button", { name: "Share all pages" }).click();
+  await expect(page.getByText("All pages shared.")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __sharedFiles?: string[] }).__sharedFiles,
+    ),
+  ).toEqual([
+    "pickle-king-aug-22-doubles-receipts-1-of-2.png",
+    "pickle-king-aug-22-doubles-receipts-2-of-2.png",
+  ]);
+  expect(
+    (await new AxeBuilder({ page }).include("dialog").analyze()).violations,
+  ).toEqual([]);
+
+  await page.keyboard.press("Escape");
+  await expect(page.locator("[data-qa='session-recap-dialog']")).toHaveCount(0);
+  await expect(page.getByText("6 selected")).toBeVisible();
+});
+
+test("falls back to per-page export when multi-file sharing is unsupported", async ({
+  page,
+}) => {
+  await openSeededHistory(page, "unsupported");
+  await openDoublesRecap(page);
+  await page.getByRole("button", { name: "Share all pages" }).click();
+  await expect(
+    page.getByText(/cannot share multiple images together/i),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Download image" }).click();
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __downloads?: string[] }).__downloads,
+    ),
+  ).toEqual(["pickle-king-aug-22-doubles-receipts-1-of-2.png"]);
+});
+
+test("keeps the visible page when an additional page cannot encode", async ({
+  page,
+}) => {
+  await openSeededHistory(page);
+  await openDoublesRecap(page);
+  await page.evaluate(() => {
+    HTMLCanvasElement.prototype.toBlob = function (callback) {
+      callback(null);
+    };
+  });
+  await page.getByRole("button", { name: "Share all pages" }).click();
+  await expect(
+    page.getByText(/visible page is still available/i),
+  ).toBeVisible();
+  await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __sharedFiles?: string[] }).__sharedFiles,
+    ),
+  ).toBeUndefined();
+});
+
+for (const viewport of [
+  { name: "phone", width: 390, height: 844 },
+  { name: "phone-landscape", width: 844, height: 390 },
+  { name: "tablet", width: 820, height: 1180 },
+  { name: "tablet-landscape", width: 1180, height: 820 },
+  { name: "desktop", width: 1440, height: 1000 },
+]) {
+  test(`captures recap selection and preview at ${viewport.name}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    await openSeededHistory(page);
+    await page.getByRole("button", { name: "Create recap" }).click();
+    await page.screenshot({
+      animations: "disabled",
+      fullPage: true,
+      path: `output/playwright/session-recap-selection-${viewport.width}x${viewport.height}.png`,
+    });
+    await page.getByRole("button", { name: "Preview recap" }).click();
+    await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(false);
+    await page.screenshot({
+      animations: "disabled",
+      fullPage: true,
+      path: `output/playwright/session-recap-preview-${viewport.width}x${viewport.height}.png`,
+    });
+  });
+}

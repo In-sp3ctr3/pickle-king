@@ -216,6 +216,8 @@ The supplied source hashes are
 | DQA-74 | P1       | bracket/iPad      | three-size real-touch swipe matrix                              | contained vertical overscroll trapped page navigation over the bracket           | frontend | fixed  |
 | DQA-75 | P2       | bracket/phone     | 390×844 final-node inspection                                   | mobile viewport padding shifted the selected match 20px left after inspect       | frontend | fixed  |
 | DQA-76 | P1       | bracket/iPad      | field report, touch contract, and three-size browser review     | manual Pointer Event drag competed with WebKit scrolling and removed momentum    | frontend | fixed  |
+| DQA-77 | P2       | recap/landscape   | 844×390 recap preview                                           | dialog chrome compressed the receipt below a useful inspection size              | frontend | fixed  |
+| DQA-78 | P2       | recap/mixed rules | mixed-rule Doubles renderer review                              | Top Pair could displace the required point-differential omission notice          | frontend | fixed  |
 
 ## Feedback Loop
 
@@ -238,20 +240,22 @@ The supplied source hashes are
 
 ## Anti-Template Review
 
-| Surface      | Risk                        | Evidence                           | Finding                                                           | Resolution                                                           | Result |
-| ------------ | --------------------------- | ---------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------- | ------ |
-| Live scorer  | Generic dashboard treatment | quick-live desktop/mobile captures | Court-first split scoring remains the dominant composition        | Compact rule-specific serve strip uses the existing court identity   | passed |
-| Serve guide  | Decorative sports diagram   | serve-tracker browser flow         | Every line, box, label, and marker communicates legal serve state | Full court mirrors teams across the net and highlights one legal box | passed |
-| Full bracket | Generic canvas/dashboard    | phone, desktop, and iPad captures  | Existing semantic match cards and connectors remain the product   | Native DOM/CSS transform and scrolling add no canvas or dependency   | passed |
+| Surface       | Risk                        | Evidence                                | Finding                                                                                             | Resolution                                                                     | Result |
+| ------------- | --------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------ |
+| Live scorer   | Generic dashboard treatment | quick-live desktop/mobile captures      | Court-first split scoring remains the dominant composition                                          | Compact rule-specific serve strip uses the existing court identity             | passed |
+| Serve guide   | Decorative sports diagram   | serve-tracker browser flow              | Every line, box, label, and marker communicates legal serve state                                   | Full court mirrors teams across the net and highlights one legal box           | passed |
+| Full bracket  | Generic canvas/dashboard    | phone, desktop, and iPad captures       | Existing semantic match cards and connectors remain the product                                     | Native DOM/CSS transform and scrolling add no canvas or dependency             | passed |
+| Session recap | Generic standings template  | supplied posters and five-size captures | Oversized format type, paper texture, acid-lime ledger, and one mascot retain the Receipts identity | Canvas renders only selected local match facts; no invented ceremony or AI art | passed |
 
 ## Authorship Evidence
 
-| Decision              | Visible evidence                                       | Product outcome                                                        |
-| --------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------- |
-| Legal service-box cue | One pulsing lime box on the full mini-court            | The scorer sees where the next serve begins without calculating parity |
-| Solid server marker   | Lime head-and-torso marker outside the active baseline | The active server remains distinct without implying live formation     |
-| Rally-winner scoring  | Two large court targets paired with whole-rally undo   | One tap records either a point or a service transition correctly       |
-| Read-only overview    | Centered complete draw plus an explicit overview note  | Fit reveals the tournament shape without exposing undersized controls  |
+| Decision              | Visible evidence                                                   | Product outcome                                                        |
+| --------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Legal service-box cue | One pulsing lime box on the full mini-court                        | The scorer sees where the next serve begins without calculating parity |
+| Solid server marker   | Lime head-and-torso marker outside the active baseline             | The active server remains distinct without implying live formation     |
+| Rally-winner scoring  | Two large court targets paired with whole-rally undo               | One tap records either a point or a service transition correctly       |
+| Read-only overview    | Centered complete draw plus an explicit overview note              | Fit reveals the tournament shape without exposing undersized controls  |
+| Receipts continuation | Date, format, page count, and full-format statistics on every page | Each shared page remains understandable after it leaves the app        |
 
 ## Harness Results
 

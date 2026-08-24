@@ -1,77 +1,56 @@
-# Bracket Viewport Signature Experience
+# Session Recap Signature Experience
 
 Status: ready
 Pipeline version: 2
-Research required: yes
-Motion required: yes
-Motion reason: direct manipulation must keep the board coordinate beneath a
-pinch midpoint or zoom control stable while moving between overview and detail.
+Research required: no
+Motion required: no
+Motion reason: the signature output is a static, deterministic receipt; normal
+focus and pressed feedback are sufficient for the selection workflow.
 
 ## Product Story
 
-Experience type: functional
+Experience type: static
 
-- Input: a player pinches, drags, or uses explicit zoom controls on Full draw.
-- Transformation: the connected bracket scales around the gesture while
-  remaining inside finite board bounds.
-- Output: either a fitted complete-draw overview or readable interactive cards.
-- User value demonstrated: the whole tournament route can be understood at a
-  glance without losing precise access to an individual match.
+- Input: an operator selects completed Quick Matches from the local ledger.
+- Transformation: Pickle King separates formats, calculates honest player and
+  pair records, and paginates them into the approved receipt composition.
+- Output: branded Post or Story PNG pages ready for explicit local sharing.
+- User value demonstrated: an informal court session becomes a polished recap
+  without re-entry, AI, or a false tournament claim.
 
 ## Direction
 
-The existing connected DOM bracket is placed inside a finite scaled stage.
-Native horizontal overflow provides one-finger touch momentum; a two-touch
-handler owns pinch while Pointer Events retain mouse and pen drag. Explicit
-controls cover zoom out, fit, reset, and zoom in. Fit remains actionable:
-tapping a match centers it at readable size, where Play/Edit retains a safe
-48px target.
+The existing editorial Match Ledger gains a temporary selection state. The
+generated artifact is a light Canvas poster derived directly from the supplied
+Receipts references, while the surrounding preview retains the current dark
+dialog and explicit share/download behavior.
 
 ## Storyboard
 
-| Stage    | Time       | Visual state                                   | QA signal                      | Reduced motion |
-| -------- | ---------- | ---------------------------------------------- | ------------------------------ | -------------- |
-| Overview | immediate  | Complete draw fitted; tap-to-inspect nodes     | `data-bracket-mode="overview"` | same           |
-| Readable | immediate  | Board at 100%; node actions restored           | `data-bracket-mode="readable"` | same           |
-| Detail   | continuous | Pinch or controls enlarge around a fixed point | zoom percentage output         | same           |
+| Stage    | Time      | Visual state                                 | QA signal             | Reduced motion |
+| -------- | --------- | -------------------------------------------- | --------------------- | -------------- |
+| Select   | immediate | Latest ledger day checked with editable rows | selected count status | same           |
+| Preview  | generated | Cream receipt inside the existing modal      | local PNG visible     | same           |
+| Continue | immediate | Format, output size, or receipt page changes | tab and page state    | same           |
 
 ## Implementation
 
-- Selected rung: semantic DOM/CSS transforms with native touch overflow and
-  Pointer Events for mouse and pen.
-- Why this rung is necessary: it preserves accessible match cards while adding
-  bounded pinch, pan, fit, wheel, and keyboard interaction without a dependency.
-- Rejected simpler options: horizontal scrolling cannot show the whole draw;
-  browser page zoom changes the entire app instead of the bracket.
-- Prototype required: yes
-- Prototype route/artifact: isolated BracketTree viewport interaction.
-- Prototype acceptance criteria: bounded fluid pinch/pan, fitted tap-to-inspect
-  overview, gestures beginning over controls, centered 100% inspection,
-  preserved taps, keyboard alternatives, and no starved animation frame.
-- Prototype evidence: docs/frontend/evidence/bracket-zoom-prototype.md
-- Prototype decision: passed
-- Approved by: frontend prototype gate and targeted interaction tests.
-- Desktop: 100% centered championship view with mouse, wheel, keyboard, Fit,
-  and Reset controls.
-- Mobile: 100% centered championship view with native momentum pan, bounded
-  two-finger pinch, Fit, and 48px toolbar controls.
-- `prefers-reduced-motion` behavior: direct manipulation remains immediate;
-  decorative transitions are removed.
-- Static fallback: the existing semantic bracket remains horizontally
-  scrollable when gestures are unavailable.
-- Measurement: 0 ms longest task across 21 bracket viewport interactions at
-  390×844.
-
-## State Model
-
-| State    | Entry                                               | Behavior                          | Exit                         | Accessibility                              |
-| -------- | --------------------------------------------------- | --------------------------------- | ---------------------------- | ------------------------------------------ |
-| overview | Fit or zoom below 100%                              | complete draw; inspect-only nodes | tap node centers it at 100%  | avoids undersized action targets           |
-| readable | Reset or scale equals 100%                          | normal scroll and match controls  | fit, pinch, or zoom controls | 48px targets restored                      |
-| detail   | zoom above 100%                                     | anchored pan and magnification    | reset, fit, or zoom out      | percent output and controls                |
-| panning  | mouse/pen moves past threshold or two touches pinch | bounded stage interaction         | pointer/touch end or cancel  | tap targets suppressed only after movement |
+- Selected rung: semantic DOM/CSS for selection plus native Canvas for the
+  requested static PNG artifact.
+- Why this rung is necessary: structured text remains accessible in the app,
+  while Canvas guarantees exact social-image dimensions and offline export.
+- Rejected simpler options: screenshots cannot provide a reliable browser event
+  or clean export; server/AI generation would violate local-first privacy.
+- Prototype required: no
+- Desktop: ledger selection remains an editorial row list with a bounded action rail.
+- Mobile: each row exposes one 48px checkbox target and stacked recap actions.
+- `prefers-reduced-motion` behavior: no recap-specific motion is introduced.
+- Static fallback: when multi-file sharing is unsupported, each visible page
+  remains individually shareable or downloadable.
+- Measurement: record first-page and complete-page-set encoding time during QA.
 
 ## Performance Budget
 
-- No new runtime dependency, bitmap canvas, WebGL, or generated asset.
-- One transform and one layout-sized stage; React updates only the scale.
+- No new runtime dependency, remote request, WebGL, or stored image.
+- Build the visible page first. Encode remaining pages sequentially only after
+  Share all pages is requested.

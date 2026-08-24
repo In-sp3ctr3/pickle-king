@@ -7,11 +7,11 @@ import type { TournamentBracket } from "../../tournament";
 import { TournamentShareDialog } from "../results";
 import {
   bracketShareCanvas,
-  quickShareCanvas,
   ShareImageDialog,
   type ShareImageRequest,
   tournamentShareContentKey,
 } from "../share";
+import { QuickMatchHistory } from "./quick-match-history";
 
 function dateLabel(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, {
@@ -78,57 +78,7 @@ export function HistoryScreen({
         </section>
       ) : null}
       {history.quickMatches.length ? (
-        <section
-          className="session-ledger"
-          aria-labelledby="quick-history-title"
-        >
-          <h2 id="quick-history-title">Quick Matches</h2>
-          {history.quickMatches.map((match) => (
-            <article className="session-ledger__row" key={match.id}>
-              <div>
-                <span>
-                  {dateLabel(match.completedAt)} · {match.format}
-                </span>
-                <strong>
-                  {match.labels.sideA}{" "}
-                  <b>
-                    {match.score.sideA}–{match.score.sideB}
-                  </b>{" "}
-                  {match.labels.sideB}
-                </strong>
-              </div>
-              <div className="session-ledger__actions">
-                <button
-                  onClick={() =>
-                    setShareRequest({
-                      alt: `${match.labels.sideA} versus ${match.labels.sideB} final score`,
-                      aspect: "portrait",
-                      build: (format) =>
-                        quickShareCanvas(
-                          match,
-                          format === "landscape" ? "feed" : format,
-                        ),
-                      fileName: `pickle-king-${match.completedAt}.png`,
-                      formats: ["feed", "story"],
-                      key: `quick:${match.id}`,
-                      title: "Final score",
-                    })
-                  }
-                  type="button"
-                >
-                  <Share2 aria-hidden="true" size={18} /> Share
-                </button>
-                <button
-                  aria-label="Remove match from history"
-                  onClick={() => onRemove(match.id, "quick")}
-                  type="button"
-                >
-                  <Trash2 aria-hidden="true" size={18} />
-                </button>
-              </div>
-            </article>
-          ))}
-        </section>
+        <QuickMatchHistory matches={history.quickMatches} onRemove={onRemove} />
       ) : null}
       {history.tournaments.length ? (
         <section

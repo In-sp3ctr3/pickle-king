@@ -14,18 +14,26 @@ export function pngFile(
 }
 
 export function canShareFile(file: File) {
+  return canShareFiles([file]);
+}
+
+export function canShareFiles(files: File[]) {
   return (
     typeof navigator.share === "function" &&
-    Boolean(navigator.canShare?.({ files: [file] }))
+    Boolean(navigator.canShare?.({ files }))
   );
 }
 
 export async function shareFile(file: File, title: string) {
-  if (!canShareFile(file)) {
+  return shareFiles([file], title);
+}
+
+export async function shareFiles(files: File[], title: string) {
+  if (!canShareFiles(files)) {
     throw new Error("File sharing is not available in this browser.");
   }
   try {
-    await navigator.share({ files: [file], title });
+    await navigator.share({ files, title });
     return "completed" as const;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {

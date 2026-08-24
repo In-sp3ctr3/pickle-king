@@ -1,6 +1,28 @@
 {
   "version": 2,
   "baseUrl": "http://127.0.0.1:3000",
+  "sessionRecap": {
+    "mode": "reference-derived product",
+    "route": "Match ledger dialog; no new route",
+    "outputs": [
+      { "name": "Post", "width": 1080, "height": 1350 },
+      { "name": "Story / Reel", "width": 1080, "height": 1920 }
+    ],
+    "evidence": [
+      "output/playwright/session-recap-selection-390x844.png",
+      "output/playwright/session-recap-preview-390x844.png",
+      "output/playwright/session-recap-selection-844x390.png",
+      "output/playwright/session-recap-preview-844x390.png",
+      "output/playwright/session-recap-selection-820x1180.png",
+      "output/playwright/session-recap-preview-820x1180.png",
+      "output/playwright/session-recap-selection-1180x820.png",
+      "output/playwright/session-recap-preview-1180x820.png",
+      "output/playwright/session-recap-selection-1440x1000.png",
+      "output/playwright/session-recap-preview-1440x1000.png",
+      "output/playwright/session-recap-doubles-multipage.png",
+      "output/playwright/session-recap-story.png"
+    ]
+  },
   "viewports": [
     { "name": "desktop", "width": 1440, "height": 1000 },
     { "name": "mobile", "width": 390, "height": 844 }

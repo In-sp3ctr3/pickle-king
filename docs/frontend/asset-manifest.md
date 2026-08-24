@@ -21,6 +21,7 @@ Pipeline version: 2
 | result/recap/stats PNGs | result and tournament sharing      | Canvas             | original implementation  | MIT project code          | accepted | 1080×1350 + 1080×1920   | format-specific Post and Story / Reel layouts; generated and previewed locally |
 | bracket-share PNG       | live and completed draw sharing    | Canvas             | original implementation  | MIT project code          | accepted | 1600×1200 + portrait    | dedicated Full draw, Post, and Story / Reel geometry                           |
 | share-arena-backdrop    | all exported share images          | generated WebP     | project artwork          | Pickle King project asset | accepted | 1254×1254, 122KB WebP   | text-free center-safe court; no logo, crown, people, confetti, or baked-in UI  |
+| session-receipt style   | selected Quick Match recap PNGs    | supplied reference | user attachments         | visual direction only     | accepted | 1080px social targets   | cream paper, black display type, lime record slab; no source pixels shipped    |
 
 ## Catalog and Library Research
 
@@ -61,11 +62,14 @@ Pipeline version: 2
 
 ## Capability Plan
 
-| Capability | Purpose                                                       | Readiness               | Cost/auth/license           | Fallback                   | Verification                                                                                  | Decision |
-| ---------- | ------------------------------------------------------------- | ----------------------- | --------------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | -------- |
-| `dom-css`  | Service guide plus fluid bracket pan, zoom, fit, and controls | available               | built-in browser capability | existing horizontal scroll | native touch overflow, two-touch pinch, pointer, wheel, keyboard, and iPad-size browser tests | selected |
-| `motion`   | Existing bounded feedback; viewport stays native              | available               | declared dependency; MIT    | CSS color/status feedback  | `motion` declared in package.json                                                             | selected |
-| `21st`     | Reusable bracket viewport interaction                         | authentication-required | optional registry/login     | native DOM/CSS             | CLI found; search returned HTTP 401 on 2026-08-19                                             | rejected |
+| Capability  | Purpose                                                       | Readiness               | Cost/auth/license           | Fallback                   | Verification                                                                                  | Decision |
+| ----------- | ------------------------------------------------------------- | ----------------------- | --------------------------- | -------------------------- | --------------------------------------------------------------------------------------------- | -------- |
+| `dom-css`   | Service guide plus fluid bracket pan, zoom, fit, and controls | available               | built-in browser capability | existing horizontal scroll | native touch overflow, two-touch pinch, pointer, wheel, keyboard, and iPad-size browser tests | selected |
+| `motion`    | Existing bounded feedback; viewport stays native              | available               | declared dependency; MIT    | CSS color/status feedback  | `motion` declared in package.json                                                             | selected |
+| `21st`      | Reusable bracket viewport interaction                         | authentication-required | optional registry/login     | native DOM/CSS             | CLI found; search returned HTTP 401 on 2026-08-19                                             | rejected |
+| `dom-css`   | Ledger selection and accessible recap dialog                  | available               | built-in browser capability | existing history patterns  | keyboard, touch-target, Axe, and responsive browser checks                                    | selected |
+| `imagegen`  | Session receipt paper and layout                              | not-needed              | no cost or authentication   | native Canvas              | supplied visual authority and deterministic Canvas are sufficient                             | rejected |
+| `figma-mcp` | Session recap source                                          | not-needed              | no account required         | supplied screenshots       | user supplied authoritative raster references                                                 | rejected |
 
 ## Dependencies
 
@@ -96,3 +100,6 @@ Feature 009 reuses the accepted mark, arena, local fonts, and icon package; it
 introduces no new raster asset or runtime dependency.
 Feature 014 reuses the accepted setup, match, table, medal, and local share
 assets. It introduces no new raster asset or runtime dependency.
+Session Recap reuses the accepted crowned mark and local fonts. The cream
+surface, rules, and deterministic paper grain are drawn in Canvas and introduce
+no shipped raster asset or runtime dependency.

@@ -52,71 +52,73 @@ Open P2: 0
 
 ## Findings
 
-| ID    | Severity | Route/region      | Evidence                                      | Repair                                                                                            | Status |
-| ----- | -------- | ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------ |
-| DR-01 | P1       | home/hero         | regenerated desktop/mobile evidence           | replaced the rejected product demo with the crowned mascot and blink                              | fixed  |
-| DR-02 | P1       | bracket/tree      | four- and six-player evidence                 | grouped two contenders, scores, and a compact action inside every connected node                  | fixed  |
-| DR-03 | P1       | scorer/type       | 10–10 tablet evidence                         | replaced joined condensed numerals with separated Archivo Black figures                           | fixed  |
-| DR-04 | P2       | setup/controls    | setup and responsive evidence                 | added custom select, animated choices, field-local errors, and aligned fields                     | fixed  |
-| DR-05 | P2       | navigation        | setup, bracket, and results evidence          | consolidated Back and Home into a solid centered island                                           | fixed  |
-| DR-06 | P2       | bracket/queue     | four- and six-player evidence                 | limited `Next` and lime treatment to the one-court eligible match                                 | fixed  |
-| DR-07 | P1       | bracket/byes      | six-player workflow and evidence              | replaced fake-looking `BYE` rows with explicit automatic-advance nodes                            | fixed  |
-| DR-08 | P1       | bracket/final     | desktop and mobile evidence                   | moved `Waiting` top-right and centered both finalists around the trophy                           | fixed  |
-| DR-09 | P2       | bracket/edit      | correction workflow and evidence              | embedded score inputs, tie selection, save, and cancel in completed nodes                         | fixed  |
-| DR-10 | P1       | draw/editor       | completed-match and iPad workflows            | separated safe renames from destructive field reseeding                                           | fixed  |
-| DR-11 | P1       | result/share      | result and exported PNG evidence              | promoted crown, score, names, and explicit share/download actions                                 | fixed  |
-| DR-12 | P2       | history/names     | ledger and combobox workflows                 | added a local score ledger and reusable, accessible player-name suggestions                       | fixed  |
-| DR-13 | P1       | result/share      | modal, results, and exported PNGs             | made the existing mascot the single crown, added truthful context, and branded exports            | fixed  |
-| DR-14 | P1       | scorer/fit        | four target viewport assertions               | fixed the scorer to `100dvh` and moved Start into an initially focused overlay                    | fixed  |
-| DR-15 | P2       | result/motion     | normal and reduced-motion workflows           | added a cleaned-up two-sided burst with a deterministic static fallback                           | fixed  |
-| DR-16 | P2       | bracket/tools     | desktop and mobile bracket evidence           | moved draw utilities beside Full draw and stacked them on narrow screens                          | fixed  |
-| DR-17 | P1       | bracket/ready     | four- and six-player workflows                | kept one recommended court while exposing compact play actions on other ready nodes               | fixed  |
-| DR-18 | P1       | bracket/final     | desktop and mobile evidence                   | centered the finalists and trophy as one compact faceoff with status held top-right               | fixed  |
-| DR-19 | P2       | scorer/input      | tablet and phone interaction tests            | retained full-panel tapping and added labeled Add point and Undo controls per side                | fixed  |
-| DR-20 | P1       | results/share     | podium and exported card evidence             | added medal hierarchy, contextual copy, comeback data, and focused recap/stats exports            | fixed  |
-| DR-21 | P2       | scorer/focus      | production desktop focus audit                | focused Start match reliably after both navigation and a production reload                        | fixed  |
-| DR-22 | P1       | result/share      | supplied references and desktop flow          | previewed the exact artifact and separated native Share from universal Download                   | fixed  |
-| DR-23 | P1       | result/type       | 4 to 11 exported PNG                          | positioned each score, name, and separator independently with bold reference-led type             | fixed  |
-| DR-24 | P2       | scorer/start      | four device viewport checks                   | reduced Start to a compact true-center overlay and removed the untimed clock region               | fixed  |
-| DR-25 | P1       | result/export     | supplied Jack 5–3 source/render/diff          | rebuilt the winner scale, split score arena, court depth, and factual footer                      | fixed  |
-| DR-26 | P1       | bracket/export    | 4/8/16-player 1600×1200 evidence              | centered the champion, retained every node, and kept header, podium, and footer in frame          | fixed  |
-| DR-27 | P2       | share/preview     | phone and both iPad orientations              | added exact previews with compact labelled Share and Download actions                             | fixed  |
-| DR-28 | P2       | setup/rhythm      | responsive geometry assertions                | separated section 02 and guaranteed readable number/suffix lanes                                  | fixed  |
-| DR-29 | P1       | bracket/names     | long-name iPad and export evidence            | bounded both participant lanes and removed unbounded versus headlines                             | fixed  |
-| DR-30 | P2       | bracket/final     | final-node and 4/8/16 comparisons             | compacted the championship node, centered the trophy, and made its edit target invisible          | fixed  |
-| DR-31 | P2       | setup/draw        | copy, migration, reroll, and viewport tests   | made rating use explicit and kept Random rerolls fair and pre-start only                          | fixed  |
-| DR-32 | P1       | share/family      | eight current reference comparison sheets     | rebuilt the full export family around one original arena and code-rendered data                   | fixed  |
-| DR-33 | P2       | history/results   | populated and read-only result captures       | restored completed results without disturbing the active tournament                               | fixed  |
-| DR-34 | P2       | interaction       | 48px bounding-box and Apple fallback tests    | fixed undersized targets and guaranteed a save path when native sharing is unavailable            | fixed  |
-| DR-35 | P1       | share/dialog      | 820×1180 bracket preview                      | separated modifier classes and kept all format choices with the fitted preview                    | fixed  |
-| DR-36 | P2       | share/story       | safe-area bounds and current Story PNG        | moved podium, labels, and result context above the 1640px essential-content boundary              | fixed  |
-| DR-37 | P2       | bracket/story     | eight-player portrait draw                    | isolated third place and routed finalist progression around the bronze node                       | fixed  |
-| DR-38 | P2       | share/evidence    | Jack 5–3 source/render/diff                   | added a normalized source, current render, and explicit pixel-difference panel                    | fixed  |
-| DR-39 | P2       | results/reentry   | completed home and bracket captures           | exposed and verified direct routes back to completed tournament results                           | fixed  |
-| DR-40 | P1       | bracket/nodes     | supplied iPad next-match capture              | reserved a fixed header row and kept both participant rows inside the node                        | fixed  |
-| DR-41 | P1       | bracket/final     | waiting/current/completed final captures      | aligned equal finalist lanes around one trophy and added readable warm-metal current state        | fixed  |
-| DR-42 | P1       | bracket/story     | current 8/16-player Story / Reel exports      | spread rounds vertically and moved both branches inward toward the centered final                 | fixed  |
-| DR-43 | P1       | bracket/nodes     | current iPad next-match capture               | split round, status, and edit into a balanced header and aligned play with participant rows       | fixed  |
-| DR-44 | P2       | bracket/story     | current 16-player Post and Story renders      | routed each sibling pair through an independent bounded lane                                      | fixed  |
-| DR-45 | P1       | bracket/edit      | completed rename browser regression           | separated stable label edits from guarded result corrections                                      | fixed  |
-| DR-46 | P1       | bracket/nodes     | supplied ready/waiting iPad captures          | made the action lane startable-only and balanced the compact header and participant insets        | fixed  |
-| DR-47 | P1       | bracket/story     | current 8/16-player Post and Story renders    | replaced shared central rails with a conventional mirrored dependency tree                        | fixed  |
-| DR-48 | P1       | results/names     | 390 and 1440 long-name result captures        | constrained measured uppercase names inside hero and podium lanes                                 | fixed  |
-| DR-49 | P2       | round-robin       | initial, qualified, and completed captures    | kept standings, six preliminary cards, and both placement cards semantically distinct             | fixed  |
-| DR-50 | P2       | phone/landscape   | 844×390 geometry assertion                    | compacted the header and Run of Show while keeping the primary action inside the viewport         | fixed  |
-| DR-51 | P2       | results/history   | completed round-robin captures                | grouped the ledger into Round robin and Placement matches                                         | fixed  |
-| DR-52 | P2       | round-robin/setup | five/six-player route and responsive captures | removed knockout-only advance copy, proved rotating rests, and kept the cap advisory timed-only   | fixed  |
-| DR-53 | P1       | scorer/serve      | desktop/mobile serve flow and comparisons     | added the legal full-court cue, solid server marker, rally undo, and persistent side swap         | fixed  |
-| DR-54 | P2       | bracket/viewport  | desktop, phone, and iPad viewport captures    | added bounded pan, pinch, wheel, keyboard zoom, Fit, and Reset without replacing semantic cards   | fixed  |
-| DR-55 | P2       | bracket/overview  | fitted viewport captures                      | centered the complete draw and made its read-only state explicit                                  | fixed  |
-| DR-56 | P1       | home/version      | Axe contrast run                              | kept the version label discreet while raising contrast from 3.48:1 to 5.17:1                      | fixed  |
-| DR-57 | P2       | bracket/wheel     | Chromium console matrix                       | moved modifier-wheel cancellation to a native non-passive listener                                | fixed  |
-| DR-58 | P2       | bracket/centering | 390×844 geometry assertion                    | centered the championship from actual viewport scroll geometry                                    | fixed  |
-| DR-59 | P1       | bracket/iPad      | rapid-pointer regression and iPad matrix      | coalesced pinch updates without frame starvation and allowed control-origin drag after threshold  | fixed  |
-| DR-60 | P1       | bracket/overview  | 820×1180 and 1180×820 inspect captures        | made Fit inspect-only, centered the selected node, and restored 49px actions at 100%              | fixed  |
-| DR-61 | P1       | bracket/iPad      | three-size real-touch swipe matrix            | limited overscroll containment to X so vertical swipes continue scrolling the page                | fixed  |
-| DR-62 | P2       | bracket/phone     | 390×844 readable viewport capture             | removed the internal mobile gutter while preserving a balanced 24px fitted edge inset             | fixed  |
-| DR-63 | P1       | bracket/iPad      | field report and phone/iPad visual review     | moved one-finger pan to native momentum overflow and reserved custom handling for two-touch pinch | fixed  |
+| ID    | Severity | Route/region       | Evidence                                      | Repair                                                                                            | Status |
+| ----- | -------- | ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------ |
+| DR-01 | P1       | home/hero          | regenerated desktop/mobile evidence           | replaced the rejected product demo with the crowned mascot and blink                              | fixed  |
+| DR-02 | P1       | bracket/tree       | four- and six-player evidence                 | grouped two contenders, scores, and a compact action inside every connected node                  | fixed  |
+| DR-03 | P1       | scorer/type        | 10–10 tablet evidence                         | replaced joined condensed numerals with separated Archivo Black figures                           | fixed  |
+| DR-04 | P2       | setup/controls     | setup and responsive evidence                 | added custom select, animated choices, field-local errors, and aligned fields                     | fixed  |
+| DR-05 | P2       | navigation         | setup, bracket, and results evidence          | consolidated Back and Home into a solid centered island                                           | fixed  |
+| DR-06 | P2       | bracket/queue      | four- and six-player evidence                 | limited `Next` and lime treatment to the one-court eligible match                                 | fixed  |
+| DR-07 | P1       | bracket/byes       | six-player workflow and evidence              | replaced fake-looking `BYE` rows with explicit automatic-advance nodes                            | fixed  |
+| DR-08 | P1       | bracket/final      | desktop and mobile evidence                   | moved `Waiting` top-right and centered both finalists around the trophy                           | fixed  |
+| DR-09 | P2       | bracket/edit       | correction workflow and evidence              | embedded score inputs, tie selection, save, and cancel in completed nodes                         | fixed  |
+| DR-10 | P1       | draw/editor        | completed-match and iPad workflows            | separated safe renames from destructive field reseeding                                           | fixed  |
+| DR-11 | P1       | result/share       | result and exported PNG evidence              | promoted crown, score, names, and explicit share/download actions                                 | fixed  |
+| DR-12 | P2       | history/names      | ledger and combobox workflows                 | added a local score ledger and reusable, accessible player-name suggestions                       | fixed  |
+| DR-13 | P1       | result/share       | modal, results, and exported PNGs             | made the existing mascot the single crown, added truthful context, and branded exports            | fixed  |
+| DR-14 | P1       | scorer/fit         | four target viewport assertions               | fixed the scorer to `100dvh` and moved Start into an initially focused overlay                    | fixed  |
+| DR-15 | P2       | result/motion      | normal and reduced-motion workflows           | added a cleaned-up two-sided burst with a deterministic static fallback                           | fixed  |
+| DR-16 | P2       | bracket/tools      | desktop and mobile bracket evidence           | moved draw utilities beside Full draw and stacked them on narrow screens                          | fixed  |
+| DR-17 | P1       | bracket/ready      | four- and six-player workflows                | kept one recommended court while exposing compact play actions on other ready nodes               | fixed  |
+| DR-18 | P1       | bracket/final      | desktop and mobile evidence                   | centered the finalists and trophy as one compact faceoff with status held top-right               | fixed  |
+| DR-19 | P2       | scorer/input       | tablet and phone interaction tests            | retained full-panel tapping and added labeled Add point and Undo controls per side                | fixed  |
+| DR-20 | P1       | results/share      | podium and exported card evidence             | added medal hierarchy, contextual copy, comeback data, and focused recap/stats exports            | fixed  |
+| DR-21 | P2       | scorer/focus       | production desktop focus audit                | focused Start match reliably after both navigation and a production reload                        | fixed  |
+| DR-22 | P1       | result/share       | supplied references and desktop flow          | previewed the exact artifact and separated native Share from universal Download                   | fixed  |
+| DR-23 | P1       | result/type        | 4 to 11 exported PNG                          | positioned each score, name, and separator independently with bold reference-led type             | fixed  |
+| DR-24 | P2       | scorer/start       | four device viewport checks                   | reduced Start to a compact true-center overlay and removed the untimed clock region               | fixed  |
+| DR-25 | P1       | result/export      | supplied Jack 5–3 source/render/diff          | rebuilt the winner scale, split score arena, court depth, and factual footer                      | fixed  |
+| DR-26 | P1       | bracket/export     | 4/8/16-player 1600×1200 evidence              | centered the champion, retained every node, and kept header, podium, and footer in frame          | fixed  |
+| DR-27 | P2       | share/preview      | phone and both iPad orientations              | added exact previews with compact labelled Share and Download actions                             | fixed  |
+| DR-28 | P2       | setup/rhythm       | responsive geometry assertions                | separated section 02 and guaranteed readable number/suffix lanes                                  | fixed  |
+| DR-29 | P1       | bracket/names      | long-name iPad and export evidence            | bounded both participant lanes and removed unbounded versus headlines                             | fixed  |
+| DR-30 | P2       | bracket/final      | final-node and 4/8/16 comparisons             | compacted the championship node, centered the trophy, and made its edit target invisible          | fixed  |
+| DR-31 | P2       | setup/draw         | copy, migration, reroll, and viewport tests   | made rating use explicit and kept Random rerolls fair and pre-start only                          | fixed  |
+| DR-32 | P1       | share/family       | eight current reference comparison sheets     | rebuilt the full export family around one original arena and code-rendered data                   | fixed  |
+| DR-33 | P2       | history/results    | populated and read-only result captures       | restored completed results without disturbing the active tournament                               | fixed  |
+| DR-34 | P2       | interaction        | 48px bounding-box and Apple fallback tests    | fixed undersized targets and guaranteed a save path when native sharing is unavailable            | fixed  |
+| DR-35 | P1       | share/dialog       | 820×1180 bracket preview                      | separated modifier classes and kept all format choices with the fitted preview                    | fixed  |
+| DR-36 | P2       | share/story        | safe-area bounds and current Story PNG        | moved podium, labels, and result context above the 1640px essential-content boundary              | fixed  |
+| DR-37 | P2       | bracket/story      | eight-player portrait draw                    | isolated third place and routed finalist progression around the bronze node                       | fixed  |
+| DR-38 | P2       | share/evidence     | Jack 5–3 source/render/diff                   | added a normalized source, current render, and explicit pixel-difference panel                    | fixed  |
+| DR-39 | P2       | results/reentry    | completed home and bracket captures           | exposed and verified direct routes back to completed tournament results                           | fixed  |
+| DR-40 | P1       | bracket/nodes      | supplied iPad next-match capture              | reserved a fixed header row and kept both participant rows inside the node                        | fixed  |
+| DR-41 | P1       | bracket/final      | waiting/current/completed final captures      | aligned equal finalist lanes around one trophy and added readable warm-metal current state        | fixed  |
+| DR-42 | P1       | bracket/story      | current 8/16-player Story / Reel exports      | spread rounds vertically and moved both branches inward toward the centered final                 | fixed  |
+| DR-43 | P1       | bracket/nodes      | current iPad next-match capture               | split round, status, and edit into a balanced header and aligned play with participant rows       | fixed  |
+| DR-44 | P2       | bracket/story      | current 16-player Post and Story renders      | routed each sibling pair through an independent bounded lane                                      | fixed  |
+| DR-45 | P1       | bracket/edit       | completed rename browser regression           | separated stable label edits from guarded result corrections                                      | fixed  |
+| DR-46 | P1       | bracket/nodes      | supplied ready/waiting iPad captures          | made the action lane startable-only and balanced the compact header and participant insets        | fixed  |
+| DR-47 | P1       | bracket/story      | current 8/16-player Post and Story renders    | replaced shared central rails with a conventional mirrored dependency tree                        | fixed  |
+| DR-48 | P1       | results/names      | 390 and 1440 long-name result captures        | constrained measured uppercase names inside hero and podium lanes                                 | fixed  |
+| DR-49 | P2       | round-robin        | initial, qualified, and completed captures    | kept standings, six preliminary cards, and both placement cards semantically distinct             | fixed  |
+| DR-50 | P2       | phone/landscape    | 844×390 geometry assertion                    | compacted the header and Run of Show while keeping the primary action inside the viewport         | fixed  |
+| DR-51 | P2       | results/history    | completed round-robin captures                | grouped the ledger into Round robin and Placement matches                                         | fixed  |
+| DR-52 | P2       | round-robin/setup  | five/six-player route and responsive captures | removed knockout-only advance copy, proved rotating rests, and kept the cap advisory timed-only   | fixed  |
+| DR-53 | P1       | scorer/serve       | desktop/mobile serve flow and comparisons     | added the legal full-court cue, solid server marker, rally undo, and persistent side swap         | fixed  |
+| DR-54 | P2       | bracket/viewport   | desktop, phone, and iPad viewport captures    | added bounded pan, pinch, wheel, keyboard zoom, Fit, and Reset without replacing semantic cards   | fixed  |
+| DR-55 | P2       | bracket/overview   | fitted viewport captures                      | centered the complete draw and made its read-only state explicit                                  | fixed  |
+| DR-56 | P1       | home/version       | Axe contrast run                              | kept the version label discreet while raising contrast from 3.48:1 to 5.17:1                      | fixed  |
+| DR-57 | P2       | bracket/wheel      | Chromium console matrix                       | moved modifier-wheel cancellation to a native non-passive listener                                | fixed  |
+| DR-58 | P2       | bracket/centering  | 390×844 geometry assertion                    | centered the championship from actual viewport scroll geometry                                    | fixed  |
+| DR-59 | P1       | bracket/iPad       | rapid-pointer regression and iPad matrix      | coalesced pinch updates without frame starvation and allowed control-origin drag after threshold  | fixed  |
+| DR-60 | P1       | bracket/overview   | 820×1180 and 1180×820 inspect captures        | made Fit inspect-only, centered the selected node, and restored 49px actions at 100%              | fixed  |
+| DR-61 | P1       | bracket/iPad       | three-size real-touch swipe matrix            | limited overscroll containment to X so vertical swipes continue scrolling the page                | fixed  |
+| DR-62 | P2       | bracket/phone      | 390×844 readable viewport capture             | removed the internal mobile gutter while preserving a balanced 24px fitted edge inset             | fixed  |
+| DR-63 | P1       | bracket/iPad       | field report and phone/iPad visual review     | moved one-finger pan to native momentum overflow and reserved custom handling for two-touch pinch | fixed  |
+| DR-64 | P2       | recap/landscape    | 844×390 selection and preview evidence        | compacted landscape dialog chrome and reserved a readable receipt preview                         | fixed  |
+| DR-65 | P2       | recap/continuation | Post, Story, and two-page Doubles evidence    | repeated context on every page and retained per-page export when multi-file share is unavailable  | fixed  |
 
 ## Decision
 
@@ -140,3 +142,7 @@ full-size second-tap actions, control-origin drag, and coalesced pinch updates.
 Phone and iPad evidence also retain zero page overflow and vertical scroll
 chaining with no open P0/P1/P2 finding. The native-scroll repair preserves Fit,
 49px readable actions, and balanced phone/iPad toolbar geometry.
+The Session Recap addition also passes the supplied cream/black/lime reference
+direction, exact 1080×1350 and 1080×1920 output checks, all five requested
+viewport captures, Axe, deterministic two-page names, and failure-safe local
+sharing. No recap P0/P1/P2 finding remains open.

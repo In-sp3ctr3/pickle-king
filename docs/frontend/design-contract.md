@@ -4,26 +4,28 @@ Status: ready
 
 Pipeline version: 2
 
-Mode: audit and repair
+Mode: reference-derived product
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-19
+Last updated: 2026-08-24
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
-- Primary user job: Run a fair single-court tournament without back-to-back fatigue
-- Primary action: Build or resume the next tournament match
-- Visual thesis: A near-black courtside score surface where acid lime identifies
-  the one live state that matters and the serve guide reads as court anatomy,
-  not dashboard chrome.
-- Content narrative: Build the draw, inspect the complete route at a glance,
-  then zoom to a readable match before starting or correcting it.
-- Selected direction: Preserve the connected semantic bracket while adding a
-  bounded native pan-and-zoom viewport with an explicit overview state.
-- Selected by: Product owner through the bracket canvas request.
-- Selection evidence: current bracket implementation and
-  `docs/frontend/evidence/bracket-zoom-prototype.md`.
+- Primary user job: Turn selected informal Quick Matches into an honest,
+  shareable end-of-session recap.
+- Primary action: Select ledger matches and preview separate Singles and
+  Doubles Receipts.
+- Visual thesis: The dark courtside ledger opens into a cream paper receipt
+  where oversized black format type and one acid-lime record slab turn local
+  match data into a social artifact without implying a tournament champion.
+- Content narrative: Select the played matches, review the derived player
+  records, then share a deterministic Post or Story page.
+- Selected direction: Extend the existing history and preview patterns with a
+  light editorial receipt derived from the two supplied Aug 22 references.
+- Selected by: Product owner through the approved Session Recap implementation plan.
+- Selection evidence: supplied Aug 22 Singles and Doubles Receipts images and
+  `specs/016-session-recap/spec.md`.
 - Selection status: approved
 
 ## Authority
@@ -36,6 +38,8 @@ Last updated: 2026-08-19
 4. Skiper v37 for the smooth number-change character only.
 5. The supplied near-black, acid-lime, athletic direction.
 6. Labelled product-specific inference.
+7. The user-supplied Aug 22 Singles and Doubles Receipts for recap export
+   composition, color, scale, and table hierarchy.
 
 ## Sources
 
@@ -43,6 +47,7 @@ Last updated: 2026-08-19
 | ----------------------------------- | ------------------- | --------------------------------------------- | ------------------------- |
 | User-supplied tournament screenshot | layout reference    | Wide two-contender match nodes with scores    | accepted                  |
 | Skiper v37                          | measured reference  | Number transition tempo and legibility        | accepted with attribution |
+| Aug 22 Receipts posters             | visual authority    | Light recap export hierarchy and color system | accepted                  |
 | Skiper v107                         | rejection reference | Confirms Pro source must not be copied        | rejected as source        |
 | Product specification               | product authority   | Flow, content, constraints, and accessibility | accepted                  |
 | Product plan                        | immutable           | Flows, controls, content, accessibility       |
@@ -265,6 +270,27 @@ Last updated: 2026-08-19
 - Target viewports: 390×844, 844×390, 820×1180, 1180×820, and
   1440×1000.
 
+## Session recap visual extension
+
+- Mode: reference-derived product.
+- Story authority: the supplied cream paper posters with oversized black
+  `SINGLES` or `DOUBLES`, one crowned mascot, and an acid-lime record table.
+- Borrow: date-led Receipts heading, clipped display scale, thin black rules,
+  strong table rows, and restrained footer branding.
+- Do not borrow: tournament/champion language, permanent standings claims,
+  unlabelled mixed-rule differential, or more than one crowned mark.
+- The Match Ledger remains near-black and editorial. Selection adds checkboxes
+  and one bounded action row rather than turning history into a dashboard grid.
+- Post and Story pages use the same content order; Post compresses the hero
+  proportion while retaining six readable player rows.
+- Continuation pages repeat date, format, page count, rules notice, and Top Pair
+  so every shared image remains understandable on its own.
+- Motion required: no. Selection, tab, format, and page changes are immediate;
+  existing pressed/focus feedback remains.
+- Assets: existing local fonts and crowned mark only. Paper grain is
+  deterministic Canvas drawing, not a new raster or remote resource.
+- Target viewports: 390×844, 844×390, 820×1180, 1180×820, and 1440×1000.
+
 ## Authorship Decisions
 
 | Decision                   | Product-specific reason                                             | Visible result                                                           |
@@ -273,6 +299,9 @@ Last updated: 2026-08-19
 | Rally-winner score zones   | Side-out scoring makes receiver wins meaningful without a point     | Large targets communicate rally outcome rather than blind increment      |
 | Stacking-safe wording      | Physical formations vary while rules position only active players   | Guide states the legal box without claiming a live player map            |
 | Read-only bracket overview | A fully fitted draw makes embedded controls too small to tap safely | Overview below 100%; readable interactive cards at 100% and above        |
+| Selected-match receipt     | Informal play needs ceremony without pretending to be a tournament  | Cream poster, player records, and explicit mixed-rules disclosure        |
+| Format-separated exports   | Singles and partner-influenced Doubles are not one fair leaderboard | Independent Singles/Doubles tabs and PNG page sets                       |
+| Balanced receipt pages     | Large groups must remain legible without arbitrary player exclusion | Six-row maximum distributed evenly across every generated page           |
 
 ## Share Export Geometry
 

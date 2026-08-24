@@ -276,6 +276,71 @@
   color: var(--chalk);
 }
 
+.session-recap-dialog[open] {
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+}
+
+.session-recap-dialog__choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.session-recap-dialog__pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: -0.35rem 0 0.65rem;
+  font-size: 0.78rem;
+}
+
+.session-recap-dialog__pages button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #283124;
+  color: var(--chalk);
+}
+
+.session-recap-dialog__pages button:disabled {
+  opacity: 0.38;
+}
+
+.session-recap-dialog__footer > div:first-child {
+  max-width: 34rem;
+}
+
+.session-recap-dialog__footer p {
+  margin: 0;
+  color: var(--mist);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.session-recap-dialog__share-all {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  border: 1px solid #45513f;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--chalk);
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.session-recap-dialog__message {
+  margin-top: 0.5rem !important;
+  color: #e6e8df !important;
+}
+
 @keyframes share-preview-spin {
   to {
     transform: rotate(1turn);
@@ -319,6 +384,58 @@
 
   .share-format-choice {
     width: 100%;
+  }
+
+  .session-recap-dialog__choices {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .session-recap-dialog__footer {
+    max-height: 28dvh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .session-recap-dialog {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    padding: 0.65rem 1rem;
+  }
+
+  .session-recap-dialog .share-preview-dialog__header h2 {
+    font-size: 1.45rem;
+  }
+
+  .session-recap-dialog .share-preview-dialog__header .eyebrow,
+  .session-recap-dialog__footer p:first-child {
+    display: none;
+  }
+
+  .session-recap-dialog__choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .session-recap-dialog .share-format-choice {
+    margin-top: 0.35rem;
+  }
+
+  .session-recap-dialog .share-preview-dialog__figure {
+    min-height: 140px;
+    margin: 0.35rem 0;
+  }
+
+  .session-recap-dialog__pages {
+    margin: -0.15rem 0 0.2rem;
+  }
+
+  .session-recap-dialog__footer {
+    max-height: none;
+    flex-direction: row;
+    overflow: visible;
   }
 }
 

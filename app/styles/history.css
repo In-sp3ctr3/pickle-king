@@ -57,11 +57,66 @@
 }
 
 .session-ledger h2 {
-  margin: 0 0 1rem;
+  margin: 0;
   color: var(--lime);
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.session-ledger__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.session-ledger__heading button {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--chalk);
+  padding: 0 1rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.recap-selection-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #45513f;
+  border-radius: 18px;
+  background: #151b13;
+  padding: 1rem;
+}
+
+.recap-selection-toolbar strong {
+  color: var(--lime);
+  font-size: 1.05rem;
+}
+
+.recap-selection-toolbar p {
+  margin: 0.35rem 0 0;
+  color: var(--mist);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.recap-selection-toolbar > div:last-child {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+}
+
+.recap-selection-toolbar button {
+  min-height: 48px;
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
 }
 
 .session-ledger__row {
@@ -71,6 +126,25 @@
   align-items: center;
   gap: 1.25rem;
   border-top: 1px solid var(--line);
+}
+
+.session-ledger__row--selecting {
+  grid-template-columns: 48px minmax(0, 1fr);
+}
+
+.session-ledger__select {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  cursor: pointer;
+}
+
+.session-ledger__select input {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--lime);
 }
 
 .session-ledger__row:last-child {
@@ -147,6 +221,15 @@
   .session-ledger__actions {
     width: 100%;
     flex-wrap: wrap;
+  }
+
+  .recap-selection-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .recap-selection-toolbar > div:last-child button {
+    flex: 1;
   }
 
   .session-ledger__view {

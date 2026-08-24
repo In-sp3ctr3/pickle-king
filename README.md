@@ -27,6 +27,7 @@ the schedule, and save or share the result—all on the device in your hands.
 - Runs timed or untimed scoring with win-by-two, golden point, corrections, and
   restart controls.
 - Includes a standalone Quick Match for singles or doubles.
+- Turns selected Quick Matches into local Singles or Doubles session receipt PNGs.
 - Keeps a bounded local history, name suggestions, match statistics, and
   replayable results.
 - Creates shareable champion, recap, player-stat, and full-bracket PNGs on the
