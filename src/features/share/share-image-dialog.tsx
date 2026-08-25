@@ -6,6 +6,8 @@ import {
   bracketShareFormatLabel,
   type BracketShareFormat,
 } from "./share-format";
+import type { QuickShareStyle } from "./quick-share-card";
+import { QuickShareStylePicker } from "./quick-share-style-picker";
 import { SharePreviewActions } from "./share-preview-actions";
 import { SharePreviewSkeleton } from "./share-preview-skeleton";
 import { useSharePreview } from "./use-share-preview";
@@ -13,13 +15,18 @@ import { useSharePreview } from "./use-share-preview";
 export interface ShareImageRequest {
   alt: string;
   aspect: "landscape" | "portrait";
-  build: (format: BracketShareFormat) => Promise<HTMLCanvasElement>;
+  build: (
+    format: BracketShareFormat,
+    style?: QuickShareStyle,
+  ) => Promise<HTMLCanvasElement>;
   description?: string;
   fileName: string;
   formats?: BracketShareFormat[];
   initialFormat?: BracketShareFormat;
   inspectable?: boolean;
+  initialStyle?: QuickShareStyle;
   key: string;
+  styles?: QuickShareStyle[];
   title: string;
 }
 
@@ -31,19 +38,34 @@ export function ShareImageDialog({
   request: ShareImageRequest;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const formats = request.formats ?? ["feed"];
   const [format, setFormat] = useState<BracketShareFormat>(
     request.initialFormat ?? formats[0] ?? "feed",
   );
+  const [style, setStyle] = useState<QuickShareStyle>(
+    request.initialStyle ?? request.styles?.[0] ?? "poster",
+  );
   const [expanded, setExpanded] = useState(false);
   const aspect = format === "landscape" ? "landscape" : request.aspect;
   const preview = useSharePreview(
-    () => request.build(format),
-    formatFileName(request.fileName, format, formats.length > 1),
-    `${request.key}:${format}`,
+    () => request.build(format, style),
+    formatFileName(
+      request.fileName,
+      format,
+      formats.length > 1,
+      style,
+      Boolean(request.styles?.length),
+    ),
+    `${request.key}:${style}:${format}`,
   );
   useEffect(() => {
+    triggerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     ref.current?.showModal();
+    return () => triggerRef.current?.focus();
   }, []);
   return (
     <dialog
@@ -55,7 +77,10 @@ export function ShareImageDialog({
       ]
         .filter(Boolean)
         .join(" ")}
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       ref={ref}
     >
       <header className="share-preview-dialog__header">
@@ -67,25 +92,38 @@ export function ShareImageDialog({
           <X aria-hidden="true" />
         </button>
       </header>
-      {formats.length > 1 ? (
-        <div
-          aria-label="Image format"
-          className="share-format-choice share-preview-dialog__formats"
-          role="group"
-        >
-          {formats.map((value) => (
-            <button
-              aria-pressed={format === value}
-              key={value}
-              onClick={() => {
-                setExpanded(false);
-                setFormat(value);
-              }}
-              type="button"
+      {formats.length > 1 || request.styles?.length ? (
+        <div className="share-preview-dialog__choices">
+          {formats.length > 1 ? (
+            <div
+              aria-label="Image format"
+              className="share-format-choice share-preview-dialog__formats"
+              role="group"
             >
-              {bracketShareFormatLabel(value)}
-            </button>
-          ))}
+              {formats.map((value) => (
+                <button
+                  aria-pressed={format === value}
+                  key={value}
+                  onClick={() => {
+                    setExpanded(false);
+                    setFormat(value);
+                  }}
+                  type="button"
+                >
+                  {bracketShareFormatLabel(value)}
+                </button>
+              ))}
+            </div>
+          ) : null}
+          {request.styles?.length ? (
+            <QuickShareStylePicker
+              onChange={(value) => {
+                setExpanded(false);
+                setStyle(value);
+              }}
+              value={style}
+            />
+          ) : null}
         </div>
       ) : null}
       <figure
@@ -152,8 +190,11 @@ function formatFileName(
   fileName: string,
   format: BracketShareFormat,
   includeFormat: boolean,
+  style: QuickShareStyle,
+  includeStyle: boolean,
 ) {
-  return includeFormat
-    ? fileName.replace(/\.png$/i, `-${format}.png`)
-    : fileName;
+  const suffix = [includeStyle ? style : null, includeFormat ? format : null]
+    .filter(Boolean)
+    .join("-");
+  return suffix ? fileName.replace(/\.png$/i, `-${suffix}.png`) : fileName;
 }

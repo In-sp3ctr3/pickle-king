@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
+import { writeFile } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
@@ -23,17 +24,44 @@ function record(
   };
 }
 
-function historyFixture() {
+function historyFixture(doublesCount = 4) {
   const day = new Date(2026, 7, 22, 18).getTime();
+  const doubles = [
+    record(
+      "d4",
+      day + 6_000,
+      "doubles",
+      ["Player 01", "Player 02"],
+      ["Player 03", "Player 05"],
+    ),
+    record(
+      "d3",
+      day + 5_000,
+      "doubles",
+      ["Player 09", "Player 10"],
+      ["Player 11", "Player 12"],
+    ),
+    record(
+      "d2",
+      day + 4_000,
+      "doubles",
+      ["Player 05", "Player 06"],
+      ["Player 07", "Player 08"],
+    ),
+    record(
+      "d1",
+      day + 3_000,
+      "doubles",
+      ["Jean-Baptiste M.", "Player 02"],
+      ["Player 03", "Player 04"],
+    ),
+  ];
   return {
     version: 2,
     quickMatches: [
-      record("d4", day + 6_000, "doubles", ["Uma", "Vic"], ["Maya", "Rae"]),
-      record("d3", day + 5_000, "doubles", ["Sol", "Taj"], ["Quin", "Rin"]),
-      record("d2", day + 4_000, "doubles", ["Maya", "Rae"], ["Sol", "Taj"]),
-      record("d1", day + 3_000, "doubles", ["Quin", "Rin"], ["Uma", "Vic"]),
-      record("s2", day + 2_000, "singles", ["Maya"], ["Rae"]),
-      record("s1", day + 1_000, "singles", ["Maya"], ["Sol"]),
+      ...doubles.slice(doubles.length - doublesCount),
+      record("s2", day + 2_000, "singles", ["Jean-Baptiste M."], ["Maya"]),
+      record("s1", day + 1_000, "singles", ["Maya"], ["Steven"]),
       record(
         "old",
         new Date(2026, 7, 21, 18).getTime(),
@@ -49,8 +77,9 @@ function historyFixture() {
 async function openSeededHistory(
   page: Page,
   shareMode: "supported" | "unsupported" | "cancelled" = "supported",
+  doublesCount = 4,
 ) {
-  const history = historyFixture();
+  const history = historyFixture(doublesCount);
   await page.addInitScript(
     ({ history, shareMode }) => {
       localStorage.clear();
@@ -93,6 +122,15 @@ async function openDoublesRecap(page: Page) {
   await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
 }
 
+async function savePreview(page: Page, path: string) {
+  const bytes = await page
+    .locator("[data-qa='share-preview']")
+    .evaluate(async (image: HTMLImageElement) =>
+      Array.from(new Uint8Array(await (await fetch(image.src)).arrayBuffer())),
+    );
+  await writeFile(path, Uint8Array.from(bytes));
+}
+
 test("selects the latest day and exports paginated Singles and Doubles receipts", async ({
   page,
 }) => {
@@ -120,6 +158,7 @@ test("selects the latest day and exports paginated Singles and Doubles receipts"
       image.naturalHeight,
     ]),
   ).toEqual([1080, 1350]);
+  await page.getByRole("button", { name: "Singles" }).click();
   await page.getByRole("button", { name: "Story / Reel" }).click();
   await expect
     .poll(() =>
@@ -129,13 +168,28 @@ test("selects the latest day and exports paginated Singles and Doubles receipts"
   expect(
     await preview.evaluate((image: HTMLImageElement) => image.naturalWidth),
   ).toBe(1080);
+  await savePreview(
+    page,
+    "output/playwright/session-recap-singles-story-card.png",
+  );
+  await page.getByRole("button", { name: "Doubles" }).click();
+  await expect(page.getByText("Page 1 of 2")).toBeVisible();
   await page.screenshot({
     animations: "disabled",
     path: "output/playwright/session-recap-story.png",
   });
+  await savePreview(page, "output/playwright/session-recap-story-card.png");
 
   await page.getByRole("button", { name: "Next page" }).click();
   await expect(page.getByText("Page 2 of 2")).toBeVisible();
+  await savePreview(
+    page,
+    "output/playwright/session-recap-story-card-page-2.png",
+  );
+  await page.screenshot({
+    animations: "disabled",
+    path: "output/playwright/session-recap-doubles-page-2.png",
+  });
   await page.getByRole("button", { name: "Share all pages" }).click();
   await expect(page.getByText("All pages shared.")).toBeVisible();
   expect(
@@ -153,6 +207,35 @@ test("selects the latest day and exports paginated Singles and Doubles receipts"
   await page.keyboard.press("Escape");
   await expect(page.locator("[data-qa='session-recap-dialog']")).toHaveCount(0);
   await expect(page.getByText("6 selected")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Preview recap" }),
+  ).toBeFocused();
+});
+
+test("keeps twelve Doubles players on one recap page", async ({ page }) => {
+  await openSeededHistory(page, "supported", 3);
+  await page.getByRole("button", { name: "Create recap" }).click();
+  await expect(page.getByText("5 selected")).toBeVisible();
+  await page.getByRole("button", { name: "Preview recap" }).click();
+  await page.getByRole("button", { name: "Doubles" }).click();
+  await expect(page.getByText(/Page \d+ of \d+/)).toHaveCount(0);
+  await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
+  await savePreview(page, "output/playwright/session-recap-12-post.png");
+  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await savePreview(page, "output/playwright/session-recap-12-story.png");
+});
+
+test("keeps eight Doubles players on the dense composition", async ({
+  page,
+}) => {
+  await openSeededHistory(page, "supported", 2);
+  await page.getByRole("button", { name: "Create recap" }).click();
+  await expect(page.getByText("4 selected")).toBeVisible();
+  await page.getByRole("button", { name: "Preview recap" }).click();
+  await page.getByRole("button", { name: "Doubles" }).click();
+  await savePreview(page, "output/playwright/session-recap-8-post.png");
+  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await savePreview(page, "output/playwright/session-recap-8-story.png");
 });
 
 test("falls back to per-page export when multi-file sharing is unsupported", async ({

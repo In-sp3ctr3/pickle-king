@@ -451,6 +451,12 @@
   font-weight: 700;
 }
 
+.quick-field-hint {
+  margin: 0 0 0.75rem;
+  color: var(--mist);
+  font-size: 0.78rem;
+}
+
 .quick-rules > label:first-child input {
   min-height: 48px;
   padding-block: 0.5rem;

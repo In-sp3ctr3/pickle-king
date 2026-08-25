@@ -12,6 +12,14 @@ async function openIdleScorer(page: Page, target = 2) {
   await page.getByRole("button", { name: "Open scorer" }).click();
 }
 
+async function startScoring(page: Page) {
+  await page
+    .getByRole("button", { name: "Start match", exact: true })
+    .first()
+    .click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
+}
+
 for (const viewport of [
   { name: "ipad-portrait", width: 820, height: 1180 },
   { name: "ipad-landscape", width: 1180, height: 820 },
@@ -51,7 +59,7 @@ for (const viewport of [
           document.documentElement.scrollWidth <= window.innerWidth,
       ),
     ).toBe(true);
-    await start.click();
+    await startScoring(page);
     await expect(start).toHaveCount(0);
     const controls = page.locator(".match-controls");
     await expect(controls).toBeVisible();
@@ -65,7 +73,7 @@ test("the result review is a branded, single-crown celebration", async ({
 }) => {
   await page.setViewportSize({ width: 1180, height: 820 });
   await openIdleScorer(page);
-  await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await startScoring(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
   const dialog = page.getByRole("dialog", { name: "Robbie wins" });
   await expect(dialog).toBeVisible();
@@ -103,7 +111,9 @@ test("the result review is a branded, single-crown celebration", async ({
     path: "output/playwright/victory-dialog-ipad.png",
   });
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Post" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "Post", exact: true }),
+  ).toBeFocused();
   await page.keyboard.press("Shift+Tab");
   await expect(
     page.getByRole("button", { name: "Confirm result" }),
@@ -131,7 +141,7 @@ test("reduced motion swaps the burst for static celebration", async ({
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openIdleScorer(page);
-  await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await startScoring(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(
@@ -151,9 +161,9 @@ test("a 4 to 11 result keeps double-digit scores in separate lanes", async ({
 }) => {
   await page.setViewportSize({ width: 1180, height: 820 });
   await openIdleScorer(page, 11);
-  await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await startScoring(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 4 });
-  await page.locator("[data-qa='score-b-add']").click({ clickCount: 11 });
+  await page.locator("[data-qa='score-b-add']").click({ clickCount: 12 });
   const preview = page.locator("[data-qa='result-preview']");
   await expect(preview).toHaveAttribute(
     "alt",
@@ -165,7 +175,7 @@ test("a 4 to 11 result keeps double-digit scores in separate lanes", async ({
   await download.saveAs("output/playwright/result-share-4-11.png");
 });
 
-test("a 40-character winner stays inside the preview while it builds", async ({
+test("a persisted 40-character winner remains shareable from history", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 820, height: 1180 });
@@ -182,28 +192,38 @@ test("a 40-character winner stays inside the preview while it builds", async ({
       );
     };
   });
-  await page.addInitScript(() => window.localStorage.clear());
+  await page.addInitScript(() => {
+    window.localStorage.clear();
+    const winner = "Samantha Elizabeth Richardson-Montgomery";
+    const loser = "Christopher Nathaniel Thompson-Alexander";
+    window.localStorage.setItem(
+      "pickle-king:history",
+      JSON.stringify({
+        version: 2,
+        quickMatches: [
+          {
+            completedAt: Date.UTC(2026, 7, 22, 18),
+            finishReason: "target",
+            format: "singles",
+            id: "legacy-40-character-result",
+            labels: { sideA: winner, sideB: loser },
+            participants: { sideA: [winner], sideB: [loser] },
+            score: { sideA: 11, sideB: 7 },
+            targetScore: 11,
+            winner: "A",
+          },
+        ],
+        tournaments: [],
+      }),
+    );
+  });
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Quick match" }).click();
-  await page
-    .getByLabel("Side A")
-    .fill("Samantha Elizabeth Richardson-Montgomery");
-  await page
-    .getByLabel("Side B")
-    .fill("Christopher Nathaniel Thompson-Alexander");
-  await page.getByLabel("Play to").fill("2");
-  await page.getByRole("button", { name: "Open scorer" }).click();
-  await page.getByRole("button", { name: "Start match", exact: true }).click();
-  await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
-  const skeleton = page.locator(".result-dialog__preview-skeleton");
-  await expect(skeleton).toBeVisible();
-  await expect(skeleton.getByText("Pickle King")).toBeVisible();
-  await expect(skeleton.locator("img")).toHaveAttribute(
-    "src",
-    "/brand/pickle-king-mark.png",
-  );
-  await expect(page.locator(".result-dialog__preview-fallback")).toHaveCount(0);
-  const preview = page.locator("[data-qa='result-preview']");
+  await page.getByRole("button", { name: "Match history" }).click();
+  await expect(
+    page.getByText("Samantha Elizabeth Richardson-Montgomery"),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Share" }).click();
+  const preview = page.locator("[data-qa='share-preview']");
   await expect(preview).toBeVisible();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);

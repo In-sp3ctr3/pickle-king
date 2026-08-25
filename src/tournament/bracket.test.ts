@@ -200,7 +200,7 @@ describe("tournament bracket", () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 4, max: 16 }),
-        fc.string({ minLength: 1, maxLength: 24 }),
+        fc.string({ minLength: 1, maxLength: 16 }),
         (count, randomSeed) => {
           const bracket = createTournamentBracket(players(count, true), {
             ...config,

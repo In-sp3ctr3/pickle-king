@@ -1,6 +1,13 @@
 import type { Match, TournamentBracket } from "../../tournament";
-import { shareColors, shareFittedText, shareText } from "./share-canvas";
-import { drawMedalBadge } from "./share-scene";
+import {
+  drawBrandLockup,
+  shareColors,
+  shareFittedText,
+  shareText,
+} from "./share-canvas";
+
+const INK = "#090b08";
+const CREAM = "#f5f1e8";
 
 export function drawChallengeSummary(
   context: CanvasRenderingContext2D,
@@ -8,7 +15,7 @@ export function drawChallengeSummary(
 ) {
   const challenges = bracket.matches.filter(({ kind }) => kind === "challenge");
   if (!challenges.length) return;
-  context.fillStyle = "rgba(21, 27, 19, 0.94)";
+  context.fillStyle = INK;
   context.fillRect(1246, 850, 300, 96);
   shareText(context, "LATE ENTRY CHALLENGE", 1264, 882, {
     color: shareColors.lime,
@@ -19,7 +26,7 @@ export function drawChallengeSummary(
     `${challenges.filter(({ status }) => status === "complete").length} OF ${challenges.length} MATCHES COMPLETE`,
     1264,
     919,
-    { color: shareColors.chalk, font: "800 16px Manrope, sans-serif" },
+    { color: CREAM, font: "800 16px Manrope, sans-serif" },
   );
 }
 
@@ -30,26 +37,42 @@ export function drawBracketPodium(
   names: Map<string, string>,
 ) {
   if (!final?.winnerId || !final.loserId || !bronze?.winnerId) return;
-  for (const [place, playerId, x, y, color] of [
-    ["2", final.loserId, 570, 1018, "#c8ced3"],
-    ["1", final.winnerId, 800, 996, shareColors.gold],
-    ["3", bronze.winnerId, 1030, 1028, "#bd7a42"],
-  ] as const) {
-    drawMedalBadge(context, x, y, place, color, place === "1" ? 70 : 60);
+  const places = [
+    ["1", "CHAMPION", final.winnerId, 570],
+    ["2", "RUNNER-UP", final.loserId, 800],
+    ["3", "THIRD", bronze.winnerId, 1030],
+  ] as const;
+  for (const [place, label, playerId, x] of places) {
+    shareText(context, place, x - 86, 1058, {
+      color: place === "1" ? shareColors.limeDeep : INK,
+      font: "900 52px 'Archivo Black', sans-serif",
+    });
+    shareText(context, label, x - 24, 1025, {
+      color: INK,
+      font: "900 12px Manrope, sans-serif",
+    });
     shareFittedText(
       context,
       (names.get(playerId) ?? "Player").toUpperCase(),
-      x,
-      y + 72,
+      x - 24,
+      1058,
       {
-        align: "center",
-        color: shareColors.chalk,
+        color: INK,
         family: "Manrope, sans-serif",
         weight: 900,
         maxSize: 18,
-        minSize: 13,
-        maxWidth: 180,
+        minSize: 12,
+        maxWidth: 170,
       },
     );
   }
+}
+
+export function drawBracketBrandFooter(
+  context: CanvasRenderingContext2D,
+  lockup: HTMLImageElement,
+  width: number,
+  height: number,
+) {
+  drawBrandLockup(context, lockup, width / 2, height - 54, 300);
 }

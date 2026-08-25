@@ -3,20 +3,14 @@ import {
   type TournamentBracket,
 } from "../../tournament";
 import {
+  drawBrandLockup,
   drawBrandMark,
-  drawShareFooter,
   shareCanvasSurface,
   shareColors,
-  shareDimensionalFittedText,
   shareFittedText,
   shareText,
 } from "./share-canvas";
 import { shareDimensions, type ShareFormat } from "./share-format";
-import {
-  drawEdgeFragments,
-  drawExportBackdrop,
-  drawMedalBadge,
-} from "./share-scene";
 import {
   championStanding,
   finalMatchData,
@@ -24,6 +18,9 @@ import {
   tournamentFormatLabel,
   tournamentNames,
 } from "./tournament-share-data";
+
+const INK = "#090b08";
+const CREAM = "#f5f1e8";
 
 export async function tournamentRecapCanvas(
   bracket: TournamentBracket,
@@ -36,225 +33,162 @@ export async function tournamentRecapCanvas(
   const championName = playerName(names, result.championId, "Champion");
   const opponentName = playerName(names, final.opponentId, "Runner-up");
   const { height, width } = shareDimensions(format);
-  const { arena, element, context, mark } = await shareCanvasSurface(
+  const { element, context, lockup, mark } = await shareCanvasSurface(
     width,
     height,
   );
+  const story = format === "story";
 
-  drawExportBackdrop(context, width, height, arena, height * 0.28);
-  drawEdgeFragments(context, width, Math.min(height * 0.32, 620), 91);
-  shareText(context, "PICKLE KING", 54, 68, {
-    color: shareColors.lime,
-    font: "900 24px 'Archivo Black', sans-serif",
-  });
-  shareText(context, tournamentFormatLabel(bracket), 1026, 68, {
-    align: "right",
-    color: shareColors.mist,
-    font: "800 19px Manrope, sans-serif",
-  });
-  drawBrandMark(context, mark, 540, height * 0.055, 182);
-
-  shareText(
+  drawPosterFrame(context, width, height);
+  drawBrandMark(
     context,
-    "T O U R N A M E N T   C H A M P I O N",
-    540,
-    height * 0.22,
-    {
-      align: "center",
-      color: shareColors.lime,
-      font: "900 20px Manrope, sans-serif",
-    },
+    mark,
+    story ? 900 : 838,
+    story ? 160 : 104,
+    story ? 940 : 610,
   );
-  shareDimensionalFittedText(
-    context,
-    championName.toUpperCase(),
-    540,
-    height * 0.325,
-    {
-      align: "center",
-      color: shareColors.chalk,
-      maxSize: 124,
-      minSize: 64,
-      maxWidth: 930,
-    },
-  );
-  shareText(context, "CROWN SECURED", 540, height * 0.365, {
-    align: "center",
+  shareText(context, `${tournamentFormatLabel(bracket)} · FINAL`, 78, 112, {
     color: shareColors.lime,
-    font: "900 20px Manrope, sans-serif",
+    font: "900 19px Manrope, sans-serif",
   });
-
-  drawFinalScore(context, height, {
-    championName,
+  drawWinner(context, championName, story);
+  drawResult(context, story, {
     championScore: final.championScore,
     opponentName,
     opponentScore: final.opponentScore,
+    record: `${champion.wins}–${champion.losses} RECORD · ${signed(champion.differential)} POINT DIFFERENTIAL`,
   });
-  shareText(
-    context,
-    `${champion.wins}–${champion.losses} RECORD   ·   ${signed(champion.differential)} POINT DIFFERENTIAL`,
-    540,
-    height * 0.635,
-    {
-      align: "center",
-      color: shareColors.chalk,
-      font: "900 24px Manrope, sans-serif",
-    },
-  );
-
-  drawPodium(context, height, {
+  drawPodium(context, story, {
     champion: championName,
     runnerUp: playerName(names, result.runnerUpId, "Runner-up"),
     third: playerName(names, result.thirdPlaceId, "Third place"),
   });
-  drawShareFooter(context, width, height - 60);
+  drawPosterBrand(context, lockup, width, height);
   return element;
 }
 
-function drawFinalScore(
+function drawPosterFrame(
   context: CanvasRenderingContext2D,
+  width: number,
   height: number,
-  data: {
-    championName: string;
-    championScore: number;
-    opponentName: string;
-    opponentScore: number;
-  },
 ) {
-  const top = height * 0.405;
-  const panelHeight = height * 0.17;
-  context.save();
-  const panel = context.createLinearGradient(0, top, 0, top + panelHeight);
-  panel.addColorStop(0, "rgba(34, 44, 29, 0.98)");
-  panel.addColorStop(1, "rgba(10, 13, 9, 0.98)");
-  context.fillStyle = panel;
+  context.fillStyle = INK;
+  context.fillRect(0, 0, width, height);
   context.strokeStyle = shareColors.lime;
-  context.lineWidth = 3;
-  context.beginPath();
-  context.roundRect(118, top, 844, panelHeight, 28);
-  context.fill();
-  context.stroke();
-  context.restore();
-  shareText(context, "FINAL", 540, top + 38, {
-    align: "center",
-    color: shareColors.mist,
-    font: "900 16px Manrope, sans-serif",
+  context.lineWidth = 14;
+  context.strokeRect(52, 52, width - 104, height - 104);
+}
+
+function drawWinner(
+  context: CanvasRenderingContext2D,
+  championName: string,
+  story: boolean,
+) {
+  const nameY = story ? 468 : 338;
+  const winsY = story ? 590 : 448;
+  shareFittedText(context, championName.toUpperCase(), 76, nameY, {
+    color: CREAM,
+    maxSize: story ? 118 : 104,
+    minSize: 52,
+    maxWidth: 470,
   });
-  finalSide(
-    context,
-    data.championName,
-    data.championScore,
-    330,
-    true,
-    top,
-    panelHeight,
-  );
-  finalSide(
-    context,
-    data.opponentName,
-    data.opponentScore,
-    750,
-    false,
-    top,
-    panelHeight,
-  );
-  shareText(context, "—", 540, top + panelHeight * 0.7, {
-    align: "center",
-    color: shareColors.mist,
-    font: "700 54px Manrope, sans-serif",
+  shareText(context, "WINS", 76, winsY, {
+    color: CREAM,
+    font: `900 ${story ? 112 : 102}px 'Archivo Black', sans-serif`,
   });
 }
 
-function finalSide(
+function drawResult(
   context: CanvasRenderingContext2D,
-  name: string,
-  score: number,
-  x: number,
-  winner: boolean,
-  top: number,
-  panelHeight: number,
+  story: boolean,
+  data: {
+    championScore: number;
+    opponentName: string;
+    opponentScore: number;
+    record: string;
+  },
 ) {
-  shareDimensionalFittedText(
+  const scoreY = story ? 940 : 700;
+  shareFittedText(
     context,
-    String(score),
-    x,
-    top + panelHeight * 0.68,
+    `${data.championScore}–${data.opponentScore}`,
+    76,
+    scoreY,
     {
-      align: "center",
-      color: winner ? shareColors.lime : shareColors.chalk,
-      maxSize: 110,
-      minSize: 88,
-      maxWidth: 220,
+      color: shareColors.lime,
+      maxSize: story ? 190 : 176,
+      minSize: 116,
+      maxWidth: 770,
     },
   );
-  shareFittedText(context, name.toUpperCase(), x, top + panelHeight * 0.87, {
-    align: "center",
-    color: winner ? shareColors.lime : shareColors.chalk,
+  shareFittedText(
+    context,
+    `OVER ${data.opponentName.toUpperCase()}`,
+    82,
+    scoreY + 60,
+    {
+      color: CREAM,
+      family: "Manrope, sans-serif",
+      weight: 700,
+      maxSize: 27,
+      minSize: 18,
+      maxWidth: 740,
+    },
+  );
+  shareFittedText(context, data.record, 82, scoreY + 116, {
+    color: shareColors.lime,
     family: "Manrope, sans-serif",
     weight: 900,
-    maxSize: 28,
-    minSize: 18,
-    maxWidth: 300,
+    maxSize: 21,
+    minSize: 15,
+    maxWidth: 880,
   });
 }
 
 function drawPodium(
   context: CanvasRenderingContext2D,
-  height: number,
+  story: boolean,
   names: { champion: string; runnerUp: string; third: string },
 ) {
-  const top = height * 0.7;
-  podiumStep(
-    context,
-    205,
-    top + 145,
-    "2",
-    "RUNNER-UP",
-    names.runnerUp,
-    "#c8ced3",
-  );
-  podiumStep(
-    context,
-    540,
-    top + 92,
-    "1",
-    "CHAMPION",
-    names.champion,
-    shareColors.gold,
-  );
-  podiumStep(context, 875, top + 175, "3", "THIRD", names.third, "#bd7a42");
+  const top = story ? 1420 : 900;
+  context.strokeStyle = CREAM;
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(78, top);
+  context.lineTo(1002, top);
+  context.stroke();
+  const places = [
+    ["1", "CHAMPION", names.champion, 80],
+    ["2", "RUNNER-UP", names.runnerUp, 390],
+    ["3", "THIRD", names.third, 700],
+  ] as const;
+  for (const [place, label, name, x] of places) {
+    shareText(context, place, x, top + 84, {
+      color: place === "1" ? shareColors.lime : CREAM,
+      font: "900 66px 'Archivo Black', sans-serif",
+    });
+    shareText(context, label, x + 66, top + 48, {
+      color: shareColors.lime,
+      font: "900 14px Manrope, sans-serif",
+    });
+    shareFittedText(context, name.toUpperCase(), x + 66, top + 84, {
+      color: CREAM,
+      family: "Manrope, sans-serif",
+      weight: 900,
+      maxSize: 22,
+      minSize: 14,
+      maxWidth: 226,
+    });
+  }
 }
 
-function podiumStep(
+function drawPosterBrand(
   context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  place: "1" | "2" | "3",
-  label: string,
-  name: string,
-  color: string,
+  lockup: HTMLImageElement,
+  width: number,
+  height: number,
 ) {
-  context.save();
-  context.fillStyle = "rgba(15, 19, 13, 0.95)";
-  context.beginPath();
-  context.roundRect(x - 145, y - 64, 290, 190, 26);
-  context.fill();
-  context.restore();
-  drawMedalBadge(context, x, y - 32, place, color, place === "1" ? 82 : 70);
-  shareText(context, label, x, y + 48, {
-    align: "center",
-    color,
-    font: "900 14px Manrope, sans-serif",
-  });
-  shareFittedText(context, name.toUpperCase(), x, y + 87, {
-    align: "center",
-    color: shareColors.chalk,
-    family: "Manrope, sans-serif",
-    weight: 900,
-    maxSize: 23,
-    minSize: 16,
-    maxWidth: 250,
-  });
+  drawBrandLockup(context, lockup, width / 2, height - 110, 320, "chalk");
 }
 
 function signed(value: number) {

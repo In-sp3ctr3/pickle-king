@@ -1,8 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource/anton/latin-400.css";
+import "@fontsource/alfa-slab-one/latin-400.css";
 import "@fontsource/archivo-black/latin-400.css";
 import "@fontsource/manrope/latin-400.css";
 import "@fontsource/manrope/latin-700.css";
 import "@fontsource/manrope/latin-800.css";
+import "@fontsource/roboto-condensed/latin-700.css";
+import "@fontsource/roboto-condensed/latin-900.css";
+import "@fontsource/roboto-slab/latin-900.css";
 import "./globals.css";
 import { siteUrl } from "./site-url";
 
@@ -58,7 +63,40 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <span
+          aria-hidden="true"
+          data-share-font-preload=""
+          style={{
+            height: 1,
+            left: 0,
+            opacity: 0,
+            overflow: "hidden",
+            pointerEvents: "none",
+            position: "fixed",
+            top: 0,
+            width: 1,
+          }}
+        >
+          <span style={{ fontFamily: "Anton", fontWeight: 400 }}>
+            PICKLE KING
+          </span>
+          <span style={{ fontFamily: "Roboto Condensed", fontWeight: 900 }}>
+            PLAYER W–L
+          </span>
+          <span style={{ fontFamily: "Roboto Condensed", fontWeight: 700 }}>
+            PLAYER W–L
+          </span>
+          <span style={{ fontFamily: "Roboto Slab", fontWeight: 900 }}>
+            11–7
+          </span>
+          <span style={{ fontFamily: "Alfa Slab One", fontWeight: 400 }}>
+            11–7
+          </span>
+          <span style={{ fontFamily: "Manrope", fontWeight: 800 }}>AUG 22</span>
+        </span>
+      </body>
     </html>
   );
 }

@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { ActionButton, NameCombobox, SlidingChoice } from "@/src/shared/ui";
 import { createScoringState } from "../../match/scoring";
 import type { ScoringState } from "../../match/types";
+import { PLAYER_NAME_MAX_LENGTH } from "../../tournament";
 
 export function QuickMatchSetup({
   onStart,
@@ -49,6 +50,10 @@ export function QuickMatchSetup({
     const nextErrors: typeof errors = { names: {} };
     active.forEach((name, index) => {
       if (!name) nextErrors.names[index] = "Enter a player name.";
+      else if (name.length > PLAYER_NAME_MAX_LENGTH) {
+        nextErrors.names[index] =
+          `Use ${PLAYER_NAME_MAX_LENGTH} characters or fewer.`;
+      }
     });
     const normalized = active.map((name) => name.toLowerCase());
     normalized.forEach((name, index) => {
@@ -124,6 +129,10 @@ export function QuickMatchSetup({
         </fieldset>
         <fieldset>
           <legend>Players</legend>
+          <p className="quick-field-hint">
+            First name + last initial if needed · {PLAYER_NAME_MAX_LENGTH}{" "}
+            characters max
+          </p>
           <div className="quick-player-grid">
             {Array.from({ length: count }, (_, index) => (
               <motion.div
@@ -148,6 +157,7 @@ export function QuickMatchSetup({
                       ? `Team ${index < 2 ? "A" : "B"} · Player ${(index % 2) + 1}`
                       : `Side ${index === 0 ? "A" : "B"}`
                   }
+                  maxLength={PLAYER_NAME_MAX_LENGTH}
                   onChange={(value) => {
                     setNames((current) =>
                       current.map((name, nameIndex) =>
@@ -158,6 +168,7 @@ export function QuickMatchSetup({
                   }}
                   suggestions={suggestions.filter(
                     (suggestion) =>
+                      suggestion.trim().length <= PLAYER_NAME_MAX_LENGTH &&
                       !names.some(
                         (name, nameIndex) =>
                           nameIndex !== index &&

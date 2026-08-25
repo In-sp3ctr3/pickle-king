@@ -1,6 +1,8 @@
 # Session Recap Signature Experience
 
-Status: ready
+Status: not-applicable
+Not applicable reason: the signature artifact is a static deterministic PNG,
+not an animated, cinematic, or spatial hero experience.
 Pipeline version: 2
 Research required: no
 Motion required: no
@@ -13,17 +15,17 @@ Experience type: static
 
 - Input: an operator selects completed Quick Matches from the local ledger.
 - Transformation: Pickle King separates formats, calculates honest player and
-  pair records, and paginates them into the approved receipt composition.
+  pair records, and fits up to twelve players into the approved receipt
+  composition before pagination.
 - Output: branded Post or Story PNG pages ready for explicit local sharing.
 - User value demonstrated: an informal court session becomes a polished recap
   without re-entry, AI, or a false tournament claim.
 
 ## Direction
 
-The existing editorial Match Ledger gains a temporary selection state. The
-generated artifact is a light Canvas poster derived directly from the supplied
-Receipts references, while the surrounding preview retains the current dark
-dialog and explicit share/download behavior.
+The existing interaction is unchanged. This repair replaces inaccurate Canvas
+illustration with deterministic reference-derived static templates and measured
+dynamic text while retaining the current dialog and share/download behavior.
 
 ## Storyboard
 
@@ -39,8 +41,10 @@ dialog and explicit share/download behavior.
   requested static PNG artifact.
 - Why this rung is necessary: structured text remains accessible in the app,
   while Canvas guarantees exact social-image dimensions and offline export.
-- Rejected simpler options: screenshots cannot provide a reliable browser event
-  or clean export; server/AI generation would violate local-first privacy.
+- Rejected simpler options: another hand-drawn approximation already failed
+  visual review; server/AI generation would violate determinism and local-first
+  privacy. Direct use of the owner-authorized source pixels is the lowest
+  faithful representation rung.
 - Prototype required: no
 - Desktop: ledger selection remains an editorial row list with a bounded action rail.
 - Mobile: each row exposes one 48px checkbox target and stacked recap actions.
@@ -51,6 +55,7 @@ dialog and explicit share/download behavior.
 
 ## Performance Budget
 
-- No new runtime dependency, remote request, WebGL, or stored image.
+- No new runtime rendering dependency, remote request, WebGL, AI generation, or
+  stored user image. Build-time Sharp and local font files are permitted.
 - Build the visible page first. Encode remaining pages sequentially only after
   Share all pages is requested.

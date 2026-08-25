@@ -4,11 +4,11 @@ Status: ready
 
 Pipeline version: 2
 
-Mode: reference-derived product
+Mode: audit and repair
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
@@ -21,10 +21,13 @@ Last updated: 2026-08-24
   match data into a social artifact without implying a tournament champion.
 - Content narrative: Select the played matches, review the derived player
   records, then share a deterministic Post or Story page.
-- Selected direction: Extend the existing history and preview patterns with a
-  light editorial receipt derived from the two supplied Aug 22 references.
-- Selected by: Product owner through the approved Session Recap implementation plan.
-- Selection evidence: supplied Aug 22 Singles and Doubles Receipts images and
+- Selected direction: Reference-lock the existing share system to the five
+  supplied Aug 22 authorities: two Receipts and three individual-result
+  posters. Preserve their stable shaded artwork as cleaned local templates,
+  then draw only real match data into measured text regions.
+- Selected by: Product owner in the 2026-08-24 annotated export repair request.
+- Selection evidence: supplied Aug 22 Singles, Doubles, Poster, Frame, and
+  Receipt images; user-approved direct reference-pixel reuse; and
   `specs/016-session-recap/spec.md`.
 - Selection status: approved
 
@@ -38,8 +41,14 @@ Last updated: 2026-08-24
 4. Skiper v37 for the smooth number-change character only.
 5. The supplied near-black, acid-lime, athletic direction.
 6. Labelled product-specific inference.
-7. The user-supplied Aug 22 Singles and Doubles Receipts for recap export
-   composition, color, scale, and table hierarchy.
+7. The user-supplied Aug 22 Singles and Doubles Receipts for exact recap
+   composition, stable masthead art, color, and table rhythm. The approved
+   compact extension raises product capacity to twelve rows.
+8. The three user-supplied Aug 22 individual-result posters for exact stable
+   artwork, mascot crop, score hierarchy, spacing, and black/cream variants.
+9. The user's annotated side-by-side boards for the defects to remove: wrong
+   fonts, misplaced mascot punctuation, crowded rules, invented `FINAL` and
+   `FIRST TO` copy, and weak footer spacing.
 
 ## Sources
 
@@ -80,7 +89,7 @@ Last updated: 2026-08-24
 | History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows           | view, share, or remove one record    |
 | Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                  | rename, late entry, or rebuild       |
 | Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile           | start, correct, or pre-start undo    |
-| Share result   | preview a brag artifact         | reference-led portrait winner and split score     | contained 4:5 or 9:16 canvas preview       | native share or explicit download    |
+| Share result   | preview a brag artifact         | reference-led poster with three treatments        | contained 4:5 or 9:16 canvas preview       | choose style, share, or download     |
 | Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview             | native share or explicit download    |
 | Serve guide    | identify legal next server      | compact strip under scorer top bar                | remains above score targets                | read-only court cue and Fix serve    |
 
@@ -97,14 +106,21 @@ Last updated: 2026-08-24
 - Max content width: 1440px; gutters 20px mobile, 40px desktop.
 - Corner language: 18–28px only on interactive/surface groupings; score fields are squared.
 - Numerals use tabular figures with visible character separation.
-- Display text must not use condensed letterforms or negative tracking.
+- Product UI display text must not use condensed letterforms or negative
+  tracking. Export-only `SINGLES` and `DOUBLES` mastheads may use deterministic
+  horizontal scaling to reproduce the supplied condensed poster lettering.
 
 ## Typography
 
-| Role    | Family        | Weight  | Size           | Line height | Use                                |
-| ------- | ------------- | ------- | -------------- | ----------- | ---------------------------------- |
-| Display | Archivo Black | 400     | fluid 44–112px | 0.88–1.02   | hero, scoreboard, results          |
-| UI/body | Manrope       | 400–800 | 12–18px        | 1.4–1.7     | labels, controls, explanatory copy |
+| Role            | Family           | Weight  | Size           | Line height | Use                                              |
+| --------------- | ---------------- | ------- | -------------- | ----------- | ------------------------------------------------ |
+| Product display | Archivo Black    | 400     | fluid 44–112px | 0.88–1.02   | app hero, scoreboard, and results                |
+| UI/body         | Manrope          | 400–800 | 12–18px        | 1.4–1.7     | labels, controls, dates, and opponent copy       |
+| Export headline | Anton            | 400     | measured       | 0.86–0.96   | Poster and Frame winner headlines                |
+| Export winner   | Archivo Black    | 400     | measured       | 0.9–1       | Broad Quick Receipt winner copy                  |
+| Export table    | Roboto Condensed | 700     | measured       | 1           | Recap standings                                  |
+| Export score    | Alfa Slab One    | 400     | measured       | 0.9–1       | Quick Receipt score numerals and score separator |
+| Export score    | Roboto Slab      | 900     | measured       | 0.9–1       | Quick Poster and Frame score numerals            |
 
 ## Color
 
@@ -146,7 +162,7 @@ Last updated: 2026-08-24
 | Toast/live region | neutral, warning                         | polite status clears after four seconds                                      |
 | NameCombobox      | empty, filtering, selected, invalid      | custom listbox; excludes already selected names                              |
 | HistoryRow        | quick match, tournament                  | score-led ledger row; never dashboard-card grid                              |
-| ShareCard         | score, recap, stats, bracket             | Post, Story / Reel, or Full draw over the local arena asset                  |
+| ShareCard         | score, recap, stats, bracket             | Post, Story / Reel, or Full draw in the supplied poster identity             |
 | StartMatchOverlay | idle, focused                            | centered lime action; scoring remains inert                                  |
 | VictoryReview     | target, buzzer, golden, early, selected  | one mascot crown; score and context dominate                                 |
 | DrawTools         | ready, reroll available, locked          | lives with Full draw heading; 48px controls                                  |
@@ -194,11 +210,11 @@ Last updated: 2026-08-24
 - Only the recommended match may read `Next` or use the lime node state. Other
   ready matches in the earliest unfinished round read `Available` and can start.
 - Native select popups are prohibited for visible product controls.
-- No generic app gradients, glassmorphism, WebGL, stock sports photos, radial light orbs, or dashboard tile grids. Canvas exports use the physical court environment and restrained edge lighting from the generated arena asset.
+- No generic app gradients, glassmorphism, WebGL, stock sports photos, radial light orbs, or dashboard tile grids. Canvas exports use the supplied cream, near-black, lime, condensed-type, and oversized-mascot identity.
 - History reads as a courtside score ledger, not an admin dashboard.
 - Result sharing is opt-in and generated locally; no automatic social prompts.
 - Every share action opens the exact local PNG preview before native share or download.
-- Every celebration and exported image contains one crown: the mascot's crown.
+- Share artwork may contain one dominant crowned mascot plus one small mascot-and-wordmark footer lockup; no other crown decoration is permitted.
 - Share generation must fail clearly rather than silently omit the mascot.
 - Draw editing and sharing controls stay with the Full draw they affect.
 - Structural draw edits must visually separate safe renames from destructive reseeding. A safe rename changes the stable player record only; it never submits a result correction or reopens downstream matches.
@@ -230,7 +246,7 @@ Last updated: 2026-08-24
   lime remains reserved for the one recommended court action.
 - Motion required: no new ornamental motion. Existing choice, match-state, and
   reduced-motion behavior applies.
-- Assets: existing local fonts, Lucide icons, mascot, and share arena only.
+- Assets: existing local fonts, Lucide icons, and mascot only.
 - Target viewports: 390×844, 844×390, 820×1180, 1180×820, and 1440×1000.
 
 ## Feature 015 serve-tracker extension
@@ -270,25 +286,54 @@ Last updated: 2026-08-24
 - Target viewports: 390×844, 844×390, 820×1180, 1180×820, and
   1440×1000.
 
-## Session recap visual extension
+## Reference-locked share repair
 
-- Mode: reference-derived product.
+- Mode: audit and repair.
 - Story authority: the supplied cream paper posters with oversized black
   `SINGLES` or `DOUBLES`, one crowned mascot, and an acid-lime record table.
 - Borrow: date-led Receipts heading, clipped display scale, thin black rules,
   strong table rows, and restrained footer branding.
-- Do not borrow: tournament/champion language, permanent standings claims,
-  unlabelled mixed-rule differential, or more than one crowned mark.
+- Do not borrow: tournament/champion language, permanent standings claims, or
+  unlabelled mixed-rule differential. One dominant mascot plus the small footer
+  lockup is the maximum on a card.
 - The Match Ledger remains near-black and editorial. Selection adds checkboxes
   and one bounded action row rather than turning history into a dashboard grid.
-- Post and Story pages use the same content order; Post compresses the hero
-  proportion while retaining six readable player rows.
+- Post and Story pages use the same content order and retain twelve readable
+  player rows before pagination. The table renders Player, W-L, and conditional
+  +/- only; removing GP preserves the reference density.
 - Continuation pages repeat date, format, page count, rules notice, and Top Pair
   so every shared image remains understandable on its own.
 - Motion required: no. Selection, tab, format, and page changes are immediate;
   existing pressed/focus feedback remains.
-- Assets: existing local fonts and crowned mark only. Paper grain is
-  deterministic Canvas drawing, not a new raster or remote resource.
+- `SINGLES` uses the supplied right-side mascot punctuation outside the final
+  letter. `DOUBLES` uses the contained owner-supplied word with the crowned
+  mascot centered inside the O. Both mastheads are stable template pixels, not
+  retyped approximations. Every extracted masthead keeps at least 8px of
+  transparent source padding, and no detached dark component may appear outside
+  the intended title band.
+- Every footer draws the same checked-in 640×144 transparent mascot + Pickle
+  King wordmark asset at its fixed 4.444:1 aspect ratio. Color variants may
+  recolor only the wordmark pixels; rebuilding the lockup from runtime text,
+  changing the mascot-to-word ratio, or using a bare wordmark is prohibited.
+- Individual Quick Match styles are Poster (default), Frame, and Receipt. Only
+  the selected Canvas is generated; alternatives are lazy.
+- Tournament Champion, Stats, and Full Bracket flows remain, but their legacy
+  arena styling is replaced atomically with this poster identity.
+- Assets: six deterministic Quick Match templates plus twelve recap templates:
+  four regular, four dense for 7–8 rows, and four compact for 9–12 rows,
+  derived from the five user-authorized reference rasters; one deterministic
+  640×144 brand lockup derived from authorized footer pixels and the existing
+  crowned mark; and local Anton, Manrope, Roboto Condensed, and Roboto Slab
+  fonts.
+  Image generation is not needed because direct reference pixels preserve the
+  shaded artwork more faithfully and all variable text remains deterministic.
+- Font readiness is a hard export boundary. The Canvas builder verifies every
+  required face and rejects preview generation with a clear error instead of
+  silently substituting browser fallback glyphs.
+- Quick Match headings use format on line one and the local date on line two.
+  A real tournament stage may replace the second-line date prefix, but Quick
+  Matches never synthesize `FINAL`. Export art never renders `FIRST TO`, target,
+  finish reason, or other redundant rules metadata.
 - Target viewports: 390×844, 844×390, 820×1180, 1180×820, and 1440×1000.
 
 ## Authorship Decisions
@@ -301,17 +346,95 @@ Last updated: 2026-08-24
 | Read-only bracket overview | A fully fitted draw makes embedded controls too small to tap safely | Overview below 100%; readable interactive cards at 100% and above        |
 | Selected-match receipt     | Informal play needs ceremony without pretending to be a tournament  | Cream poster, player records, and explicit mixed-rules disclosure        |
 | Format-separated exports   | Singles and partner-influenced Doubles are not one fair leaderboard | Independent Singles/Doubles tabs and PNG page sets                       |
-| Balanced receipt pages     | Large groups must remain legible without arbitrary player exclusion | Six-row maximum distributed evenly across every generated page           |
+| Twelve-row receipt pages   | A normal open-play group should fit on one image                    | Strict twelve-row chunks begin a continuation only with player thirteen  |
+| Share-style choice         | Players want Strava-like control without rebuilding the result      | Three named treatments with Poster selected by default                   |
 
 ## Share Export Geometry
 
 - Post exports: 1080×1350 with essential content inside x=54…1026 and y=54…1296.
 - Story / Reel exports: 1080×1920 with essential content inside x=72…1008 and y=240…1640.
+- Story recap date baseline is 134±6px with its lime rule at 164±6px. Pages
+  with 7–8 rows use the dense composition; pages with 9–12 rows use the
+  compact composition. Contained mastheads stay inside x=64…1016. Compact
+  Story rules begin at y=870 with a row-count-aware 60–72px pitch and 44px
+  row type; compact Post rules begin at y=600 with a 45–60px pitch and 32px
+  row type. Both formats paginate only at player thirteen,
+  and every continuation keeps the same twelve-slot compact composition.
+- `PLAYER STANDINGS` and `ROTATING PARTNERS` are dynamic Manrope 700 text,
+  centered between two broken rules. Table headers and rows use Roboto
+  Condensed 700; actual glyph bounds are vertically centered between rules.
+- Quick Poster keeps equal score slots, centers the opponent beneath the lower
+  score, fits `THAT'S GAME.` inside the lime slab, and centers the footer at the
+  bottom. Frame keeps at least 72px between winner and score. Receipt keeps at
+  least 72px between winner and score, clears the mascot circle, and keeps the
+  score inside x=1008.
+- Quick Receipt Story uses the normalized 1080×1920 authority geometry below.
+  The winner, score, and opponent fixture text must be measured independently
+  from the static artwork; a full-image difference board cannot close these
+  regions by itself.
+
+| Receipt region | Authority ink bounds (x, y, w, h) | Allowed geometry drift | Type contract                        |
+| -------------- | --------------------------------- | ---------------------- | ------------------------------------ |
+| winner         | 549, 1148, 465, 247               | ±12px per edge         | Archivo Black 400, right aligned     |
+| score          | 162, 1458, 848, 251               | ±12px per edge         | Alfa Slab One 400, measured fit      |
+| opponent       | 787, 1732, 211, 27                | ±8px per edge          | Manrope 400, right aligned           |
+| footer lockup  | centered at x=540, y=1844         | ±12px center/baseline  | mascot plus tracked Manrope wordmark |
+
+- Quick Receipt heading keeps format and date on separate right-aligned lines.
+  `SINGLES` is at least 32px, the date is at least 24px, and both use explicit
+  positive tracking. The footer wordmark is at least 27px with 4px tracking;
+  compressed Anton footer text is prohibited.
+- Quick Poster and Frame use the same region-level measurement discipline as
+  Receipt. Poster preserves the vertical score slab and independent stacked
+  winner score, separator, loser score, opponent, and `THAT'S GAME.` regions.
+  Frame preserves the lower-left winner/result block. Both keep semantic
+  two-line format/date copy, never invent `FINAL` or `FIRST TO`, and use the
+  requested centered mascot + tracked wordmark footer instead of copying the
+  source's text-only footer placement.
+- Poster Story keeps the winner block inside x=68…423, leaving at least 24px
+  of clear space before the mascot. Frame Story preserves a minimum 16px gap
+  between `MAYA`, `WINS`, and the score; its winner lines advance by 218px
+  rather than overlapping glyph boxes.
+
+| Quick Story region | Authority ink bounds (x, y, w, h) | Allowed drift | Required treatment           |
+| ------------------ | --------------------------------- | ------------- | ---------------------------- |
+| Poster winner      | 71, 202, 439, 408                 | ±14px/edge    | Anton 400 cream winner stack |
+| Poster score `4`   | 108, 715, 265, 330                | ±14px/edge    | Anton 400 black numeral      |
+| Poster separator   | 180, 1097, 120, 53                | ±14px/edge    | Anton 400 black separator    |
+| Poster score `2`   | 109, 1198, 250, 350               | ±14px/edge    | Anton 400 black numeral      |
+| Poster opponent    | 105, 1579, 266, 35                | ±14px/edge    | Manrope 400 centered copy    |
+| Frame winner       | 122, 1012, 423, 366               | ±14px/edge    | Anton 400 cream winner stack |
+| Frame score        | 134, 1421, 769, 231               | ±14px/edge    | Alfa Slab One 400 at 1.15×   |
+| Frame opponent     | 132, 1688, 242, 29                | ±14px/edge    | Manrope 400 opponent copy    |
+
+- Recap tables are measured as independent header, player-row, Top Pair/note,
+  date, and footer bands. The supplied sample page typography is the primary
+  calibration fixture; twelve-player capacity, deterministic order, pagination,
+  and mixed-rule behavior remain immutable. Exact sample Story text bands are:
+  Singles `1142–1174`, `1224–1263`, `1306–1345`, `1387–1425`,
+  `1466–1505`, `1547–1587`; Doubles `1048–1079`, `1126–1166`,
+  `1208–1248`, `1289–1329`, `1370–1411`, `1451–1492`, `1532–1573`,
+  and Top Pair `1643–1669`. Nine through twelve rows use the compact branch.
+  Its finite profile is keyed only by format and visible row count: Story uses
+  44px/700 type on a 72/72/65/60px pitch for 9/10/11/12 rows; Post uses
+  32px/700 type on a 60/54/49/45px pitch. Every continuation keeps the fixed
+  twelve-slot composition.
+- Recap Story dates use format-specific Manrope 800 calibration: Singles 36px
+  with 7px tracking and Doubles 30px with 6px tracking. Tables use Roboto
+  Condensed 700 at approximately 34px headers, 48–54px names, and 48–52px
+  records; columns start near x=142 with record right x=650 and differential
+  right x=902. Sample row rhythm is `81±4px`; dense pages compress gaps,
+  not glyphs. Visible row-ink-to-rule gaps target `21±3px`. Top Pair uses a
+  fitted 34px starting size at baseline 1669. The canonical recap footer is
+  the Singles authority's centered mascot + tracked Manrope 800 wordmark:
+  approximately 95px mark, 44px type, 4px tracking, and 398×95px overall.
 - Brackets have dedicated 1600×1200 Full draw, 1080×1350 Post, and 1080×1920 Story / Reel geometry. Portrait draws use mirrored horizontal branches: opening matches occupy the outside columns, each dependent match moves inward and is vertically centered between its two sources, and only the two semifinal branches converge downward into the centered final. Each dependency group owns one private merge rail; unrelated connector groups may not cross, overlap, share a rail, or enter another card.
 - Bracket previews open fitted. Expand creates an internally scrolling inspection surface with overscroll containment.
 - Native Web Share completion reads `Done`; only an explicit browser download reads `Saved`.
 - Confirmed Quick Matches return directly to setup after one history write. The completed-score screen is not a second step.
-- New tournament names are capped at 24 characters. Dynamic labels use measured fitting within single-line participant rows; run-of-show opponents stack around `vs`. Horizontal text scaling, mid-word wrapping, and negative tracking are prohibited.
+- New player names are capped at 16 trimmed characters. Persisted names up to
+  40 characters continue to load and use measured fitting/ellipsizing; saved
+  history is never rewritten.
 - Decorative fragments stay in the outer 14% and never intersect text, scores, medals, or the mascot.
 - Preview images use containment; no ancestor may crop the generated PNG.
 

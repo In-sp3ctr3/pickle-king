@@ -173,8 +173,8 @@ export function drawPortraitConnectors(
       (segment) => segment.targetId === targetId,
     );
     context.strokeStyle = targetSegments.every(({ complete }) => complete)
-      ? shareColors.limeDeep
-      : "#516048";
+      ? shareColors.lime
+      : "#090b08";
     context.beginPath();
     for (const { x1, x2, y1, y2 } of targetSegments) {
       context.moveTo(x1, y1);

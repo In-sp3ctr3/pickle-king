@@ -6,6 +6,22 @@ import {
 } from "./bracket-share-layout";
 import { fitCanvasText, shareColors, shareText } from "./share-canvas";
 
+const INK = "#090b08";
+const CREAM = "#f5f1e8";
+const MUTED = "#827f75";
+
+export function bracketMatchPalette(status: Match["status"], isFinal: boolean) {
+  const active = status === "complete" || isFinal;
+  return {
+    accent: active ? shareColors.lime : INK,
+    border: active ? shareColors.lime : INK,
+    fill: INK,
+    loser: MUTED,
+    text: CREAM,
+    winner: shareColors.lime,
+  };
+}
+
 export function drawBracketMatch(
   context: CanvasRenderingContext2D,
   match: Match,
@@ -14,27 +30,13 @@ export function drawBracketMatch(
   matches: Map<string, Match>,
   isFinal: boolean,
 ) {
-  const panel = context.createLinearGradient(
-    0,
-    position.y,
-    0,
-    position.y + position.height,
-  );
-  panel.addColorStop(
-    0,
-    isFinal ? "rgba(54, 48, 24, 0.98)" : "rgba(28, 36, 25, 0.98)",
-  );
-  panel.addColorStop(1, "rgba(9, 12, 8, 0.98)");
-  context.fillStyle = panel;
+  const palette = bracketMatchPalette(match.status, isFinal);
+  context.fillStyle = palette.fill;
   context.fillRect(position.x, position.y, position.width, position.height);
-  context.strokeStyle = isFinal ? shareColors.gold : "rgba(84, 99, 77, 0.72)";
+  context.strokeStyle = palette.border;
   context.lineWidth = isFinal ? 4 : 2;
   context.strokeRect(position.x, position.y, position.width, position.height);
-  context.fillStyle = isFinal
-    ? shareColors.gold
-    : match.status === "complete"
-      ? shareColors.limeDeep
-      : shareColors.line;
+  context.fillStyle = palette.accent;
   context.fillRect(position.x, position.y, 5, position.height);
   shareText(
     context,
@@ -42,7 +44,7 @@ export function drawBracketMatch(
     position.x + 14,
     position.y + 18,
     {
-      color: shareColors.mist,
+      color: "#bbb6aa",
       font: "900 11px Manrope, sans-serif",
     },
   );
@@ -75,6 +77,7 @@ function drawMatchRow(
   matches: Map<string, Match>,
   offsetY: number,
 ) {
+  const palette = bracketMatchPalette(match.status, false);
   const sideData = resolvedSide(match, side, matches);
   const playerId = sideData?.memberIds[0];
   const rawName = playerId
@@ -94,18 +97,18 @@ function drawMatchRow(
   const x = position.x + 14;
   const y = position.y + offsetY;
   shareText(context, label, x, y, {
-    color: winner ? shareColors.lime : loser ? "#747c6d" : shareColors.chalk,
+    color: winner ? palette.winner : loser ? palette.loser : palette.text,
     font: `800 ${fontSize}px Manrope, sans-serif`,
   });
   if (match.status === "complete") {
     shareText(context, String(score), position.x + position.width - 12, y, {
       align: "right",
-      color: winner ? shareColors.lime : "#747c6d",
+      color: winner ? palette.winner : palette.loser,
       font: "900 17px Manrope, sans-serif",
     });
   }
   if (loser) {
-    context.strokeStyle = "#747c6d";
+    context.strokeStyle = palette.loser;
     context.lineWidth = 2;
     context.beginPath();
     context.moveTo(x, y - fontSize * 0.35);

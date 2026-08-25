@@ -54,8 +54,16 @@ export function BracketEditorDialog({
       setMessage("A tournament needs between 4 and 16 players.");
       return;
     }
+    const originalNames = new Map(
+      initial.map(({ id, name }) => [id, name.trim()]),
+    );
     if (
-      trimmed.some(({ name }) => !name || name.length > PLAYER_NAME_MAX_LENGTH)
+      trimmed.some(
+        ({ id, name }) =>
+          !name ||
+          (name.length > PLAYER_NAME_MAX_LENGTH &&
+            name !== originalNames.get(id)),
+      )
     ) {
       setMessage(
         `Every player needs a name between 1 and ${PLAYER_NAME_MAX_LENGTH} characters.`,

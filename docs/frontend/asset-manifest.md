@@ -5,23 +5,26 @@ Pipeline version: 2
 
 ## Asset Register
 
-| ID                      | Placement                          | Type               | Source                   | License                   | Status   | Optimization            | Notes                                                                          |
-| ----------------------- | ---------------------------------- | ------------------ | ------------------------ | ------------------------- | -------- | ----------------------- | ------------------------------------------------------------------------------ |
-| brand-mark              | header, results, icons, share PNGs | generated raster   | project artwork          | Pickle King project asset | accepted | 512px stripped PNG      | sole crown-bearing mark                                                        |
-| result-reference        | result review and score PNG        | supplied reference | user attachment          | visual direction only     | accepted | 1456×1365 and 1152×1408 | layout/type hierarchy; no pixels copied                                        |
-| hero-art                | former home hero                   | generated raster   | project artwork          | Pickle King project asset | rejected | removed from repository | user rejected artwork                                                          |
-| splatter-mask           | former home hero                   | generated raster   | project artwork          | Pickle King project asset | rejected | removed from repository | user rejected reveal                                                           |
-| social-card             | metadata                           | generated raster   | project artwork          | Pickle King project asset | accepted | exact 1200×630 PNG      | product-specific                                                               |
-| Barlow Condensed        | former display face                | WOFF2              | Fontsource               | SIL Open Font License     | rejected | dependency removed      | characters too tight                                                           |
-| Manrope                 | body/UI                            | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | no remote request                                                              |
-| Archivo Black           | display/numerals                   | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | heavy, separated glyphs                                                        |
-| icons                   | controls/status                    | React icon package | Lucide                   | ISC                       | accepted | tree-shaken components  | no hand-authored SVG                                                           |
-| bracket                 | tournament draw                    | DOM/CSS            | original implementation  | MIT project code          | accepted | bounded native pan/zoom | semantic cards remain; no canvas/WebGL                                         |
-| small-field schedule    | five/six-player round robin        | DOM/CSS            | existing design contract | MIT project code          | accepted | no new asset            | dynamic rounds, resting label, and timed advisory reuse existing identity      |
-| result/recap/stats PNGs | result and tournament sharing      | Canvas             | original implementation  | MIT project code          | accepted | 1080×1350 + 1080×1920   | format-specific Post and Story / Reel layouts; generated and previewed locally |
-| bracket-share PNG       | live and completed draw sharing    | Canvas             | original implementation  | MIT project code          | accepted | 1600×1200 + portrait    | dedicated Full draw, Post, and Story / Reel geometry                           |
-| share-arena-backdrop    | all exported share images          | generated WebP     | project artwork          | Pickle King project asset | accepted | 1254×1254, 122KB WebP   | text-free center-safe court; no logo, crown, people, confetti, or baked-in UI  |
-| session-receipt style   | selected Quick Match recap PNGs    | supplied reference | user attachments         | visual direction only     | accepted | 1080px social targets   | cream paper, black display type, lime record slab; no source pixels shipped    |
+| ID                      | Placement                          | Type               | Source                   | License                   | Status   | Optimization            | Notes                                                                       |
+| ----------------------- | ---------------------------------- | ------------------ | ------------------------ | ------------------------- | -------- | ----------------------- | --------------------------------------------------------------------------- |
+| brand-mark              | header, results, icons, share PNGs | generated raster   | project artwork          | Pickle King project asset | accepted | 512px stripped PNG      | sole crown-bearing mark                                                     |
+| result-reference        | result review and score PNG        | supplied reference | user attachment          | visual direction only     | accepted | 1456×1365 and 1152×1408 | layout/type hierarchy; no pixels copied                                     |
+| hero-art                | former home hero                   | generated raster   | project artwork          | Pickle King project asset | rejected | removed from repository | user rejected artwork                                                       |
+| splatter-mask           | former home hero                   | generated raster   | project artwork          | Pickle King project asset | rejected | removed from repository | user rejected reveal                                                        |
+| social-card             | metadata                           | generated raster   | project artwork          | Pickle King project asset | accepted | exact 1200×630 PNG      | product-specific                                                            |
+| Barlow Condensed        | former display face                | WOFF2              | Fontsource               | SIL Open Font License     | rejected | dependency removed      | characters too tight                                                        |
+| Manrope                 | body/UI                            | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | no remote request                                                           |
+| Archivo Black           | display/numerals                   | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | heavy, separated glyphs                                                     |
+| Alfa Slab One           | Quick Receipt score                | WOFF2              | Fontsource               | SIL Open Font License     | accepted | local Latin subset      | measured closer to the supplied score numerals than the installed fallback  |
+| icons                   | controls/status                    | React icon package | Lucide                   | ISC                       | accepted | tree-shaken components  | no hand-authored SVG                                                        |
+| bracket                 | tournament draw                    | DOM/CSS            | original implementation  | MIT project code          | accepted | bounded native pan/zoom | semantic cards remain; no canvas/WebGL                                      |
+| small-field schedule    | five/six-player round robin        | DOM/CSS            | existing design contract | MIT project code          | accepted | no new asset            | dynamic rounds, resting label, and timed advisory reuse existing identity   |
+| result/recap/stats PNGs | result and tournament sharing      | Canvas             | original implementation  | MIT project code          | accepted | 1080×1350 + 1080×1920   | supplied poster identity; generated and previewed locally                   |
+| bracket-share PNG       | live and completed draw sharing    | Canvas             | original implementation  | MIT project code          | accepted | 1600×1200 + portrait    | dedicated Full draw, Post, and Story / Reel geometry                        |
+| session-receipt sources | selected Quick Match recap PNGs    | supplied reference | user attachments         | product-owner authorized  | accepted | original Story rasters  | source evidence and stable masthead/table art may be directly derived       |
+| quick-result sources    | individual Quick Match PNGs        | supplied reference | user attachments         | product-owner authorized  | accepted | three portrait targets  | stable shaded art may be directly derived; dynamic match text stays Canvas  |
+| share templates         | Recap and Quick Match PNG bases    | local derived WebP | six supplied authorities | project derivative        | accepted | 1080px Post and Story   | six Quick plus four regular, four dense, and four compact recap templates   |
+| brand-lockup            | every share PNG footer             | local derived PNG  | authorized footer + mark | Pickle King project asset | accepted | 640×144 transparent     | one fixed 4.444:1 mascot/wordmark ratio; runtime text rebuilding prohibited |
 
 ## Catalog and Library Research
 
@@ -70,36 +73,52 @@ Pipeline version: 2
 | `dom-css`   | Ledger selection and accessible recap dialog                  | available               | built-in browser capability | existing history patterns  | keyboard, touch-target, Axe, and responsive browser checks                                    | selected |
 | `imagegen`  | Session receipt paper and layout                              | not-needed              | no cost or authentication   | native Canvas              | supplied visual authority and deterministic Canvas are sufficient                             | rejected |
 | `figma-mcp` | Session recap source                                          | not-needed              | no account required         | supplied screenshots       | user supplied authoritative raster references                                                 | rejected |
+| `sharp`     | Build share templates, dense recap variants, and brand lockup | available               | installed package; Apache-2 | deterministic Canvas-only  | build script verifies twelve template dimensions and the 640×144 lockup                       | selected |
 
 ## Dependencies
 
-| Package                     | Purpose                        | Rationale                                     |
-| --------------------------- | ------------------------------ | --------------------------------------------- |
-| `@number-flow/react`        | changing scores/clocks         | stable digit layout and accessible text       |
-| `motion`                    | meaningful spatial transitions | bracket, dialog, and crown state continuity   |
-| `lucide-react`              | consistent controls            | avoids ad hoc raw SVG                         |
-| `@radix-ui/react-select`    | rating popup behavior          | accessible keyboard/focus semantics           |
-| `@fontsource/archivo-black` | local display typography       | heavy, readable glyphs without remote fonts   |
-| `serwist` / `@serwist/cli`  | versioned precache worker      | deterministic post-Vinext injection           |
-| `canvas-confetti`           | result celebration burst       | real one-shot particles with explicit cleanup |
+| Package                        | Purpose                         | Rationale                                                                     |
+| ------------------------------ | ------------------------------- | ----------------------------------------------------------------------------- |
+| `@number-flow/react`           | changing scores/clocks          | stable digit layout and accessible text                                       |
+| `motion`                       | meaningful spatial transitions  | bracket, dialog, and crown state continuity                                   |
+| `lucide-react`                 | consistent controls             | avoids ad hoc raw SVG                                                         |
+| `@radix-ui/react-select`       | rating popup behavior           | accessible keyboard/focus semantics                                           |
+| `@fontsource/archivo-black`    | display and Receipt winner type | broad local glyphs match the winner authority without a new dependency        |
+| `@fontsource/alfa-slab-one`    | Receipt score type              | OFL-1.1 local face measurably matches the supplied slab numerals more closely |
+| `@fontsource/anton`            | Quick export headline           | locally hosted condensed face matching Poster and Frame proportions           |
+| `@fontsource/roboto-condensed` | recap export type               | locally hosted narrow standings face                                          |
+| `@fontsource/roboto-slab`      | Poster and Frame export scores  | locally hosted slab face retained for the two dark treatments                 |
+| `serwist` / `@serwist/cli`     | versioned precache worker       | deterministic post-Vinext injection                                           |
+| `canvas-confetti`              | result celebration burst        | real one-shot particles with explicit cleanup                                 |
 
 ## Generated Assets
 
-| Asset                   | Tool                                | Prompt/derivation                                                                                             | Dimensions       | Repository path                                                            | License/status          | Visual review                                                       |
-| ----------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------- |
-| Crowned pickleball mark | project artwork + local processing  | original text-free, transparent, acid-lime pickleball character with angular gold crown; resized and stripped | 512×512          | `public/brand/pickle-king-mark.png`                                        | project asset; accepted | silhouette and transparency inspected                               |
-| Social card             | project artwork + local composition | near-black court, crowned-ball mark, Pickle King launch copy                                                  | 1200×630         | `public/social/pickle-king-card.png`                                       | project asset; accepted | exact size and copy legibility inspected                            |
-| Share arena backdrop    | project artwork + WebP optimization | original text-free premium indoor pickleball court; near-black materials and restrained acid-lime edge light  | 1254×1254        | `public/brand/pickle-king-arena.webp`                                      | project asset; accepted | inspected at original resolution and 4:5, 9:16, and 4:3 crop intent |
-| Standard icons          | ImageMagick derivation              | accepted mark on court background                                                                             | 192×192, 512×512 | `public/icons/icon-192.png`, `public/icons/icon-512.png`                   | project asset; accepted | standard install sizes inspected                                    |
-| Maskable icons          | ImageMagick derivation              | accepted mark with maskable safe area                                                                         | 192×192, 512×512 | `public/icons/icon-maskable-192.png`, `public/icons/icon-maskable-512.png` | project asset; accepted | safe area inspected                                                 |
-| Apple touch icon        | ImageMagick derivation              | accepted mark on court background                                                                             | 180×180          | `public/apple-touch-icon.png`                                              | project asset; accepted | iOS size inspected                                                  |
+| Asset                      | Tool                                 | Prompt/derivation                                                                                             | Dimensions            | Repository path                                                            | License/status               | Visual review                                      |
+| -------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------- |
+| Crowned pickleball mark    | project artwork + local processing   | original text-free, transparent, acid-lime pickleball character with angular gold crown; resized and stripped | 512×512               | `public/brand/pickle-king-mark.png`                                        | project asset; accepted      | silhouette and transparency inspected              |
+| Social card                | project artwork + local composition  | near-black court, crowned-ball mark, Pickle King launch copy                                                  | 1200×630              | `public/social/pickle-king-card.png`                                       | project asset; accepted      | exact size and copy legibility inspected           |
+| Standard icons             | ImageMagick derivation               | accepted mark on court background                                                                             | 192×192, 512×512      | `public/icons/icon-192.png`, `public/icons/icon-512.png`                   | project asset; accepted      | standard install sizes inspected                   |
+| Maskable icons             | ImageMagick derivation               | accepted mark with maskable safe area                                                                         | 192×192, 512×512      | `public/icons/icon-maskable-192.png`, `public/icons/icon-maskable-512.png` | project asset; accepted      | safe area inspected                                |
+| Apple touch icon           | ImageMagick derivation               | accepted mark on court background                                                                             | 180×180               | `public/apple-touch-icon.png`                                              | project asset; accepted      | iOS size inspected                                 |
+| Canonical brand lockup     | deterministic Sharp composition      | authorized recap wordmark pixels plus the accepted transparent crowned mark                                   | 640×144               | `public/brand/pickle-king-lockup.png`                                      | project asset; accepted      | alpha, ratio, and every footer inspected           |
+| Contained Doubles source   | owner-supplied reference crop        | complete `DOUBLES` curves and centered crowned mascot with internal transparent padding                       | original Post raster  | `docs/frontend/references/share/recap-doubles-contained.png`               | product-owner authorized     | bottom/right curves and detached fragments scanned |
+| Dense recap templates      | deterministic Sharp composition      | contained Singles/Doubles mastheads with protected edges above taller lime tables                             | 1080px Post and Story | `public/share/templates/recap-*-dense-{feed,story}.webp`                   | project derivative; accepted | 7–8-row exports inspected                          |
+| Compact recap templates    | deterministic Sharp composition      | upward-reclaimed masthead and slab space for the finite 9–12-row composition                                  | 1080px Post and Story | `public/share/templates/recap-*-compact-{feed,story}.webp`                 | project derivative; accepted | 9–12 rows and continuation exports inspected       |
+| Derived recap/name targets | independently approved local renders | locked 8/12/13-player recap states and the 16-character Quick fixture                                         | Post and Story        | `docs/frontend/references/share/derived/`                                  | project evidence; accepted   | exact hashes recorded and triptychs inspected      |
 
 No raw-asset exceptions are approved. React Bits source was not copied.
 Feature 005 introduced no new raster asset or runtime dependency.
-Feature 009 reuses the accepted mark, arena, local fonts, and icon package; it
-introduces no new raster asset or runtime dependency.
+Feature 009 now reuses the accepted mark, local fonts, and icon package; its
+retired arena raster was removed with the share-identity replacement.
 Feature 014 reuses the accepted setup, match, table, medal, and local share
 assets. It introduces no new raster asset or runtime dependency.
-Session Recap reuses the accepted crowned mark and local fonts. The cream
-surface, rules, and deterministic paper grain are drawn in Canvas and introduce
-no shipped raster asset or runtime dependency.
+The 2026-08-24 repair is explicitly authorized to preserve supplied reference
+pixels. A deterministic Sharp script stores the five source authorities under
+`docs/frontend/references/share/` and emits six Quick templates, twelve recap
+templates, and the canonical lockup. The Doubles extraction uses a complete
+owner-supplied final-S contour and rejects a flat outer-edge plateau, inadequate
+internal padding, or detached title fragments before writing an asset. Dynamic
+names, dates, scores,
+standings, page labels, and opponent copy are never baked into those templates.
+No image model, remote asset, runtime request, or new rendering framework is
+used.

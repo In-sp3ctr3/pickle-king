@@ -4,6 +4,7 @@
   "sessionRecap": {
     "mode": "reference-derived product",
     "route": "Match ledger dialog; no new route",
+    "pageCapacity": 12,
     "outputs": [
       { "name": "Post", "width": 1080, "height": 1350 },
       { "name": "Story / Reel", "width": 1080, "height": 1920 }
@@ -844,6 +845,13 @@
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".result-dialog" }
+        },
+        {
+          "name": "quick result Poster Frame Receipt styles",
+          "selector": ".result-dialog [aria-label='Image style'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='result-preview']" }
         },
         {
           "name": "scorer controls behind result review",
@@ -1700,6 +1708,140 @@
       "reducedMotionChecks": [
         {
           "name": "populated history remains available",
+          "selector": "[data-qa='history-screen']",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "history-recap",
+      "path": "/",
+      "prepare": "quick-history",
+      "primaryActionSelector": "[data-qa='create-recap']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/history-recap-desktop-source.png",
+          "render": "test-results/frontend-captures/history-recap-desktop.png",
+          "comparison": "test-results/frontend-comparisons/history-recap-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/history-recap-mobile-source.png",
+          "render": "test-results/frontend-captures/history-recap-mobile.png",
+          "comparison": "test-results/frontend-comparisons/history-recap-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "recap history brand home",
+          "selector": "[data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "recap history back",
+          "selector": "[data-qa='app-back']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='start-tournament']" }
+        },
+        {
+          "name": "individual quick match actions",
+          "selector": ".session-ledger__row button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='history-screen']" }
+        },
+        {
+          "name": "create recap",
+          "selector": "[data-qa='create-recap']",
+          "sequence": "recap-workflow",
+          "action": "click",
+          "expect": { "visible": "[data-qa='preview-recap']" }
+        },
+        {
+          "name": "recap match selection",
+          "selector": ".session-ledger__row input[type='checkbox']",
+          "auditOnly": true,
+          "action": "check",
+          "expect": { "visible": "[data-qa='preview-recap']" }
+        },
+        {
+          "name": "cancel recap selection",
+          "selector": ".recap-selection-toolbar .secondary-button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='create-recap']" }
+        },
+        {
+          "name": "preview recap",
+          "selector": "[data-qa='preview-recap']",
+          "sequence": "recap-workflow",
+          "action": "click",
+          "expect": { "visible": "[data-qa='session-recap-dialog']" }
+        },
+        {
+          "name": "recap type choices",
+          "selector": ".session-recap-dialog [aria-label='Recap type'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "show doubles recap",
+          "selector": ".session-recap-dialog [aria-label='Recap type'] button:nth-child(2)",
+          "sequence": "recap-workflow",
+          "action": "click",
+          "expect": { "visible": "button[aria-label='Next page']" }
+        },
+        {
+          "name": "recap image formats",
+          "selector": ".session-recap-dialog [aria-label='Image format'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "next recap page",
+          "selector": "button[aria-label='Next page']",
+          "sequence": "recap-workflow",
+          "action": "click",
+          "expect": { "visible": "button[aria-label='Previous page']" }
+        },
+        {
+          "name": "previous recap page",
+          "selector": "button[aria-label='Previous page']",
+          "sequence": "recap-workflow",
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "share all recap pages",
+          "selector": ".session-recap-dialog__share-all",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "per-page recap actions",
+          "selector": ".session-recap-dialog .share-preview-actions button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "close recap",
+          "selector": "button[aria-label='Close recap']",
+          "sequence": "recap-workflow",
+          "action": "click",
+          "expect": { "visible": "[data-qa='history-screen']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "recap history remains available",
           "selector": "[data-qa='history-screen']",
           "expect": "visible"
         }

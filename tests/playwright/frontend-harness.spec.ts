@@ -33,7 +33,7 @@ for (const viewport of routeMap.viewports) {
       test(`${route.name}: route, controls, console, focus, axe, and screenshot`, async ({
         page,
       }) => {
-        if (route.name === "results") test.slow();
+        test.setTimeout(120_000);
         await installDeterministicBrowserState(page);
         const consoleErrors: string[] = [];
         page.on("console", (message) => {

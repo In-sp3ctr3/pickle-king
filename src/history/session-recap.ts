@@ -230,17 +230,16 @@ function normalizeName(name: string) {
   return name.trim().toLocaleLowerCase();
 }
 
-export function paginateRecapPlayers<T>(values: T[], maximum = 6): T[][] {
+export const RECAP_ROWS_PER_PAGE = 12;
+
+export function paginateRecapPlayers<T>(
+  values: T[],
+  maximum = RECAP_ROWS_PER_PAGE,
+): T[][] {
   if (!values.length) return [];
-  const pageCount = Math.ceil(values.length / maximum);
-  const baseSize = Math.floor(values.length / pageCount);
-  const largerPages = values.length % pageCount;
   const pages: T[][] = [];
-  let start = 0;
-  for (let page = 0; page < pageCount; page += 1) {
-    const size = baseSize + (page < largerPages ? 1 : 0);
-    pages.push(values.slice(start, start + size));
-    start += size;
+  for (let start = 0; start < values.length; start += maximum) {
+    pages.push(values.slice(start, start + maximum));
   }
   return pages;
 }

@@ -117,6 +117,7 @@ const detectors = {
   "model-viewer": () => packageStatus(packageJson, ["@google/model-viewer"]),
   three: () => packageStatus(packageJson, ["three", "@react-three/fiber"]),
   playwright: () => packageStatus(packageJson, ["@playwright/test"]),
+  sharp: () => packageStatus(packageJson, ["sharp"]),
   ffmpeg: () => commandStatus("ffmpeg", ["-version"]),
   blender: () => commandStatus("blender"),
   "21st": () => {

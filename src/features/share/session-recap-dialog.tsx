@@ -24,6 +24,7 @@ export function SessionRecapDialog({
   onClose: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const sections = useMemo(() => buildSessionRecaps(matches), [matches]);
   const dateLabel = receiptDateLabel(
     matches.map(({ completedAt }) => completedAt),
@@ -63,7 +64,12 @@ export function SessionRecapDialog({
   );
 
   useEffect(() => {
+    triggerRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     ref.current?.showModal();
+    return () => triggerRef.current?.focus();
   }, []);
 
   if (!section) return null;
@@ -127,7 +133,10 @@ export function SessionRecapDialog({
       aria-label="Session recap"
       className="share-preview-dialog session-recap-dialog"
       data-qa="session-recap-dialog"
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       ref={ref}
     >
       <header className="share-preview-dialog__header">
@@ -198,29 +207,31 @@ export function SessionRecapDialog({
           <SharePreviewSkeleton className="share-preview-dialog__loading" />
         )}
       </figure>
-      <div className="session-recap-dialog__pages">
-        <button
-          aria-label="Previous page"
-          disabled={page === 0}
-          onClick={() => setPage((value) => Math.max(0, value - 1))}
-          type="button"
-        >
-          <ChevronLeft aria-hidden="true" />
-        </button>
-        <span aria-live="polite">
-          Page {page + 1} of {pages.length}
-        </span>
-        <button
-          aria-label="Next page"
-          disabled={page === pages.length - 1}
-          onClick={() =>
-            setPage((value) => Math.min(pages.length - 1, value + 1))
-          }
-          type="button"
-        >
-          <ChevronRight aria-hidden="true" />
-        </button>
-      </div>
+      {pages.length > 1 ? (
+        <div className="session-recap-dialog__pages">
+          <button
+            aria-label="Previous page"
+            disabled={page === 0}
+            onClick={() => setPage((value) => Math.max(0, value - 1))}
+            type="button"
+          >
+            <ChevronLeft aria-hidden="true" />
+          </button>
+          <span aria-live="polite">
+            Page {page + 1} of {pages.length}
+          </span>
+          <button
+            aria-label="Next page"
+            disabled={page === pages.length - 1}
+            onClick={() =>
+              setPage((value) => Math.min(pages.length - 1, value + 1))
+            }
+            type="button"
+          >
+            <ChevronRight aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
       <footer className="share-preview-dialog__footer session-recap-dialog__footer">
         <div>
           <p>Names and scores stay on this device until you share them.</p>

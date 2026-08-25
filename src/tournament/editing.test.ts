@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { completeMatch, createTournamentBracket, getNextMatch } from "./index";
 import { renameTournamentPlayer, tournamentHasStarted } from "./editing";
-import type { Player, TournamentConfig } from "./types";
+import {
+  PLAYER_NAME_MAX_LENGTH,
+  type Player,
+  type TournamentConfig,
+} from "./types";
 
 const players: Player[] = Array.from({ length: 4 }, (_, index) => ({
   id: `p${index}`,
@@ -41,16 +45,35 @@ describe("tournament editing", () => {
   it("rejects empty, duplicate, overlong, and unknown-player renames", () => {
     const bracket = createTournamentBracket(players, config);
     expect(() => renameTournamentPlayer(bracket, "p0", " ")).toThrow(
-      /1 and 24/i,
+      new RegExp(`1 and ${PLAYER_NAME_MAX_LENGTH}`, "i"),
     );
     expect(() => renameTournamentPlayer(bracket, "p0", "PLAYER 1")).toThrow(
       /unique/i,
     );
-    expect(() => renameTournamentPlayer(bracket, "p0", "x".repeat(25))).toThrow(
-      /1 and 24/i,
-    );
+    expect(() =>
+      renameTournamentPlayer(
+        bracket,
+        "p0",
+        "x".repeat(PLAYER_NAME_MAX_LENGTH + 1),
+      ),
+    ).toThrow(new RegExp(`1 and ${PLAYER_NAME_MAX_LENGTH}`, "i"));
     expect(() => renameTournamentPlayer(bracket, "missing", "Patrick")).toThrow(
       /not found/i,
     );
+  });
+
+  it("preserves an unchanged legacy name above the new-entry limit", () => {
+    const bracket = createTournamentBracket(players, config);
+    const legacyName = "A persisted player name with forty chars".slice(0, 40);
+    const legacy = {
+      ...bracket,
+      players: bracket.players.map((player) =>
+        player.id === "p0" ? { ...player, name: legacyName } : player,
+      ),
+    };
+    expect(renameTournamentPlayer(legacy, "p0", legacyName)).toEqual(legacy);
+    expect(() =>
+      renameTournamentPlayer(legacy, "p0", `${legacyName.slice(0, -1)}x`),
+    ).toThrow(new RegExp(`1 and ${PLAYER_NAME_MAX_LENGTH}`, "i"));
   });
 });

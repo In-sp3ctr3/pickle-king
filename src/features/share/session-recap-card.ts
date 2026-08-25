@@ -1,15 +1,26 @@
 import type { RecapPlayerRecord, SessionRecapSection } from "../../history";
 import {
-  drawBrandMark,
+  drawBrandLockup,
+  fitCanvasText,
   shareCanvasSurface,
   shareFittedText,
   shareText,
 } from "./share-canvas";
 import { shareDimensions, type ShareFormat } from "./share-format";
+import {
+  drawRasterCenteredRecapText,
+  sessionRecapDateLayout,
+  sessionRecapFooterLayout,
+  sessionRecapLayoutRowCount,
+  sessionRecapNote,
+  sessionRecapSubtitleY,
+  sessionRecapTableLayout,
+  sessionRecapTemplatePath,
+} from "./session-recap-layout";
 
-const cream = "#f4f0e7";
+export * from "./session-recap-layout";
+
 const ink = "#10110f";
-const lime = "#c8f000";
 
 export async function sessionRecapCanvas(
   section: SessionRecapSection,
@@ -18,170 +29,248 @@ export async function sessionRecapCanvas(
   format: ShareFormat,
 ) {
   const { width, height } = shareDimensions(format);
-  const { context, element, mark } = await shareCanvasSurface(width, height);
-  const story = format === "story";
-  context.fillStyle = cream;
-  context.fillRect(0, 0, width, height);
-  drawPaperTexture(context, width, height);
-
-  shareText(context, options.dateLabel, width / 2, story ? 128 : 96, {
-    align: "center",
-    color: ink,
-    font: "900 30px 'Archivo Black', sans-serif",
-  });
-  context.fillStyle = lime;
-  context.fillRect(width / 2 - 128, story ? 154 : 122, 256, 3);
-
-  const headingY = story ? 650 : 440;
-  shareFittedText(context, section.format.toUpperCase(), width / 2, headingY, {
-    align: "center",
-    color: ink,
-    maxSize: section.format === "singles" ? 224 : 194,
-    maxWidth: width - 92,
-    minSize: 154,
-  });
-  drawBrandMark(context, mark, width - 88, headingY + 26, 98);
-
-  const subtitleY = story ? 796 : 564;
-  rule(context, 146, subtitleY - 12, 318);
-  rule(context, width - 318, subtitleY - 12, width - 146);
-  shareText(
-    context,
-    section.format === "doubles" ? "ROTATING PARTNERS" : "PLAYER RECORDS",
-    width / 2,
-    subtitleY,
-    {
-      align: "center",
-      color: ink,
-      font: "900 27px 'Archivo Black', sans-serif",
-    },
+  const layoutRowCount = sessionRecapLayoutRowCount(
+    players.length,
+    options.pageCount,
   );
+  const { context, element, lockup } = await shareCanvasSurface(
+    width,
+    height,
+    sessionRecapTemplatePath(section.format, format, layoutRowCount),
+  );
+  const story = format === "story";
+  const date = sessionRecapDateLayout(section.format, format);
+  const table = sessionRecapTableLayout(section.format, layoutRowCount, format);
 
-  const tableTop = story ? 860 : 618;
-  const footerHeight = story ? 350 : 250;
-  const tableBottom = height - footerHeight;
-  context.fillStyle = lime;
-  context.fillRect(0, tableTop, width, tableBottom - tableTop);
-  drawTable(context, players, section.showDifferential, tableTop, tableBottom);
-
-  const footerY = tableBottom + (story ? 90 : 64);
-  let detailRows = 0;
-  if (section.topPair) {
-    shareFittedText(
-      context,
-      `TOP PAIR · ${section.topPair.names.join(" + ")} · ${section.topPair.wins}–${section.topPair.losses}`.toUpperCase(),
-      width / 2,
-      footerY,
-      {
-        align: "center",
-        color: ink,
-        maxSize: 26,
-        maxWidth: width - 128,
-        minSize: 22,
-      },
-    );
-    detailRows += 1;
+  drawReceiptDate(context, options.dateLabel, date);
+  if (section.format === "singles") {
+    context.fillStyle = "#b6d800";
+    context.fillRect(width / 2 - 186, story ? 164 : 88, 372, 3);
   }
-  if (!section.showDifferential) {
+
+  drawRecapSubtitle(
+    context,
+    section.format,
+    sessionRecapSubtitleY(section.format, layoutRowCount, format),
+    story,
+  );
+  drawTable(context, players, section.showDifferential, table, story);
+  drawSectionNote(context, section, table.noteY);
+
+  if (options.pageCount > 1) {
     shareText(
       context,
-      "MIXED RULES · POINT DIFFERENTIAL OMITTED",
+      `PAGE ${options.page + 1} OF ${options.pageCount}`,
       width / 2,
-      footerY + detailRows * 38,
+      table.pageY,
       {
         align: "center",
-        color: ink,
-        font: "900 22px 'Archivo Black', sans-serif",
+        color: table.dense ? ink : "#53564f",
+        font: `800 ${table.dense ? 24 : 18}px Manrope, sans-serif`,
       },
     );
-    detailRows += 1;
   }
-  shareText(
+  const footer = sessionRecapFooterLayout(format);
+  drawBrandLockup(
     context,
-    `PAGE ${options.page + 1} OF ${options.pageCount}`,
-    width / 2,
-    footerY + 56 + Math.max(0, detailRows - 1) * 28,
-    {
-      align: "center",
-      color: "#53564f",
-      font: "800 19px Manrope, sans-serif",
-    },
+    lockup,
+    footer.centerX,
+    footer.centerY,
+    footer.width,
   );
-  shareText(context, "PICKLE KING", width / 2, height - 46, {
-    align: "center",
-    color: ink,
-    font: "900 25px 'Archivo Black', sans-serif",
-  });
   return element;
+}
+
+function drawRecapSubtitle(
+  context: CanvasRenderingContext2D,
+  section: SessionRecapSection["format"],
+  baseline: number,
+  story: boolean,
+) {
+  const value =
+    section === "singles" ? "PLAYER STANDINGS" : "ROTATING PARTNERS";
+  const fontSize = story ? 30 : 22;
+  context.save();
+  context.fillStyle = ink;
+  context.font = `700 ${fontSize}px Manrope, sans-serif`;
+  context.letterSpacing = `${story ? 4 : 3}px`;
+  context.textAlign = "center";
+  context.fillText(value, 540, baseline);
+  const metrics = context.measureText(value);
+  const centerY =
+    baseline -
+    (metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent) / 2;
+  const halfWidth = metrics.width / 2;
+  rule(context, 158, centerY, 540 - halfWidth - 24);
+  rule(context, 540 + halfWidth + 24, centerY, 922);
+  context.restore();
+}
+
+function drawReceiptDate(
+  context: CanvasRenderingContext2D,
+  value: string,
+  layout: ReturnType<typeof sessionRecapDateLayout>,
+) {
+  context.save();
+  context.fillStyle = ink;
+  context.font = `800 ${layout.fontSize}px Manrope, sans-serif`;
+  context.letterSpacing = `${layout.letterSpacing}px`;
+  context.textAlign = "center";
+  context.fillText(value, layout.x, layout.y);
+  context.restore();
 }
 
 function drawTable(
   context: CanvasRenderingContext2D,
   players: RecapPlayerRecord[],
   showDifferential: boolean,
-  top: number,
-  bottom: number,
+  layout: ReturnType<typeof sessionRecapTableLayout>,
+  story: boolean,
 ) {
-  const left = 106;
-  const right = 974;
-  const nameWidth = showDifferential ? 460 : 560;
-  const gpX = showDifferential ? 640 : 730;
-  const recordX = showDifferential ? 780 : 900;
-  const differentialX = 952;
-  const headerY = top + 72;
-  const rowHeight = Math.min(112, (bottom - headerY - 34) / players.length);
-  const labelFont = "900 25px 'Archivo Black', sans-serif";
-  shareText(context, "PLAYER", left, headerY, { color: ink, font: labelFont });
-  shareText(context, "GP", gpX, headerY, {
-    align: "right",
-    color: ink,
-    font: labelFont,
-  });
-  shareText(context, "W–L", recordX, headerY, {
-    align: "right",
-    color: ink,
-    font: labelFont,
-  });
+  const left = story ? 142 : 128;
+  const right = story ? 938 : 952;
+  const nameX = left + 8;
+  const recordX = story ? 650 : showDifferential ? 690 : 890;
+  const differentialX = story ? 902 : 922;
+  const rowSize = layout.rowFontSize;
+  drawCenteredText(
+    context,
+    "PLAYER",
+    nameX,
+    layout.headerTop,
+    layout.firstRuleY,
+    layout.headerFontSize,
+    "left",
+  );
+  drawCenteredText(
+    context,
+    "W–L",
+    recordX,
+    layout.headerTop,
+    layout.firstRuleY,
+    layout.headerFontSize,
+    "right",
+  );
   if (showDifferential) {
-    shareText(context, "+/−", differentialX, headerY, {
-      align: "right",
-      color: ink,
-      font: labelFont,
-    });
+    drawCenteredText(
+      context,
+      "+/−",
+      differentialX,
+      layout.headerTop,
+      layout.firstRuleY,
+      layout.headerFontSize,
+      "right",
+    );
   }
-  rule(context, left, headerY + 28, right);
+  rule(context, left, layout.firstRuleY, right);
   players.forEach((player, index) => {
-    const y = headerY + 82 + index * rowHeight;
-    shareFittedText(context, player.name, left, y, {
-      color: ink,
-      maxSize: 43,
-      maxWidth: nameWidth,
-      minSize: 30,
-    });
-    shareText(context, String(player.gamesPlayed), gpX, y, {
-      align: "right",
-      color: ink,
-      font: "900 38px 'Archivo Black', sans-serif",
-    });
-    shareText(context, `${player.wins}–${player.losses}`, recordX, y, {
-      align: "right",
-      color: ink,
-      font: "900 38px 'Archivo Black', sans-serif",
-    });
+    const topRule = layout.rowRules[index];
+    const bottomRule = layout.rowRules[index + 1];
+    drawCenteredFittedText(
+      context,
+      player.name,
+      nameX,
+      {
+        maxSize: rowSize,
+        maxWidth: showDifferential ? 470 : 610,
+        minSize: story ? 42 : 28,
+      },
+      topRule,
+      bottomRule,
+    );
+    drawCenteredText(
+      context,
+      `${player.wins}–${player.losses}`,
+      recordX,
+      topRule,
+      bottomRule,
+      rowSize,
+      "right",
+    );
     if (showDifferential) {
-      shareText(
+      drawCenteredText(
         context,
         `${player.differential > 0 ? "+" : ""}${player.differential}`,
         differentialX,
-        y,
-        {
-          align: "right",
-          color: ink,
-          font: "900 38px 'Archivo Black', sans-serif",
-        },
+        topRule,
+        bottomRule,
+        rowSize,
+        "right",
       );
     }
-    if (index < players.length - 1) rule(context, left, y + 30, right);
+    rule(context, left, bottomRule, right);
+  });
+}
+
+function drawCenteredFittedText(
+  context: CanvasRenderingContext2D,
+  value: string,
+  x: number,
+  options: { maxSize: number; maxWidth: number; minSize: number },
+  top: number,
+  bottom: number,
+) {
+  let size = options.maxSize;
+  let font = `700 ${size}px 'Roboto Condensed', sans-serif`;
+  context.font = font;
+  while (
+    size > options.minSize &&
+    context.measureText(value).width > options.maxWidth
+  ) {
+    size -= 2;
+    font = `700 ${size}px 'Roboto Condensed', sans-serif`;
+    context.font = font;
+  }
+  const fitted = fitCanvasText(context, value, options.maxWidth);
+  drawRasterCenteredRecapText(
+    context,
+    fitted,
+    font,
+    size,
+    x,
+    top,
+    bottom,
+    "left",
+  );
+}
+
+function drawCenteredText(
+  context: CanvasRenderingContext2D,
+  value: string,
+  x: number,
+  top: number,
+  bottom: number,
+  size: number,
+  align: CanvasTextAlign,
+) {
+  const font = `700 ${size}px 'Roboto Condensed', sans-serif`;
+  drawRasterCenteredRecapText(
+    context,
+    value,
+    font,
+    size,
+    x,
+    top,
+    bottom,
+    align === "right" ? "right" : "left",
+  );
+}
+
+function drawSectionNote(
+  context: CanvasRenderingContext2D,
+  section: SessionRecapSection,
+  baseline: number,
+) {
+  const note = sessionRecapNote(section);
+  if (!note) return;
+  shareFittedText(context, note, 540, baseline, {
+    align: "center",
+    color: ink,
+    family: "'Roboto Condensed', sans-serif",
+    maxSize: 34,
+    maxWidth: 860,
+    minSize: 24,
+    weight: 900,
   });
 }
 
@@ -197,19 +286,6 @@ function rule(
   context.moveTo(start, y);
   context.lineTo(end, y);
   context.stroke();
-}
-
-function drawPaperTexture(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-) {
-  context.fillStyle = "rgba(16, 17, 15, 0.025)";
-  for (let index = 0; index < 420; index += 1) {
-    const x = (index * 73) % width;
-    const y = (index * 149) % height;
-    context.fillRect(x, y, 2 + (index % 3), 1);
-  }
 }
 
 export function sessionRecapFileName(

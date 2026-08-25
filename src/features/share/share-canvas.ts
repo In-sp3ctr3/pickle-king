@@ -3,15 +3,26 @@ export const shareColors = {
   surface: "#151b13",
   surfaceRaised: "#1b2218",
   chalk: "#f5f3e9",
-  lime: "#c8ff3d",
-  limeDeep: "#95c721",
+  lime: "#c8dc00",
+  limeDeep: "#bdd600",
   mist: "#9da494",
   line: "#34402e",
   gold: "#f3c744",
 };
 
 let brandMarkPromise: Promise<HTMLImageElement> | null = null;
-let arenaPromise: Promise<HTMLImageElement | null> | null = null;
+let brandLockupPromise: Promise<HTMLImageElement> | null = null;
+let shareFontPromise: Promise<void> | null = null;
+const imagePromises = new Map<string, Promise<HTMLImageElement>>();
+
+export const requiredShareFonts = [
+  { family: "Anton", font: "400 24px Anton" },
+  { family: "Alfa Slab One", font: "400 24px 'Alfa Slab One'" },
+  { family: "Roboto Condensed", font: "700 24px 'Roboto Condensed'" },
+  { family: "Roboto Condensed", font: "900 24px 'Roboto Condensed'" },
+  { family: "Roboto Slab", font: "900 24px 'Roboto Slab'" },
+  { family: "Manrope", font: "800 24px Manrope" },
+] as const;
 
 function loadBrandMark() {
   return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -34,48 +45,99 @@ function brandMark() {
   return brandMarkPromise;
 }
 
-function loadArena() {
-  return new Promise<HTMLImageElement | null>((resolve) => {
+function brandLockup() {
+  brandLockupPromise ??= loadImage(
+    "/brand/pickle-king-lockup.png",
+    "The Pickle King lockup",
+  ).catch((error: unknown) => {
+    brandLockupPromise = null;
+    throw error;
+  });
+  return brandLockupPromise;
+}
+
+function loadImage(source: string, label: string) {
+  const cached = imagePromises.get(source);
+  if (cached) return cached;
+  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
     image.decoding = "async";
     image.onload = () => {
-      void image.decode().then(
-        () => resolve(image),
-        () => resolve(image),
-      );
+      void image.decode().then(() => resolve(image), reject);
     };
-    image.onerror = () => resolve(null);
-    image.src = "/brand/pickle-king-arena.webp";
+    image.onerror = () => reject(new Error(`${label} could not load.`));
+    image.src = source;
+  }).catch((error: unknown) => {
+    imagePromises.delete(source);
+    throw error;
   });
+  imagePromises.set(source, promise);
+  return promise;
 }
 
-function arenaBackground() {
-  arenaPromise ??= loadArena();
-  return arenaPromise;
+export function loadShareTemplate(source: string) {
+  return loadImage(source, "The share template");
+}
+
+export function waitForShareFonts() {
+  shareFontPromise ??= loadShareFonts().catch((error: unknown) => {
+    shareFontPromise = null;
+    throw error;
+  });
+  return shareFontPromise;
+}
+
+async function loadShareFonts() {
+  if (!document.fonts) {
+    throw new Error(
+      "This browser cannot verify the fonts used in share images.",
+    );
+  }
+  const loadedFaces = await Promise.all(
+    requiredShareFonts.map(({ font }) =>
+      document.fonts.load(font, "PICKLE KING 11–7"),
+    ),
+  );
+  const missing = requiredShareFonts.filter(
+    ({ font }, index) =>
+      !loadedFaces[index].some(({ status }) => status === "loaded") ||
+      !document.fonts.check(font, "PICKLE KING 11–7"),
+  );
+  if (missing.length) {
+    throw new Error(
+      `Share image fonts did not load: ${[...new Set(missing.map(({ family }) => family))].join(", ")}.`,
+    );
+  }
 }
 
 export function prewarmShareAssets() {
-  void Promise.all([
-    brandMark(),
-    arenaBackground(),
-    document.fonts.ready,
-  ]).catch(() => undefined);
+  void Promise.all([brandMark(), brandLockup(), waitForShareFonts()]).catch(
+    () => undefined,
+  );
 }
 
-export async function shareCanvasSurface(width: number, height: number) {
-  const [mark, arena] = await Promise.all([
+export async function shareCanvasSurface(
+  width: number,
+  height: number,
+  templateSource?: string,
+) {
+  const [mark, lockup, template] = await Promise.all([
     brandMark(),
-    arenaBackground(),
-    document.fonts.ready,
+    brandLockup(),
+    templateSource ? loadShareTemplate(templateSource) : null,
+    waitForShareFonts(),
   ]);
   const element = document.createElement("canvas");
   element.width = width;
   element.height = height;
   const context = element.getContext("2d");
   if (!context) throw new Error("This browser cannot create share images.");
-  context.fillStyle = shareColors.court;
-  context.fillRect(0, 0, width, height);
-  return { arena, context, element, mark };
+  if (template) context.drawImage(template, 0, 0, width, height);
+  else {
+    context.fillStyle = shareColors.court;
+    context.fillRect(0, 0, width, height);
+  }
+  return { context, element, lockup, mark };
 }
 
 export function shareText(
@@ -97,14 +159,23 @@ export function fitCanvasText(
   maxWidth: number,
 ) {
   if (context.measureText(value).width <= maxWidth) return value;
-  let end = value.length;
+  const graphemes = segmentGraphemes(value);
+  let end = graphemes.length;
   while (
     end > 1 &&
-    context.measureText(`${value.slice(0, end)}…`).width > maxWidth
+    context.measureText(`${graphemes.slice(0, end).join("")}…`).width > maxWidth
   ) {
     end -= 1;
   }
-  return `${value.slice(0, end)}…`;
+  return `${graphemes.slice(0, end).join("")}…`;
+}
+
+function segmentGraphemes(value: string) {
+  if (typeof Intl.Segmenter === "undefined") return Array.from(value);
+  return Array.from(
+    new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(value),
+    ({ segment }) => segment,
+  );
 }
 
 export function shareFittedText(
@@ -142,45 +213,6 @@ export function shareFittedText(
   return size;
 }
 
-export function shareDimensionalFittedText(
-  context: CanvasRenderingContext2D,
-  value: string,
-  x: number,
-  y: number,
-  options: {
-    align?: CanvasTextAlign;
-    color: string;
-    family?: string;
-    maxSize: number;
-    maxWidth: number;
-    minSize?: number;
-    weight?: number;
-  },
-) {
-  const family = options.family ?? "'Archivo Black', sans-serif";
-  const weight = options.weight ?? 900;
-  const minSize = options.minSize ?? 24;
-  let size = options.maxSize;
-  context.font = `${weight} ${size}px ${family}`;
-  while (
-    size > minSize &&
-    context.measureText(value).width > options.maxWidth
-  ) {
-    size -= 2;
-    context.font = `${weight} ${size}px ${family}`;
-  }
-  const label = fitCanvasText(context, value, options.maxWidth);
-  context.textAlign = options.align ?? "left";
-  context.fillStyle = "#030403";
-  context.fillText(label, x + 4, y + 7);
-  context.fillStyle = options.color;
-  context.fillText(label, x, y);
-  context.strokeStyle = "rgba(255, 255, 255, 0.28)";
-  context.lineWidth = 1;
-  context.strokeText(label, x, y - 1);
-  return size;
-}
-
 export function drawBrandMark(
   context: CanvasRenderingContext2D,
   mark: HTMLImageElement,
@@ -191,69 +223,35 @@ export function drawBrandMark(
   context.drawImage(mark, centerX - size / 2, top, size, size);
 }
 
-export function drawLimeGlow(
-  context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  radius: number,
-) {
-  const glow = context.createRadialGradient(x, y, 0, x, y, radius);
-  glow.addColorStop(0, "rgba(200, 255, 61, 0.24)");
-  glow.addColorStop(1, "rgba(200, 255, 61, 0)");
-  context.fillStyle = glow;
-  context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-}
+export const BRAND_LOCKUP_ASPECT_RATIO = 640 / 144;
 
-export function drawTrophy(
+export function drawBrandLockup(
   context: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-) {
-  context.save();
-  context.translate(x, y);
-  context.fillStyle = shareColors.gold;
-  context.strokeStyle = shareColors.gold;
-  context.lineWidth = Math.max(3, size * 0.06);
-  context.beginPath();
-  context.moveTo(-size * 0.3, -size * 0.28);
-  context.lineTo(size * 0.3, -size * 0.28);
-  context.quadraticCurveTo(size * 0.24, size * 0.16, 0, size * 0.2);
-  context.quadraticCurveTo(
-    -size * 0.24,
-    size * 0.16,
-    -size * 0.3,
-    -size * 0.28,
-  );
-  context.fill();
-  for (const direction of [-1, 1]) {
-    context.beginPath();
-    context.moveTo(direction * size * 0.28, -size * 0.2);
-    context.quadraticCurveTo(
-      direction * size * 0.52,
-      -size * 0.14,
-      direction * size * 0.32,
-      size * 0.06,
-    );
-    context.stroke();
-  }
-  context.fillRect(-size * 0.055, size * 0.16, size * 0.11, size * 0.28);
-  context.fillRect(-size * 0.25, size * 0.42, size * 0.5, size * 0.1);
-  context.restore();
-}
-
-export function drawShareFooter(
-  context: CanvasRenderingContext2D,
+  lockup: HTMLImageElement,
+  centerX: number,
+  centerY: number,
   width: number,
-  y: number,
+  wordmarkColor: "ink" | "chalk" = "ink",
 ) {
-  shareText(context, "PICKLE KING", 64, y, {
-    color: shareColors.lime,
-    font: "900 24px 'Archivo Black', sans-serif",
-  });
-  shareText(context, "SETTLED ON COURT · STORED ON DEVICE", width - 64, y, {
-    align: "right",
-    color: shareColors.mist,
-    font: "800 18px Manrope, sans-serif",
-  });
+  const height = width / BRAND_LOCKUP_ASPECT_RATIO;
+  const left = centerX - width / 2;
+  const top = centerY - height / 2;
+  const markWidth = width * (144 / 640);
+
+  context.drawImage(lockup, 0, 0, 144, 144, left, top, markWidth, height);
+  context.save();
+  context.filter =
+    wordmarkColor === "chalk" ? "brightness(0) invert(1)" : "none";
+  context.drawImage(
+    lockup,
+    144,
+    0,
+    496,
+    144,
+    left + markWidth,
+    top,
+    width - markWidth,
+    height,
+  );
+  context.restore();
 }

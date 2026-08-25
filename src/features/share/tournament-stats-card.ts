@@ -5,8 +5,7 @@ import {
   type TournamentBracket,
 } from "../../tournament";
 import {
-  drawBrandMark,
-  drawShareFooter,
+  drawBrandLockup,
   fitCanvasText,
   shareCanvasSurface,
   shareColors,
@@ -14,13 +13,44 @@ import {
   shareText,
 } from "./share-canvas";
 import { shareDimensions, type ShareFormat } from "./share-format";
-import { drawExportBackdrop } from "./share-scene";
 import {
   championStanding,
   playerName,
   tournamentFormatLabel,
   tournamentNames,
 } from "./tournament-share-data";
+
+const INK = "#090b08";
+const CREAM = "#f5f1e8";
+
+export function tournamentStatsTableGeometry(
+  format: ShareFormat,
+  playerCount: number,
+) {
+  const story = format === "story";
+  const slabTop = story ? 520 : 370;
+  const rowsTop = story ? 620 : 446;
+  const maxHighlightsTop = story ? 1480 : 990;
+  const rowHeight = Math.min(
+    story ? 52 : 48,
+    (maxHighlightsTop - rowsTop) / Math.max(1, playerCount),
+  );
+  const tableBottom = rowsTop + rowHeight * playerCount;
+  const highlightsTop = Math.min(
+    maxHighlightsTop,
+    Math.max(story ? 1300 : 780, tableBottom + 34),
+  );
+  const highlightsBottom = highlightsTop + (story ? 230 : 180);
+  return {
+    footerTop: story ? 1790 : 1240,
+    highlightsBottom,
+    highlightsTop,
+    rowHeight,
+    rowsTop,
+    slabTop,
+    tableBottom,
+  };
+}
 
 export async function tournamentStatsCanvas(
   bracket: TournamentBracket,
@@ -31,130 +61,147 @@ export async function tournamentStatsCanvas(
   const champion = championStanding(result);
   const highlights = tournamentHighlights(bracket, result);
   const { height, width } = shareDimensions(format);
-  const { arena, element, context, mark } = await shareCanvasSurface(
-    width,
-    height,
+  const { element, context, lockup } = await shareCanvasSurface(width, height);
+  const geometry = tournamentStatsTableGeometry(
+    format,
+    result.standings.length,
   );
 
-  drawExportBackdrop(context, width, height, arena, 290);
-  shareText(context, "PICKLE KING", 54, 66, {
-    color: shareColors.lime,
-    font: "900 24px 'Archivo Black', sans-serif",
+  drawPaper(context, width, height);
+  drawHeader(context, bracket, result.championId, names, champion);
+  context.fillStyle = shareColors.lime;
+  context.fillRect(
+    0,
+    geometry.slabTop,
+    width,
+    geometry.footerTop - geometry.slabTop - 40,
+  );
+  drawStandings(context, result.standings, names, geometry);
+  drawHighlights(context, highlights, geometry.highlightsTop, format);
+  drawReceiptBrand(context, lockup, width, height);
+  return element;
+}
+
+function drawPaper(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+) {
+  context.fillStyle = CREAM;
+  context.fillRect(0, 0, width, height);
+  const wash = context.createRadialGradient(
+    width * 0.48,
+    height * 0.35,
+    width * 0.05,
+    width * 0.48,
+    height * 0.35,
+    height * 0.8,
+  );
+  wash.addColorStop(0, "rgba(255,255,255,0.34)");
+  wash.addColorStop(1, "rgba(172,157,132,0.08)");
+  context.fillStyle = wash;
+  context.fillRect(0, 0, width, height);
+}
+
+function drawHeader(
+  context: CanvasRenderingContext2D,
+  bracket: TournamentBracket,
+  championId: string,
+  names: Map<string, string>,
+  champion: ReturnType<typeof championStanding>,
+) {
+  shareText(context, tournamentFormatLabel(bracket), 540, 82, {
+    align: "center",
+    color: INK,
+    font: "900 17px Manrope, sans-serif",
   });
-  shareText(context, tournamentFormatLabel(bracket), 1026, 66, {
-    align: "right",
-    color: shareColors.mist,
-    font: "800 18px Manrope, sans-serif",
-  });
-  drawBrandMark(context, mark, 920, 82, 116);
-  shareText(context, "TOURNAMENT STANDINGS", 56, 128, {
-    color: shareColors.mist,
-    font: "900 18px Manrope, sans-serif",
+  shareFittedText(context, "STANDINGS", 54, 246, {
+    color: INK,
+    maxSize: 110,
+    minSize: 72,
+    maxWidth: 972,
   });
   shareFittedText(
     context,
-    playerName(names, result.championId, "Champion").toUpperCase(),
-    56,
-    218,
-    { color: shareColors.lime, maxSize: 68, minSize: 42, maxWidth: 760 },
-  );
-  shareText(
-    context,
-    `CHAMPION  ·  ${champion.wins}–${champion.losses}  ·  ${signed(champion.differential)} DIFF`,
+    `${playerName(names, championId, "Champion").toUpperCase()} · CHAMPION · ${champion.wins}–${champion.losses} · ${signed(champion.differential)} DIFF`,
     58,
-    264,
-    { color: shareColors.chalk, font: "900 21px Manrope, sans-serif" },
+    316,
+    {
+      color: INK,
+      family: "Manrope, sans-serif",
+      weight: 900,
+      maxSize: 22,
+      minSize: 16,
+      maxWidth: 964,
+    },
   );
-
-  const tableEnd = drawStandings(context, result.standings, names, format);
-  drawHighlights(
-    context,
-    highlights,
-    format === "story"
-      ? Math.min(1420, Math.max(950, tableEnd + 60))
-      : Math.min(height - 390, Math.max(680, tableEnd + 48)),
-    format,
-  );
-  drawShareFooter(context, width, height - 60);
-  return element;
 }
 
 function drawStandings(
   context: CanvasRenderingContext2D,
   standings: ReturnType<typeof calculateTournamentResult>["standings"],
   names: Map<string, string>,
-  format: ShareFormat,
+  geometry: ReturnType<typeof tournamentStatsTableGeometry>,
 ) {
-  const story = format === "story";
-  const top = story ? 360 : 326;
-  const rowHeight = Math.min(
-    story ? 92 : 52,
-    (story ? 760 : 570) / standings.length,
-  );
+  const headerY = geometry.rowsTop - 28;
   for (const [label, x, align] of [
-    ["PLAYER", 70, "left"],
-    ["W–L", 702, "right"],
-    ["PTS", 848, "right"],
-    ["DIFF", 1006, "right"],
+    ["PLAYER", 72, "left"],
+    ["W–L", 694, "right"],
+    ["PTS", 850, "right"],
+    ["+/−", 1008, "right"],
   ] as const) {
-    shareText(context, label, x, top, {
+    shareText(context, label, x, headerY, {
       align,
-      color: shareColors.mist,
-      font: "900 15px Manrope, sans-serif",
+      color: INK,
+      font: "900 18px Manrope, sans-serif",
     });
   }
+  context.strokeStyle = INK;
+  context.lineWidth = 2;
   standings.forEach((standing, index) => {
-    const y = top + 32 + index * rowHeight;
-    context.fillStyle =
-      index === 0
-        ? "rgba(41, 54, 30, 0.96)"
-        : index % 2
-          ? "rgba(21, 27, 19, 0.9)"
-          : "rgba(27, 34, 24, 0.88)";
-    context.fillRect(56, y, 968, rowHeight - 4);
-    context.font = "900 19px Manrope, sans-serif";
+    const top = geometry.rowsTop + index * geometry.rowHeight;
+    const baseline = top + geometry.rowHeight * 0.68;
+    context.beginPath();
+    context.moveTo(64, top);
+    context.lineTo(1016, top);
+    context.stroke();
+    const fontSize = Math.max(16, Math.min(27, geometry.rowHeight * 0.52));
+    context.font = `900 ${fontSize}px Manrope, sans-serif`;
     const name = fitCanvasText(
       context,
-      `${String(index + 1).padStart(2, "0")}  ${playerName(names, standing.playerId)}`,
-      520,
+      playerName(names, standing.playerId),
+      510,
     );
-    shareText(context, name, 72, y + rowHeight * 0.65, {
-      color: index === 0 ? shareColors.lime : shareColors.chalk,
-      font: "900 19px Manrope, sans-serif",
+    shareText(context, name, 72, baseline, {
+      color: INK,
+      font: `900 ${fontSize}px Manrope, sans-serif`,
     });
-    shareText(
-      context,
-      `${standing.wins}–${standing.losses}`,
-      702,
-      y + rowHeight * 0.65,
-      {
-        align: "right",
-        font: "900 19px Manrope, sans-serif",
-      },
-    );
+    shareText(context, `${standing.wins}–${standing.losses}`, 694, baseline, {
+      align: "right",
+      color: INK,
+      font: `900 ${fontSize}px Manrope, sans-serif`,
+    });
     shareText(
       context,
       `${standing.pointsFor}–${standing.pointsAgainst}`,
-      848,
-      y + rowHeight * 0.65,
+      850,
+      baseline,
       {
         align: "right",
-        font: "800 18px Manrope, sans-serif",
+        color: INK,
+        font: `800 ${Math.max(15, fontSize - 1)}px Manrope, sans-serif`,
       },
     );
-    shareText(
-      context,
-      signed(standing.differential),
-      1006,
-      y + rowHeight * 0.65,
-      {
-        align: "right",
-        color: standing.differential > 0 ? shareColors.lime : shareColors.chalk,
-        font: "900 19px Manrope, sans-serif",
-      },
-    );
+    shareText(context, signed(standing.differential), 1008, baseline, {
+      align: "right",
+      color: INK,
+      font: `900 ${fontSize}px Manrope, sans-serif`,
+    });
   });
-  return top + 32 + standings.length * rowHeight;
+  context.beginPath();
+  context.moveTo(64, geometry.tableBottom);
+  context.lineTo(1016, geometry.tableBottom);
+  context.stroke();
 }
 
 function drawHighlights(
@@ -163,53 +210,39 @@ function drawHighlights(
   top: number,
   format: ShareFormat,
 ) {
-  shareText(context, "TOURNAMENT MOMENTS", 56, top, {
-    color: shareColors.mist,
+  shareText(context, "MATCH FACTS", 540, top + 22, {
+    align: "center",
+    color: INK,
     font: "900 16px Manrope, sans-serif",
   });
-  const sectionTop = top + 28;
-  const cellWidth = 484;
-  const rowHeight = format === "story" ? 180 : 112;
-  context.strokeStyle = "rgba(111, 128, 103, 0.42)";
-  context.lineWidth = 2;
-  context.beginPath();
-  context.moveTo(56, sectionTop);
-  context.lineTo(1024, sectionTop);
-  context.moveTo(540, sectionTop);
-  context.lineTo(540, sectionTop + rowHeight * 2);
-  context.moveTo(56, sectionTop + rowHeight);
-  context.lineTo(1024, sectionTop + rowHeight);
-  context.moveTo(56, sectionTop + rowHeight * 2);
-  context.lineTo(1024, sectionTop + rowHeight * 2);
-  context.stroke();
+  const rowHeight = format === "story" ? 92 : 68;
   highlights.forEach((highlight, index) => {
     const column = index % 2;
     const row = Math.floor(index / 2);
-    const x = 56 + column * cellWidth;
-    const y = sectionTop + row * rowHeight;
-    shareText(context, `0${index + 1}`, x + 18, y + 42, {
-      color: index === 0 ? shareColors.lime : shareColors.gold,
-      font: "900 17px Manrope, sans-serif",
+    const x = 78 + column * 480;
+    const y = top + 56 + row * rowHeight;
+    shareText(context, highlight.label.toUpperCase(), x, y, {
+      color: INK,
+      font: "900 13px Manrope, sans-serif",
     });
-    shareText(context, highlight.label.toUpperCase(), x + 68, y + 42, {
-      color: shareColors.mist,
-      font: "900 14px Manrope, sans-serif",
+    shareFittedText(context, highlight.value, x, y + 29, {
+      color: INK,
+      family: "Manrope, sans-serif",
+      weight: 900,
+      maxSize: 21,
+      minSize: 14,
+      maxWidth: 420,
     });
-    shareFittedText(
-      context,
-      highlight.value,
-      x + 68,
-      y + (format === "story" ? 112 : 78),
-      {
-        color: index === 0 ? shareColors.lime : shareColors.chalk,
-        family: "Manrope, sans-serif",
-        weight: 900,
-        maxSize: 24,
-        minSize: 16,
-        maxWidth: cellWidth - 94,
-      },
-    );
   });
+}
+
+function drawReceiptBrand(
+  context: CanvasRenderingContext2D,
+  lockup: HTMLImageElement,
+  width: number,
+  height: number,
+) {
+  drawBrandLockup(context, lockup, width / 2, height - 85, 330);
 }
 
 function signed(value: number) {

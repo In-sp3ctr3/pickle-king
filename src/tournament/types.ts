@@ -8,7 +8,7 @@ export const SKILL_LEVELS = [
   "5.5+",
 ] as const;
 
-export const PLAYER_NAME_MAX_LENGTH = 24;
+export const PLAYER_NAME_MAX_LENGTH = 16;
 
 export type SkillLevel = (typeof SKILL_LEVELS)[number];
 

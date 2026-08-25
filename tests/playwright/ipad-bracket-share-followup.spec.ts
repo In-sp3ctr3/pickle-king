@@ -62,7 +62,7 @@ test("setup can reset the entire form without clearing remembered history", asyn
   await expect(page.getByLabel("Player name")).toHaveCount(4);
   for (const input of await page.getByLabel("Player name").all()) {
     await expect(input).toHaveValue("");
-    await expect(input).toHaveAttribute("maxlength", "24");
+    await expect(input).toHaveAttribute("maxlength", "16");
   }
   await expect(page.getByLabel("Rating")).toHaveText([
     "Choose level",

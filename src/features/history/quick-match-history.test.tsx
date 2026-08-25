@@ -29,6 +29,29 @@ function match(
 afterEach(cleanup);
 
 describe("Quick Match recap selection", () => {
+  it("opens individual sharing with Poster, Frame, and Receipt choices", async () => {
+    const user = userEvent.setup();
+    HTMLDialogElement.prototype.showModal = function showModal() {
+      this.setAttribute("open", "");
+    };
+    render(
+      <QuickMatchHistory
+        matches={[match("quick", Date.now(), "singles")]}
+        onRemove={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Share" }));
+
+    expect(
+      screen
+        .getByRole("button", { name: "Poster" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(screen.getByRole("button", { name: "Frame" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Receipt" })).toBeTruthy();
+  });
+
   it("preselects the newest local day, allows toggling, and restores ledger actions on cancel", async () => {
     const user = userEvent.setup();
     const values = [

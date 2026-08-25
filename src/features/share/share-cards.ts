@@ -1,5 +1,9 @@
 export { bracketShareCanvas } from "./bracket-share-card";
-export { quickShareCanvas } from "./quick-share-card";
+export {
+  quickShareCanvas,
+  quickShareFileName,
+  type QuickShareStyle,
+} from "./quick-share-card";
 export { sessionRecapCanvas, sessionRecapFileName } from "./session-recap-card";
 export { tournamentRecapCanvas } from "./tournament-recap-card";
 export { tournamentStatsCanvas } from "./tournament-stats-card";

@@ -1,5 +1,6 @@
 import type { Match, TournamentBracket } from "../../tournament";
 import {
+  drawBracketBrandFooter,
   drawBracketPodium,
   drawChallengeSummary,
 } from "./bracket-share-extras";
@@ -10,15 +11,11 @@ import {
 } from "./bracket-share-layout";
 import { drawBracketMatch } from "./bracket-share-match";
 import {
-  drawBrandMark,
-  drawShareFooter,
-  drawTrophy,
   shareCanvasSurface,
   shareColors,
   shareFittedText,
   shareText,
 } from "./share-canvas";
-import { drawEdgeFragments, drawExportBackdrop } from "./share-scene";
 import type { BracketShareFormat } from "./share-format";
 import { portraitBracketShareCanvas } from "./bracket-share-portrait";
 
@@ -29,10 +26,7 @@ export async function bracketShareCanvas(
   if (format !== "landscape") {
     return portraitBracketShareCanvas(bracket, format);
   }
-  const { arena, element, context, mark } = await shareCanvasSurface(
-    1600,
-    1200,
-  );
+  const { element, context, lockup } = await shareCanvasSurface(1600, 1200);
   const names = new Map(bracket.players.map(({ id, name }) => [id, name]));
   const matchLookup = new Map(
     bracket.matches.map((match) => [match.id, match]),
@@ -44,9 +38,8 @@ export async function bracketShareCanvas(
   const bronze = matchLookup.get(bracket.bronzeMatchId);
   const champion = final?.winnerId ? names.get(final.winnerId) : null;
 
-  drawExportBackdrop(context, 1600, 1200, arena, 310);
-  if (champion) drawEdgeFragments(context, 1600, 280, 29);
-  drawHeader(context, mark, bracket, champion ?? null, final, names);
+  drawPaper(context, 1600, 1200);
+  drawHeader(context, bracket, champion ?? null, final, names);
 
   const positions = eliminationSharePositions(bracket, elimination);
   drawConnectors(context, bracket, elimination, positions);
@@ -76,57 +69,53 @@ export async function bracketShareCanvas(
   }
   drawChallengeSummary(context, bracket);
   drawBracketPodium(context, final, bronze, names);
-  drawShareFooter(context, 1600, 1165);
+  drawBracketBrandFooter(context, lockup, 1600, 1200);
   return element;
 }
 
 function drawHeader(
   context: CanvasRenderingContext2D,
-  mark: HTMLImageElement,
   bracket: TournamentBracket,
   champion: string | null,
   final: Match | undefined,
   names: Map<string, string>,
 ) {
-  shareText(context, "PICKLE KING", 50, 62, {
-    color: shareColors.lime,
-    font: "900 23px 'Archivo Black', sans-serif",
+  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 64, 68, {
+    color: "#090b08",
+    font: "900 18px Manrope, sans-serif",
   });
-  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 1550, 62, {
+  shareText(context, "FULL DRAW", 1536, 68, {
     align: "right",
-    color: shareColors.mist,
+    color: "#090b08",
     font: "800 18px Manrope, sans-serif",
   });
-  drawBrandMark(context, mark, 800, 2, 150);
-  shareText(
-    context,
-    champion ? "TOURNAMENT CHAMPION" : "ROAD TO THE CROWN",
-    800,
-    158,
-    {
-      align: "center",
-      color: champion ? shareColors.gold : shareColors.lime,
-      font: "900 18px Manrope, sans-serif",
-    },
-  );
   if (champion) {
     shareFittedText(context, champion.toUpperCase(), 800, 220, {
       align: "center",
-      color: shareColors.chalk,
-      maxSize: 54,
-      minSize: 32,
-      maxWidth: 520,
+      color: "#090b08",
+      maxSize: 74,
+      minSize: 38,
+      maxWidth: 760,
     });
-    drawTrophy(context, 800, 273, 52);
+    shareText(context, "TOURNAMENT CHAMPION", 800, 268, {
+      align: "center",
+      color: "#090b08",
+      font: "900 17px Manrope, sans-serif",
+    });
   } else {
+    shareText(context, "TOURNAMENT DRAW", 800, 214, {
+      align: "center",
+      color: "#090b08",
+      font: "900 54px 'Archivo Black', sans-serif",
+    });
     shareText(
       context,
-      `${bracket.matches.filter(({ status }) => status === "complete").length} MATCHES COMPLETE`,
+      `${bracket.matches.filter(({ status }) => status === "complete").length} OF ${bracket.matches.length} MATCHES COMPLETE`,
       800,
-      214,
+      266,
       {
         align: "center",
-        color: shareColors.mist,
+        color: "#090b08",
         font: "800 17px Manrope, sans-serif",
       },
     );
@@ -141,8 +130,8 @@ function drawHeader(
       322,
       {
         align: "center",
-        color: shareColors.mist,
-        font: "800 17px Manrope, sans-serif",
+        color: "#090b08",
+        font: "900 18px Manrope, sans-serif",
       },
     );
   }
@@ -171,7 +160,7 @@ function drawConnectors(
       const y1 = startPosition.y + startPosition.height / 2;
       const y2 = targetPosition.y + targetPosition.height / 2;
       context.strokeStyle =
-        sourceMatch.status === "complete" ? shareColors.limeDeep : "#516048";
+        sourceMatch.status === "complete" ? shareColors.lime : "#090b08";
       context.lineWidth = sourceMatch.status === "complete" ? 4 : 3;
       context.beginPath();
       context.moveTo(x1, y1);
@@ -181,4 +170,25 @@ function drawConnectors(
       context.stroke();
     }
   }
+}
+
+function drawPaper(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+) {
+  context.fillStyle = "#f5f1e8";
+  context.fillRect(0, 0, width, height);
+  const wash = context.createRadialGradient(
+    width / 2,
+    height * 0.35,
+    width * 0.08,
+    width / 2,
+    height * 0.35,
+    height * 0.8,
+  );
+  wash.addColorStop(0, "rgba(255,255,255,0.3)");
+  wash.addColorStop(1, "rgba(172,157,132,0.08)");
+  context.fillStyle = wash;
+  context.fillRect(0, 0, width, height);
 }

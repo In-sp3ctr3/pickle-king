@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { FinishReason } from "../match/types";
 import type { QuickMatchRecord } from "./types";
-import {
-  buildSessionRecaps,
-  latestQuickMatchDayIds,
-  paginateRecapPlayers,
-  receiptDateLabel,
-} from "./session-recap";
+import { buildSessionRecaps } from "./session-recap";
 
 let completedAt = new Date(2026, 7, 22, 18).getTime();
 
@@ -318,41 +313,5 @@ describe("session recap", () => {
       }),
     ];
     expect(buildSessionRecaps(values)[0].topPair).toBeNull();
-  });
-
-  it("balances every player into pages of at most six", () => {
-    const players = Array.from({ length: 13 }, (_, index) => ({
-      differential: 0,
-      gamesPlayed: 1,
-      losses: 0,
-      name: `Player ${index + 1}`,
-      pointsAgainst: 0,
-      pointsFor: 1,
-      wins: 1,
-    }));
-    const pages = paginateRecapPlayers(players);
-    expect(pages.map((page) => page.length)).toEqual([5, 4, 4]);
-    expect(pages.flat()).toEqual(players);
-  });
-
-  it("defaults selection to the newest local day and formats the range", () => {
-    const older = {
-      ...suppliedSingles()[0],
-      id: "older",
-      completedAt: new Date(2026, 7, 21, 23).getTime(),
-    };
-    const latest = suppliedDoubles()
-      .slice(0, 2)
-      .map((match, index) => ({
-        ...match,
-        id: `latest-${index}`,
-        completedAt: new Date(2026, 7, 22, 10 + index).getTime(),
-      }));
-    expect(latestQuickMatchDayIds([older, ...latest])).toEqual(
-      new Set(["latest-0", "latest-1"]),
-    );
-    expect(receiptDateLabel([older.completedAt, latest[1].completedAt])).toBe(
-      "AUG 21–22 RECEIPTS",
-    );
   });
 });

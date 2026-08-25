@@ -25,15 +25,18 @@ const scorer: ScoringState = {
 
 describe("result preview cache keys", () => {
   it("changes for corrected winners, stages, targets, and formats", () => {
-    const base = resultPreviewKey(scorer, "feed");
+    const base = resultPreviewKey(scorer, "feed", "poster");
 
-    expect(resultPreviewKey({ ...scorer, winner: "B" }, "feed")).not.toBe(base);
     expect(
-      resultPreviewKey({ ...scorer, stageLabel: "Final" }, "feed"),
+      resultPreviewKey({ ...scorer, winner: "B" }, "feed", "poster"),
     ).not.toBe(base);
-    expect(resultPreviewKey({ ...scorer, targetScore: 7 }, "feed")).not.toBe(
-      base,
-    );
-    expect(resultPreviewKey(scorer, "story")).not.toBe(base);
+    expect(
+      resultPreviewKey({ ...scorer, stageLabel: "Final" }, "feed", "poster"),
+    ).not.toBe(base);
+    expect(
+      resultPreviewKey({ ...scorer, targetScore: 7 }, "feed", "poster"),
+    ).not.toBe(base);
+    expect(resultPreviewKey(scorer, "story", "poster")).not.toBe(base);
+    expect(resultPreviewKey(scorer, "feed", "frame")).not.toBe(base);
   });
 });

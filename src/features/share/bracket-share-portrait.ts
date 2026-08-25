@@ -1,9 +1,7 @@
 import type { Match, TournamentBracket } from "../../tournament";
+import { drawBracketBrandFooter } from "./bracket-share-extras";
 import { drawBracketMatch } from "./bracket-share-match";
 import {
-  drawBrandMark,
-  drawShareFooter,
-  drawTrophy,
   shareCanvasSurface,
   shareColors,
   shareFittedText,
@@ -17,17 +15,15 @@ import {
   type PortraitGeometry,
 } from "./bracket-share-portrait-layout";
 import { bracketShareDimensions, type ShareFormat } from "./share-format";
-import { drawMedalBadge, drawExportBackdrop } from "./share-scene";
+
+const INK = "#090b08";
 
 export async function portraitBracketShareCanvas(
   bracket: TournamentBracket,
   format: ShareFormat,
 ) {
   const { width, height } = bracketShareDimensions(format);
-  const { arena, context, element, mark } = await shareCanvasSurface(
-    width,
-    height,
-  );
+  const { context, element, lockup } = await shareCanvasSurface(width, height);
   const names = new Map(bracket.players.map(({ id, name }) => [id, name]));
   const lookup = new Map(bracket.matches.map((match) => [match.id, match]));
   const elimination = bracket.matches.filter(
@@ -38,8 +34,8 @@ export async function portraitBracketShareCanvas(
   const geometry = portraitBracketGeometry(format);
   const positions = portraitMatchPositions(bracket, elimination, geometry);
 
-  drawExportBackdrop(context, width, height, arena, height * 0.42);
-  drawPortraitHeader(context, mark, bracket, final, names, height);
+  drawPaper(context, width, height);
+  drawPortraitHeader(context, bracket, final, names, height);
   drawPortraitConnectors(context, bracket, elimination, positions);
   for (const match of elimination) {
     const position = positions.get(match.id);
@@ -53,55 +49,78 @@ export async function portraitBracketShareCanvas(
       match.id === bracket.finalMatchId,
     );
   }
-  const finalPosition = positions.get(bracket.finalMatchId);
-  if (finalPosition) {
-    drawTrophy(
-      context,
-      finalPosition.x + finalPosition.width / 2,
-      finalPosition.y - 20,
-      34,
-    );
-  }
   if (bronze) {
     drawBracketMatch(context, bronze, geometry.bronze, names, lookup, false);
   }
   drawPortraitPodium(context, final, bronze, names, geometry);
-  drawShareFooter(context, width, height - 54);
+  drawBracketBrandFooter(context, lockup, width, height);
   return element;
 }
 
 export { portraitBracketGeometry, portraitRoundBands };
 
+function drawPaper(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+) {
+  context.fillStyle = "#f5f1e8";
+  context.fillRect(0, 0, width, height);
+  const wash = context.createRadialGradient(
+    width / 2,
+    height * 0.32,
+    width * 0.06,
+    width / 2,
+    height * 0.32,
+    height * 0.76,
+  );
+  wash.addColorStop(0, "rgba(255,255,255,0.3)");
+  wash.addColorStop(1, "rgba(172,157,132,0.08)");
+  context.fillStyle = wash;
+  context.fillRect(0, 0, width, height);
+}
+
 function drawPortraitHeader(
   context: CanvasRenderingContext2D,
-  mark: HTMLImageElement,
   bracket: TournamentBracket,
   final: Match | undefined,
   names: Map<string, string>,
   height: number,
 ) {
-  shareText(context, "PICKLE KING", 54, 62, {
-    color: shareColors.lime,
-    font: "900 22px 'Archivo Black', sans-serif",
+  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 54, 68, {
+    color: INK,
+    font: "900 17px Manrope, sans-serif",
   });
-  shareText(context, `${bracket.players.length} PLAYER TOURNAMENT`, 1026, 62, {
+  shareText(context, "FULL DRAW", 1026, 68, {
     align: "right",
-    color: shareColors.mist,
-    font: "800 17px Manrope, sans-serif",
+    color: INK,
+    font: "900 17px Manrope, sans-serif",
   });
-  drawBrandMark(context, mark, 540, height === 1350 ? 68 : 92, 104);
   const champion = final?.winnerId ? names.get(final.winnerId) : null;
   shareFittedText(
     context,
-    (champion ?? "ROAD TO THE CROWN").toUpperCase(),
+    (champion ?? "TOURNAMENT DRAW").toUpperCase(),
     540,
-    height === 1350 ? 218 : 258,
+    height === 1350 ? 190 : 220,
     {
       align: "center",
-      color: champion ? shareColors.lime : shareColors.chalk,
-      maxSize: 50,
-      minSize: 28,
-      maxWidth: 820,
+      color: INK,
+      maxSize: 58,
+      minSize: 30,
+      maxWidth: 860,
+    },
+  );
+  shareText(
+    context,
+    champion
+      ? "TOURNAMENT CHAMPION"
+      : `${bracket.matches.filter(({ status }) => status === "complete").length} OF ${bracket.matches.length} MATCHES COMPLETE`,
+    540,
+    height === 1350 ? 232 : 264,
+    {
+      align: "center",
+      color: champion ? shareColors.limeDeep : INK,
+      font: "900 15px Manrope, sans-serif",
     },
   );
 }
@@ -115,32 +134,32 @@ function drawPortraitPodium(
 ) {
   if (!final?.winnerId) return;
   const places = [
-    { id: final.loserId, medal: "2" as const, color: "#c9cec5", x: 240 },
-    {
-      id: final.winnerId,
-      medal: "1" as const,
-      color: shareColors.gold,
-      x: 540,
-    },
-    { id: bronze?.winnerId, medal: "3" as const, color: "#c6814a", x: 840 },
+    { id: final.winnerId, label: "CHAMPION", place: "1", x: 180 },
+    { id: final.loserId, label: "RUNNER-UP", place: "2", x: 480 },
+    { id: bronze?.winnerId, label: "THIRD", place: "3", x: 780 },
   ];
-  places.forEach(({ color, id, medal, x }) => {
+  places.forEach(({ id, label, place, x }) => {
     if (!id) return;
-    const lift = medal === "1" ? -18 : 0;
-    drawMedalBadge(context, x, geometry.podiumY + lift, medal, color, 54);
+    shareText(context, place, x, geometry.podiumY + 36, {
+      color: place === "1" ? shareColors.limeDeep : INK,
+      font: "900 52px 'Archivo Black', sans-serif",
+    });
+    shareText(context, label, x + 58, geometry.podiumY + 5, {
+      color: INK,
+      font: "900 12px Manrope, sans-serif",
+    });
     shareFittedText(
       context,
-      names.get(id) ?? "Player",
-      x,
-      geometry.podiumY + 66,
+      (names.get(id) ?? "Player").toUpperCase(),
+      x + 58,
+      geometry.podiumY + 36,
       {
-        align: "center",
-        color: medal === "1" ? shareColors.lime : shareColors.chalk,
+        color: INK,
         family: "Manrope, sans-serif",
         weight: 900,
         maxSize: 18,
         minSize: 12,
-        maxWidth: 220,
+        maxWidth: 210,
       },
     );
   });

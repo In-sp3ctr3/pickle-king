@@ -76,7 +76,10 @@ export function TournamentShareDialog({
     <dialog
       aria-label="Share tournament"
       className="tournament-share-dialog tournament-share-dialog--preview tournament-share-dialog--has-formats"
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       ref={ref}
     >
       <header>

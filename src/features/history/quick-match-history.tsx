@@ -155,14 +155,16 @@ export function QuickMatchHistory({
                   setShareRequest({
                     alt: `${match.labels.sideA} versus ${match.labels.sideB} final score`,
                     aspect: "portrait",
-                    build: (format) =>
+                    build: (format, style = "poster") =>
                       quickShareCanvas(
                         match,
                         format === "landscape" ? "feed" : format,
+                        style,
                       ),
                     fileName: `pickle-king-${match.completedAt}.png`,
                     formats: ["feed", "story"],
                     key: `quick:${match.id}`,
+                    styles: ["poster", "frame", "receipt"],
                     title: "Final score",
                   })
                 }

@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import type { ScoringState } from "../../match/types";
 import {
   quickShareCanvas,
-  prewarmSharePreview,
+  quickShareFileName,
+  QuickShareStylePicker,
   shareFormatLabel,
   SharePreviewActions,
   SharePreviewSkeleton,
   type ShareFormat,
+  type QuickShareStyle,
   useSharePreview,
 } from "../share";
 import { VictoryConfetti } from "./victory-confetti";
@@ -45,19 +47,11 @@ export function ResultConfirmationDialog({
 
   const winnerName = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
   const [format, setFormat] = useState<ShareFormat>("feed");
-  useEffect(() => {
-    for (const value of ["feed", "story"] as const) {
-      prewarmSharePreview(
-        resultPreviewKey(scorer, value),
-        `pickle-king-score-result-${value}.png`,
-        () => quickShareCanvas(scorer, value),
-      );
-    }
-  }, [scorer]);
+  const [style, setStyle] = useState<QuickShareStyle>("poster");
   const share = useSharePreview(
-    () => quickShareCanvas(scorer, format),
-    `pickle-king-score-result-${format}.png`,
-    resultPreviewKey(scorer, format),
+    () => quickShareCanvas(scorer, format, style),
+    quickShareFileName(style, format),
+    resultPreviewKey(scorer, format, style),
   );
 
   return (
@@ -107,6 +101,7 @@ export function ResultConfirmationDialog({
           </button>
         ))}
       </div>
+      <QuickShareStylePicker onChange={setStyle} value={style} />
       <figure
         aria-busy={!share.ready}
         className={`result-dialog__preview result-dialog__preview--${format}`}
@@ -149,7 +144,11 @@ export function ResultConfirmationDialog({
   );
 }
 
-export function resultPreviewKey(scorer: ScoringState, format: ShareFormat) {
+export function resultPreviewKey(
+  scorer: ScoringState,
+  format: ShareFormat,
+  style: QuickShareStyle,
+) {
   return JSON.stringify([
     scorer.labelA,
     scorer.labelB,
@@ -160,6 +159,7 @@ export function resultPreviewKey(scorer: ScoringState, format: ShareFormat) {
     scorer.targetScore,
     scorer.stageLabel ?? null,
     format,
+    style,
   ]);
 }
 

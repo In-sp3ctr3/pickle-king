@@ -11,7 +11,11 @@ function validateName(
   name: string,
 ): string {
   const trimmed = name.trim();
-  if (!trimmed || trimmed.length > PLAYER_NAME_MAX_LENGTH) {
+  const existing = players.find(({ id }) => id === playerId)?.name.trim();
+  if (
+    !trimmed ||
+    (trimmed.length > PLAYER_NAME_MAX_LENGTH && trimmed !== existing)
+  ) {
     throw new Error(
       `Player names must be between 1 and ${PLAYER_NAME_MAX_LENGTH} characters.`,
     );

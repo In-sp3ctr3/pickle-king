@@ -6,6 +6,7 @@ export function NameCombobox({
   describedBy,
   invalid,
   label,
+  maxLength,
   onChange,
   suggestions,
   value,
@@ -13,6 +14,7 @@ export function NameCombobox({
   describedBy?: string;
   invalid: boolean;
   label: string;
+  maxLength: number;
   onChange: (value: string) => void;
   suggestions: string[];
   value: string;
@@ -52,7 +54,7 @@ export function NameCombobox({
           aria-expanded={visible}
           aria-invalid={invalid}
           autoComplete="off"
-          maxLength={40}
+          maxLength={maxLength}
           onBlur={() => window.setTimeout(() => setOpen(false), 100)}
           onChange={(event) => {
             onChange(event.target.value);

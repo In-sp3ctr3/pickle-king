@@ -2,6 +2,24 @@ import { expect, type Page } from "@playwright/test";
 
 const NAMES = ["Maya", "Rae", "Kai", "Noah", "Ivy", "Zane"];
 const RATINGS = ["5.5+", "4.5", "4.0", "3.5", "3.0", "2.5"];
+export async function chooseRating(page: Page, index: number, value: string) {
+  const rating = page.getByLabel("Rating").nth(index);
+  await rating.focus();
+  await expect
+    .poll(async () => {
+      if ((await rating.getAttribute("data-state")) !== "open") {
+        await rating.press("Enter");
+      }
+      return rating.getAttribute("data-state");
+    })
+    .toBe("open");
+  const activeListbox = page.locator("[role='listbox'][data-state='open']");
+  await expect(activeListbox).toBeVisible();
+  await activeListbox.getByRole("option", { name: value, exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(rating).toContainText(value);
+  await expect(rating).toHaveAttribute("data-state", "closed");
+}
 
 export async function confirmServeSetup(page: Page) {
   await expect(page.locator("[data-qa='serve-setup-dialog']")).toBeVisible();
@@ -25,10 +43,7 @@ export async function fillRoundRobinSetup(
   }
   for (let index = 0; index < playerCount; index += 1) {
     await page.getByLabel("Player name").nth(index).fill(NAMES[index]);
-    await page.getByLabel("Rating").nth(index).click();
-    await page
-      .getByRole("option", { name: RATINGS[index], exact: true })
-      .click();
+    await chooseRating(page, index, RATINGS[index]);
   }
   await page.getByRole("button", { name: /Round robin \+ finals/i }).click();
   await page

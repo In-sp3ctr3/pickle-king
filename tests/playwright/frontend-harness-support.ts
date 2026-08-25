@@ -2,99 +2,20 @@ import { expect, type Page } from "@playwright/test";
 import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
 import {
+  chooseRating,
   completeScheduledMatches,
   confirmServeSetup,
   fillRoundRobinSetup,
 } from "./small-field-harness";
+import { quickHistoryFixture } from "./quick-history-fixture";
+import type { Route, RouteMap } from "./frontend-route-types";
 
-export type ExpectedOutcome = {
-  url?: string;
-  visible?: string;
-  text?: { selector: string; value: string };
-};
-
-export type Control = {
-  name: string;
-  selector: string;
-  viewports?: string[];
-  sequence?: string;
-  action: "click" | "fill" | "press" | "check" | "select";
-  auditOnly?: boolean;
-  value?: string;
-  expect: ExpectedOutcome;
-};
-
-export type MotionCheck = {
-  name: string;
-  selector: string;
-  stateAttribute: string;
-  requiredStates: string[];
-  reducedMotionState: string;
-  observationMs: number;
-  triggerSequence?: string;
-};
-
-export type CanvasCheck = {
-  name: string;
-  canvasSelector: string;
-  semanticSelector: string;
-  fallbackSelector: string;
-  renderStateAttribute: string;
-  activeValue: string;
-  pausedValue: string;
-  reducedValue: string;
-  fallbackValue: string;
-  dprAttribute: string;
-  maxDpr: number;
-};
-
-export type Route = {
-  name: string;
-  path: string;
-  prepare?:
-    | "tournament-setup"
-    | "four-player-bracket"
-    | "four-player-completed-bracket"
-    | "four-player-completed-home"
-    | "four-player-history"
-    | "four-player-history-results"
-    | "four-player-results"
-    | "round-robin-initial"
-    | "round-robin-qualified"
-    | "round-robin-completed"
-    | "round-robin-results"
-    | "round-robin-history-results"
-    | "round-robin-five-initial"
-    | "round-robin-six-timed-setup"
-    | "round-robin-six-untimed-setup"
-    | "round-robin-six-results"
-    | "round-robin-six-history-results"
-    | "quick-setup"
-    | "quick-idle"
-    | "quick-live"
-    | "quick-result"
-    | "history-empty";
-  primaryActionSelector?: string;
-  primaryActionNotApplicableReason?: string;
-  visualEvidence: Record<
-    string,
-    { source: string; render: string; comparison: string }
-  >;
-  controls: Control[];
-  motionChecks?: MotionCheck[];
-  reducedMotionChecks?: Array<{
-    name: string;
-    selector: string;
-    expect: "visible" | "hidden";
-  }>;
-  canvasChecks?: CanvasCheck[];
-};
-
-type RouteMap = {
-  baseUrl?: string;
-  viewports: Array<{ name: string; width: number; height: number }>;
-  routes: Route[];
-};
+export type {
+  CanvasCheck,
+  Control,
+  MotionCheck,
+  Route,
+} from "./frontend-route-types";
 
 export const routeMap = JSON.parse(
   readFileSync(path.resolve("docs/frontend/route-map.json"), "utf8"),
@@ -110,10 +31,7 @@ async function fillFourPlayerSetup(page: Page, target = 11) {
   const ratings = ["5.5+", "4.5", "3.5", "2.5"];
   for (let index = 0; index < names.length; index += 1) {
     await page.getByLabel("Player name").nth(index).fill(names[index]);
-    await page.getByLabel("Rating").nth(index).click();
-    await page.keyboard.type(ratings[index]);
-    await page.keyboard.press("Enter");
-    await expect(page.getByRole("listbox")).toBeHidden();
+    await chooseRating(page, index, ratings[index]);
   }
   await page
     .getByRole("spinbutton", {
@@ -133,6 +51,11 @@ async function fillQuickMatch(page: Page, target = 11) {
 }
 
 export async function openRoute(page: Page, route: Route) {
+  if (route.prepare === "quick-history") {
+    await page.addInitScript((history) => {
+      localStorage.setItem("pickle-king:history", JSON.stringify(history));
+    }, quickHistoryFixture());
+  }
   const response = await page.goto(new URL(route.path, baseUrl).toString(), {
     waitUntil: "networkidle",
   });
@@ -260,6 +183,10 @@ export async function openRoute(page: Page, route: Route) {
   }
   if (route.prepare === "history-empty") {
     await page.locator("[data-qa='match-history']").click();
+  }
+  if (route.prepare === "quick-history") {
+    await page.locator("[data-qa='match-history']").click();
+    await expect(page.locator("[data-qa='history-screen']")).toBeVisible();
   }
   if (
     route.prepare === "quick-idle" ||

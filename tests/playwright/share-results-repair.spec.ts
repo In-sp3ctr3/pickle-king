@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -35,9 +35,21 @@ async function finishTournament(page: Page) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Start match", exact: true })
+      .click();
     await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
     await page.getByRole("button", { name: "Confirm result" }).click();
   }
+}
+
+async function downloadAs(page: Page, button: Locator, path: string) {
+  const event = page.waitForEvent("download");
+  await button.click();
+  const download = await event;
+  await download.saveAs(path);
+  return download;
 }
 
 test("quick result export keeps the reference-led score hierarchy", async ({
@@ -55,24 +67,66 @@ test("quick result export keeps the reference-led score hierarchy", async ({
   await page.getByLabel("Play to").fill("2");
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Start match", exact: true })
+    .click();
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
   const preview = page.locator("[data-qa='result-preview']");
+  const poster = page.getByRole("button", { name: "Poster" });
+  const frame = page.getByRole("button", { name: "Frame" });
+  const receipt = page.getByRole("button", { name: "Receipt" });
+  await expect(poster).toHaveAttribute("aria-pressed", "true");
+  await expect(frame).toHaveAttribute("aria-pressed", "false");
+  await expect(receipt).toHaveAttribute("aria-pressed", "false");
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
-  const downloadEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download result" }).click();
-  const download = await downloadEvent;
-  await download.saveAs("output/playwright/share-quick-feed.png");
-  await expect(
-    page.getByRole("button", { name: "Download result" }),
-  ).toHaveText("Saved");
+  const downloadButton = page.getByRole("button", { name: "Download result" });
+  const download = await downloadAs(
+    page,
+    downloadButton,
+    "output/playwright/share-quick-feed.png",
+  );
+  expect(download.suggestedFilename()).toBe(
+    "pickle-king-score-result-poster-feed.png",
+  );
+  await expect(downloadButton).toHaveText("Saved");
   await page.getByRole("button", { name: "Story / Reel" }).click();
+  await downloadAs(
+    page,
+    downloadButton,
+    "output/playwright/share-quick-poster-story.png",
+  );
+  await page.getByRole("button", { name: "Post", exact: true }).click();
+  await frame.click();
+  await expect(frame).toHaveAttribute("aria-pressed", "true");
+  await expect(preview).toHaveJSProperty("naturalHeight", 1350);
+  const frameDownload = await downloadAs(
+    page,
+    downloadButton,
+    "output/playwright/share-quick-frame-feed.png",
+  );
+  expect(frameDownload.suggestedFilename()).toBe(
+    "pickle-king-score-result-frame-feed.png",
+  );
+  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await downloadAs(
+    page,
+    downloadButton,
+    "output/playwright/share-quick-frame-story.png",
+  );
+  await receipt.click();
+  await expect(receipt).toHaveAttribute("aria-pressed", "true");
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
-  const storyDownloadEvent = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download result" }).click();
-  const storyDownload = await storyDownloadEvent;
-  await storyDownload.saveAs("output/playwright/share-quick-story.png");
+  const storyDownload = await downloadAs(
+    page,
+    downloadButton,
+    "output/playwright/share-quick-story.png",
+  );
+  expect(storyDownload.suggestedFilename()).toBe(
+    "pickle-king-score-result-receipt-story.png",
+  );
 });
 
 test("setup sections and number controls keep deliberate spacing", async ({
@@ -119,6 +173,7 @@ test("setup sections and number controls keep deliberate spacing", async ({
 test("tournament results lead with the champion and preview every export", async ({
   page,
 }) => {
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 820, height: 1180 });
   await finishTournament(page);
   const results = page.locator("[data-qa='results']");
@@ -139,41 +194,25 @@ test("tournament results lead with the champion and preview every export", async
   const download = dialog.getByRole("button", { name: "Download image" });
   await expect(share).toHaveText("Share");
   await expect(download).toHaveText("Download");
-  const recapDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  const recapDownload = await recapDownloadEvent;
-  await recapDownload.saveAs("output/playwright/share-recap-feed.png");
+  await downloadAs(page, download, "output/playwright/share-recap-feed.png");
   await expect(download).toHaveText("Saved");
   await dialog.getByRole("button", { name: "Story / Reel" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
-  const storyDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  const storyDownload = await storyDownloadEvent;
-  await storyDownload.saveAs("output/playwright/share-recap-story.png");
+  await downloadAs(page, download, "output/playwright/share-recap-story.png");
   await dialog.getByRole("button", { name: "Post" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   await dialog.getByRole("tab", { name: "Player stats" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
-  const statsDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  const statsDownload = await statsDownloadEvent;
-  await statsDownload.saveAs("output/playwright/share-stats-feed.png");
+  await downloadAs(page, download, "output/playwright/share-stats-feed.png");
   await dialog.getByRole("button", { name: "Story / Reel" }).click();
-  const statsStoryDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  await (
-    await statsStoryDownloadEvent
-  ).saveAs("output/playwright/share-stats-story.png");
+  await downloadAs(page, download, "output/playwright/share-stats-story.png");
   await dialog.getByRole("tab", { name: "Full bracket" }).click();
   await dialog.getByRole("button", { name: "Full draw" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1600);
   await expect(preview).toHaveJSProperty("naturalHeight", 1200);
 
-  const bracketDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  const bracketDownload = await bracketDownloadEvent;
-  await bracketDownload.saveAs("output/playwright/share-bracket-feed.png");
+  await downloadAs(page, download, "output/playwright/share-bracket-feed.png");
   await expect(dialog.getByText("Download started")).toHaveCount(0);
 
   await dialog.getByRole("button", { name: "Expand bracket preview" }).click();
@@ -194,18 +233,14 @@ test("tournament results lead with the champion and preview every export", async
   await dialog.getByRole("button", { name: "Post" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
-  const postBracketDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  await (
-    await postBracketDownloadEvent
-  ).saveAs("output/playwright/share-bracket-post.png");
+  await downloadAs(page, download, "output/playwright/share-bracket-post.png");
   await dialog.getByRole("button", { name: "Story / Reel" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
-  const storyBracketDownloadEvent = page.waitForEvent("download");
-  await download.click();
-  await (
-    await storyBracketDownloadEvent
-  ).saveAs("output/playwright/share-bracket-story.png");
+  await downloadAs(page, download, "output/playwright/share-bracket-story.png");
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("button", { name: "Share tournament" }),
+  ).toBeFocused();
 });
 
 test("share previews and results never overflow target screens", async ({
@@ -247,6 +282,7 @@ test("share previews and results never overflow target screens", async ({
       await page.evaluate(() => {
         const offenders = [...document.querySelectorAll<HTMLElement>("body *")]
           .filter((node) => node.offsetParent !== null)
+          .filter((node) => !node.closest("[data-share-font-preload]"))
           .filter((node) => node.scrollWidth > node.clientWidth + 1);
         return offenders.map((node) => node.className).slice(0, 5);
       }),

@@ -18,6 +18,20 @@ function players(count: number): SetupPlayerDraft[] {
 }
 
 describe("setup format validation", () => {
+  it("accepts sixteen-character names and rejects seventeen", () => {
+    const accepted = players(4);
+    accepted[0].name = "Jean-Baptiste M.";
+    expect(
+      validateSetup(accepted, numbers, "untimed").errors.names.p1,
+    ).toBeUndefined();
+
+    const rejected = players(4);
+    rejected[0].name = "12345678901234567";
+    expect(validateSetup(rejected, numbers, "untimed").errors.names.p1).toBe(
+      "Use 16 characters or fewer.",
+    );
+  });
+
   it.each([4, 5, 6])("accepts round robin + finals for %i players", (count) => {
     const result = validateSetup(
       players(count),
