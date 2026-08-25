@@ -5,6 +5,7 @@ import {
   type TournamentBracket,
 } from "../../tournament";
 import {
+  type BrandLockupAssets,
   drawBrandLockup,
   fitCanvasText,
   shareCanvasSurface,
@@ -238,7 +239,7 @@ function drawHighlights(
 
 function drawReceiptBrand(
   context: CanvasRenderingContext2D,
-  lockup: HTMLImageElement,
+  lockup: BrandLockupAssets,
   width: number,
   height: number,
 ) {

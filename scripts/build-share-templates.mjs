@@ -259,43 +259,55 @@ async function buildBrandLockup() {
   })
     .png()
     .toBuffer();
-  const wordmark = await sharp({
-    create: {
-      background: { b: 8, g: 11, r: 9 },
-      channels: 3,
-      height: wordHeight,
-      width: wordWidth,
-    },
-  })
-    .joinChannel(alphaPng)
-    .png()
-    .toBuffer();
+  const wordmark = async (background) =>
+    sharp({
+      create: {
+        background,
+        channels: 3,
+        height: wordHeight,
+        width: wordWidth,
+      },
+    })
+      .joinChannel(alphaPng)
+      .png()
+      .toBuffer();
+  const [inkWordmark, chalkWordmark] = await Promise.all([
+    wordmark({ b: 8, g: 11, r: 9 }),
+    wordmark({ b: 233, g: 243, r: 245 }),
+  ]);
   const mark = await sharp(path.join(brandDirectory, "pickle-king-mark.png"))
     .resize(128, 128)
     .png()
     .toBuffer();
-  const output = path.join(brandDirectory, "pickle-king-lockup.png");
-  await sharp({
-    create: {
-      background: { b: 0, g: 0, r: 0, alpha: 0 },
-      channels: 4,
-      height: 144,
-      width: 640,
-    },
-  })
-    .composite([
-      { input: mark, left: 16, top: 8 },
-      { input: wordmark, left: 157, top: 34 },
-    ])
-    .png()
-    .toFile(output);
-  const metadata = await sharp(output).metadata();
-  if (metadata.width !== 640 || metadata.height !== 144 || !metadata.hasAlpha) {
-    throw new Error(
-      "pickle-king-lockup.png must be a transparent 640x144 PNG.",
-    );
+  for (const [fileName, lockupWordmark] of [
+    ["pickle-king-lockup.png", inkWordmark],
+    ["pickle-king-lockup-chalk.png", chalkWordmark],
+  ]) {
+    const output = path.join(brandDirectory, fileName);
+    await sharp({
+      create: {
+        background: { b: 0, g: 0, r: 0, alpha: 0 },
+        channels: 4,
+        height: 144,
+        width: 640,
+      },
+    })
+      .composite([
+        { input: mark, left: 16, top: 8 },
+        { input: lockupWordmark, left: 157, top: 34 },
+      ])
+      .png()
+      .toFile(output);
+    const metadata = await sharp(output).metadata();
+    if (
+      metadata.width !== 640 ||
+      metadata.height !== 144 ||
+      !metadata.hasAlpha
+    ) {
+      throw new Error(`${fileName} must be a transparent 640x144 PNG.`);
+    }
+    console.log(`${path.relative(root, output)} 640x144`);
   }
-  console.log(`${path.relative(root, output)} 640x144`);
 }
 
 async function buildDensityRecap(referenceId, rendered, format, density) {

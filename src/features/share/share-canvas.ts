@@ -11,7 +11,7 @@ export const shareColors = {
 };
 
 let brandMarkPromise: Promise<HTMLImageElement> | null = null;
-let brandLockupPromise: Promise<HTMLImageElement> | null = null;
+let brandLockupPromise: Promise<BrandLockupAssets> | null = null;
 let shareFontPromise: Promise<void> | null = null;
 const imagePromises = new Map<string, Promise<HTMLImageElement>>();
 
@@ -45,14 +45,24 @@ function brandMark() {
   return brandMarkPromise;
 }
 
+export interface BrandLockupAssets {
+  chalk: HTMLImageElement;
+  ink: HTMLImageElement;
+}
+
 function brandLockup() {
-  brandLockupPromise ??= loadImage(
-    "/brand/pickle-king-lockup.png",
-    "The Pickle King lockup",
-  ).catch((error: unknown) => {
-    brandLockupPromise = null;
-    throw error;
-  });
+  brandLockupPromise ??= Promise.all([
+    loadImage("/brand/pickle-king-lockup.png", "The Pickle King lockup"),
+    loadImage(
+      "/brand/pickle-king-lockup-chalk.png",
+      "The light Pickle King lockup",
+    ),
+  ])
+    .then(([ink, chalk]) => ({ chalk, ink }))
+    .catch((error: unknown) => {
+      brandLockupPromise = null;
+      throw error;
+    });
   return brandLockupPromise;
 }
 
@@ -227,7 +237,7 @@ export const BRAND_LOCKUP_ASPECT_RATIO = 640 / 144;
 
 export function drawBrandLockup(
   context: CanvasRenderingContext2D,
-  lockup: HTMLImageElement,
+  lockup: BrandLockupAssets,
   centerX: number,
   centerY: number,
   width: number,
@@ -236,22 +246,5 @@ export function drawBrandLockup(
   const height = width / BRAND_LOCKUP_ASPECT_RATIO;
   const left = centerX - width / 2;
   const top = centerY - height / 2;
-  const markWidth = width * (144 / 640);
-
-  context.drawImage(lockup, 0, 0, 144, 144, left, top, markWidth, height);
-  context.save();
-  context.filter =
-    wordmarkColor === "chalk" ? "brightness(0) invert(1)" : "none";
-  context.drawImage(
-    lockup,
-    144,
-    0,
-    496,
-    144,
-    left + markWidth,
-    top,
-    width - markWidth,
-    height,
-  );
-  context.restore();
+  context.drawImage(lockup[wordmarkColor], left, top, width, height);
 }

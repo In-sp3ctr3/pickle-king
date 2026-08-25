@@ -1,5 +1,6 @@
 import type { Match, TournamentBracket } from "../../tournament";
 import {
+  type BrandLockupAssets,
   drawBrandLockup,
   shareColors,
   shareFittedText,
@@ -70,7 +71,7 @@ export function drawBracketPodium(
 
 export function drawBracketBrandFooter(
   context: CanvasRenderingContext2D,
-  lockup: HTMLImageElement,
+  lockup: BrandLockupAssets,
   width: number,
   height: number,
 ) {

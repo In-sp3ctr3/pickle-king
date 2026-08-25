@@ -291,6 +291,7 @@ canvas padding cannot conceal a clipped source contour.
 | DQA-96 | P1       | recap/regular Feed         | fresh five-player Singles and six-player Doubles Post rasters        | regular pages divided their row space by the twelve-row capacity, wedging 34px text into 27–34px rule bands while leaving lower space unused              | frontend | fixed  |
 | DQA-97 | P1       | recap/Doubles masthead     | owner-source contour scan plus regular/dense/compact Feed and Story  | the padded Doubles source still contained a visually flat, pre-clipped final-S contour that an outer bounding-box check could not detect                  | frontend | fixed  |
 | DQA-98 | P1       | recap/table grid           | nine-profile Player/W-L/+/- raster scan                              | synthetic font metrics and one shared optical offset could not center three independently rasterized columns or prove every finite density breakpoint     | frontend | fixed  |
+| DQA-99 | P1       | Quick result Feed exports  | production `Darien 12–10 Jean-Paul` Poster/Frame/Receipt captures    | iOS ignored Canvas-filter wordmark recoloring; two-digit scores and winner lanes crossed the static artwork because Feed QA only covered smaller fixtures | frontend | fixed  |
 
 ## Feedback Loop
 
@@ -357,6 +358,9 @@ Result: passed
 Rationale: exact contained previews, native share/download fallbacks, measured
 name fitting, 48px court-side controls, safe-area geometry, and the current
 quick, recap, stats, and 4/8/16-player bracket artifacts were reviewed. The
+Quick Feed matrix now includes the real two-digit `Darien 12–10 Jean-Paul`
+fixture in all three treatments, direct chalk/ink lockup assets, and fixed
+score/name safe lanes with no Canvas-filter dependency. The
 recap set includes one-page 8/12-player exports, the 13-player continuation,
 and complete `Jean-Baptiste M.` Quick exports across all three treatments. The
 latest iPad evidence proves state-specific ordinary nodes: compact equal-inset

@@ -1,4 +1,5 @@
 import {
+  type BrandLockupAssets,
   drawBrandLockup,
   shareColors,
   shareFittedText,
@@ -271,7 +272,7 @@ export function drawQuickInlineResult(
 
 export function drawQuickFooter(
   context: CanvasRenderingContext2D,
-  lockup: HTMLImageElement,
+  lockup: BrandLockupAssets,
   centerX: number,
   centerY: number,
   color: string,

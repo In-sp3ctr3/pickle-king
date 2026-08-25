@@ -391,6 +391,11 @@ Last updated: 2026-08-25
   two-line format/date copy, never invent `FINAL` or `FIRST TO`, and use the
   requested centered mascot + tracked wordmark footer instead of copying the
   source's text-only footer placement.
+- Quick Feed exports use `Darien 12–10 Jean-Paul` as the finite two-digit
+  regression fixture. Poster keeps both score values and the separator inside
+  the lime slab; Frame keeps the complete result left of the mascot; Receipt
+  keeps the complete winner and score on cream. Dark exports draw the canonical
+  chalk lockup asset directly—Canvas filter-based recoloring is prohibited.
 - Poster Story keeps the winner block inside x=68…423, leaving at least 24px
   of clear space before the mascot. Frame Story preserves a minimum 16px gap
   between `MAYA`, `WINS`, and the score; its winner lines advance by 218px

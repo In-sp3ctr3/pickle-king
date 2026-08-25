@@ -3,6 +3,7 @@ import {
   type TournamentBracket,
 } from "../../tournament";
 import {
+  type BrandLockupAssets,
   drawBrandLockup,
   drawBrandMark,
   shareCanvasSurface,
@@ -184,7 +185,7 @@ function drawPodium(
 
 function drawPosterBrand(
   context: CanvasRenderingContext2D,
-  lockup: HTMLImageElement,
+  lockup: BrandLockupAssets,
   width: number,
   height: number,
 ) {

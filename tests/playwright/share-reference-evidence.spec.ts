@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { writeFile } from "node:fs/promises";
+import sharp from "sharp";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 let completedAt = new Date(2026, 7, 22, 18).getTime();
@@ -49,6 +50,7 @@ function exactReferenceHistory() {
     record("poster", "singles", ["Jadan"], ["Shevar"], 4, 2),
     record("alternate", "singles", ["Maya"], ["Steven"], 11, 7),
     record("long", "singles", ["Jean-Baptiste M."], ["Alexandra"], 11, 7),
+    record("production", "singles", ["Darien"], ["Jean-Paul"], 12, 10),
   ];
   return {
     quickMatches: [...doubles, ...singles, ...quick],
@@ -65,6 +67,25 @@ async function savePreview(page: Page, path: string, height = 1920) {
     Array.from(new Uint8Array(await (await fetch(image.src)).arrayBuffer())),
   );
   await writeFile(path, Uint8Array.from(bytes));
+}
+
+async function pixelCount(
+  path: string,
+  region: { height: number; left: number; top: number; width: number },
+  matches: (red: number, green: number, blue: number) => boolean,
+) {
+  const { data, info } = await sharp(path)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  let count = 0;
+  for (let y = region.top; y < region.top + region.height; y += 1) {
+    for (let x = region.left; x < region.left + region.width; x += 1) {
+      const index = (y * info.width + x) * 4;
+      if (matches(data[index], data[index + 1], data[index + 2])) count += 1;
+    }
+  }
+  return count;
 }
 
 test("renders matched-data poster reference evidence", async ({ page }) => {
@@ -93,6 +114,73 @@ test("renders matched-data poster reference evidence", async ({ page }) => {
   await poster.getByRole("button", { name: "Share" }).click();
   await page.getByRole("button", { name: "Story / Reel" }).click();
   await savePreview(page, "output/playwright/reference-quick-poster-story.png");
+  await page.getByRole("button", { name: "Close preview" }).click();
+
+  const production = page.locator("article", {
+    hasText: "Darien 12–10 Jean-Paul",
+  });
+  await production.getByRole("button", { name: "Share" }).click();
+  await savePreview(
+    page,
+    "output/playwright/production-quick-poster-feed.png",
+    1350,
+  );
+  await page.getByRole("button", { name: "Frame" }).click();
+  await savePreview(
+    page,
+    "output/playwright/production-quick-frame-feed.png",
+    1350,
+  );
+  await page.getByRole("button", { name: "Receipt" }).click();
+  await savePreview(
+    page,
+    "output/playwright/production-quick-receipt-feed.png",
+    1350,
+  );
+  for (const style of ["poster", "frame"]) {
+    await expect(
+      pixelCount(
+        `output/playwright/production-quick-${style}-feed.png`,
+        { height: 80, left: 460, top: 1250, width: 260 },
+        (red, green, blue) => red > 180 && green > 180 && blue > 180,
+      ),
+    ).resolves.toBeGreaterThan(2_000);
+  }
+  await expect(
+    pixelCount(
+      "output/playwright/production-quick-poster-feed.png",
+      { height: 24, left: 190, top: 850, width: 105 },
+      (red, green, blue) => red < 30 && green < 30 && blue < 30,
+    ),
+  ).resolves.toBeGreaterThan(500);
+  await expect(
+    pixelCount(
+      "output/playwright/production-quick-frame-feed.png",
+      { height: 70, left: 90, top: 90, width: 150 },
+      (red, green, blue) => red > 120 && green > 150 && blue < 80,
+    ),
+  ).resolves.toBeGreaterThan(500);
+  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await savePreview(
+    page,
+    "output/playwright/production-quick-receipt-story.png",
+  );
+  await page.getByRole("button", { name: "Poster" }).click();
+  await savePreview(
+    page,
+    "output/playwright/production-quick-poster-story.png",
+  );
+  await page.getByRole("button", { name: "Frame" }).click();
+  await savePreview(page, "output/playwright/production-quick-frame-story.png");
+  for (const style of ["poster", "frame"]) {
+    await expect(
+      pixelCount(
+        `output/playwright/production-quick-${style}-story.png`,
+        { height: 100, left: 430, top: 1760, width: 330 },
+        (red, green, blue) => red > 180 && green > 180 && blue > 180,
+      ),
+    ).resolves.toBeGreaterThan(3_000);
+  }
   await page.getByRole("button", { name: "Close preview" }).click();
 
   const alternate = page.locator("article", { hasText: "Maya 11–7 Steven" });
@@ -126,6 +214,7 @@ test("renders matched-data poster reference evidence", async ({ page }) => {
   await poster.getByRole("checkbox").uncheck();
   await alternate.getByRole("checkbox").uncheck();
   await longName.getByRole("checkbox").uncheck();
+  await production.getByRole("checkbox").uncheck();
   await page.getByRole("button", { name: "Preview recap" }).click();
   await page.getByRole("button", { name: "Story / Reel" }).click();
   await page.getByRole("button", { name: "Singles" }).click();

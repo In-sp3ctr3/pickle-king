@@ -5,6 +5,10 @@ import {
 } from "./quick-share-layouts";
 
 type TextCall = { font: string; text: string; x: number; y: number };
+const lockup = {
+  chalk: {} as HTMLImageElement,
+  ink: {} as HTMLImageElement,
+};
 
 function recordingContext() {
   const text: TextCall[] = [];
@@ -59,14 +63,7 @@ const fixture: QuickShareCardData = {
 describe("Quick Receipt layout", () => {
   it("uses the reference fonts and fixed Story baselines", () => {
     const { context, text } = recordingContext();
-    drawQuickShareLayout(
-      context,
-      {} as HTMLImageElement,
-      fixture,
-      1080,
-      1920,
-      "receipt",
-    );
+    drawQuickShareLayout(context, lockup, fixture, 1080, 1920, "receipt");
 
     expect(text.find(({ text }) => text === "MAYA")).toMatchObject({
       font: "400 164px 'Archivo Black', sans-serif",
@@ -88,17 +85,10 @@ describe("Quick Receipt layout", () => {
   it("keeps score and opponent positions independent of winner line count", () => {
     const short = recordingContext();
     const long = recordingContext();
-    drawQuickShareLayout(
-      short.context,
-      {} as HTMLImageElement,
-      fixture,
-      1080,
-      1920,
-      "receipt",
-    );
+    drawQuickShareLayout(short.context, lockup, fixture, 1080, 1920, "receipt");
     drawQuickShareLayout(
       long.context,
-      {} as HTMLImageElement,
+      lockup,
       { ...fixture, winnerName: "Ana Maria + Christopher Jonathan" },
       1080,
       1920,
@@ -115,32 +105,76 @@ describe("Quick Receipt layout", () => {
 
   it("centers the canonical 4.444:1 lockup", () => {
     const { context, images } = recordingContext();
-    drawQuickShareLayout(
-      context,
-      {} as HTMLImageElement,
-      fixture,
-      1080,
-      1920,
-      "receipt",
-    );
-    const footer = images.slice(-2);
-    const left = footer[0].x;
-    const right = footer[1].x + footer[1].width;
+    drawQuickShareLayout(context, lockup, fixture, 1080, 1920, "receipt");
+    const footer = images.at(-1)!;
+    const left = footer.x;
+    const right = footer.x + footer.width;
 
     expect(right - left).toBeCloseTo(320);
-    expect(footer[0].height).toBeCloseTo(72);
+    expect(footer.height).toBeCloseTo(72);
     expect((left + right) / 2).toBeCloseTo(540);
   });
 });
 
 describe("Quick Poster and Frame Story layouts", () => {
+  it("keeps the production 12–10 feed fixture inside each safe text lane", () => {
+    const production = {
+      ...fixture,
+      loserName: "Jean-Paul",
+      loserScore: 10,
+      winnerName: "Darien",
+      winnerScore: 12,
+    };
+
+    const poster = recordingContext();
+    drawQuickShareLayout(
+      poster.context,
+      lockup,
+      production,
+      1080,
+      1350,
+      "poster",
+    );
+    expect(
+      poster.text
+        .filter(({ text }) => ["12", "–", "10"].includes(text))
+        .map(({ y }) => y),
+    ).toEqual([820, 1040]);
+
+    const frame = recordingContext();
+    drawQuickShareLayout(
+      frame.context,
+      lockup,
+      production,
+      1080,
+      1350,
+      "frame",
+    );
+    const frameScore = frame.text.find(({ text }) => text === "12–10")!;
+    expect(estimatedRight(frameScore)).toBeLessThanOrEqual(524);
+
+    const receipt = recordingContext();
+    drawQuickShareLayout(
+      receipt.context,
+      lockup,
+      production,
+      1080,
+      1350,
+      "receipt",
+    );
+    const receiptWinner = receipt.text.find(({ text }) => text === "DARIEN")!;
+    const receiptScore = receipt.text.find(({ text }) => text === "12–10")!;
+    expect(estimatedLeft(receiptWinner)).toBeGreaterThanOrEqual(650);
+    expect(estimatedLeft(receiptScore)).toBeGreaterThanOrEqual(620);
+  });
+
   it("renders a valid sixteen-character winner in full in every treatment", () => {
     for (const style of ["poster", "frame", "receipt"] as const) {
       for (const height of [1350, 1920]) {
         const { context, text } = recordingContext();
         drawQuickShareLayout(
           context,
-          {} as HTMLImageElement,
+          lockup,
           { ...fixture, winnerName: "Jean-Baptiste M." },
           1080,
           height,
@@ -174,7 +208,7 @@ describe("Quick Poster and Frame Story layouts", () => {
     const { context, text, translations } = recordingContext();
     drawQuickShareLayout(
       context,
-      {} as HTMLImageElement,
+      lockup,
       {
         ...fixture,
         loserName: "Shevar",
@@ -213,14 +247,7 @@ describe("Quick Poster and Frame Story layouts", () => {
 
   it("matches the Frame winner and independently fitted result anchors", () => {
     const { context, text, translations } = recordingContext();
-    drawQuickShareLayout(
-      context,
-      {} as HTMLImageElement,
-      fixture,
-      1080,
-      1920,
-      "frame",
-    );
+    drawQuickShareLayout(context, lockup, fixture, 1080, 1920, "frame");
 
     expect(text.find(({ text }) => text === "MAYA")).toMatchObject({
       font: expect.stringMatching(/^400 \d+px 'Anton', sans-serif$/),
@@ -246,3 +273,20 @@ describe("Quick Poster and Frame Story layouts", () => {
     );
   });
 });
+
+function estimatedLeft(call: TextCall) {
+  const width = estimatedWidth(call);
+  if (call.x >= 900) return call.x - width;
+  return call.x;
+}
+
+function estimatedRight(call: TextCall) {
+  return estimatedLeft(call) + estimatedWidth(call);
+}
+
+function estimatedWidth(call: TextCall) {
+  const size = Number.parseFloat(
+    call.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? "10",
+  );
+  return call.text.length * size * 0.6;
+}
