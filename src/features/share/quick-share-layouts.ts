@@ -2,11 +2,11 @@ import {
   type BrandLockupAssets,
   shareColors,
   shareFittedText,
+  shareText,
 } from "./share-canvas";
 import type { QuickShareStyle } from "./quick-share-card";
 import {
   drawQuickFooter,
-  drawQuickHeading,
   drawQuickInlineResult,
   drawQuickStackedScore,
   drawQuickWinner,
@@ -14,6 +14,40 @@ import {
 } from "./quick-share-layout-helpers";
 
 export type { QuickShareCardData } from "./quick-share-layout-helpers";
+
+function drawQuickHeading(
+  context: CanvasRenderingContext2D,
+  lines: QuickShareCardData["heading"],
+  x: number,
+  y: number,
+  options: {
+    align?: CanvasTextAlign;
+    color: string;
+    lineHeight?: number;
+    secondSize?: number;
+    size: number;
+    tracking?: number;
+  },
+) {
+  lines.forEach((line, index) => {
+    const size =
+      index === 1 ? (options.secondSize ?? options.size) : options.size;
+    context.save();
+    if (options.tracking) context.letterSpacing = `${options.tracking}px`;
+    shareText(
+      context,
+      line,
+      x,
+      y + index * (options.lineHeight ?? options.size * 1.25),
+      {
+        align: options.align,
+        color: options.color,
+        font: `800 ${size}px Manrope, sans-serif`,
+      },
+    );
+    context.restore();
+  });
+}
 
 export function drawQuickShareLayout(
   context: CanvasRenderingContext2D,
@@ -42,11 +76,11 @@ function drawPoster(
     lineHeight: story ? 44 : undefined,
     size: story ? 36 : 21,
   });
-  drawQuickWinner(context, data.winnerName, 68, story ? 109 : 128, {
+  drawQuickWinner(context, data.winnerName, 68, story ? 205 : 140, {
     color: shareColors.chalk,
     family: "Anton",
     lineHeight: story ? 250 : 130,
-    maxHeight: story ? 500 : undefined,
+    maxHeight: story ? 430 : 260,
     maxSize: story ? 313 : undefined,
     maxWidth: story ? 355 : 370,
     minSize: story ? 46 : 36,
@@ -59,7 +93,7 @@ function drawPoster(
       [1048, 1124, 1550],
       300,
       403,
-      1.32,
+      1.15,
       {
         family: "Anton",
         separatorBox: { height: 54, width: 120 },
@@ -77,11 +111,20 @@ function drawPoster(
     });
     drawQuickFooter(context, lockup, width / 2, 1844, shareColors.chalk, 320);
   } else {
-    drawQuickStackedScore(context, data, 242, [820, 860, 1040], 285, 170, 1, {
-      family: "Anton",
-      separatorBox: { height: 12, width: 76 },
-      weight: 400,
-    });
+    drawQuickStackedScore(
+      context,
+      data,
+      242,
+      [820, 860, 1040],
+      285,
+      170,
+      1.15,
+      {
+        family: "Anton",
+        separatorBox: { height: 12, width: 76 },
+        weight: 400,
+      },
+    );
     shareFittedText(context, `over ${data.loserName}`, 242, 1125, {
       align: "center",
       color: shareColors.court,
@@ -91,7 +134,7 @@ function drawPoster(
       minSize: 20,
       weight: 800,
     });
-    drawQuickFooter(context, lockup, width / 2, 1300, shareColors.chalk, 280);
+    drawQuickFooter(context, lockup, width / 2, 1264, shareColors.chalk, 280);
   }
 }
 
@@ -131,23 +174,22 @@ function drawFrame(
     {
       color: shareColors.chalk,
       maxWidth: story ? 800 : 420,
-      opponentHorizontalScale: story ? 1.15 : undefined,
       opponentMaxWidth: story ? 300 : undefined,
       opponentSize: story ? 40 : 30,
       opponentWeight: story ? 400 : undefined,
       opponentX: story ? 128 : undefined,
       opponentY: story ? 1717 : winsY + 270,
       scoreColor: shareColors.limeDeep,
-      scoreFamily: story ? "Alfa Slab One" : undefined,
-      scoreHorizontalScale: story ? 1.17 : undefined,
+      scoreFamily: "Alfa Slab One",
+      scoreHorizontalScale: 1.15,
       scoreSize: story ? 295 : 205,
-      scoreWeight: story ? 400 : undefined,
+      scoreWeight: 400,
     },
   );
   if (story) {
     drawQuickFooter(context, lockup, width / 2, 1805, shareColors.chalk, 320);
   } else {
-    drawQuickFooter(context, lockup, width / 2, 1280, shareColors.chalk, 280);
+    drawQuickFooter(context, lockup, width / 2, 1264, shareColors.chalk, 280);
   }
 }
 
@@ -170,24 +212,24 @@ function drawReceipt(
   drawQuickWinner(
     context,
     data.winnerName,
-    width - (story ? 66 : 70),
+    story ? width - 66 : 1026,
     story ? 1121 : 700,
     {
       align: "right",
       color: shareColors.court,
       family: "Archivo Black",
       lineHeight: story ? 132 : 105,
-      maxHeight: story ? 264 : 210,
+      maxHeight: story ? 264 : 185,
       maxSize: story ? 164 : 130,
-      maxWidth: story ? 465 : 300,
+      maxWidth: story ? 465 : 270,
       minSize: story ? 46 : 36,
     },
   );
   drawQuickInlineResult(
     context,
     data,
-    story ? 586 : width - 70,
-    story ? 1710 : 1065,
+    story ? 586 : 1008,
+    story ? 1710 : 1093,
     {
       align: story ? "center" : "right",
       color: shareColors.court,
@@ -197,10 +239,11 @@ function drawReceipt(
       opponentMaxWidth: story ? 410 : 360,
       opponentWeight: 400,
       opponentX: width - (story ? 79 : 70),
-      opponentY: story ? 1759 : 1128,
+      opponentY: story ? 1759 : 1156,
       scoreColor: shareColors.limeDeep,
       scoreFamily: "Alfa Slab One",
-      scoreHorizontalScale: story ? 1.16 : undefined,
+      scoreHorizontalScale: 1.15,
+      scoreMinSize: story ? undefined : 90,
       scoreSize: story ? 330 : 215,
       scoreWeight: 400,
     },
@@ -209,7 +252,7 @@ function drawReceipt(
     context,
     lockup,
     width / 2,
-    story ? 1844 : 1292,
+    story ? 1844 : 1264,
     shareColors.court,
     story ? 320 : 280,
   );

@@ -3,7 +3,6 @@ import {
   drawBrandLockup,
   shareColors,
   shareFittedText,
-  shareText,
 } from "./share-canvas";
 import { quickWinnerLines } from "./quick-winner-lines";
 
@@ -17,48 +16,6 @@ export interface QuickShareCardData {
   loserScore: number;
   winnerName: string;
   winnerScore: number;
-}
-
-export function drawQuickHeading(
-  context: CanvasRenderingContext2D,
-  lines: QuickShareCardData["heading"],
-  x: number,
-  y: number,
-  options: {
-    align?: CanvasTextAlign;
-    color: string;
-    lineHeight?: number;
-    secondSize?: number;
-    size: number;
-    tracking?: number;
-  },
-) {
-  lines.forEach((line, index) => {
-    const size =
-      index === 1 ? (options.secondSize ?? options.size) : options.size;
-    if (options.tracking) {
-      context.save();
-      context.letterSpacing = `${options.tracking}px`;
-      shareText(
-        context,
-        line,
-        x,
-        y + index * (options.lineHeight ?? options.size * 1.25),
-        {
-          align: options.align,
-          color: options.color,
-          font: `800 ${size}px Manrope, sans-serif`,
-        },
-      );
-      context.restore();
-      return;
-    }
-    shareText(context, line, x, y + index * options.size * 1.25, {
-      align: options.align,
-      color: options.color,
-      font: `800 ${size}px Manrope, sans-serif`,
-    });
-  });
 }
 
 export function drawQuickWinner(
@@ -105,36 +62,64 @@ export function drawQuickWinner(
     }
     return size;
   };
-  const nameSize = fittedSize(nameLines);
+  let nameSize = fittedSize(nameLines);
   const winsSize = fittedSize(["WINS"]);
   context.font = `${weight} ${winsSize}px '${options.family}', sans-serif`;
   const winsTop =
     winsBaseline -
     (context.measureText("WINS").actualBoundingBoxAscent || winsSize * 0.75);
-  context.font = `${weight} ${nameSize}px '${options.family}', sans-serif`;
-  const nameDescent =
-    context.measureText("Hg").actualBoundingBoxDescent || nameSize * 0.2;
-  const lastNameBaseline =
-    winsTop - Math.max(12, Math.round(nameSize * 0.35)) - nameDescent;
-  const nameBaselines =
-    nameLines.length === 1
-      ? [top + options.lineHeight]
-      : nameLines.map(
-          (_, index) =>
-            lastNameBaseline -
-            (nameLines.length - index - 1) * Math.round(nameSize * 1.15),
-        );
+  const positionName = () => {
+    context.font = `${weight} ${nameSize}px '${options.family}', sans-serif`;
+    const metrics = nameLines.map((line) =>
+      context.measureText(line.toUpperCase()),
+    );
+    const descent = Math.max(
+      ...metrics.map((metric) => metric.actualBoundingBoxDescent ?? 0),
+    );
+    const lineStep = Math.max(
+      Math.round(nameSize * 1.04),
+      Math.ceil(
+        Math.max(
+          ...metrics.map(
+            (metric) =>
+              (metric.actualBoundingBoxAscent || nameSize * 0.75) +
+              (metric.actualBoundingBoxDescent ?? 0),
+          ),
+        ) +
+          nameSize * 0.08,
+      ),
+    );
+    const lastBaseline =
+      winsTop - Math.max(10, Math.round(nameSize * 0.08)) - descent;
+    const baselines = nameLines.map(
+      (_, index) => lastBaseline - (nameLines.length - index - 1) * lineStep,
+    );
+    const firstTop =
+      baselines[0] - (metrics[0].actualBoundingBoxAscent || nameSize * 0.75);
+    return { baselines, firstTop };
+  };
+  let positioned = positionName();
+  while (nameSize > minSize && positioned.firstTop < top) {
+    nameSize -= 2;
+    positioned = positionName();
+  }
   context.restore();
   nameLines.forEach((line, index) => {
-    shareFittedText(context, line.toUpperCase(), x, nameBaselines[index], {
-      align: options.align,
-      color: options.color,
-      family: `'${options.family}', sans-serif`,
-      maxSize: nameSize,
-      maxWidth: options.maxWidth,
-      minSize: nameSize,
-      weight,
-    });
+    shareFittedText(
+      context,
+      line.toUpperCase(),
+      x,
+      positioned.baselines[index],
+      {
+        align: options.align,
+        color: options.color,
+        family: `'${options.family}', sans-serif`,
+        maxSize: nameSize,
+        maxWidth: options.maxWidth,
+        minSize: nameSize,
+        weight,
+      },
+    );
   });
   shareFittedText(context, "WINS", x, winsBaseline, {
     align: options.align,
@@ -213,6 +198,7 @@ export function drawQuickInlineResult(
     scoreColor: string;
     scoreFamily?: "Alfa Slab One" | "Roboto Slab";
     scoreHorizontalScale?: number;
+    scoreMinSize?: number;
     scoreSize: number;
     scoreWeight?: number;
   },
@@ -224,7 +210,7 @@ export function drawQuickInlineResult(
     family: `'${options.scoreFamily ?? "Roboto Slab"}', serif`,
     maxSize: options.scoreSize,
     maxWidth: options.maxWidth,
-    minSize: Math.round(options.scoreSize * 0.55),
+    minSize: options.scoreMinSize ?? Math.round(options.scoreSize * 0.55),
     weight: options.scoreWeight ?? 900,
   };
   if (options.scoreHorizontalScale) {

@@ -35,9 +35,17 @@ function recordingContext() {
         this.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? "10",
       );
       const tracking = Number.parseFloat(this.letterSpacing) || 0;
+      const factor = this.font.includes("Anton")
+        ? 0.38
+        : this.font.includes("Alfa Slab One")
+          ? 0.46
+          : 0.56;
       return {
+        actualBoundingBoxAscent: size * 0.76,
+        actualBoundingBoxDescent: 0,
         width:
-          value.length * size * 0.6 + Math.max(0, value.length - 1) * tracking,
+          value.length * size * factor +
+          Math.max(0, value.length - 1) * tracking,
       };
     },
     restore() {},
@@ -65,11 +73,12 @@ describe("Quick Receipt layout", () => {
     const { context, text } = recordingContext();
     drawQuickShareLayout(context, lockup, fixture, 1080, 1920, "receipt");
 
-    expect(text.find(({ text }) => text === "MAYA")).toMatchObject({
-      font: "400 164px 'Archivo Black', sans-serif",
-      x: 1014,
-      y: 1253,
-    });
+    const winner = text.find(({ text }) => text === "MAYA")!;
+    const wins = text.find(({ text }) => text === "WINS")!;
+    expect(winner.font).toBe("400 164px 'Archivo Black', sans-serif");
+    expect(winner.x).toBe(1014);
+    expect(estimatedInkTop(winner)).toBeGreaterThanOrEqual(1121);
+    expect(wins.y - winner.y).toBeGreaterThan(120);
     expect(text.find(({ text }) => text === "11–7")).toMatchObject({
       font: expect.stringMatching(/^400 \d+px 'Alfa Slab One', serif$/),
       x: 0,
@@ -107,12 +116,10 @@ describe("Quick Receipt layout", () => {
     const { context, images } = recordingContext();
     drawQuickShareLayout(context, lockup, fixture, 1080, 1920, "receipt");
     const footer = images.at(-1)!;
-    const left = footer.x;
-    const right = footer.x + footer.width;
 
-    expect(right - left).toBeCloseTo(320);
+    expect(footer.width).toBeCloseTo(320);
     expect(footer.height).toBeCloseTo(72);
-    expect((left + right) / 2).toBeCloseTo(540);
+    expect(footer.x + footer.width / 2).toBeCloseTo(540);
   });
 });
 
@@ -162,10 +169,26 @@ describe("Quick Poster and Frame Story layouts", () => {
       1350,
       "receipt",
     );
-    const receiptWinner = receipt.text.find(({ text }) => text === "DARIEN")!;
+    const receiptWins = receipt.text.find(({ text }) => text === "WINS")!;
     const receiptScore = receipt.text.find(({ text }) => text === "12–10")!;
-    expect(estimatedLeft(receiptWinner)).toBeGreaterThanOrEqual(650);
-    expect(estimatedLeft(receiptScore)).toBeGreaterThanOrEqual(620);
+    expect(receipt.translations).toContainEqual([1008, 0]);
+    expect(receiptScore).toMatchObject({ x: 0, y: 1093 });
+    expect(
+      estimatedInkTop(receiptScore) - receiptWins.y,
+    ).toBeGreaterThanOrEqual(72);
+  });
+
+  it("keeps every Post footer centered inside the safe area", () => {
+    for (const style of ["poster", "frame", "receipt"] as const) {
+      const { context, images, text } = recordingContext();
+      drawQuickShareLayout(context, lockup, fixture, 1080, 1350, style);
+      const footer = images.at(-1)!;
+      const lastContentBaseline = Math.max(...text.map(({ y }) => y));
+
+      expect(footer.x + footer.width / 2, style).toBeCloseTo(540);
+      expect(footer.y + footer.height, style).toBeLessThanOrEqual(1296);
+      expect(footer.y - lastContentBaseline, style).toBeGreaterThanOrEqual(72);
+    }
   });
 
   it("renders a valid sixteen-character winner in full in every treatment", () => {
@@ -200,6 +223,10 @@ describe("Quick Poster and Frame Story layouts", () => {
           lastNameLine.font.match(/(\d+)px/)![1],
         );
         expect(wins.y - lastNameLine.y).toBeGreaterThan(nameSize);
+        if (style === "receipt" && height === 1350)
+          expect(
+            estimatedInkTop(text.find(({ text }) => text === "11–7")!) - wins.y,
+          ).toBeGreaterThanOrEqual(72);
       }
     }
   });
@@ -221,16 +248,13 @@ describe("Quick Poster and Frame Story layouts", () => {
       "poster",
     );
 
-    expect(text.find(({ text }) => text === "JADAN")).toMatchObject({
+    const winner = text.find(({ text }) => text === "JADAN")!;
+    expect(winner).toMatchObject({
       font: expect.stringMatching(/^400 \d+px 'Anton', sans-serif$/),
       x: 68,
-      y: 359,
     });
-    const winner = text.find(({ text }) => text === "JADAN")!;
-    const winnerSize = Number.parseFloat(winner.font.match(/(\d+)px/)![1]);
-    expect(
-      winner.x + winner.text.length * winnerSize * 0.6,
-    ).toBeLessThanOrEqual(423);
+    expect(estimatedInkTop(winner)).toBeGreaterThanOrEqual(205);
+    expect(estimatedRight(winner)).toBeLessThanOrEqual(423);
     expect(
       text.find(({ text, y }) => text === "4" && y === 1048),
     ).toMatchObject({
@@ -249,11 +273,12 @@ describe("Quick Poster and Frame Story layouts", () => {
     const { context, text, translations } = recordingContext();
     drawQuickShareLayout(context, lockup, fixture, 1080, 1920, "frame");
 
-    expect(text.find(({ text }) => text === "MAYA")).toMatchObject({
+    const winner = text.find(({ text }) => text === "MAYA")!;
+    expect(winner).toMatchObject({
       font: expect.stringMatching(/^400 \d+px 'Anton', sans-serif$/),
       x: 120,
-      y: 1182,
     });
+    expect(estimatedInkTop(winner)).toBeGreaterThanOrEqual(964);
     expect(text.find(({ text }) => text === "WINS")?.y).toBe(1400);
     expect(text.find(({ text }) => text === "11–7")).toMatchObject({
       font: expect.stringMatching(/^400 \d+px 'Alfa Slab One', serif$/),
@@ -262,15 +287,10 @@ describe("Quick Poster and Frame Story layouts", () => {
     });
     expect(text.find(({ text }) => text === "over Steven")).toMatchObject({
       font: expect.stringMatching(/^400 \d+px Manrope, sans-serif$/),
-      x: 0,
+      x: 128,
       y: 1717,
     });
-    expect(translations).toEqual(
-      expect.arrayContaining([
-        [131, 0],
-        [128, 0],
-      ]),
-    );
+    expect(translations).toContainEqual([131, 0]);
   });
 });
 
@@ -288,5 +308,17 @@ function estimatedWidth(call: TextCall) {
   const size = Number.parseFloat(
     call.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? "10",
   );
-  return call.text.length * size * 0.6;
+  const factor = call.font.includes("Anton")
+    ? 0.38
+    : call.font.includes("Alfa Slab One")
+      ? 0.46
+      : 0.56;
+  return call.text.length * size * factor;
+}
+
+function estimatedInkTop(call: TextCall) {
+  const size = Number.parseFloat(
+    call.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? "10",
+  );
+  return call.y - size * 0.75;
 }

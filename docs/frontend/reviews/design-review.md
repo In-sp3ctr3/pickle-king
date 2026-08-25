@@ -141,6 +141,7 @@ Open P2: 0
 | DR-77 | P1       | recap/regular Feed | five-player Singles and six-player Doubles PNGs      | replaced the accidental twelve-row denominator with explicit regular geometry that uses the available slab  | fixed  |
 | DR-78 | P1       | recap/masthead     | final-S contour plateau and connected-component scan | rebuilt the final S from complete owner pixels and made its actual contour, not its canvas margin, the gate | fixed  |
 | DR-79 | P1       | recap/table grid   | regular/dense/compact Feed and Story lane scans      | raster-centered Player, W-L, and +/- independently between explicit rules across every density breakpoint   | fixed  |
+| DR-80 | P1       | quick/export lanes | eighteen PNG baselines plus exact `Jean-Paul` bounds | moved mascot artwork into fixed lanes, fitted from painted glyph bounds, and prohibited score ellipsizing   | fixed  |
 
 ## Decision
 

@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -30,3 +30,11 @@ jobs:
       - run: npm run check:lines
       - run: npm run test
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Quick share visual regression
+        run: |
+          npm run start > /tmp/pickle-king-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          curl --fail --retry 30 --retry-delay 1 --retry-all-errors --output /dev/null http://127.0.0.1:3000
+          npm run test:share-visual

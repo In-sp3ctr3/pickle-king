@@ -12,6 +12,8 @@
 - [ ] `npm run check`
 - [ ] `npm run format:check`
 - [ ] Mobile and desktop screenshots attached for UI changes
+- [ ] Reported production regressions are permanent fixtures with boundary cases
+- [ ] Share-image PNG baselines were reviewed at full resolution (when changed)
 - [ ] Keyboard, focus, reduced-motion, and Axe checked for UI changes
 - [ ] Persistence/offline implications reviewed
 - [ ] Security and privacy implications reviewed

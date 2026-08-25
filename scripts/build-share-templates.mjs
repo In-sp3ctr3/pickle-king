@@ -584,6 +584,59 @@ async function verifyMastheadSafeArea(referenceId, rendered, format) {
   }
 }
 
+async function shiftQuickArtwork(referenceId, rendered) {
+  const { height, width } = await sharp(rendered).metadata();
+  if (!height || !width) throw new Error(`Missing dimensions: ${referenceId}`);
+  if (referenceId === "quick-receipt") {
+    const paper = await sharp(rendered)
+      .extract({ height: 120, left: 940, top: height - 150, width: 120 })
+      .ensureAlpha()
+      .png()
+      .toBuffer();
+    const artwork = await sharp(rendered)
+      .extract({ height: Math.min(1320, height), left: 0, top: 0, width: 820 })
+      .png()
+      .toBuffer();
+    const base = await sharp({
+      create: {
+        background: { alpha: 1, b: 239, g: 241, r: 244 },
+        channels: 4,
+        height,
+        width,
+      },
+    })
+      .composite([{ input: paper, tile: true }])
+      .png()
+      .toBuffer();
+    return sharp(base)
+      .composite([{ input: artwork, left: -120, top: -20 }])
+      .png()
+      .toBuffer();
+  }
+  const artLeft = referenceId === "quick-frame" ? 420 : 430;
+  const artwork = await sharp(rendered)
+    .extract({ height, left: artLeft, top: 0, width: width - artLeft })
+    .png()
+    .toBuffer();
+  const black = await sharp({
+    create: {
+      background: { alpha: 1, b: 0, g: 0, r: 0 },
+      channels: 4,
+      height,
+      width: width - artLeft,
+    },
+  })
+    .png()
+    .toBuffer();
+  return sharp(rendered)
+    .composite([
+      { input: black, left: artLeft, top: 0 },
+      { input: artwork, left: artLeft + 90, top: 70 },
+    ])
+    .png()
+    .toBuffer();
+}
+
 async function build() {
   await lockSources();
   await mkdir(outputDirectory, { recursive: true });
@@ -655,6 +708,9 @@ async function build() {
           ])
           .png()
           .toBuffer();
+      }
+      if (reference.id.startsWith("quick-")) {
+        rendered = await shiftQuickArtwork(reference.id, rendered);
       }
       const recapSource = rendered;
       if (reference.id.startsWith("recap-")) {

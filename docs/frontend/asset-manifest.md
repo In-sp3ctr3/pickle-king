@@ -120,5 +120,8 @@ owner-supplied final-S contour and rejects a flat outer-edge plateau, inadequate
 internal padding, or detached title fragments before writing an asset. Dynamic
 names, dates, scores,
 standings, page labels, and opponent copy are never baked into those templates.
+The six Quick templates deterministically move Poster/Frame artwork right and
+down and Receipt artwork left, leaving fixed dynamic-text lanes that are checked
+from the emitted WebP pixels before browser rendering.
 No image model, remote asset, runtime request, or new rendering framework is
 used.

@@ -2,6 +2,32 @@
 
 Status: complete
 
+## 2026-08-25 Evaluation Audit
+
+The production `12–10` regression exposed a gap in the earlier evidence: the
+Quick-share browser fixture covered `4–2` and `11–7`, but no two-digit losing
+score. It saved PNGs and sampled selected pixel regions without comparing the
+complete encoded image, while unit layout tests used approximate mocked font
+widths. Those checks could pass without proving real glyph spacing, clipping,
+or non-overlap.
+
+- `npm run test:share-visual` now compares the encoded PNG against eighteen
+  reviewed baselines: Poster, Frame, and Receipt for `12–10`, the 16-character
+  name limit, and `Jean-Paul` as the winner at 1080×1350 and 1080×1920. At
+  most 100 changed pixels are allowed per image. It also captures actual Canvas
+  text and rejects score ellipsizing, then measures winner-only pixel bounds
+  against fixed lanes using a same-data control render.
+- The same command generates regular, dense, compact, and continuation recap
+  fixtures, then checks every Player, W-L, and +/- lane for complete dividers,
+  clear space, and raster centering between rules.
+- The local production-server run passed 5 of 5 browser tests plus the recap
+  grid check in 2.0 minutes on Chromium.
+- `.github/workflows/quality.yml` now runs the focused gate after the production
+  build on pinned Ubuntu 24.04 and Chromium. The first remote Linux run remains
+  the cross-platform proof; the baselines were generated on macOS.
+- Future production visual failures become permanent fixtures before repair.
+  Evidence capture alone is not recorded as a pass.
+
 The owner-approved 2026-08-25 extension raises each recap page to twelve rows,
 lightens and centers the table typography, standardizes the broken-rule
 subtitle, protects the Doubles masthead edge, and lowers new player entry to 16

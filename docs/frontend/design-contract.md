@@ -396,6 +396,17 @@ Last updated: 2026-08-25
   the lime slab; Frame keeps the complete result left of the mascot; Receipt
   keeps the complete winner and score on cream. Dark exports draw the canonical
   chalk lockup asset directly—Canvas filter-based recoloring is prohibited.
+- Quick template artwork owns a fixed non-text lane: Poster and Frame mascot
+  pixels begin at x=510 or later, while Receipt artwork ends at x=700 or
+  earlier. Dynamic text never moves the artwork. The exact `Jean-Paul` winner
+  fixture must remain inside these winner regions in both formats: Poster Post
+  x=50…510/y=120…470 and Story x=50…510/y=195…650; Frame Post
+  x=80…560/y=540…930 and Story x=80…560/y=950…1410; Receipt Post
+  x=600…1040/y=680…930 and Story x=540…1040/y=1110…1400.
+- The browser visual gate records the actual Canvas `fillText` values: a valid
+  result such as `12–10` must never be shortened to an ellipsis. Winner-region
+  assertions use a same-data control render so only winner pixels contribute
+  to the measured bounds.
 - Poster Story keeps the winner block inside x=68…423, leaving at least 24px
   of clear space before the mascot. Frame Story preserves a minimum 16px gap
   between `MAYA`, `WINS`, and the score; its winner lines advance by 218px
