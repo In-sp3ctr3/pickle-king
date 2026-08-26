@@ -73,7 +73,7 @@ async function expectStyleSnapshots(
   height: 1350 | 1920,
 ) {
   for (const style of styles) {
-    await page.getByRole("button", { name: style, exact: true }).click();
+    await page.getByRole("radio", { name: style, exact: true }).click();
     expect(await previewPng(page, height)).toMatchSnapshot(
       `${fixture}-${style.toLowerCase()}-${height}.png`,
       { maxDiffPixels: 100 },
@@ -116,19 +116,22 @@ async function sharePng(
 ) {
   const match = page.locator("article", { hasText: matchText });
   await match.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("button", { name: style, exact: true }).click();
+  await page.getByRole("radio", { name: style, exact: true }).click();
   await page
-    .getByRole("button", { name: story ? "Story / Reel" : "Post", exact: true })
+    .getByRole("button", {
+      name: story ? "Story (9:16)" : "Post (4:5)",
+      exact: true,
+    })
     .click();
   const png = await previewPng(page, story ? 1920 : 1350);
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
   return png;
 }
 
 test("locks Quick share PNGs for two-digit scores and the name boundary", async ({
   page,
 }) => {
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
   await page.addInitScript((fixture) => {
     localStorage.clear();
     localStorage.setItem("pickle-king:history", JSON.stringify(fixture));
@@ -167,9 +170,9 @@ test("locks Quick share PNGs for two-digit scores and the name boundary", async 
     hasText: "Darien 12–10 Jean-Paul",
   });
   await twoDigit.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("button", { name: "Post", exact: true }).click();
+  await page.getByRole("button", { name: "Post (4:5)", exact: true }).click();
   await expectStyleSnapshots(page, "two-digit", 1350);
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await expectStyleSnapshots(page, "two-digit", 1920);
   expect(
     await page.evaluate(
@@ -177,17 +180,17 @@ test("locks Quick share PNGs for two-digit scores and the name boundary", async 
         (window as unknown as { __shareDrawnText: string[] }).__shareDrawnText,
     ),
   ).not.toContain("12–…");
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   const longName = page.locator("article", {
     hasText: "Jean-Baptiste M. 11–7 Alexandra",
   });
   await longName.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("button", { name: "Post", exact: true }).click();
+  await page.getByRole("button", { name: "Post (4:5)", exact: true }).click();
   await expectStyleSnapshots(page, "long-name", 1350);
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await expectStyleSnapshots(page, "long-name", 1920);
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   const safeZones = {
     frame: { post: [80, 540, 560, 930], story: [80, 950, 560, 1410] },

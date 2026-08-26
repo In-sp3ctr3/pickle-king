@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { confirmServeSetup } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -13,19 +14,31 @@ test("Quick Match confirmation records once and returns to setup", async ({
   await page.getByLabel("Play to").fill("1");
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await confirmServeSetup(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
   await page.getByRole("button", { name: "Confirm result" }).click();
   await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Done" })).toHaveCount(0);
+  await expect(page.locator("[data-qa='result-saved']")).toBeVisible();
   expect(
     await page.evaluate(() => {
       const raw = localStorage.getItem("pickle-king:history");
       return raw ? JSON.parse(raw).quickMatches.length : 0;
     }),
   ).toBe(1);
+  await page.locator("[data-qa='share-saved-result']").click();
+  await expect(page.locator("[data-qa='share-composer']")).toBeVisible();
+  await expect(page.locator("[data-qa='share-format-story']")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(page.getByRole("radio", { name: "Poster" })).toBeChecked();
+  await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
+  await page.getByRole("button", { name: "Close share composer" }).click();
+  await page.locator("[data-qa='continue-saved-result']").click();
+  await expect(page.locator("[data-qa='result-saved']")).toHaveCount(0);
 });
 
-test("result rendering shows only an aspect-correct branded skeleton", async ({
+test("composer keeps the design while switching Story and Post", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -42,11 +55,19 @@ test("result rendering shows only an aspect-correct branded skeleton", async ({
   await page.getByLabel("Play to").fill("1");
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await confirmServeSetup(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
-  const skeleton = page.locator(".result-dialog__preview-skeleton");
-  await expect(skeleton).toBeVisible();
-  await expect(page.locator(".result-dialog__preview-fallback")).toHaveCount(0);
-  await page.getByRole("button", { name: "Story / Reel" }).click();
-  await expect(skeleton).toHaveCSS("aspect-ratio", "9 / 16");
-  await expect(page.locator("[data-qa='result-preview']")).toBeVisible();
+  await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='share-saved-result']").click();
+  await page.getByRole("radio", { name: "Receipt" }).click();
+  await page.locator("[data-qa='share-format-feed']").click();
+  await expect(page.getByRole("radio", { name: "Receipt" })).toBeChecked();
+  const preview = page.locator("[data-qa='share-preview']");
+  await expect(preview).toBeVisible();
+  expect(
+    await preview.evaluate((image: HTMLImageElement) => image.naturalWidth),
+  ).toBe(1080);
+  expect(
+    await preview.evaluate((image: HTMLImageElement) => image.naturalHeight),
+  ).toBe(1350);
 });

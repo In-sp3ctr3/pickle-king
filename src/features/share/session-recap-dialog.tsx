@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, LoaderCircle, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, LoaderCircle } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   buildSessionRecaps,
   paginateRecapPlayers,
@@ -9,7 +9,9 @@ import {
   type QuickMatchRecord,
 } from "../../history";
 import { canShareFiles, shareFiles } from "./share-file";
-import { shareFormatLabel, type ShareFormat } from "./share-format";
+import { ShareComposerDialog } from "./share-composer-dialog";
+import { DEFAULT_SHARE_FORMAT, type ShareFormat } from "./share-format";
+import { ShareFormatPicker } from "./share-format-picker";
 import { SharePreviewActions } from "./share-preview-actions";
 import { sharePreviewFile } from "./share-preview-cache";
 import { SharePreviewSkeleton } from "./share-preview-skeleton";
@@ -23,14 +25,13 @@ export function SessionRecapDialog({
   matches: QuickMatchRecord[];
   onClose: () => void;
 }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
   const sections = useMemo(() => buildSessionRecaps(matches), [matches]);
   const dateLabel = receiptDateLabel(
     matches.map(({ completedAt }) => completedAt),
   );
   const [sectionIndex, setSectionIndex] = useState(0);
-  const [imageFormat, setImageFormat] = useState<ShareFormat>("feed");
+  const [imageFormat, setImageFormat] =
+    useState<ShareFormat>(DEFAULT_SHARE_FORMAT);
   const [page, setPage] = useState(0);
   const [allStatus, setAllStatus] = useState<"idle" | "working">("idle");
   const [allMessage, setAllMessage] = useState<string | null>(null);
@@ -62,15 +63,6 @@ export function SessionRecapDialog({
     fileName,
     key,
   );
-
-  useEffect(() => {
-    triggerRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
-    ref.current?.showModal();
-    return () => triggerRef.current?.focus();
-  }, []);
 
   if (!section) return null;
 
@@ -129,25 +121,59 @@ export function SessionRecapDialog({
   }
 
   return (
-    <dialog
-      aria-label="Session recap"
-      className="share-preview-dialog session-recap-dialog"
-      data-qa="session-recap-dialog"
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-      ref={ref}
-    >
-      <header className="share-preview-dialog__header">
-        <div>
-          <p className="eyebrow">Receipts</p>
-          <h2>Session recap</h2>
+    <ShareComposerDialog
+      actions={
+        <div className="session-recap-dialog__actions">
+          {pages.length > 1 ? (
+            <button
+              className="session-recap-dialog__share-all"
+              disabled={allStatus === "working"}
+              onClick={() => void shareAllPages()}
+              type="button"
+            >
+              {allStatus === "working" ? (
+                <LoaderCircle
+                  aria-hidden="true"
+                  className="share-action-spinner"
+                />
+              ) : null}
+              Share all pages
+            </button>
+          ) : null}
+          <SharePreviewActions preview={preview} qaPrefix="recap-page" />
+          {allMessage ? (
+            <p aria-live="polite" className="session-recap-dialog__message">
+              {allMessage}
+            </p>
+          ) : null}
         </div>
-        <button aria-label="Close recap" onClick={onClose} type="button">
-          <X aria-hidden="true" />
-        </button>
-      </header>
+      }
+      className="share-preview-dialog session-recap-dialog"
+      onClose={onClose}
+      preview={
+        <figure
+          aria-busy={!preview.ready}
+          className={`share-preview-dialog__figure share-preview-dialog__figure--${imageFormat}`}
+        >
+          {preview.previewUrl ? (
+            // The source is a local Blob URL created from the generated canvas.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt={`${section.format} session recap page ${page + 1}`}
+              data-qa="share-preview"
+              src={preview.previewUrl}
+            />
+          ) : preview.error ? (
+            <div className="share-preview-dialog__error" role="alert">
+              {preview.error}
+            </div>
+          ) : (
+            <SharePreviewSkeleton className="share-preview-dialog__loading" />
+          )}
+        </figure>
+      }
+      title="Session recap"
+    >
       <div className="session-recap-dialog__choices">
         {sections.length > 1 ? (
           <div
@@ -167,46 +193,16 @@ export function SessionRecapDialog({
             ))}
           </div>
         ) : null}
-        <div
-          aria-label="Image format"
-          className="share-format-choice"
-          role="group"
-        >
-          {(["feed", "story"] as const).map((value) => (
-            <button
-              aria-pressed={imageFormat === value}
-              key={value}
-              onClick={() => {
-                setImageFormat(value);
-                setAllMessage(null);
-              }}
-              type="button"
-            >
-              {shareFormatLabel(value)}
-            </button>
-          ))}
-        </div>
+        <ShareFormatPicker
+          formats={["story", "feed"]}
+          onChange={(value) => {
+            if (value === "landscape") return;
+            setImageFormat(value);
+            setAllMessage(null);
+          }}
+          value={imageFormat}
+        />
       </div>
-      <figure
-        aria-busy={!preview.ready}
-        className={`share-preview-dialog__figure share-preview-dialog__figure--${imageFormat}`}
-      >
-        {preview.previewUrl ? (
-          // The source is a local Blob URL created from the generated canvas.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={`${section.format} session recap page ${page + 1}`}
-            data-qa="share-preview"
-            src={preview.previewUrl}
-          />
-        ) : preview.error ? (
-          <div className="share-preview-dialog__error" role="alert">
-            {preview.error}
-          </div>
-        ) : (
-          <SharePreviewSkeleton className="share-preview-dialog__loading" />
-        )}
-      </figure>
       {pages.length > 1 ? (
         <div className="session-recap-dialog__pages">
           <button
@@ -232,33 +228,6 @@ export function SessionRecapDialog({
           </button>
         </div>
       ) : null}
-      <footer className="share-preview-dialog__footer session-recap-dialog__footer">
-        <div>
-          <p>Names and scores stay on this device until you share them.</p>
-          {pages.length > 1 ? (
-            <button
-              className="session-recap-dialog__share-all"
-              disabled={allStatus === "working"}
-              onClick={() => void shareAllPages()}
-              type="button"
-            >
-              {allStatus === "working" ? (
-                <LoaderCircle
-                  aria-hidden="true"
-                  className="share-action-spinner"
-                />
-              ) : null}
-              Share all pages
-            </button>
-          ) : null}
-          {allMessage ? (
-            <p aria-live="polite" className="session-recap-dialog__message">
-              {allMessage}
-            </p>
-          ) : null}
-        </div>
-        <SharePreviewActions preview={preview} qaPrefix="recap-page" />
-      </footer>
-    </dialog>
+    </ShareComposerDialog>
   );
 }

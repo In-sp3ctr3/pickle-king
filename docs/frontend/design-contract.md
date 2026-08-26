@@ -4,31 +4,31 @@ Status: ready
 
 Pipeline version: 2
 
-Mode: audit and repair
+Mode: reference-derived product
 
 Owner: In-sp3ctr3
 
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 
 - Product: Pickle King offline tournament PWA
 - Audience: Friend groups running a pickleball session courtside
-- Primary user job: Turn selected informal Quick Matches into an honest,
-  shareable end-of-session recap.
-- Primary action: Select ledger matches and preview separate Singles and
-  Doubles Receipts.
-- Visual thesis: The dark courtside ledger opens into a cream paper receipt
-  where oversized black format type and one acid-lime record slab turn local
-  match data into a social artifact without implying a tournament champion.
-- Content narrative: Select the played matches, review the derived player
-  records, then share a deterministic Post or Story page.
-- Selected direction: Reference-lock the existing share system to the five
-  supplied Aug 22 authorities: two Receipts and three individual-result
-  posters. Preserve their stable shaded artwork as cleaned local templates,
-  then draw only real match data into measured text regions.
-- Selected by: Product owner in the 2026-08-24 annotated export repair request.
+- Primary user job: Save an accurate result, then turn it into a polished social
+  artifact without confusing persistence with sharing.
+- Primary action: Confirm the result, open Share result, inspect the exact Story
+  preview, then Share or Save.
+- Visual thesis: A restrained courtside composer frames the approved cream,
+  near-black, lime, condensed-type, and crowned-mascot artifacts without
+  competing with them.
+- Content narrative: Confirm, celebrate the saved result, select a truthful
+  format/artifact, inspect the exact local PNG, then hand it to the device.
+- Selected direction: Preserve the five reference-locked Quick/Recap authorities,
+  place them inside one functional Share Composer, and derive Champion,
+  Standings, and Full draw from the same identity without adding theme variants.
+- Selected by: Product owner in the 2026-08-26 Premium Share Composer plan.
 - Selection evidence: supplied Aug 22 Singles, Doubles, Poster, Frame, and
   Receipt images; user-approved direct reference-pixel reuse; and
-  `specs/016-session-recap/spec.md`.
+  `specs/016-session-recap/spec.md` and
+  `specs/017-share-composer-tournament-identity/spec.md`.
 - Selection status: approved
 
 ## Authority
@@ -77,21 +77,22 @@ Last updated: 2026-08-25
 
 ## Page Regions
 
-| Region         | Purpose                         | Geometry                                          | Responsive behavior                        | Interaction                          |
-| -------------- | ------------------------------- | ------------------------------------------------- | ------------------------------------------ | ------------------------------------ |
-| Court header   | explicit app navigation         | centered floating island                          | labels contract, actions remain available  | back and home                        |
-| Home hero      | establish identity and begin    | asymmetric copy + crowned mascot                  | stacked; CTA first                         | mascot arrival and blink             |
-| Run of show    | next match and time risk        | lime court slab + ordered queue                   | horizontal queue becomes list              | start the one eligible match         |
-| Bracket        | advancement overview            | connected two-sided elimination tree              | bounded pan/zoom with fitted overview      | pan, zoom, fit, start, and correct   |
-| Round robin    | participation and qualification | live table + 3–5 paired rounds + placement row    | three cards become one; rounds stack       | start, rest, correct, and track rank |
-| Scorekeeper    | no-look scoring                 | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns | start, add, subtract, pause, reset   |
-| Results        | podium and evidence             | crowned-ball focal point + grouped tables         | stacked podium then tables                 | share, review, or replay             |
-| History        | recall a social session         | editorial ledger + strong score rail              | table becomes stacked match rows           | view, share, or remove one record    |
-| Draw editor    | repair the field safely         | focused sheet with consequence copy               | full-height mobile dialog                  | rename, late entry, or rebuild       |
-| Challenge lane | expose an amended route         | horizontal earned-match sequence                  | scroll-preserved cards on mobile           | start, correct, or pre-start undo    |
-| Share result   | preview a brag artifact         | reference-led poster with three treatments        | contained 4:5 or 9:16 canvas preview       | choose style, share, or download     |
-| Share bracket  | preview the complete draw       | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview             | native share or explicit download    |
-| Serve guide    | identify legal next server      | compact strip under scorer top bar                | remains above score targets                | read-only court cue and Fix serve    |
+| Region         | Purpose                          | Geometry                                          | Responsive behavior                        | Interaction                           |
+| -------------- | -------------------------------- | ------------------------------------------------- | ------------------------------------------ | ------------------------------------- |
+| Court header   | explicit app navigation          | centered floating island                          | labels contract, actions remain available  | back and home                         |
+| Home hero      | establish identity and begin     | asymmetric copy + crowned mascot                  | stacked; CTA first                         | mascot arrival and blink              |
+| Run of show    | next match and time risk         | lime court slab + ordered queue                   | horizontal queue becomes list              | start the one eligible match          |
+| Bracket        | advancement overview             | connected two-sided elimination tree              | bounded pan/zoom with fitted overview      | pan, zoom, fit, start, and correct    |
+| Round robin    | participation and qualification  | live table + 3–5 paired rounds + placement row    | three cards become one; rounds stack       | start, rest, correct, and track rank  |
+| Scorekeeper    | no-look scoring                  | viewport-bound split screen + centered idle start | portrait two halves; landscape two columns | start, add, subtract, pause, reset    |
+| Results        | podium and evidence              | crowned-ball focal point + grouped tables         | stacked podium then tables                 | share, review, or replay              |
+| History        | recall a social session          | editorial ledger + strong score rail              | table becomes stacked match rows           | view, share, or remove one record     |
+| Draw editor    | repair the field safely          | focused sheet with consequence copy               | full-height mobile dialog                  | rename, late entry, or rebuild        |
+| Challenge lane | expose an amended route          | horizontal earned-match sequence                  | scroll-preserved cards on mobile           | start, correct, or pre-start undo     |
+| Share result   | preview a brag artifact          | reference-led poster with three treatments        | contained 4:5 or 9:16 canvas preview       | choose style, share, or download      |
+| Share bracket  | preview the complete draw        | 4:3 tree with champion focal point                | exact 1600×1200 canvas preview             | native share or explicit download     |
+| Share composer | inspect the exact local artifact | large preview plus one quiet control rail         | stacked below 820px; two-column above      | choose ratio/artifact, share, or save |
+| Serve guide    | identify legal next server       | compact strip under scorer top bar                | remains above score targets                | read-only court cue and Fix serve     |
 
 ## Page Rhythm Map
 
@@ -338,16 +339,38 @@ Last updated: 2026-08-25
 
 ## Authorship Decisions
 
-| Decision                   | Product-specific reason                                             | Visible result                                                           |
-| -------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Legal-position mini-court  | Players forget a serving side, not a generic score statistic        | Horizontal full-court diagram with one highlighted box and server marker |
-| Rally-winner score zones   | Side-out scoring makes receiver wins meaningful without a point     | Large targets communicate rally outcome rather than blind increment      |
-| Stacking-safe wording      | Physical formations vary while rules position only active players   | Guide states the legal box without claiming a live player map            |
-| Read-only bracket overview | A fully fitted draw makes embedded controls too small to tap safely | Overview below 100%; readable interactive cards at 100% and above        |
-| Selected-match receipt     | Informal play needs ceremony without pretending to be a tournament  | Cream poster, player records, and explicit mixed-rules disclosure        |
-| Format-separated exports   | Singles and partner-influenced Doubles are not one fair leaderboard | Independent Singles/Doubles tabs and PNG page sets                       |
-| Twelve-row receipt pages   | A normal open-play group should fit on one image                    | Strict twelve-row chunks begin a continuation only with player thirteen  |
-| Share-style choice         | Players want Strava-like control without rebuilding the result      | Three named treatments with Poster selected by default                   |
+| Decision                   | Product-specific reason                                             | Visible result                                                             |
+| -------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Legal-position mini-court  | Players forget a serving side, not a generic score statistic        | Horizontal full-court diagram with one highlighted box and server marker   |
+| Rally-winner score zones   | Side-out scoring makes receiver wins meaningful without a point     | Large targets communicate rally outcome rather than blind increment        |
+| Stacking-safe wording      | Physical formations vary while rules position only active players   | Guide states the legal box without claiming a live player map              |
+| Read-only bracket overview | A fully fitted draw makes embedded controls too small to tap safely | Overview below 100%; readable interactive cards at 100% and above          |
+| Selected-match receipt     | Informal play needs ceremony without pretending to be a tournament  | Cream poster, player records, and explicit mixed-rules disclosure          |
+| Format-separated exports   | Singles and partner-influenced Doubles are not one fair leaderboard | Independent Singles/Doubles tabs and PNG page sets                         |
+| Twelve-row receipt pages   | A normal open-play group should fit on one image                    | Strict twelve-row chunks begin a continuation only with player thirteen    |
+| Share-style choice         | Players want Strava-like control without rebuilding the result      | Three named treatments with Poster selected by default                     |
+| Confirmation/share split   | Saving a match is irreversible while styling is optional            | Result is saved first; a transient celebration opens the composer          |
+| Tournament artifact trio   | Champion, table, and draw solve different sharing jobs              | One branded Champion plus Standings and Full draw, not nine theme variants |
+
+## Share Composer Contract
+
+- Portrait composers open on Story (9:16). Full bracket opens on Full draw
+  (4:3). Post is labelled Post (4:5); bare ratio-free labels are prohibited.
+- Result review owns only result truth, exceptional finish context, Edit score,
+  and Confirm result. Share controls appear only after the existing result write.
+- Below 820px the dialog is a full-height stack: header, ratio, exact preview,
+  visual choices/pages, privacy copy, and sticky actions. At 820px and wider,
+  preview and controls form a two-column modal.
+- Quick visual choices are actual-result thumbnails in a labelled radio group.
+  Native horizontal scroll-snap may reveal adjacent choices, but keyboard/tap
+  controls remain complete without a swipe gesture.
+- The selected Quick preview is generated first. Remaining active-ratio
+  thumbnails build sequentially through the existing local preview cache.
+- Champion and Standings share one portrait ratio state. Full draw retains its
+  own ratio state. Changing artifact restores that artifact family's prior
+  in-dialog selection; closing resets all selections.
+- Sticky actions say Share or Share / Save on Apple mobile and Save image for
+  the explicit file fallback. No UI promises a specific native destination.
 
 ## Share Export Geometry
 

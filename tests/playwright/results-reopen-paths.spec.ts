@@ -19,8 +19,10 @@ async function finishTournament(page: Page) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await page.locator("[data-qa='confirm-serve-setup']").click();
     await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
     await page.getByRole("button", { name: "Confirm result" }).click();
+    await page.locator("[data-qa='continue-saved-result']").click();
   }
 }
 

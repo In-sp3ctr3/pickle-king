@@ -21,7 +21,7 @@ or non-overlap.
   fixtures, then checks every Player, W-L, and +/- lane for complete dividers,
   clear space, and raster centering between rules.
 - The local production-server run passed 5 of 5 browser tests plus the recap
-  grid check in 2.0 minutes on Chromium.
+  grid check in 2.3 minutes on Chromium.
 - `.github/workflows/quality.yml` now runs the focused gate after the production
   build on pinned Ubuntu 24.04 and Chromium. The first remote Linux run remains
   the cross-platform proof; the baselines were generated on macOS.
@@ -52,7 +52,7 @@ DQA-83 through DQA-86 with no remaining P0/P1/P2 finding.
 - `npm run lint`, `npm run typecheck`, `npm run format:check`,
   `npm run test:pwa`, `npm run build`, and `npm audit --audit-level=high`
   passed. The audit reported zero vulnerabilities.
-- The full frontend harness passed 72 of 72 cases serially and produced 48
+- The full frontend harness passed 72 of 72 cases with three workers and produced 48
   render captures plus 48 combined comparison artifacts. Direction,
   static-prototype, and release receipts passed.
 - Adversarial code review and Ponytail simplicity review have no open feature

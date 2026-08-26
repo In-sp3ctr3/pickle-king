@@ -5,6 +5,7 @@ import {
   chooseRating,
   completeScheduledMatches,
   confirmServeSetup,
+  continueSavedResult,
   fillRoundRobinSetup,
 } from "./small-field-harness";
 import { quickHistoryFixture } from "./quick-history-fixture";
@@ -155,6 +156,7 @@ export async function openRoute(page: Page, route: Route) {
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='score-a-add']").click();
       await page.locator("[data-qa='confirm-result']").click();
+      await continueSavedResult(page);
     }
     await expect(page.locator("[data-qa='results']")).toBeVisible();
   }
@@ -191,11 +193,21 @@ export async function openRoute(page: Page, route: Route) {
   if (
     route.prepare === "quick-idle" ||
     route.prepare === "quick-live" ||
-    route.prepare === "quick-result"
+    route.prepare === "quick-result" ||
+    route.prepare === "quick-result-saved"
   ) {
-    await fillQuickMatch(page, route.prepare === "quick-result" ? 1 : 11);
+    await fillQuickMatch(
+      page,
+      route.prepare === "quick-result" || route.prepare === "quick-result-saved"
+        ? 1
+        : 11,
+    );
   }
-  if (route.prepare === "quick-live" || route.prepare === "quick-result") {
+  if (
+    route.prepare === "quick-live" ||
+    route.prepare === "quick-result" ||
+    route.prepare === "quick-result-saved"
+  ) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
@@ -206,6 +218,10 @@ export async function openRoute(page: Page, route: Route) {
     } else {
       await page.locator("[data-qa='score-a-add']").click();
       await expect(page.getByRole("dialog")).toBeVisible();
+      if (route.prepare === "quick-result-saved") {
+        await page.locator("[data-qa='confirm-result']").click();
+        await expect(page.locator("[data-qa='result-saved']")).toBeVisible();
+      }
     }
   }
   return response;

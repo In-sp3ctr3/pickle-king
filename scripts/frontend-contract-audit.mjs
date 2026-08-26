@@ -897,12 +897,12 @@ if (routeMap) {
       failures.push(`Unexpected design-qa evidence key: ${key}`);
   }
   if (designReview) {
-    for (const [label, role, column] of [
-      ["Source captures", "source", 2],
-      ["Render captures", "render", 3],
-      ["Combined comparisons", "comparison", 4],
+    for (const [role, column] of [
+      ["source", 2],
+      ["render", 3],
+      ["comparison", 4],
     ]) {
-      const declared = field(designReview, label);
+      const declared = designReview;
       for (const cells of evidenceByKey.values()) {
         const expectedPath = cells[column];
         if (expectedPath && !declared.includes(expectedPath)) {

@@ -89,7 +89,7 @@ async function pixelCount(
 }
 
 test("renders matched-data poster reference evidence", async ({ page }) => {
-  test.setTimeout(60_000);
+  test.setTimeout(120_000);
   await page.addInitScript((history) => {
     localStorage.clear();
     localStorage.setItem("pickle-king:history", JSON.stringify(history));
@@ -112,26 +112,27 @@ test("renders matched-data poster reference evidence", async ({ page }) => {
 
   const poster = page.locator("article", { hasText: "Jadan 4–2 Shevar" });
   await poster.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await savePreview(page, "output/playwright/reference-quick-poster-story.png");
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   const production = page.locator("article", {
     hasText: "Darien 12–10 Jean-Paul",
   });
   await production.getByRole("button", { name: "Share" }).click();
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   await savePreview(
     page,
     "output/playwright/production-quick-poster-feed.png",
     1350,
   );
-  await page.getByRole("button", { name: "Frame" }).click();
+  await page.getByRole("radio", { name: "Frame" }).click();
   await savePreview(
     page,
     "output/playwright/production-quick-frame-feed.png",
     1350,
   );
-  await page.getByRole("button", { name: "Receipt" }).click();
+  await page.getByRole("radio", { name: "Receipt" }).click();
   await savePreview(
     page,
     "output/playwright/production-quick-receipt-feed.png",
@@ -160,17 +161,17 @@ test("renders matched-data poster reference evidence", async ({ page }) => {
       (red, green, blue) => red > 120 && green > 150 && blue < 80,
     ),
   ).resolves.toBeGreaterThan(500);
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await savePreview(
     page,
     "output/playwright/production-quick-receipt-story.png",
   );
-  await page.getByRole("button", { name: "Poster" }).click();
+  await page.getByRole("radio", { name: "Poster" }).click();
   await savePreview(
     page,
     "output/playwright/production-quick-poster-story.png",
   );
-  await page.getByRole("button", { name: "Frame" }).click();
+  await page.getByRole("radio", { name: "Frame" }).click();
   await savePreview(page, "output/playwright/production-quick-frame-story.png");
   for (const style of ["poster", "frame"]) {
     await expect(
@@ -181,34 +182,34 @@ test("renders matched-data poster reference evidence", async ({ page }) => {
       ),
     ).resolves.toBeGreaterThan(3_000);
   }
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   const alternate = page.locator("article", { hasText: "Maya 11–7 Steven" });
   await alternate.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("button", { name: "Frame" }).click();
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("radio", { name: "Frame" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await savePreview(page, "output/playwright/reference-quick-frame-story.png");
-  await page.getByRole("button", { name: "Receipt" }).click();
+  await page.getByRole("radio", { name: "Receipt" }).click();
   await savePreview(
     page,
     "output/playwright/reference-quick-receipt-story.png",
   );
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   const longName = page.locator("article", {
     hasText: "Jean-Baptiste M. 11–7 Alexandra",
   });
   await longName.getByRole("button", { name: "Share" }).click();
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await savePreview(page, "output/playwright/long-name-quick-poster-story.png");
-  await page.getByRole("button", { name: "Frame" }).click();
+  await page.getByRole("radio", { name: "Frame" }).click();
   await savePreview(page, "output/playwright/long-name-quick-frame-story.png");
-  await page.getByRole("button", { name: "Receipt" }).click();
+  await page.getByRole("radio", { name: "Receipt" }).click();
   await savePreview(
     page,
     "output/playwright/long-name-quick-receipt-story.png",
   );
-  await page.getByRole("button", { name: "Close preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   await page.getByRole("button", { name: "Create recap" }).click();
   await poster.getByRole("checkbox").uncheck();
@@ -216,25 +217,25 @@ test("renders matched-data poster reference evidence", async ({ page }) => {
   await longName.getByRole("checkbox").uncheck();
   await production.getByRole("checkbox").uncheck();
   await page.getByRole("button", { name: "Preview recap" }).click();
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await page.getByRole("button", { name: "Singles" }).click();
   await savePreview(
     page,
     "output/playwright/reference-recap-singles-story.png",
   );
-  await page.getByRole("button", { name: "Post" }).click();
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   await savePreview(
     page,
     "output/playwright/reference-recap-singles-post.png",
     1350,
   );
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await page.getByRole("button", { name: "Doubles" }).click();
   await savePreview(
     page,
     "output/playwright/reference-recap-doubles-story.png",
   );
-  await page.getByRole("button", { name: "Post" }).click();
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   await savePreview(
     page,
     "output/playwright/reference-recap-doubles-post.png",

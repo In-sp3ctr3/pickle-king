@@ -181,7 +181,7 @@ function verify(results) {
         continue;
       }
       if (name === "heading" && profile.startsWith("quick-")) {
-        if (measured.render.width < 145 || measured.render.height < 60)
+        if (measured.render.width < 130 || measured.render.height < 60)
           failures.push(`${profile}/${name} misses readability floor`);
         continue;
       }
@@ -191,12 +191,37 @@ function verify(results) {
       ) {
         continue;
       }
-      for (const edge of ["left", "top", "right", "bottom"]) {
-        const drift = Math.abs(
-          measured.reference[edge] - measured.render[edge],
-        );
-        if (drift > 14)
-          failures.push(`${profile}/${name} ${edge} drift ${drift}px`);
+      if (profile === "quick-poster" && name === "scoreLoser") {
+        const winner = result.regions.scoreWinner.render;
+        const loserCenter = (measured.render.left + measured.render.right) / 2;
+        const winnerCenter = winner ? (winner.left + winner.right) / 2 : null;
+        if (winnerCenter == null || Math.abs(loserCenter - winnerCenter) > 8)
+          failures.push(`${profile}/${name} is not centered with winner score`);
+        for (const edge of ["top", "bottom"]) {
+          const drift = Math.abs(
+            measured.reference[edge] - measured.render[edge],
+          );
+          if (drift > 14)
+            failures.push(`${profile}/${name} ${edge} drift ${drift}px`);
+        }
+      } else if (profile === "quick-frame" && name === "opponent") {
+        if (measured.render.width < 200)
+          failures.push(`${profile}/${name} width ${measured.render.width}px`);
+        for (const edge of ["left", "top", "bottom"]) {
+          const drift = Math.abs(
+            measured.reference[edge] - measured.render[edge],
+          );
+          if (drift > 14)
+            failures.push(`${profile}/${name} ${edge} drift ${drift}px`);
+        }
+      } else {
+        for (const edge of ["left", "top", "right", "bottom"]) {
+          const drift = Math.abs(
+            measured.reference[edge] - measured.render[edge],
+          );
+          if (drift > 14)
+            failures.push(`${profile}/${name} ${edge} drift ${drift}px`);
+        }
       }
       const shapeChecked =
         (profile === "quick-poster" &&

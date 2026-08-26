@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Pickle King Share Composer prototype</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      :root {
+        color-scheme: dark;
+        font-family: Manrope, Arial, sans-serif;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #070a07;
+        color: #f5f1e8;
+      }
+      button {
+        font: inherit;
+      }
+      .composer {
+        width: min(1180px, calc(100vw - 48px));
+        height: min(900px, calc(100vh - 48px));
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(330px, 0.72fr);
+        overflow: hidden;
+        border: 1px solid #31392d;
+        border-radius: 28px;
+        background: #11150f;
+        box-shadow: 0 38px 120px #000b;
+      }
+      .preview {
+        display: grid;
+        min-width: 0;
+        place-items: center;
+        padding: 28px;
+        background: #090c09;
+      }
+      .preview img {
+        display: block;
+        width: auto;
+        height: min(810px, 82vh);
+        max-width: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 22px 30px #0009);
+      }
+      .controls {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: auto auto minmax(0, 1fr) auto;
+        gap: 24px;
+        padding: 28px;
+        border-left: 1px solid #30382b;
+      }
+      header {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 20px;
+      }
+      .eyebrow {
+        margin: 0 0 5px;
+        color: #c8dc00;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font:
+          400 38px/1 Archivo Black,
+          Impact,
+          sans-serif;
+        text-transform: uppercase;
+      }
+      .close {
+        width: 48px;
+        height: 48px;
+        border: 0;
+        border-radius: 50%;
+        background: #252d21;
+        color: white;
+        font-size: 24px;
+      }
+      .label {
+        display: block;
+        margin-bottom: 10px;
+        color: #aeb6a5;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .ratios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 5px;
+        border-radius: 17px;
+        background: #090c09;
+      }
+      .ratios button {
+        min-height: 52px;
+        border: 0;
+        border-radius: 13px;
+        background: transparent;
+        color: #aeb6a5;
+        font-weight: 800;
+      }
+      .ratios .selected {
+        background: #c8dc00;
+        color: #090b08;
+      }
+      .designs {
+        min-height: 0;
+        align-self: end;
+      }
+      .rail {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 42%;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 2px 2px 12px;
+        scroll-snap-type: x mandatory;
+      }
+      .card {
+        scroll-snap-align: start;
+        padding: 6px;
+        border: 1px solid #384132;
+        border-radius: 16px;
+        background: #171c15;
+        color: white;
+        text-align: left;
+      }
+      .card.selected {
+        border-color: #c8dc00;
+        box-shadow: 0 0 0 2px #c8dc00;
+      }
+      .thumb {
+        aspect-ratio: 9 / 16;
+        overflow: hidden;
+        border-radius: 11px;
+        background: #050705;
+      }
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .card strong {
+        display: block;
+        padding: 10px 6px 6px;
+        font-size: 13px;
+      }
+      footer {
+        margin: 0 -28px -28px;
+        padding: 20px 28px 24px;
+        border-top: 1px solid #30382b;
+        background: #11150ff5;
+      }
+      .privacy {
+        margin: 0 0 14px;
+        color: #9da494;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .actions button {
+        min-height: 54px;
+        border: 1px solid #3a4434;
+        border-radius: 15px;
+        background: transparent;
+        color: white;
+        font-weight: 800;
+      }
+      .actions .primary {
+        border-color: #c8dc00;
+        background: #c8dc00;
+        color: #090b08;
+      }
+      @media (max-width: 819px) {
+        body {
+          display: block;
+        }
+        .composer {
+          width: 100vw;
+          height: 100dvh;
+          grid-template-columns: 1fr;
+          grid-template-rows: minmax(0, 1fr) auto;
+          border: 0;
+          border-radius: 0;
+        }
+        .preview {
+          grid-row: 1;
+          padding: 18px;
+        }
+        .preview img {
+          height: min(54dvh, 580px);
+        }
+        .controls {
+          grid-row: 2;
+          max-height: 55dvh;
+          overflow: auto;
+          padding: 20px;
+          border-top: 1px solid #30382b;
+          border-left: 0;
+        }
+        h1 {
+          font-size: 28px;
+        }
+        footer {
+          position: sticky;
+          bottom: -20px;
+          margin: 0 -20px -20px;
+          padding: 16px 20px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="composer" aria-label="Share result prototype">
+      <section class="preview">
+        <img
+          src="../../../output/playwright/reference-quick-poster-story.png"
+          alt="Poster Story preview"
+        />
+      </section>
+      <section class="controls">
+        <header>
+          <div>
+            <p class="eyebrow">Result saved</p>
+            <h1>Share result</h1>
+          </div>
+          <button class="close" aria-label="Close">×</button>
+        </header>
+        <div>
+          <span class="label">Format</span>
+          <div class="ratios" role="group" aria-label="Image format">
+            <button class="selected">Story (9:16)</button
+            ><button>Post (4:5)</button>
+          </div>
+        </div>
+        <div class="designs">
+          <span class="label">Design</span>
+          <div class="rail" role="radiogroup" aria-label="Image design">
+            <button class="card selected" role="radio" aria-checked="true">
+              <span class="thumb"
+                ><img
+                  src="../../../output/playwright/reference-quick-poster-story.png"
+                  alt="" /></span
+              ><strong>Poster</strong>
+            </button>
+            <button class="card" role="radio" aria-checked="false">
+              <span class="thumb"
+                ><img
+                  src="../../../output/playwright/reference-quick-frame-story.png"
+                  alt="" /></span
+              ><strong>Frame</strong>
+            </button>
+            <button class="card" role="radio" aria-checked="false">
+              <span class="thumb"
+                ><img
+                  src="../../../output/playwright/reference-quick-receipt-story.png"
+                  alt="" /></span
+              ><strong>Receipt</strong>
+            </button>
+          </div>
+        </div>
+        <footer>
+          <p class="privacy">
+            Names and scores stay on this device until you share them.
+          </p>
+          <div class="actions">
+            <button>Save image</button><button class="primary">Share</button>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>

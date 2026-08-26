@@ -45,11 +45,11 @@ describe("Quick Match recap selection", () => {
 
     expect(
       screen
-        .getByRole("button", { name: "Poster" })
-        .getAttribute("aria-pressed"),
+        .getByRole("radio", { name: "Poster" })
+        .getAttribute("aria-checked"),
     ).toBe("true");
-    expect(screen.getByRole("button", { name: "Frame" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Receipt" })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: "Frame" })).toBeTruthy();
+    expect(screen.getByRole("radio", { name: "Receipt" })).toBeTruthy();
   });
 
   it("preselects the newest local day, allows toggling, and restores ledger actions on cancel", async () => {

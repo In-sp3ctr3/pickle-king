@@ -30,14 +30,14 @@ describe("SharePreviewActions", () => {
     expect(markup).not.toContain("Download image");
   });
 
-  it("offers a download fallback when native iPad sharing is unavailable", () => {
+  it("offers a save fallback when native iPad sharing is unavailable", () => {
     const markup = renderToStaticMarkup(
       <SharePreviewActions
         preview={preview({ appleMobile: true, shareAvailable: false })}
       />,
     );
-    expect(markup).toContain("Download image");
-    expect(markup).toContain("Download");
+    expect(markup).toContain("Save image");
+    expect(markup).not.toContain("Download image");
   });
 
   it("shows completion inside the action instead of status copy", () => {

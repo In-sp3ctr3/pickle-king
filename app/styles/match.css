@@ -682,6 +682,34 @@
   backdrop-filter: blur(8px);
 }
 
+.result-dialog__score {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: 260px;
+  place-items: center;
+  align-content: center;
+  gap: 0.25rem;
+  border: 1px solid #313a2d;
+  background: #11150f;
+  text-align: center;
+}
+
+.result-dialog__score p {
+  margin: 0;
+  font-family: "Archivo Black", sans-serif;
+  font-size: clamp(2rem, 8vw, 4rem);
+  line-height: 0.94;
+  text-transform: uppercase;
+}
+
+.result-dialog__score strong {
+  color: var(--lime);
+  font-family: "Roboto Slab", serif;
+  font-size: clamp(3.5rem, 15vw, 7rem);
+  line-height: 1;
+}
+
 .result-dialog__preview {
   position: relative;
   z-index: 1;
@@ -852,6 +880,10 @@ html[data-visual-freeze="true"] .victory-confetti__static {
   grid-template-columns: minmax(8rem, 1fr) auto minmax(8rem, 1fr);
   gap: 0.75rem;
   margin-top: 0.75rem;
+}
+
+.result-dialog__actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .result-dialog .dialog-actions > button {
@@ -1100,6 +1132,66 @@ html[data-visual-freeze="true"] .victory-confetti__static {
     animation: none;
     transition: none;
   }
+}
+
+.result-saved-dialog {
+  width: min(92vw, 520px);
+  max-width: none;
+  margin: auto;
+  border: 0;
+  border-radius: 24px;
+  background: #11150f;
+  color: var(--chalk);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  text-align: center;
+  box-shadow: 0 34px 100px rgb(0 0 0 / 78%);
+}
+
+.result-saved-dialog::backdrop {
+  background: rgb(2 3 2 / 82%);
+  backdrop-filter: blur(10px);
+}
+
+.result-saved-dialog__check {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--lime);
+  color: var(--court);
+  padding: 0.8rem;
+}
+
+.result-saved-dialog h2 {
+  margin: 0.3rem 0 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.result-saved-dialog__outcome {
+  margin: 0.1rem 0 0;
+  font:
+    800 1rem/1 Manrope,
+    sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.result-saved-dialog > strong {
+  display: block;
+  margin: 0.5rem 0 1.5rem;
+  color: var(--lime);
+  font-family: "Roboto Slab", serif;
+  font-size: clamp(2.5rem, 12vw, 5rem);
+}
+
+.result-saved-dialog .dialog-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.result-saved-dialog .dialog-actions button {
+  min-height: 52px;
 }
 
 @media (max-width: 319px) {

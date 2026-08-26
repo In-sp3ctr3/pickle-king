@@ -2,15 +2,17 @@
 
 Pipeline version: 2
 Status: passed
-Last updated: 2026-08-25
+Last updated: 2026-08-26
 
 ## Environment
 
-- Commit/source state: v1.10.0-alpha.1 share identity repair
+- Active feature: `specs/017-share-composer-tournament-identity/`.
+- Direction, isolated prototype, production implementation, full-resolution
+  artifact review, and browser evidence are approved.
+
+- Commit/source state: v1.10.0-alpha.1 Premium Share Composer and tournament identity
 - Browser: Playwright Chromium 1.62.1
-- Base URL: development harness on localhost; final focused Receipt workflow and
-  offline checks repeated against the production Vinext server at
-  http://127.0.0.1:3042
+- Base URL: production Vinext server at http://127.0.0.1:3043
 - DPR: Playwright default at 1440×1000 and 390×844
 - Stable-data/animation setup: distinct fixed ratings, cleared localStorage,
   blurred focus before capture, disabled screenshot animations, and isolated
@@ -41,6 +43,8 @@ Last updated: 2026-08-25
 | quick-live                      | mobile   | docs/frontend/evidence/quick-live-mobile-source.png                       | test-results/frontend-captures/quick-live-mobile.png                       | test-results/frontend-comparisons/quick-live-mobile.png                       | passed          | passed     |
 | quick-result                    | desktop  | docs/frontend/evidence/quick-result-desktop-source.png                    | test-results/frontend-captures/quick-result-desktop.png                    | test-results/frontend-comparisons/quick-result-desktop.png                    | passed          | passed     |
 | quick-result                    | mobile   | docs/frontend/evidence/quick-result-mobile-source.png                     | test-results/frontend-captures/quick-result-mobile.png                     | test-results/frontend-comparisons/quick-result-mobile.png                     | passed          | passed     |
+| quick-result-saved              | desktop  | docs/frontend/evidence/quick-result-saved-desktop-source.png              | test-results/frontend-captures/quick-result-saved-desktop.png              | test-results/frontend-comparisons/quick-result-saved-desktop.png              | passed          | passed     |
+| quick-result-saved              | mobile   | docs/frontend/evidence/quick-result-saved-mobile-source.png               | test-results/frontend-captures/quick-result-saved-mobile.png               | test-results/frontend-comparisons/quick-result-saved-mobile.png               | passed          | passed     |
 | results                         | desktop  | docs/frontend/evidence/results-desktop-source.png                         | test-results/frontend-captures/results-desktop.png                         | test-results/frontend-comparisons/results-desktop.png                         | passed          | passed     |
 | results                         | mobile   | docs/frontend/evidence/results-mobile-source.png                          | test-results/frontend-captures/results-mobile.png                          | test-results/frontend-comparisons/results-mobile.png                          | passed          | passed     |
 | history                         | desktop  | docs/frontend/evidence/history-desktop-source.png                         | test-results/frontend-captures/history-desktop.png                         | test-results/frontend-comparisons/history-desktop.png                         | passed          | passed     |
@@ -146,6 +150,9 @@ not replace the five supplied authorities above.
 | Quick · `Jean-Baptiste M.` · Poster Story  | `docs/frontend/evidence/share-comparisons/quick-long-name-poster-story.webp`  |
 | Quick · `Jean-Baptiste M.` · Frame Story   | `docs/frontend/evidence/share-comparisons/quick-long-name-frame-story.webp`   |
 | Quick · `Jean-Baptiste M.` · Receipt Story | `docs/frontend/evidence/share-comparisons/quick-long-name-receipt-story.webp` |
+| Tournament · Champion · Story              | `docs/frontend/evidence/share-comparisons/tournament-champion-story.png`      |
+| Tournament · Standings · Story             | `docs/frontend/evidence/share-comparisons/tournament-standings-story.png`     |
+| Tournament · Full draw · Story             | `docs/frontend/evidence/share-comparisons/tournament-full-draw-story.png`     |
 
 The final independently approved recap target hashes, in table order, are
 `386144f9fdaa3b2e3ee25331d591d591a87eb0c90a2d6880af02f5229aae110a`,
@@ -156,6 +163,12 @@ The final independently approved recap target hashes, in table order, are
 `fab4c15615bd742f6daeeac090311869909493a8dcee9fd2555c7dec305d003c`,
 `4ab1e5fc0992107141d354a20473034fae6b3b9e4901ef5adb1f7be8983d09e1`,
 and `24027aa8ae7e9e1466df4b35804d0585b231e00cd2d884abb1ef31448a2a0baf`.
+
+The independently reviewed tournament Story targets are reference-derived,
+not supplied authorities. Their Champion, Standings, and Full draw hashes are
+`58101a490493b40d63eb0d49f592dc9085b3e787bbea3bf31189bd9a999afad4`,
+`aedb33687c1e528f77fada865b755864be3353b16def83dfbfea5f57413b5c21`,
+and `8306e2229c998f99fddf6285c952c580c6c9d92ce956785edd0019879adad5e7`.
 
 Supplied source hashes, in the table order above, are
 `fd359dc21bcdec8d5f02a470722195b778f530932a0a8154f0ee2fac03a581e3`,
@@ -175,10 +188,12 @@ five-viewport browser matrix also covers current 16-character and legacy
 40-character names without clipping or moving the score/footer geometry.
 
 Poster, Frame, Singles recap, and Doubles recap identity regions use
-`scripts/measure-other-share-fidelity.mjs --check`. Quick scores, opponents,
-and taglines stay within 14px per edge; the repaired winner regions instead
-enforce the requested collision clearances. Every footer is checked for a
-centered readable canonical lockup. The final
+`scripts/measure-other-share-fidelity.mjs --check`. Unchanged Quick score,
+opponent, and tagline regions stay within 14px per edge. The intentional
+two-line heading, lighter Frame opponent, and fixed-lane Poster loser score use
+readability, minimum-width, vertical-edge, mask, and shared-center checks
+instead of obsolete source-glyph widths. Every footer is checked for a centered
+readable canonical lockup. The final
 Frame template preserves its continuous bottom rule, while dense Doubles keeps
 equal 64px masthead margins and the authority's underline-free masthead.
 
@@ -294,6 +309,10 @@ canvas padding cannot conceal a clipped source contour.
 | DQA-99  | P1       | Quick result Feed exports  | production `Darien 12–10 Jean-Paul` Poster/Frame/Receipt captures    | iOS ignored Canvas-filter wordmark recoloring; two-digit scores and winner lanes crossed the static artwork because Feed QA only covered smaller fixtures | frontend | fixed  |
 | DQA-100 | P1       | Quick result visual gate   | independent full-resolution review of eighteen Post/Story baselines  | broad whole-image tolerance could lose opponent text; Receipt Feed clipped the winner against the mascot and all Feed footers crossed the safe area       | frontend | fixed  |
 | DQA-101 | P1       | Quick result fitting       | `Jean-Paul` winner diff bounds plus Canvas text capture              | width-only name fitting painted above its lane, mascot art consumed text space, and Receipt Post silently shortened `12–10` to an ellipsis                | frontend | fixed  |
+| DQA-102 | P1       | share/composer             | five-viewport Composer captures and keyboard/touch workflow          | fragmented dialogs, ambiguous format labels, and text-only Quick styles made sharing feel disjointed                                                      | frontend | fixed  |
+| DQA-103 | P1       | result/handoff             | confirm, dismiss, continue, and Share result browser workflows       | result persistence and image sharing were coupled, making dismissal and save timing unclear                                                               | product  | fixed  |
+| DQA-104 | P1       | tournament/share identity  | Champion, Standings, and Full draw target/render/difference boards   | tournament artifacts did not consistently use the approved cream, near-black, lime, mascot, and canonical-lockup system                                   | frontend | fixed  |
+| DQA-105 | P2       | share/responsive actions   | 390×844, 844×390, 820×1180, 1180×820, and 1440×1000 captures         | preview hierarchy and Share/Save reachability were not proven across phone, tablet, and desktop                                                           | frontend | fixed  |
 
 ## Feedback Loop
 
@@ -319,22 +338,27 @@ canvas padding cannot conceal a clipped source contour.
 
 ## Anti-Template Review
 
-| Surface       | Risk                        | Evidence                                | Finding                                                                                             | Resolution                                                                     | Result |
-| ------------- | --------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------ |
-| Live scorer   | Generic dashboard treatment | quick-live desktop/mobile captures      | Court-first split scoring remains the dominant composition                                          | Compact rule-specific serve strip uses the existing court identity             | passed |
-| Serve guide   | Decorative sports diagram   | serve-tracker browser flow              | Every line, box, label, and marker communicates legal serve state                                   | Full court mirrors teams across the net and highlights one legal box           | passed |
-| Full bracket  | Generic canvas/dashboard    | phone, desktop, and iPad captures       | Existing semantic match cards and connectors remain the product                                     | Native DOM/CSS transform and scrolling add no canvas or dependency             | passed |
-| Session recap | Generic standings template  | supplied posters and five-size captures | Oversized format type, paper texture, acid-lime ledger, and one mascot retain the Receipts identity | Canvas renders only selected local match facts; no invented ceremony or AI art | passed |
+| Surface            | Risk                           | Evidence                                              | Finding                                                                                             | Resolution                                                                            | Result |
+| ------------------ | ------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
+| Live scorer        | Generic dashboard treatment    | quick-live desktop/mobile captures                    | Court-first split scoring remains the dominant composition                                          | Compact rule-specific serve strip uses the existing court identity                    | passed |
+| Serve guide        | Decorative sports diagram      | serve-tracker browser flow                            | Every line, box, label, and marker communicates legal serve state                                   | Full court mirrors teams across the net and highlights one legal box                  | passed |
+| Full bracket       | Generic canvas/dashboard       | phone, desktop, and iPad captures                     | Existing semantic match cards and connectors remain the product                                     | Native DOM/CSS transform and scrolling add no canvas or dependency                    | passed |
+| Session recap      | Generic standings template     | supplied posters and five-size captures               | Oversized format type, paper texture, acid-lime ledger, and one mascot retain the Receipts identity | Canvas renders only selected local match facts; no invented ceremony or AI art        | passed |
+| Share Composer     | Generic media picker           | five composer viewports and actual result thumbnails  | The current match remains dominant while format, design, privacy, and actions stay explicit         | Two shared primitives reuse native dialog, radio, scrolling, and Canvas behavior      | passed |
+| Tournament exports | Generic trophy/leaderboard art | three full-resolution target/render/difference boards | Champion, Standings, and Full draw remain distinct factual artifacts in one identity                | Existing renderers and data boundaries are retained; no theme engine or invented copy | passed |
 
 ## Authorship Evidence
 
-| Decision              | Visible evidence                                                   | Product outcome                                                        |
-| --------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| Legal service-box cue | One pulsing lime box on the full mini-court                        | The scorer sees where the next serve begins without calculating parity |
-| Solid server marker   | Lime head-and-torso marker outside the active baseline             | The active server remains distinct without implying live formation     |
-| Rally-winner scoring  | Two large court targets paired with whole-rally undo               | One tap records either a point or a service transition correctly       |
-| Read-only overview    | Centered complete draw plus an explicit overview note              | Fit reveals the tournament shape without exposing undersized controls  |
-| Receipts continuation | Date, format, page count, and full-format statistics on every page | Each shared page remains understandable after it leaves the app        |
+| Decision              | Visible evidence                                                   | Product outcome                                                         |
+| --------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| Legal service-box cue | One pulsing lime box on the full mini-court                        | The scorer sees where the next serve begins without calculating parity  |
+| Solid server marker   | Lime head-and-torso marker outside the active baseline             | The active server remains distinct without implying live formation      |
+| Rally-winner scoring  | Two large court targets paired with whole-rally undo               | One tap records either a point or a service transition correctly        |
+| Read-only overview    | Centered complete draw plus an explicit overview note              | Fit reveals the tournament shape without exposing undersized controls   |
+| Receipts continuation | Date, format, page count, and full-format statistics on every page | Each shared page remains understandable after it leaves the app         |
+| Saved-result handoff  | Confirmation ends before a focused Result saved celebration        | Dismissal cannot erase a match and sharing never controls persistence   |
+| Ratio-first composer  | Story (9:16), Post (4:5), and supported Full draw (4:3) labels     | Users choose destination shape before committing to an export           |
+| Visual design rail    | Actual Poster, Frame, and Receipt result thumbnails                | Template choice is inspectable, tactile, and never dependent on swiping |
 
 ## Harness Results
 
@@ -357,9 +381,15 @@ Reviewer evidence: docs/frontend/reviews/design-review.md
 
 Result: passed
 
-Rationale: exact contained previews, native share/download fallbacks, measured
+Rationale: exact contained previews, native Share/Save fallbacks, measured
 name fitting, 48px court-side controls, safe-area geometry, and the current
 quick, recap, stats, and 4/8/16-player bracket artifacts were reviewed. The
+shared Composer also passes its five target viewports, Story defaults, exact
+ratio labels, selected-preview-first thumbnail sequence, focus restoration,
+sticky actions, and reduced-motion behavior. Confirmation now persists once
+before the transient Result saved handoff. Champion, Standings, and Full draw
+use one coherent share identity while keeping their artifact-specific facts and
+formats.
 Quick Feed matrix now includes the real two-digit `Darien 12–10 Jean-Paul`
 fixture in all three treatments, direct chalk/ink lockup assets, and fixed
 score/name safe lanes with no Canvas-filter dependency. The

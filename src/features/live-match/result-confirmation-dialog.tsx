@@ -1,18 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { ScoringState } from "../../match/types";
-import {
-  quickShareCanvas,
-  quickShareFileName,
-  QuickShareStylePicker,
-  shareFormatLabel,
-  SharePreviewActions,
-  SharePreviewSkeleton,
-  type ShareFormat,
-  type QuickShareStyle,
-  useSharePreview,
-} from "../share";
+import type { QuickShareStyle, ShareFormat } from "../share";
 import { VictoryConfetti } from "./victory-confetti";
 
 export function ResultConfirmationDialog({
@@ -46,14 +36,6 @@ export function ResultConfirmationDialog({
   }, []);
 
   const winnerName = scorer.winner === "A" ? scorer.labelA : scorer.labelB;
-  const [format, setFormat] = useState<ShareFormat>("feed");
-  const [style, setStyle] = useState<QuickShareStyle>("poster");
-  const share = useSharePreview(
-    () => quickShareCanvas(scorer, format, style),
-    quickShareFileName(style, format),
-    resultPreviewKey(scorer, format, style),
-  );
-
   return (
     <dialog
       aria-labelledby="result-title"
@@ -85,46 +67,17 @@ export function ResultConfirmationDialog({
         {winnerName} wins
       </h2>
       <span className="sr-only">{scorer.stageLabel ?? "Final score"}</span>
-      <div
-        aria-label="Image format"
-        className="share-format-choice"
-        role="group"
-      >
-        {(["feed", "story"] as const).map((value) => (
-          <button
-            aria-pressed={format === value}
-            key={value}
-            onClick={() => setFormat(value)}
-            type="button"
-          >
-            {shareFormatLabel(value)}
-          </button>
-        ))}
+      <div className="result-dialog__score" data-qa="result-score">
+        <p>{winnerName} wins</p>
+        <strong>
+          {scorer.scoreA}–{scorer.scoreB}
+        </strong>
       </div>
-      <QuickShareStylePicker onChange={setStyle} value={style} />
-      <figure
-        aria-busy={!share.ready}
-        className={`result-dialog__preview result-dialog__preview--${format}`}
-      >
-        {share.previewUrl ? (
-          // Blob previews are already-local generated images and cannot use an image optimizer.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            alt={`${winnerName} wins ${scorer.scoreA} to ${scorer.scoreB}. Share image preview.`}
-            data-qa="result-preview"
-            src={share.previewUrl}
-          />
-        ) : (
-          <SharePreviewSkeleton className="result-dialog__preview-skeleton" />
-        )}
-        <figcaption>Share preview</figcaption>
-      </figure>
       <ResultExplanation scorer={scorer} />
       <div className="dialog-actions result-dialog__actions">
         <button className="secondary-button" onClick={onEdit} type="button">
           Edit score
         </button>
-        <SharePreviewActions preview={share} qaPrefix="result" />
         <button
           className="primary-button"
           data-initial-focus
@@ -135,11 +88,6 @@ export function ResultConfirmationDialog({
           Confirm result
         </button>
       </div>
-      {!share.shareAvailable && share.ready ? (
-        <p className="result-dialog__share-note" id="share-unavailable">
-          Native sharing is unavailable here. You can still download the PNG.
-        </p>
-      ) : null}
     </dialog>
   );
 }

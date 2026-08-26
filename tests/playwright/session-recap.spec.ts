@@ -157,9 +157,8 @@ test("selects the latest day and exports paginated Singles and Doubles receipts"
       image.naturalWidth,
       image.naturalHeight,
     ]),
-  ).toEqual([1080, 1350]);
+  ).toEqual([1080, 1920]);
   await page.getByRole("button", { name: "Singles" }).click();
-  await page.getByRole("button", { name: "Story / Reel" }).click();
   await expect
     .poll(() =>
       preview.evaluate((image: HTMLImageElement) => image.naturalHeight),
@@ -220,8 +219,9 @@ test("keeps twelve Doubles players on one recap page", async ({ page }) => {
   await page.getByRole("button", { name: "Doubles" }).click();
   await expect(page.getByText(/Page \d+ of \d+/)).toHaveCount(0);
   await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   await savePreview(page, "output/playwright/session-recap-12-post.png");
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await savePreview(page, "output/playwright/session-recap-12-story.png");
 });
 
@@ -233,8 +233,9 @@ test("keeps eight Doubles players on the dense composition", async ({
   await expect(page.getByText("4 selected")).toBeVisible();
   await page.getByRole("button", { name: "Preview recap" }).click();
   await page.getByRole("button", { name: "Doubles" }).click();
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   await savePreview(page, "output/playwright/session-recap-8-post.png");
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await savePreview(page, "output/playwright/session-recap-8-story.png");
 });
 
@@ -247,7 +248,7 @@ test("falls back to per-page export when multi-file sharing is unsupported", asy
   await expect(
     page.getByText(/cannot share multiple images together/i),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Download image" }).click();
+  await page.getByRole("button", { name: "Save image" }).click();
   expect(
     await page.evaluate(
       () => (window as Window & { __downloads?: string[] }).__downloads,

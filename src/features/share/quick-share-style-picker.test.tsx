@@ -15,22 +15,20 @@ describe("QuickShareStylePicker", () => {
       <QuickShareStylePicker onChange={onChange} value="poster" />,
     );
 
-    expect(screen.getByRole("group", { name: "Image style" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "Design" })).toBeTruthy();
     expect(
       screen
-        .getByRole("button", { name: "Poster" })
-        .getAttribute("aria-pressed"),
+        .getByRole("radio", { name: "Poster" })
+        .getAttribute("aria-checked"),
     ).toBe("true");
 
-    screen.getByRole("button", { name: "Frame" }).focus();
+    screen.getByRole("radio", { name: "Frame" }).focus();
     await user.keyboard("{Enter}");
     expect(onChange).toHaveBeenCalledWith("frame");
 
     rerender(<QuickShareStylePicker onChange={onChange} value="frame" />);
     expect(
-      screen
-        .getByRole("button", { name: "Frame" })
-        .getAttribute("aria-pressed"),
+      screen.getByRole("radio", { name: "Frame" }).getAttribute("aria-checked"),
     ).toBe("true");
   });
 });

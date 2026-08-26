@@ -4,7 +4,11 @@ import { AlertTriangle } from "lucide-react";
 import { useCallback, useReducer, useState } from "react";
 import { HomeScreen } from "../features/home";
 import { HistoryScreen } from "../features/history";
-import { MatchScreen } from "../features/live-match";
+import {
+  MatchScreen,
+  RecentResultHandoff,
+  type ConfirmedResultSnapshot,
+} from "../features/live-match";
 import { QuickMatchSetup } from "../features/quick-match";
 import { ResultsScreen } from "../features/results";
 import { TournamentSetup } from "../features/setup";
@@ -12,7 +16,9 @@ import { usePwa } from "../features/pwa";
 import { clearSnapshot } from "../persistence/storage";
 import { clearHistory } from "../persistence/history-storage";
 import { rememberedPlayerNames } from "../history";
+import { quickMatchRecord } from "../history";
 import type { ScoringAction } from "../match/types";
+import { scoringReducer } from "../match/scoring";
 import {
   correctionNeedsConfirmation,
   lateEntryCorrectionBlockReason,
@@ -27,6 +33,8 @@ const noop = () => undefined;
 export function AppShell() {
   const [state, dispatch] = useReducer(appReducer, initialAppState(0));
   const [handoffNames, setHandoffNames] = useState<string[]>([]);
+  const [recentResult, setRecentResult] =
+    useState<ConfirmedResultSnapshot | null>(null);
   const now = useAppLifecycle(state, dispatch);
   const pwa = usePwa(state.screen === "live" || state.screen === "quick-live");
 
@@ -121,6 +129,27 @@ export function AppShell() {
   const archivedTournament = state.history.tournaments.find(
     ({ id }) => id === state.historyTournamentId,
   );
+  const confirmResult = () => {
+    if (!state.scorer || state.scorer.status !== "awaiting-confirmation")
+      return;
+    const completedAt = Date.now();
+    const completed = scoringReducer(state.scorer, { type: "confirm" });
+    const quick = state.quickMatch;
+    const tournamentDone =
+      !quick &&
+      state.tournament?.matches.filter(({ status }) => status !== "complete")
+        .length === 1;
+    setRecentResult({
+      continueLabel: quick
+        ? "Set up next match"
+        : tournamentDone
+          ? "View results"
+          : "Continue tournament",
+      input: quick ? quickMatchRecord(completed, completedAt) : completed,
+      key: `confirmed:${completedAt}`,
+    });
+    dispatch({ type: "confirm-result", now: completedAt });
+  };
   return (
     <div className="app-shell">
       <AppNavigation
@@ -197,9 +226,7 @@ export function AppShell() {
       state.scorer ? (
         <MatchScreen
           onAction={score}
-          onConfirm={() =>
-            dispatch({ type: "confirm-result", now: Date.now() })
-          }
+          onConfirm={confirmResult}
           onDiscard={() => dispatch({ type: "discard-match", now: Date.now() })}
           onExit={() => dispatch({ type: "navigate", screen: "home" })}
           scorer={state.scorer}
@@ -263,6 +290,12 @@ export function AppShell() {
       ) : null}
       {state.screen === "history-results" && archivedTournament ? (
         <ResultsScreen bracket={archivedTournament.bracket} />
+      ) : null}
+      {recentResult ? (
+        <RecentResultHandoff
+          onDismiss={() => setRecentResult(null)}
+          result={recentResult}
+        />
       ) : null}
     </div>
   );

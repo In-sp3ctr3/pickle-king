@@ -68,7 +68,7 @@ for (const viewport of [
   });
 }
 
-test("the result review is a branded, single-crown celebration", async ({
+test("result review stays focused and sharing starts after save", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1180, height: 820 });
@@ -82,58 +82,31 @@ test("the result review is a branded, single-crown celebration", async ({
   ).toBeVisible();
   await expect(dialog.getByText("Won by 2")).toHaveCount(0);
   await expect(dialog.getByText(/Confirm to finish/)).toHaveCount(0);
-  const preview = dialog.locator("[data-qa='result-preview']");
-  await expect(preview).toBeVisible();
-  await expect(preview).toHaveJSProperty("naturalWidth", 1080);
-  await expect(preview).toHaveJSProperty("naturalHeight", 1350);
-  await expect(
-    dialog.getByRole("button", { name: "Share result", exact: true }),
-  ).toBeVisible();
+  await expect(dialog.locator("[data-qa='result-preview']")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "Confirm result" }),
   ).toBeFocused();
-  await expect(dialog.getByText(/Building image/)).toHaveCount(0);
-  for (const box of await dialog
-    .locator(".share-format-choice button")
-    .evaluateAll((elements) =>
-      elements.map((element) => element.getBoundingClientRect().toJSON()),
-    )) {
-    expect(box.width).toBeGreaterThanOrEqual(48);
-    expect(box.height).toBeGreaterThanOrEqual(48);
-  }
-  await expect(
-    dialog.locator("[data-qa='victory-confetti'] canvas"),
-  ).toBeVisible();
   const box = await dialog.boundingBox();
-  expect(box?.width).toBeGreaterThan(700);
+  expect(box?.width).toBeLessThanOrEqual(800);
   await page.screenshot({
     animations: "disabled",
     path: "output/playwright/victory-dialog-ipad.png",
   });
-  await page.keyboard.press("Tab");
-  await expect(
-    page.getByRole("button", { name: "Post", exact: true }),
-  ).toBeFocused();
-  await page.keyboard.press("Shift+Tab");
-  await expect(
-    page.getByRole("button", { name: "Confirm result" }),
-  ).toBeFocused();
-  const downloadPromise = page.waitForEvent("download");
-  await dialog
-    .getByRole("button", { name: "Download result", exact: true })
-    .click();
-  const download = await downloadPromise;
-  expect(download.suggestedFilename()).toMatch(/^pickle-king-score-.*\.png$/);
-  await download.saveAs("output/playwright/result-share-preview.png");
   await page.getByRole("button", { name: "Edit score" }).click();
   await page.getByRole("button", { name: "Review corrected result" }).click();
   await expect(page.getByRole("dialog", { name: "Robbie wins" })).toBeVisible();
-  await expect(page.locator("[data-qa='victory-confetti']")).toHaveAttribute(
-    "data-motion-state",
-    "burst",
-  );
   await page.getByRole("button", { name: "Confirm result" }).click();
-  await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
+  await expect(page.locator("[data-qa='result-saved']")).toBeVisible();
+  await expect(page.locator("[data-qa='share-saved-result']")).toBeFocused();
+  await page.locator("[data-qa='share-saved-result']").click();
+  const composer = page.getByRole("dialog", { name: "Share result" });
+  await expect(composer.locator("[data-qa='share-preview']")).toHaveJSProperty(
+    "naturalHeight",
+    1920,
+  );
+  await expect(
+    composer.getByRole("button", { name: "Story (9:16)" }),
+  ).toHaveAttribute("aria-pressed", "true");
 });
 
 test("reduced motion swaps the burst for static celebration", async ({
@@ -164,13 +137,12 @@ test("a 4 to 11 result keeps double-digit scores in separate lanes", async ({
   await startScoring(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 4 });
   await page.locator("[data-qa='score-b-add']").click({ clickCount: 12 });
-  const preview = page.locator("[data-qa='result-preview']");
-  await expect(preview).toHaveAttribute(
-    "alt",
-    "Maya wins 4 to 11. Share image preview.",
-  );
+  await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='share-saved-result']").click();
+  const preview = page.locator("[data-qa='share-preview']");
+  await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download result" }).click();
+  await page.getByRole("button", { name: "Save image" }).click();
   const download = await downloadPromise;
   await download.saveAs("output/playwright/result-share-4-11.png");
 });
@@ -223,6 +195,7 @@ test("a persisted 40-character winner remains shareable from history", async ({
     page.getByText("Samantha Elizabeth Richardson-Montgomery"),
   ).toBeVisible();
   await page.getByRole("button", { name: "Share" }).click();
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   const preview = page.locator("[data-qa='share-preview']");
   await expect(preview).toBeVisible();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);

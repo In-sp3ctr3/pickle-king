@@ -30,14 +30,16 @@ test("a completed 16-player bracket remains legible inside 1600 by 1200", async 
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await page.locator("[data-qa='confirm-serve-setup']").click();
     await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
     await page.getByRole("button", { name: "Confirm result" }).click();
+    await page.locator("[data-qa='continue-saved-result']").click();
   }
   await page.getByRole("button", { name: "Share tournament" }).click();
   const dialog = page.getByRole("dialog", { name: "Share tournament" });
-  await dialog.getByRole("tab", { name: "Full bracket" }).click();
+  await dialog.getByRole("tab", { name: "Full draw" }).click();
   const downloadEvent = page.waitForEvent("download");
-  await dialog.getByRole("button", { name: "Download image" }).click();
+  await dialog.getByRole("button", { name: "Save image" }).click();
   const download = await downloadEvent;
   const path = await download.path();
   if (!path) throw new Error("Bracket PNG path was unavailable.");
@@ -71,14 +73,14 @@ test("a completed 16-player bracket remains legible inside 1600 by 1200", async 
     ).toBeGreaterThan(1_000);
   }
   for (const [label, width, height, file] of [
-    ["Post", 1080, 1350, "post"],
-    ["Story / Reel", 1080, 1920, "story"],
+    ["Post (4:5)", 1080, 1350, "post"],
+    ["Story (9:16)", 1080, 1920, "story"],
   ] as const) {
     await dialog.getByRole("button", { name: label }).click();
     const preview = dialog.locator("[data-qa='share-preview']");
     await expect(preview).toHaveJSProperty("naturalHeight", height);
     const event = page.waitForEvent("download");
-    await dialog.getByRole("button", { name: "Download image" }).click();
+    await dialog.getByRole("button", { name: "Save image" }).click();
     const portraitDownload = await event;
     const portraitPath = await portraitDownload.path();
     if (!portraitPath) throw new Error("Portrait bracket PNG was unavailable.");

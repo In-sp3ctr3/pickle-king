@@ -1,7 +1,11 @@
 import type { QuickMatchRecord } from "../../history";
 import type { ScoringState } from "../../match/types";
 import { shareCanvasSurface } from "./share-canvas";
-import { shareDimensions, type ShareFormat } from "./share-format";
+import {
+  DEFAULT_SHARE_FORMAT,
+  shareDimensions,
+  type ShareFormat,
+} from "./share-format";
 import {
   drawQuickShareLayout,
   type QuickShareCardData,
@@ -11,7 +15,7 @@ export type QuickShareStyle = "poster" | "frame" | "receipt";
 
 export async function quickShareCanvas(
   input: QuickMatchRecord | ScoringState,
-  format: ShareFormat = "feed",
+  format: ShareFormat = DEFAULT_SHARE_FORMAT,
   style: QuickShareStyle = "poster",
 ): Promise<HTMLCanvasElement> {
   if (!input.winner) throw new Error("A result needs a winner before sharing.");

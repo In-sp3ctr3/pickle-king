@@ -1,61 +1,79 @@
-# Session Recap Signature Experience
+# Premium Share Composer Signature Experience
 
-Status: not-applicable
-Not applicable reason: the signature artifact is a static deterministic PNG,
-not an animated, cinematic, or spatial hero experience.
+Status: ready
 Pipeline version: 2
-Research required: no
+Research required: yes
 Motion required: no
-Motion reason: the signature output is a static, deterministic receipt; normal
-focus and pressed feedback are sufficient for the selection workflow.
+Motion reason: selection, preview replacement, and sticky actions communicate
+state without authored animation; native scrolling and existing pressed/focus
+feedback are sufficient.
 
 ## Product Story
 
-Experience type: static
+Experience type: functional
 
-- Input: an operator selects completed Quick Matches from the local ledger.
-- Transformation: Pickle King separates formats, calculates honest player and
-  pair records, and fits up to twelve players into the approved receipt
-  composition before pagination.
-- Output: branded Post or Story PNG pages ready for explicit local sharing.
-- User value demonstrated: an informal court session becomes a polished recap
-  without re-entry, AI, or a false tournament claim.
-
-## Direction
-
-The existing interaction is unchanged. This repair replaces inaccurate Canvas
-illustration with deterministic reference-derived static templates and measured
-dynamic text while retaining the current dialog and share/download behavior.
+- Input: a confirmed result, selected recap, or completed tournament.
+- Transformation: the operator selects an honest output ratio and an applicable
+  visual artifact while viewing the exact locally generated PNG.
+- Output: a Story, Post, or Full draw file handed to native Share or explicit
+  Save without another data write.
+- User value demonstrated: saving the sporting result and styling its social
+  artifact are clear, reversible decisions rather than one crowded dialog.
 
 ## Storyboard
 
-| Stage    | Time      | Visual state                                 | QA signal             | Reduced motion |
-| -------- | --------- | -------------------------------------------- | --------------------- | -------------- |
-| Select   | immediate | Latest ledger day checked with editable rows | selected count status | same           |
-| Preview  | generated | Cream receipt inside the existing modal      | local PNG visible     | same           |
-| Continue | immediate | Format, output size, or receipt page changes | tab and page state    | same           |
+| Stage     | Trigger               | Visible state                              | User action              | Fallback                       |
+| --------- | --------------------- | ------------------------------------------ | ------------------------ | ------------------------------ |
+| Review    | match ends            | score truth, Edit, Confirm                 | confirm the saved result | edit returns to scorer         |
+| Celebrate | persistence completes | Result saved summary                       | share or continue        | dismiss keeps saved data       |
+| Compose   | Share result          | Story preview, ratio, visual rail, actions | select, share, or save   | error retains available action |
 
-## Implementation
+## State Model
 
-- Selected rung: semantic DOM/CSS for selection plus native Canvas for the
-  requested static PNG artifact.
-- Why this rung is necessary: structured text remains accessible in the app,
-  while Canvas guarantees exact social-image dimensions and offline export.
-- Rejected simpler options: another hand-drawn approximation already failed
-  visual review; server/AI generation would violate determinism and local-first
-  privacy. Direct use of the owner-authorized source pixels is the lowest
-  faithful representation rung.
-- Prototype required: no
-- Desktop: ledger selection remains an editorial row list with a bounded action rail.
-- Mobile: each row exposes one 48px checkbox target and stacked recap actions.
-- `prefers-reduced-motion` behavior: no recap-specific motion is introduced.
-- Static fallback: when multi-file sharing is unsupported, each visible page
-  remains individually shareable or downloadable.
-- Measurement: record first-page and complete-page-set encoding time during QA.
+| State   | Entry                               | Content                                  | Exit                          | Failure behavior                   |
+| ------- | ----------------------------------- | ---------------------------------------- | ----------------------------- | ---------------------------------- |
+| review  | scorer awaits confirmation          | result truth only                        | Edit or Confirm               | no persistence on Edit             |
+| saved   | reducer completes                   | immutable result summary                 | Continue or Share result      | dismiss never rolls back           |
+| loading | composer opens or selection changes | skeleton in exact preview frame          | matching file resolves        | inline error and Save/close remain |
+| ready   | active file resolves                | preview, ratios, choices, sticky actions | Share, Save, close, or select | cancellation returns to ready      |
+
+## Representation
+
+- Selected rung: semantic DOM/CSS for the composer and native Canvas for exact
+  deterministic PNGs.
+- Why this rung is necessary: the controls must remain semantic and accessible,
+  while Canvas is already the verified offline boundary for exact social-image
+  dimensions and typography.
+- Rejected simpler options: retaining the separate dialogs repeats the same
+  hierarchy and focus defects; a text-only selector hides the visual choice.
+- Rejected simpler rung: keeping three separate dialogs repeats focus,
+  responsive, and action hierarchy defects.
+- Rejected higher rungs: no gesture library, carousel package, Figma source,
+  image generation, video, WebGL, or destination SDK is needed.
+- Prototype required: yes
+- Prototype route/artifact: isolated responsive HTML composer using current
+  exact Quick result files; no production route.
+- Prototype acceptance criteria: Story selected, exact preview dominant,
+  labelled visual rail, visible adjacent choice, and sticky Share/Save actions.
+- Prototype evidence: docs/frontend/evidence/share-composer-prototype.png
+- Approved by: product owner through the 2026-08-26 implementation plan; local
+  artifact inspection confirms the agreed hierarchy.
+- Prototype decision: passed
+- Desktop: two-column modal at 820px and wider with the preview left and the
+  controls/action rail right.
+- Mobile: full-height stacked dialog with native horizontal scroll-snap visual
+  choices and sticky bottom actions.
+- `prefers-reduced-motion` behavior: immediate state replacement; no auto-rotation or inertial
+  scripted carousel.
+- Static fallback: labeled buttons remain the primary selector; native scrolling
+  is optional assistance rather than required input.
+- Measurement: capture responsive geometry, preview-generation latency, exact
+  PNG dimensions, and object-URL cleanup in the production browser suite.
 
 ## Performance Budget
 
-- No new runtime rendering dependency, remote request, WebGL, AI generation, or
-  stored user image. Build-time Sharp and local font files are permitted.
-- Build the visible page first. Encode remaining pages sequentially only after
-  Share all pages is requested.
+- Selected full preview: <=600ms cold and <=250ms from decoded local assets on
+  the production browser fixture.
+- Alternative Quick thumbnails build sequentially after the selected preview.
+- No new runtime dependency or remote request. Object URLs are revoked when a
+  choice, ratio, or composer is discarded.

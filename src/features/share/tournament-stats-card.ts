@@ -13,9 +13,13 @@ import {
   shareFittedText,
   shareText,
 } from "./share-canvas";
-import { shareDimensions, type ShareFormat } from "./share-format";
 import {
-  championStanding,
+  DEFAULT_SHARE_FORMAT,
+  shareDimensions,
+  type ShareFormat,
+} from "./share-format";
+import { drawRasterCenteredRecapText } from "./session-recap-layout";
+import {
   playerName,
   tournamentFormatLabel,
   tournamentNames,
@@ -29,24 +33,32 @@ export function tournamentStatsTableGeometry(
   playerCount: number,
 ) {
   const story = format === "story";
+  const density =
+    playerCount <= 6 ? "regular" : playerCount <= 12 ? "dense" : "compact";
   const slabTop = story ? 520 : 370;
-  const rowsTop = story ? 620 : 446;
-  const maxHighlightsTop = story ? 1480 : 990;
-  const rowHeight = Math.min(
-    story ? 52 : 48,
-    (maxHighlightsTop - rowsTop) / Math.max(1, playerCount),
-  );
-  const tableBottom = rowsTop + rowHeight * playerCount;
-  const highlightsTop = Math.min(
-    maxHighlightsTop,
-    Math.max(story ? 1300 : 780, tableBottom + 34),
-  );
+  const profile = story
+    ? density === "regular"
+      ? { firstRuleY: 630, rowFontSize: 46, rowHeight: 76 }
+      : density === "dense"
+        ? { firstRuleY: 610, rowFontSize: 36, rowHeight: 56 }
+        : { firstRuleY: 590, rowFontSize: 28, rowHeight: 44 }
+    : density === "regular"
+      ? { firstRuleY: 450, rowFontSize: 34, rowHeight: 56 }
+      : density === "dense"
+        ? { firstRuleY: 430, rowFontSize: 28, rowHeight: 40 }
+        : { firstRuleY: 420, rowFontSize: 22, rowHeight: 32 };
+  const rowsTop = profile.firstRuleY;
+  const tableBottom = rowsTop + profile.rowHeight * playerCount;
+  const highlightsTop = Math.max(story ? 1200 : 790, tableBottom + 28);
   const highlightsBottom = highlightsTop + (story ? 230 : 180);
   return {
+    density,
+    firstRuleY: profile.firstRuleY,
     footerTop: story ? 1790 : 1240,
     highlightsBottom,
     highlightsTop,
-    rowHeight,
+    rowFontSize: profile.rowFontSize,
+    rowHeight: profile.rowHeight,
     rowsTop,
     slabTop,
     tableBottom,
@@ -55,11 +67,10 @@ export function tournamentStatsTableGeometry(
 
 export async function tournamentStatsCanvas(
   bracket: TournamentBracket,
-  format: ShareFormat = "feed",
+  format: ShareFormat = DEFAULT_SHARE_FORMAT,
 ) {
   const result = calculateTournamentResult(bracket);
   const names = tournamentNames(bracket);
-  const champion = championStanding(result);
   const highlights = tournamentHighlights(bracket, result);
   const { height, width } = shareDimensions(format);
   const { element, context, lockup } = await shareCanvasSurface(width, height);
@@ -69,7 +80,7 @@ export async function tournamentStatsCanvas(
   );
 
   drawPaper(context, width, height);
-  drawHeader(context, bracket, result.championId, names, champion);
+  drawHeader(context, bracket);
   context.fillStyle = shareColors.lime;
   context.fillRect(
     0,
@@ -107,9 +118,6 @@ function drawPaper(
 function drawHeader(
   context: CanvasRenderingContext2D,
   bracket: TournamentBracket,
-  championId: string,
-  names: Map<string, string>,
-  champion: ReturnType<typeof championStanding>,
 ) {
   shareText(context, tournamentFormatLabel(bracket), 540, 82, {
     align: "center",
@@ -122,20 +130,19 @@ function drawHeader(
     minSize: 72,
     maxWidth: 972,
   });
-  shareFittedText(
-    context,
-    `${playerName(names, championId, "Champion").toUpperCase()} · CHAMPION · ${champion.wins}–${champion.losses} · ${signed(champion.differential)} DIFF`,
-    58,
-    316,
-    {
-      color: INK,
-      family: "Manrope, sans-serif",
-      weight: 900,
-      maxSize: 22,
-      minSize: 16,
-      maxWidth: 964,
-    },
-  );
+  shareText(context, "PLAYER STANDINGS", 540, 316, {
+    align: "center",
+    color: INK,
+    font: "700 19px Manrope, sans-serif",
+  });
+  context.strokeStyle = INK;
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(88, 309);
+  context.lineTo(350, 309);
+  context.moveTo(730, 309);
+  context.lineTo(992, 309);
+  context.stroke();
 }
 
 function drawStandings(
@@ -144,60 +151,67 @@ function drawStandings(
   names: Map<string, string>,
   geometry: ReturnType<typeof tournamentStatsTableGeometry>,
 ) {
-  const headerY = geometry.rowsTop - 28;
+  const headerTop = geometry.slabTop + 16;
+  const headerBottom = geometry.firstRuleY;
   for (const [label, x, align] of [
     ["PLAYER", 72, "left"],
     ["W–L", 694, "right"],
     ["PTS", 850, "right"],
     ["+/−", 1008, "right"],
   ] as const) {
-    shareText(context, label, x, headerY, {
+    drawRasterCenteredRecapText(
+      context,
+      label,
+      `700 ${Math.min(24, geometry.rowFontSize)}px 'Roboto Condensed', sans-serif`,
+      Math.min(24, geometry.rowFontSize),
+      x,
+      headerTop,
+      headerBottom,
       align,
-      color: INK,
-      font: "900 18px Manrope, sans-serif",
-    });
+    );
   }
   context.strokeStyle = INK;
   context.lineWidth = 2;
   standings.forEach((standing, index) => {
     const top = geometry.rowsTop + index * geometry.rowHeight;
-    const baseline = top + geometry.rowHeight * 0.68;
+    const bottom = top + geometry.rowHeight;
     context.beginPath();
     context.moveTo(64, top);
     context.lineTo(1016, top);
     context.stroke();
-    const fontSize = Math.max(16, Math.min(27, geometry.rowHeight * 0.52));
-    context.font = `900 ${fontSize}px Manrope, sans-serif`;
+    const fontSize = geometry.rowFontSize;
+    context.font = `700 ${fontSize}px 'Roboto Condensed', sans-serif`;
     const name = fitCanvasText(
       context,
       playerName(names, standing.playerId),
       510,
     );
-    shareText(context, name, 72, baseline, {
-      color: INK,
-      font: `900 ${fontSize}px Manrope, sans-serif`,
-    });
-    shareText(context, `${standing.wins}–${standing.losses}`, 694, baseline, {
-      align: "right",
-      color: INK,
-      font: `900 ${fontSize}px Manrope, sans-serif`,
-    });
-    shareText(
+    drawRasterCenteredRecapText(
       context,
-      `${standing.pointsFor}–${standing.pointsAgainst}`,
-      850,
-      baseline,
-      {
-        align: "right",
-        color: INK,
-        font: `800 ${Math.max(15, fontSize - 1)}px Manrope, sans-serif`,
-      },
+      name,
+      `700 ${fontSize}px 'Roboto Condensed', sans-serif`,
+      fontSize,
+      72,
+      top,
+      bottom,
+      "left",
     );
-    shareText(context, signed(standing.differential), 1008, baseline, {
-      align: "right",
-      color: INK,
-      font: `900 ${fontSize}px Manrope, sans-serif`,
-    });
+    for (const [value, x] of [
+      [`${standing.wins}–${standing.losses}`, 694],
+      [`${standing.pointsFor}–${standing.pointsAgainst}`, 850],
+      [signed(standing.differential), 1008],
+    ] as const) {
+      drawRasterCenteredRecapText(
+        context,
+        value,
+        `700 ${fontSize}px 'Roboto Condensed', sans-serif`,
+        fontSize,
+        x,
+        top,
+        bottom,
+        "right",
+      );
+    }
   });
   context.beginPath();
   context.moveTo(64, geometry.tableBottom);

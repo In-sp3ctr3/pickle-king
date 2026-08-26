@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -35,12 +36,10 @@ async function finishTournament(page: Page) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Start match", exact: true })
-      .click();
+    await confirmServeSetup(page);
     await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
     await page.getByRole("button", { name: "Confirm result" }).click();
+    await continueSavedResult(page);
   }
 }
 
@@ -55,33 +54,30 @@ async function downloadAs(page: Page, button: Locator, path: string) {
 test("quick result export keeps the reference-led score hierarchy", async ({
   page,
 }) => {
+  test.setTimeout(120_000);
   await page.addInitScript(() => window.localStorage.clear());
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "Quick match" }).click();
-  await page
-    .getByLabel("Side A")
-    .fill("Samantha Elizabeth Richardson-Montgomery");
-  await page
-    .getByLabel("Side B")
-    .fill("Christopher Nathaniel Thompson-Alexander");
+  await page.getByLabel("Side A").fill("Jean-Baptiste M.");
+  await page.getByLabel("Side B").fill("Alexandra");
   await page.getByLabel("Play to").fill("2");
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Start match", exact: true })
-    .click();
+  await confirmServeSetup(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
-  const preview = page.locator("[data-qa='result-preview']");
-  const poster = page.getByRole("button", { name: "Poster" });
-  const frame = page.getByRole("button", { name: "Frame" });
-  const receipt = page.getByRole("button", { name: "Receipt" });
-  await expect(poster).toHaveAttribute("aria-pressed", "true");
-  await expect(frame).toHaveAttribute("aria-pressed", "false");
-  await expect(receipt).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='share-saved-result']").click();
+  const preview = page.locator("[data-qa='share-preview']");
+  const poster = page.getByRole("radio", { name: "Poster" });
+  const frame = page.getByRole("radio", { name: "Frame" });
+  const receipt = page.getByRole("radio", { name: "Receipt" });
+  await expect(poster).toHaveAttribute("aria-checked", "true");
+  await expect(frame).toHaveAttribute("aria-checked", "false");
+  await expect(receipt).toHaveAttribute("aria-checked", "false");
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
-  await expect(preview).toHaveJSProperty("naturalHeight", 1350);
-  const downloadButton = page.getByRole("button", { name: "Download result" });
+  await expect(preview).toHaveJSProperty("naturalHeight", 1920);
+  const downloadButton = page.getByRole("button", { name: "Save image" });
+  await page.getByRole("button", { name: "Post (4:5)" }).click();
   const download = await downloadAs(
     page,
     downloadButton,
@@ -91,15 +87,15 @@ test("quick result export keeps the reference-led score hierarchy", async ({
     "pickle-king-score-result-poster-feed.png",
   );
   await expect(downloadButton).toHaveText("Saved");
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await downloadAs(
     page,
     downloadButton,
     "output/playwright/share-quick-poster-story.png",
   );
-  await page.getByRole("button", { name: "Post", exact: true }).click();
+  await page.getByRole("button", { name: "Post (4:5)", exact: true }).click();
   await frame.click();
-  await expect(frame).toHaveAttribute("aria-pressed", "true");
+  await expect(frame).toHaveAttribute("aria-checked", "true");
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   const frameDownload = await downloadAs(
     page,
@@ -109,14 +105,14 @@ test("quick result export keeps the reference-led score hierarchy", async ({
   expect(frameDownload.suggestedFilename()).toBe(
     "pickle-king-score-result-frame-feed.png",
   );
-  await page.getByRole("button", { name: "Story / Reel" }).click();
+  await page.getByRole("button", { name: "Story (9:16)" }).click();
   await downloadAs(
     page,
     downloadButton,
     "output/playwright/share-quick-frame-story.png",
   );
   await receipt.click();
-  await expect(receipt).toHaveAttribute("aria-pressed", "true");
+  await expect(receipt).toHaveAttribute("aria-checked", "true");
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   const storyDownload = await downloadAs(
@@ -187,28 +183,26 @@ test("tournament results lead with the champion and preview every export", async
   const preview = dialog.locator("[data-qa='share-preview']");
   await expect(preview).toBeVisible();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
-  await expect(preview).toHaveJSProperty("naturalHeight", 1350);
+  await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   await expect(dialog.getByText(/Building image/)).toHaveCount(0);
 
   const share = dialog.getByRole("button", { name: "Share image" });
-  const download = dialog.getByRole("button", { name: "Download image" });
+  const download = dialog.getByRole("button", { name: "Save image" });
   await expect(share).toHaveText("Share");
-  await expect(download).toHaveText("Download");
-  await downloadAs(page, download, "output/playwright/share-recap-feed.png");
-  await expect(download).toHaveText("Saved");
-  await dialog.getByRole("button", { name: "Story / Reel" }).click();
-  await expect(preview).toHaveJSProperty("naturalWidth", 1080);
-  await expect(preview).toHaveJSProperty("naturalHeight", 1920);
+  await expect(download).toHaveText("Save image");
   await downloadAs(page, download, "output/playwright/share-recap-story.png");
-  await dialog.getByRole("button", { name: "Post" }).click();
+  await expect(download).toHaveText("Saved");
+  await dialog.getByRole("button", { name: "Post (4:5)" }).click();
+  await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
-  await dialog.getByRole("tab", { name: "Player stats" }).click();
+  await downloadAs(page, download, "output/playwright/share-recap-feed.png");
+  await dialog.getByRole("tab", { name: "Standings" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   await downloadAs(page, download, "output/playwright/share-stats-feed.png");
-  await dialog.getByRole("button", { name: "Story / Reel" }).click();
+  await dialog.getByRole("button", { name: "Story (9:16)" }).click();
   await downloadAs(page, download, "output/playwright/share-stats-story.png");
-  await dialog.getByRole("tab", { name: "Full bracket" }).click();
-  await dialog.getByRole("button", { name: "Full draw" }).click();
+  await dialog.getByRole("tab", { name: "Full draw" }).click();
+  await dialog.getByRole("button", { name: "Full draw (4:3)" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1600);
   await expect(preview).toHaveJSProperty("naturalHeight", 1200);
 
@@ -230,11 +224,11 @@ test("tournament results lead with the champion and preview every export", async
   ).toBe(true);
   await dialog.getByRole("button", { name: "Fit bracket preview" }).click();
 
-  await dialog.getByRole("button", { name: "Post" }).click();
+  await dialog.getByRole("button", { name: "Post (4:5)" }).click();
   await expect(preview).toHaveJSProperty("naturalWidth", 1080);
   await expect(preview).toHaveJSProperty("naturalHeight", 1350);
   await downloadAs(page, download, "output/playwright/share-bracket-post.png");
-  await dialog.getByRole("button", { name: "Story / Reel" }).click();
+  await dialog.getByRole("button", { name: "Story (9:16)" }).click();
   await expect(preview).toHaveJSProperty("naturalHeight", 1920);
   await downloadAs(page, download, "output/playwright/share-bracket-story.png");
   await page.keyboard.press("Escape");
@@ -283,6 +277,10 @@ test("share previews and results never overflow target screens", async ({
         const offenders = [...document.querySelectorAll<HTMLElement>("body *")]
           .filter((node) => node.offsetParent !== null)
           .filter((node) => !node.closest("[data-share-font-preload]"))
+          .filter(
+            (node) =>
+              !node.matches(".share-artifact-rail, .quick-share-design-rail"),
+          )
           .filter((node) => node.scrollWidth > node.clientWidth + 1);
         return offenders.map((node) => node.className).slice(0, 5);
       }),

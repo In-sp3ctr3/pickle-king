@@ -5,13 +5,17 @@ import {
 import {
   type BrandLockupAssets,
   drawBrandLockup,
-  drawBrandMark,
   shareCanvasSurface,
   shareColors,
   shareFittedText,
   shareText,
 } from "./share-canvas";
-import { shareDimensions, type ShareFormat } from "./share-format";
+import { drawQuickWinner } from "./quick-share-layout-helpers";
+import {
+  DEFAULT_SHARE_FORMAT,
+  shareDimensions,
+  type ShareFormat,
+} from "./share-format";
 import {
   championStanding,
   finalMatchData,
@@ -20,12 +24,11 @@ import {
   tournamentNames,
 } from "./tournament-share-data";
 
-const INK = "#090b08";
 const CREAM = "#f5f1e8";
 
 export async function tournamentRecapCanvas(
   bracket: TournamentBracket,
-  format: ShareFormat = "feed",
+  format: ShareFormat = DEFAULT_SHARE_FORMAT,
 ) {
   const result = calculateTournamentResult(bracket);
   const names = tournamentNames(bracket);
@@ -34,20 +37,13 @@ export async function tournamentRecapCanvas(
   const championName = playerName(names, result.championId, "Champion");
   const opponentName = playerName(names, final.opponentId, "Runner-up");
   const { height, width } = shareDimensions(format);
-  const { element, context, lockup, mark } = await shareCanvasSurface(
+  const { element, context, lockup } = await shareCanvasSurface(
     width,
     height,
+    `/share/templates/tournament-champion-${format}.webp`,
   );
   const story = format === "story";
 
-  drawPosterFrame(context, width, height);
-  drawBrandMark(
-    context,
-    mark,
-    story ? 900 : 838,
-    story ? 160 : 104,
-    story ? 940 : 610,
-  );
   shareText(context, `${tournamentFormatLabel(bracket)} · FINAL`, 78, 112, {
     color: shareColors.lime,
     font: "900 19px Manrope, sans-serif",
@@ -68,34 +64,20 @@ export async function tournamentRecapCanvas(
   return element;
 }
 
-function drawPosterFrame(
-  context: CanvasRenderingContext2D,
-  width: number,
-  height: number,
-) {
-  context.fillStyle = INK;
-  context.fillRect(0, 0, width, height);
-  context.strokeStyle = shareColors.lime;
-  context.lineWidth = 14;
-  context.strokeRect(52, 52, width - 104, height - 104);
-}
-
 function drawWinner(
   context: CanvasRenderingContext2D,
   championName: string,
   story: boolean,
 ) {
   const nameY = story ? 468 : 338;
-  const winsY = story ? 590 : 448;
-  shareFittedText(context, championName.toUpperCase(), 76, nameY, {
+  drawQuickWinner(context, championName, 76, nameY - (story ? 112 : 98), {
     color: CREAM,
-    maxSize: story ? 118 : 104,
-    minSize: 52,
+    family: "Anton",
+    lineHeight: story ? 112 : 98,
+    maxHeight: story ? 234 : 208,
+    maxSize: story ? 112 : 98,
     maxWidth: 470,
-  });
-  shareText(context, "WINS", 76, winsY, {
-    color: CREAM,
-    font: `900 ${story ? 112 : 102}px 'Archivo Black', sans-serif`,
+    minSize: story ? 52 : 42,
   });
 }
 

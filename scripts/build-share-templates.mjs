@@ -721,6 +721,12 @@ async function build() {
         );
       }
       await sharp(rendered).webp({ effort: 6, quality: 90 }).toFile(output);
+      if (reference.id === "quick-frame") {
+        await copyFile(
+          output,
+          path.join(outputDirectory, `tournament-champion-${format}.webp`),
+        );
+      }
       const metadata = await sharp(output).metadata();
       if (metadata.width !== size.width || metadata.height !== size.height) {
         throw new Error(`${path.basename(output)} has the wrong dimensions.`);

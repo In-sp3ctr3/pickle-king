@@ -64,6 +64,7 @@ export type Route = {
     | "quick-idle"
     | "quick-live"
     | "quick-result"
+    | "quick-result-saved"
     | "quick-history"
     | "history-empty";
   primaryActionSelector?: string;

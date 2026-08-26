@@ -452,3 +452,207 @@
     animation: none;
   }
 }
+
+/* Share Composer */
+.share-composer {
+  width: min(100%, 1080px);
+  height: min(100dvh, 940px);
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: 24px;
+  background: #11150f;
+  color: var(--chalk);
+  padding: 1.25rem;
+  box-shadow: 0 34px 100px rgb(0 0 0 / 78%);
+}
+
+.share-composer[open] {
+  display: grid;
+  grid-template-areas: "header" "preview" "controls" "footer";
+  grid-template-rows: auto minmax(240px, 1fr) auto auto;
+  gap: 0.9rem;
+}
+
+.share-composer::backdrop {
+  background: rgb(2 3 2 / 82%);
+  backdrop-filter: blur(10px);
+}
+
+.share-composer__header {
+  grid-area: header;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.share-composer__header h2,
+.share-composer__header p,
+.share-composer__controls h3 {
+  margin: 0;
+}
+
+.share-composer__header h2 {
+  font-size: clamp(1.55rem, 4vw, 2.45rem);
+  text-transform: uppercase;
+}
+
+.share-composer__header > button {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #283124;
+  color: var(--chalk);
+}
+
+.share-composer__preview {
+  grid-area: preview;
+  min-width: 0;
+  min-height: 0;
+}
+
+.share-composer__preview .share-preview-dialog__figure {
+  height: 100%;
+  margin: 0;
+}
+
+.share-composer__controls {
+  grid-area: controls;
+  min-width: 0;
+  overflow: auto;
+}
+
+.share-composer__controls h3 {
+  padding-top: 1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.share-composer__footer {
+  z-index: 3;
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid #2d3529;
+  background: #11150f;
+  padding-top: 0.85rem;
+}
+
+.share-composer__footer > p {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--mist);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.quick-share-design-rail,
+.share-artifact-rail {
+  display: grid;
+  grid-auto-columns: minmax(132px, 42%);
+  grid-auto-flow: column;
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+  overflow-x: auto;
+  padding: 0.2rem 0.1rem 0.7rem;
+  scroll-snap-type: x mandatory;
+}
+
+.quick-share-design {
+  display: grid;
+  min-height: 48px;
+  scroll-snap-align: start;
+  gap: 0.55rem;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  background: #090c08;
+  color: var(--mist);
+  padding: 0.45rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.quick-share-design[aria-checked="true"] {
+  border-color: var(--lime);
+  color: var(--chalk);
+}
+
+.quick-share-design__image,
+.quick-share-design__placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #1c2119;
+}
+
+.quick-share-design__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.session-recap-dialog__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+@media (min-width: 820px) {
+  .share-composer[open] {
+    grid-template-areas:
+      "header header"
+      "preview controls"
+      "preview footer";
+    grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.8fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 1.25rem;
+  }
+
+  .quick-share-design-rail,
+  .share-artifact-rail {
+    grid-auto-columns: minmax(118px, 1fr);
+  }
+}
+
+@media (max-width: 819px) {
+  .share-composer {
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+    padding: 1rem;
+  }
+
+  .share-composer__footer {
+    position: sticky;
+    bottom: -1rem;
+    align-items: stretch;
+    flex-direction: column;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .share-composer__footer > p {
+    display: none;
+  }
+
+  .share-composer__footer .share-preview-actions__buttons {
+    width: 100%;
+  }
+
+  .share-composer__footer .share-preview-icon-button {
+    flex: 1;
+  }
+}

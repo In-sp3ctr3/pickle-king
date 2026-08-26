@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -28,8 +29,10 @@ async function buildFourPlayerDraw(page: Page, complete = false) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await confirmServeSetup(page);
     await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
     await page.locator("[data-qa='confirm-result']").click();
+    await continueSavedResult(page);
   }
   await page.locator("[data-qa='view-final-bracket']").click();
 }
@@ -137,12 +140,12 @@ test("share format choices stay concise and side by side", async ({ page }) => {
   await page.getByRole("button", { name: "Share tournament" }).click();
   const dialog = page.getByRole("dialog", { name: "Share tournament" });
   await expect(
-    dialog.getByRole("button", { name: "Post", exact: true }),
+    dialog.getByRole("button", { name: "Post (4:5)", exact: true }),
   ).toBeVisible();
   await expect(
-    dialog.getByRole("button", { name: "Story / Reel", exact: true }),
+    dialog.getByRole("button", { name: "Story (9:16)", exact: true }),
   ).toBeVisible();
-  await expect(dialog.getByText(/4:5|9:16/)).toHaveCount(0);
+  await expect(dialog.getByText(/4:5|9:16/)).toHaveCount(2);
   const boxes = await dialog
     .locator(".share-format-choice button")
     .evaluateAll((buttons) =>

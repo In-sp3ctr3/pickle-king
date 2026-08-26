@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   bracketShareDimensions,
   bracketShareFormatLabel,
+  DEFAULT_SHARE_FORMAT,
   shareFormatLabel,
 } from "./share-format";
 
 describe("share formats", () => {
-  it("uses production Post and Story / Reel labels", () => {
-    expect(shareFormatLabel("feed")).toBe("Post");
-    expect(shareFormatLabel("story")).toBe("Story / Reel");
+  it("defaults portrait sharing to Story and includes exact ratios", () => {
+    expect(DEFAULT_SHARE_FORMAT).toBe("story");
+    expect(shareFormatLabel("feed")).toBe("Post (4:5)");
+    expect(shareFormatLabel("story")).toBe("Story (9:16)");
   });
 
   it("contracts every bracket canvas dimension", () => {
@@ -24,6 +26,6 @@ describe("share formats", () => {
       height: 1920,
       width: 1080,
     });
-    expect(bracketShareFormatLabel("landscape")).toBe("Full draw");
+    expect(bracketShareFormatLabel("landscape")).toBe("Full draw (4:3)");
   });
 });

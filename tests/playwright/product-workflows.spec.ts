@@ -122,10 +122,7 @@ test("a burst of score taps locks at the winning point", async ({ page }) => {
   });
 
   await expect(page.getByRole("heading", { name: "Alex wins" })).toBeVisible();
-  await expect(page.locator("[data-qa='result-preview']")).toHaveAttribute(
-    "alt",
-    "Alex wins 7 to 0. Share image preview.",
-  );
+  await expect(page.getByText("Final score")).toBeVisible();
   await expect(
     page.locator("section[aria-label='Alex, 7 points']"),
   ).toBeVisible();

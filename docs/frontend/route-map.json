@@ -7,7 +7,7 @@
     "pageCapacity": 12,
     "outputs": [
       { "name": "Post", "width": 1080, "height": 1350 },
-      { "name": "Story / Reel", "width": 1080, "height": 1920 }
+      { "name": "Story (9:16)", "width": 1080, "height": 1920 }
     ],
     "evidence": [
       "output/playwright/session-recap-selection-390x844.png",
@@ -413,21 +413,21 @@
         },
         {
           "name": "bracket preview format choices",
-          "selector": ".share-preview-dialog__formats button",
+          "selector": ".share-composer [aria-label='Image format'] button",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='share-preview']" }
         },
         {
           "name": "bracket preview output actions",
-          "selector": ".share-preview-dialog .share-preview-actions button",
+          "selector": ".share-composer__footer button",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='share-preview']" }
         },
         {
           "name": "close bracket preview",
-          "selector": ".share-preview-dialog__header > button",
+          "selector": "button[aria-label='Close share composer']",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": "[data-qa='bracket-screen']" }
@@ -847,13 +847,6 @@
           "expect": { "visible": ".result-dialog" }
         },
         {
-          "name": "quick result Poster Frame Receipt styles",
-          "selector": ".result-dialog [aria-label='Image style'] button",
-          "auditOnly": true,
-          "action": "click",
-          "expect": { "visible": "[data-qa='result-preview']" }
-        },
-        {
           "name": "scorer controls behind result review",
           "selector": ".match-screen button",
           "auditOnly": true,
@@ -870,21 +863,7 @@
           "name": "confirm quick result",
           "selector": "[data-qa='confirm-result']",
           "action": "click",
-          "expect": { "visible": "[data-qa='quick-match-setup']" }
-        },
-        {
-          "name": "share quick result",
-          "selector": "[data-qa='share-result']",
-          "auditOnly": true,
-          "action": "click",
-          "expect": { "visible": ".result-dialog" }
-        },
-        {
-          "name": "download quick result",
-          "selector": "[data-qa='download-result']",
-          "auditOnly": true,
-          "action": "click",
-          "expect": { "visible": "[data-qa='result-preview']" }
+          "expect": { "visible": "[data-qa='result-saved']" }
         }
       ],
       "motionChecks": [
@@ -901,6 +880,90 @@
         {
           "name": "result dialog remains available",
           "selector": ".result-dialog",
+          "expect": "visible"
+        }
+      ],
+      "canvasChecks": []
+    },
+    {
+      "name": "quick-result-saved",
+      "path": "/",
+      "prepare": "quick-result-saved",
+      "primaryActionSelector": "[data-qa='share-saved-result']",
+      "visualEvidence": {
+        "desktop": {
+          "source": "docs/frontend/evidence/quick-result-saved-desktop-source.png",
+          "render": "test-results/frontend-captures/quick-result-saved-desktop.png",
+          "comparison": "test-results/frontend-comparisons/quick-result-saved-desktop.png"
+        },
+        "mobile": {
+          "source": "docs/frontend/evidence/quick-result-saved-mobile-source.png",
+          "render": "test-results/frontend-captures/quick-result-saved-mobile.png",
+          "comparison": "test-results/frontend-comparisons/quick-result-saved-mobile.png"
+        }
+      },
+      "controls": [
+        {
+          "name": "saved result background controls",
+          "selector": "[data-qa='quick-match-setup'] button, [data-qa='quick-match-setup'] input, [data-qa='app-back'], [data-qa='brand-home']",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='result-saved']" }
+        },
+        {
+          "name": "saved result actions",
+          "selector": ".result-saved-dialog button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='result-saved']" }
+        },
+        {
+          "name": "continue after saved result",
+          "selector": "[data-qa='continue-saved-result']",
+          "action": "click",
+          "expect": { "visible": "[data-qa='quick-match-setup']" }
+        },
+        {
+          "name": "open saved result composer",
+          "selector": "[data-qa='share-saved-result']",
+          "sequence": "saved-result-share",
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-composer']" }
+        },
+        {
+          "name": "quick design rail",
+          "selector": "[aria-label='Design'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "quick result formats",
+          "selector": "[aria-label='Image format'] button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "quick result export actions",
+          "selector": ".share-preview-actions button",
+          "auditOnly": true,
+          "action": "click",
+          "expect": { "visible": "[data-qa='share-preview']" }
+        },
+        {
+          "name": "close saved result composer",
+          "selector": "button[aria-label='Close share composer']",
+          "sequence": "saved-result-share",
+          "action": "click",
+          "expect": { "visible": "[data-qa='result-saved']" }
+        }
+      ],
+      "motionChecks": [],
+      "reducedMotionChecks": [
+        {
+          "name": "saved result remains available",
+          "selector": "[data-qa='result-saved']",
           "expect": "visible"
         }
       ],
@@ -964,8 +1027,8 @@
           "expect": { "visible": "[data-qa='share-preview']" }
         },
         {
-          "name": "close tournament share preview",
-          "selector": "button[aria-label='Close share preview']",
+          "name": "close tournament share composer",
+          "selector": "button[aria-label='Close share composer']",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".tournament-share-dialog" }
@@ -1229,7 +1292,7 @@
         },
         {
           "name": "close round-robin share",
-          "selector": "button[aria-label='Close share preview']",
+          "selector": "button[aria-label='Close share composer']",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".tournament-share-dialog" }
@@ -1327,7 +1390,7 @@
         },
         {
           "name": "close archived round-robin share",
-          "selector": "button[aria-label='Close share preview']",
+          "selector": "button[aria-label='Close share composer']",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".tournament-share-dialog" }
@@ -1779,7 +1842,7 @@
           "selector": "[data-qa='preview-recap']",
           "sequence": "recap-workflow",
           "action": "click",
-          "expect": { "visible": "[data-qa='session-recap-dialog']" }
+          "expect": { "visible": "[data-qa='share-composer']" }
         },
         {
           "name": "recap type choices",
@@ -1832,7 +1895,7 @@
         },
         {
           "name": "close recap",
-          "selector": "button[aria-label='Close recap']",
+          "selector": "button[aria-label='Close share composer']",
           "sequence": "recap-workflow",
           "action": "click",
           "expect": { "visible": "[data-qa='history-screen']" }
@@ -1906,8 +1969,8 @@
           "expect": { "visible": "[data-qa='share-preview']" }
         },
         {
-          "name": "close archived tournament share preview",
-          "selector": "button[aria-label='Close share preview']",
+          "name": "close archived tournament share composer",
+          "selector": "button[aria-label='Close share composer']",
           "auditOnly": true,
           "action": "click",
           "expect": { "visible": ".tournament-share-dialog" }

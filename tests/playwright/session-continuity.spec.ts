@@ -39,6 +39,7 @@ async function completeQuickMatch(page: Page) {
   await page.getByLabel("Play to").fill("2");
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
   await expect(
     page.getByRole("heading", { name: "Robbie wins" }),
@@ -62,6 +63,7 @@ test("confirmed Quick Matches become history and remembered-name suggestions", a
   await openFresh(page);
   await completeQuickMatch(page);
   await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='continue-saved-result']").click();
   await expect(page.locator("[data-qa='quick-match-setup']")).toBeVisible();
   await page.getByRole("button", { name: "Go home" }).click();
   await page.getByRole("button", { name: "Match history" }).click();
@@ -87,10 +89,12 @@ test("safe renames retain results and structural edits rebuild the draw", async 
   await buildTournament(page);
   await page.locator("[data-qa='start-next']").click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.getByRole("button", { name: "End match" }).click();
   await page.getByRole("button", { name: /Keep score/ }).click();
   await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='continue-saved-result']").click();
   await expect(page.getByText("1 of 4 matches complete")).toBeVisible();
 
   await page.getByRole("button", { name: "Edit draw" }).click();
@@ -130,20 +134,22 @@ test("result sharing downloads a branded PNG when native file share is unavailab
   });
   await openFresh(page);
   await completeQuickMatch(page);
+  await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='share-saved-result']").click();
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download result" }).click();
+  await page.getByRole("button", { name: "Save image" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/^pickle-king-.*\.png$/);
-  await expectBrandedPng(download, 1080, 1350, {
-    x: 410,
-    y: 90,
-    width: 260,
-    height: 270,
+  await expectBrandedPng(download, 1080, 1920, {
+    x: 380,
+    y: 1760,
+    width: 320,
+    height: 120,
   });
   await download.saveAs("output/playwright/quick-share-card.png");
-  await expect(
-    page.getByRole("button", { name: "Download result" }),
-  ).toHaveText("Saved");
+  await expect(page.getByRole("button", { name: "Save image" })).toHaveText(
+    "Saved",
+  );
 });
 
 test("a tournament bracket exports as an offline PNG", async ({ page }) => {
@@ -165,7 +171,7 @@ test("a tournament bracket exports as an offline PNG", async ({ page }) => {
     Math.min(...formatBoxes.map(({ y }) => y)) + 1,
   );
   const downloadPromise = page.waitForEvent("download");
-  await dialog.getByRole("button", { name: "Download image" }).click();
+  await dialog.getByRole("button", { name: "Save image" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe(
     "pickle-king-bracket-landscape.png",

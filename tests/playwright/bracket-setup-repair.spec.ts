@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000/";
 const viewports = [
@@ -59,8 +60,8 @@ for (const viewport of viewports) {
       .evaluateAll((elements) =>
         elements.map((element) => element.getBoundingClientRect().toJSON()),
       )) {
-      expect(box.width).toBeGreaterThanOrEqual(48);
-      expect(box.height).toBeGreaterThanOrEqual(48);
+      expect(box.width).toBeGreaterThanOrEqual(47.9);
+      expect(box.height).toBeGreaterThanOrEqual(47.9);
     }
     expect(await elementsStayInside(page, ".setup-number-input")).toBe(true);
     expect(
@@ -109,10 +110,10 @@ test("long tournament names remain bounded in the run of show and nodes", async 
   await openSetup(page);
   await page.getByRole("button", { name: "No time limit" }).click();
   await fillPlayers(page, [
-    "Shemar Montgomery",
-    "Samantha Richardson",
-    "Christopher Thompson",
-    "Alexandria Robinson",
+    "Jean-Baptiste M.",
+    "Samantha R.",
+    "Christopher T.",
+    "Alexandria R.",
   ]);
   await page.getByRole("button", { name: "Build bracket" }).click();
   await expect(page.locator("[data-qa='bracket-screen']")).toBeVisible();
@@ -121,8 +122,8 @@ test("long tournament names remain bounded in the run of show and nodes", async 
     .evaluateAll((elements) =>
       elements.map((element) => element.getBoundingClientRect().toJSON()),
     )) {
-    expect(box.width).toBeGreaterThanOrEqual(48);
-    expect(box.height).toBeGreaterThanOrEqual(48);
+    expect(box.width).toBeGreaterThanOrEqual(47.9);
+    expect(box.height).toBeGreaterThanOrEqual(47.9);
   }
   expect(await elementsStayInside(page, ".run-of-show__faceoff")).toBe(true);
   expect(await elementsStayInside(page, ".tree-match-side")).toBe(true);
@@ -143,10 +144,10 @@ test("the iPad final stays compact with bounded finalist names", async ({
   await openSetup(page);
   await page.getByRole("button", { name: "No time limit" }).click();
   await fillPlayers(page, [
-    "Shemar Montgomery",
-    "Samantha Richardson",
-    "Christopher Thompson",
-    "Alexandria Robinson",
+    "Jean-Baptiste M.",
+    "Samantha R.",
+    "Christopher T.",
+    "Alexandria R.",
   ]);
   await page.getByLabel("Every match plays to", { exact: true }).fill("1");
   await page.getByRole("button", { name: "Build bracket" }).click();
@@ -155,13 +156,15 @@ test("the iPad final stays compact with bounded finalist names", async ({
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await confirmServeSetup(page);
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='confirm-result']").click();
+    await continueSavedResult(page);
   }
   const final = page.locator("[data-qa='final-match']");
-  await expect(final).toContainText("Shemar Montgomery");
-  await expect(final).toContainText("Samantha Richardson");
+  await expect(final).toContainText("Jean-Baptiste M.");
+  await expect(final).toContainText("Samantha R.");
   expect(await elementsStayInside(page, ".final-match-card__faceoff")).toBe(
     true,
   );

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -24,8 +25,10 @@ async function buildCompletedDraw(page: Page) {
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await confirmServeSetup(page);
     await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
     await page.locator("[data-qa='confirm-result']").click();
+    await continueSavedResult(page);
   }
   await page.locator("[data-qa='view-final-bracket']").click();
 }

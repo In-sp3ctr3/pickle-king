@@ -44,12 +44,12 @@ export function SharePreviewActions({
         </button>
         {!preview.appleMobile || !preview.shareAvailable ? (
           <button
-            aria-label={`Download ${noun}`}
+            aria-label={`Save ${noun}`}
             className="share-preview-icon-button share-preview-icon-button--secondary"
             data-qa={`download-${qaPrefix}`}
             disabled={!preview.ready || preview.busy}
             onClick={preview.download}
-            title={`Download ${noun}`}
+            title={`Save ${noun}`}
             type="button"
           >
             {preview.busy && preview.lastAction === "download" ? (
@@ -62,7 +62,7 @@ export function SharePreviewActions({
             ) : (
               <Download aria-hidden="true" />
             )}
-            <span>{downloadSucceeded ? "Saved" : "Download"}</span>
+            <span>{downloadSucceeded ? "Saved" : "Save image"}</span>
           </button>
         ) : null}
       </div>

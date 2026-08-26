@@ -26,6 +26,11 @@ export async function confirmServeSetup(page: Page) {
   await page.locator("[data-qa='confirm-serve-setup']").click();
 }
 
+export async function continueSavedResult(page: Page) {
+  await expect(page.locator("[data-qa='result-saved']")).toBeVisible();
+  await page.locator("[data-qa='continue-saved-result']").click();
+}
+
 export async function fillRoundRobinSetup(
   page: Page,
   options: {
@@ -64,5 +69,6 @@ export async function completeScheduledMatches(page: Page, count: number) {
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='confirm-result']").click();
+    await continueSavedResult(page);
   }
 }

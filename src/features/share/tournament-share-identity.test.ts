@@ -44,7 +44,7 @@ describe("tournament share poster identity", () => {
     const [champion, stats, bracket, extras, match, portrait] = rendererSources;
     const source = rendererSources.join("\n");
 
-    expect(champion).toContain("drawBrandMark");
+    expect(champion).toContain("tournament-champion-${format}.webp");
     expect(champion).toContain("drawBrandLockup");
     expect(champion).toContain("drawPosterBrand(context, lockup");
     expect(stats).toContain("drawBrandLockup");

@@ -44,9 +44,11 @@ test("a completed result is corrected inside its bracket node", async ({
   await buildTournament(page);
   await page.locator("[data-qa='bracket-node-start']").first().click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='continue-saved-result']").click();
 
   const completed = page.locator("[data-match-status='complete']").first();
   const contenders = await completed
@@ -111,9 +113,11 @@ test("a forgotten player can review, cancel, apply, and undo a late entry", asyn
   await buildTournament(page, names);
   await page.locator("[data-qa='bracket-node-start']").first().click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await page.locator("[data-qa='confirm-serve-setup']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.getByRole("button", { name: "Confirm result" }).click();
+  await page.locator("[data-qa='continue-saved-result']").click();
 
   async function addForgottenPlayer() {
     await page.locator("[data-qa='edit-draw']").click();
@@ -164,9 +168,11 @@ test("placement lock keeps the bracket and offers the late player to Quick Match
     await page
       .getByRole("button", { name: "Start match", exact: true })
       .click();
+    await page.locator("[data-qa='confirm-serve-setup']").click();
     await page.locator("[data-qa='score-a-add']").click();
     await page.locator("[data-qa='score-a-add']").click();
     await page.getByRole("button", { name: "Confirm result" }).click();
+    await page.locator("[data-qa='continue-saved-result']").click();
   }
 
   async function reviewSam() {

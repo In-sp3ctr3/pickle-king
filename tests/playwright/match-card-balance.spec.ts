@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -41,8 +42,10 @@ async function expectContained(parent: Locator, child: Locator) {
 async function finishNextMatch(page: Page) {
   await page.locator("[data-qa='start-next']").click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await confirmServeSetup(page);
   await page.locator("[data-qa='score-a-add']").click({ clickCount: 2 });
   await page.locator("[data-qa='confirm-result']").click();
+  await continueSavedResult(page);
 }
 
 test("iPad next cards contain both players and use a dark edit pencil", async ({

@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { confirmServeSetup } from "./small-field-harness";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000";
 
@@ -41,6 +41,7 @@ async function completeNext(page: Page) {
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='confirm-result']").click();
+  await continueSavedResult(page);
 }
 
 test("a seventh player falls back to fast knockout with an announcement", async ({
@@ -152,8 +153,8 @@ test("the 17-match schedule refreshes, corrects placements, archives, shares, an
   await shareTrigger.click();
   const share = page.getByRole("dialog", { name: "Share tournament" });
   await expect(share.getByRole("tab")).toHaveCount(2);
-  await expect(share.getByRole("tab", { name: "Full bracket" })).toHaveCount(0);
-  await share.getByRole("button", { name: "Close share preview" }).click();
+  await expect(share.getByRole("tab", { name: "Full draw" })).toHaveCount(0);
+  await share.getByRole("button", { name: "Close share composer" }).click();
   await expect(shareTrigger).toBeFocused();
 
   await page.getByRole("button", { name: "Review schedule" }).click();
@@ -176,7 +177,7 @@ test("the 17-match schedule refreshes, corrects placements, archives, shares, an
   await expect(
     page.getByRole("dialog", { name: "Share tournament" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Close share preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
   await page.getByRole("button", { name: "View results" }).click();
   await expect(page.getByText("Round-robin standings")).toBeVisible();
 });

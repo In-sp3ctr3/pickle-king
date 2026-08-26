@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { PNG } from "pngjs";
+import { confirmServeSetup, continueSavedResult } from "./small-field-harness";
 
 const baseUrl = process.env.FRONTEND_BASE_URL ?? "http://127.0.0.1:3000/";
 
@@ -23,18 +24,20 @@ async function finishRecommendedMatch(page: Page, stage: string) {
   await page.locator("[data-qa='start-next']").click();
   await expect(page.getByText(stage, { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await confirmServeSetup(page);
   await page.locator("[data-qa='score-a-add']").click();
   await page.locator("[data-qa='score-a-add']").click();
   await expect(page.getByRole("dialog")).toContainText(stage);
   await page.getByRole("button", { name: "Confirm result" }).click();
+  await continueSavedResult(page);
 }
 
-async function expectPortraitPng(path: string | null) {
+async function expectStoryPng(path: string | null) {
   if (!path) throw new Error("Downloaded PNG path was unavailable.");
   const png = PNG.sync.read(await readFile(path));
   expect({ width: png.width, height: png.height }).toEqual({
     width: 1080,
-    height: 1350,
+    height: 1920,
   });
   expect(png.data.some((channel) => channel !== 0)).toBe(true);
 }
@@ -90,26 +93,30 @@ test("completed tournament is static, shareable, and replayable", async ({
   await expect(page.locator(".podium-medal")).toHaveCount(3);
   await expect(page.getByRole("button", { name: "Correct" })).toHaveCount(0);
   await page.getByRole("button", { name: "Share tournament" }).click();
-  await expect(page.getByRole("dialog")).toContainText("Champion card");
-  await expect(page.getByRole("dialog")).toContainText("Player stats");
-  await expect(page.getByRole("dialog")).toContainText("Full bracket");
+  await expect(page.getByRole("dialog")).toContainText("Champion");
+  await expect(page.getByRole("dialog")).toContainText("Standings");
+  await expect(page.getByRole("dialog")).toContainText("Full draw");
+  await expect(page.locator("[data-qa='share-format-story']")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(page.locator("[data-qa='share-preview']")).toBeVisible();
   const recapDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download image" }).click();
+  await page.getByRole("button", { name: "Save image" }).click();
   const recap = await recapDownload;
-  await expectPortraitPng(await recap.path());
+  await expectStoryPng(await recap.path());
   await recap.saveAs("output/playwright/tournament-recap-card.png");
-  await page.getByRole("tab", { name: /Player stats/ }).click();
+  await page.getByRole("tab", { name: /Standings/ }).click();
   await expect(page.locator("[data-qa='share-preview']")).toHaveJSProperty(
     "naturalWidth",
     1080,
   );
   const statsDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Download image" }).click();
+  await page.getByRole("button", { name: "Save image" }).click();
   const stats = await statsDownload;
-  await expectPortraitPng(await stats.path());
+  await expectStoryPng(await stats.path());
   await stats.saveAs("output/playwright/tournament-stats-card.png");
-  await page.getByRole("button", { name: "Close share preview" }).click();
+  await page.getByRole("button", { name: "Close share composer" }).click();
 
   await page.getByRole("button", { name: "Play again" }).click();
   await expect(page.getByRole("dialog")).toContainText("Replay same draw");
@@ -129,19 +136,22 @@ test("scorer keeps court tap and exposes explicit add and undo controls", async 
   await page.getByLabel("Side B").fill("Maya");
   await page.getByRole("button", { name: "Open scorer" }).click();
   await page.getByRole("button", { name: "Start match", exact: true }).click();
+  await confirmServeSetup(page);
 
   const side = page.locator(".score-side-a");
   await expect(
-    side.getByRole("button", { name: "Add one point to Robbie" }),
+    side.getByRole("button", { name: "Record Robbie as the rally winner" }),
   ).toBeVisible();
   await expect(
-    side.getByRole("button", { name: "Undo one point from Robbie" }),
-  ).toBeDisabled();
-  await side.getByRole("button", { name: "Add one point to Robbie" }).click();
-  await expect(side.locator(".score-number")).toContainText("1");
+    side.getByRole("button", { name: "Undo last rally" }),
+  ).toBeEnabled();
+  await side.getByRole("button", { name: "Undo last rally" }).click();
+  await expect(side.locator(".score-number")).toContainText("0");
   await side
-    .getByRole("button", { name: "Undo one point from Robbie" })
+    .getByRole("button", { name: "Record Robbie as the rally winner" })
     .click();
+  await expect(side.locator(".score-number")).toContainText("1");
+  await side.getByRole("button", { name: "Undo last rally" }).click();
   await expect(side.locator(".score-number")).toContainText("0");
   await expect(side.locator("[data-qa='score-a-add']")).toBeEnabled();
 });
