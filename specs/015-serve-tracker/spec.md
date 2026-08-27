@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-09
 
-**Status**: Ready for planning
+**Status**: Implemented and verified
 
 ## Goal
 
@@ -63,6 +63,9 @@ without relying only on color.
 3. **Given** a team is stacking, **When** its legal server is shown, **Then**
    the guide describes a correct serving position rather than claiming to show
    live player formation.
+4. **Given** a doubles rally is ready to serve, **When** the live scorer is
+   visible, **Then** the guide names the legal receiver and shows a white player
+   marker in the diagonally opposite receiving box.
 
 ---
 
@@ -133,11 +136,14 @@ the most recent rally without losing the service state.
 - **FR-012**: The scorer MUST provide a one-tap Swap sides control that reverses
   score-zone order and court-end orientation without changing team identity,
   scores, service history, or tournament results, and persists that orientation.
-- **FR-011**: The system MUST retain existing target, time-limit,
+- **FR-013**: The system MUST retain existing target, time-limit,
   golden-point, result-confirmation, and result-edit flows.
-- **FR-012**: The system MUST provide keyboard access, visible focus, semantic
+- **FR-014**: The system MUST provide keyboard access, visible focus, semantic
   labels, a status announcement for each rally outcome, and a reduced-motion
   alternative for transient feedback.
+- **FR-015**: In doubles, the guide MUST name the legal receiver and show a
+  white receiver marker in the diagonally opposite service box; the server
+  marker remains lime and singles remain unchanged.
 
 ### Key Entities
 
@@ -171,6 +177,8 @@ the most recent rally without losing the service state.
   or post-serve movement tracking is needed.
 - Player names already associated with a match are available to identify a
   doubles team's right-at-zero player.
+- The doubles receiver is the player whose score-derived position is diagonally
+  opposite the server, consistent with [USA Pickleball Rule 5.B.3](https://usapickleball.org/ref-notices/rule-5-b-3-explanation-stacking-players/).
 - No player data leaves the device.
 
 ## Out of Scope

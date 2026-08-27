@@ -712,6 +712,18 @@
           "comparison": "test-results/frontend-comparisons/quick-live-mobile.png"
         }
       },
+      "supplementalEvidence": {
+        "doublesReceiverMobile": {
+          "source": "docs/frontend/evidence/doubles-receiver-mobile-source.png",
+          "render": "test-results/frontend-captures/doubles-receiver-mobile.png",
+          "comparison": "test-results/frontend-comparisons/doubles-receiver-mobile.png"
+        },
+        "doublesReceiverLandscape": {
+          "source": "docs/frontend/evidence/doubles-receiver-landscape-source.png",
+          "render": "test-results/frontend-captures/doubles-receiver-landscape.png",
+          "comparison": "test-results/frontend-comparisons/doubles-receiver-landscape.png"
+        }
+      },
       "controls": [
         {
           "name": "live controls",

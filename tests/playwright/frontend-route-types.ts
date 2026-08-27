@@ -39,6 +39,12 @@ export type CanvasCheck = {
   maxDpr: number;
 };
 
+type VisualEvidence = {
+  source: string;
+  render: string;
+  comparison: string;
+};
+
 export type Route = {
   name: string;
   path: string;
@@ -69,10 +75,8 @@ export type Route = {
     | "history-empty";
   primaryActionSelector?: string;
   primaryActionNotApplicableReason?: string;
-  visualEvidence: Record<
-    string,
-    { source: string; render: string; comparison: string }
-  >;
+  visualEvidence: Record<string, VisualEvidence>;
+  supplementalEvidence?: Record<string, VisualEvidence>;
   controls: Control[];
   motionChecks?: MotionCheck[];
   reducedMotionChecks?: Array<{

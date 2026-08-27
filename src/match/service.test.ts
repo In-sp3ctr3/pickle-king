@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { activeServer, nextService, serviceSide } from "./service";
+import {
+  activeReceiver,
+  activeServer,
+  nextService,
+  serviceSide,
+} from "./service";
 import type { ServiceState } from "./types";
 
 const sides = {
@@ -25,6 +30,29 @@ describe("service sequence", () => {
         sides,
       }),
     ).toMatchObject({ playerId: "a1", side: "left" });
+  });
+
+  it("identifies the doubles receiver in the diagonal service box", () => {
+    expect(
+      activeReceiver({ scores: { A: 0, B: 0 }, service: opening, sides }),
+    ).toMatchObject({ playerId: "b1", side: "right", team: "B" });
+    expect(
+      activeReceiver({
+        scores: { A: 1, B: 0 },
+        service: opening,
+        sides,
+      }),
+    ).toMatchObject({ playerId: "b2", side: "left", team: "B" });
+    expect(
+      activeReceiver({
+        scores: { A: 0, B: 0 },
+        service: opening,
+        sides: {
+          sideA: { memberIds: ["a1"] },
+          sideB: { memberIds: ["b1"] },
+        },
+      }),
+    ).toBeNull();
   });
 
   it("makes the opening fault an immediate side out", () => {

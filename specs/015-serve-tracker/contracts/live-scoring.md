@@ -31,6 +31,9 @@ The guide is read-only and always includes:
   box without a glow or background plate and without claiming to show the other
   players' live formation. The marker remains fully outside either baseline and
   never overlaps the playing surface.
+- in doubles, the legal receiver's name and one solid white head-and-torso
+  marker outside the opposite baseline at the diagonally opposite receiving
+  box. Singles do not show a receiver.
 
 The active box softly pulses from bright to muted lime and the server marker
 transitions between boxes. Both effects are disabled for reduced motion. On a

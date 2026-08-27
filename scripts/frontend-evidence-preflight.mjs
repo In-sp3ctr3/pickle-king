@@ -55,6 +55,39 @@ function validatePath(relativePath, label, allowedRoot = null) {
   return resolved;
 }
 
+function validateEvidence(evidence, key) {
+  if (!evidence) {
+    failures.push(`Missing visual evidence for ${key}`);
+    return;
+  }
+  const source = validatePath(
+    evidence.source,
+    `Source for ${key}`,
+    "docs/frontend/evidence",
+  );
+  const render = validatePath(
+    evidence.render,
+    `Render for ${key}`,
+    "test-results/frontend-captures",
+  );
+  const comparison = validatePath(
+    evidence.comparison,
+    `Comparison for ${key}`,
+    "test-results/frontend-comparisons",
+  );
+  if (
+    source &&
+    render &&
+    comparison &&
+    new Set([source, render, comparison]).size !== 3
+  ) {
+    failures.push(`Source, render, and comparison must be distinct for ${key}`);
+  }
+  recordUnique("source", source, key);
+  recordUnique("render", render, key);
+  recordUnique("comparison", comparison, key);
+}
+
 let routeMap;
 try {
   routeMap = JSON.parse(readFileSync(routeMapPath, "utf8"));
@@ -66,39 +99,12 @@ try {
 for (const route of routeMap.routes ?? []) {
   for (const viewport of routeMap.viewports ?? []) {
     const key = `${route.name}/${viewport.name}`;
-    const evidence = route.visualEvidence?.[viewport.name];
-    if (!evidence) {
-      failures.push(`Missing visualEvidence for ${key}`);
-      continue;
-    }
-    const source = validatePath(
-      evidence.source,
-      `Source for ${key}`,
-      "docs/frontend/evidence",
-    );
-    const render = validatePath(
-      evidence.render,
-      `Render for ${key}`,
-      "test-results/frontend-captures",
-    );
-    const comparison = validatePath(
-      evidence.comparison,
-      `Comparison for ${key}`,
-      "test-results/frontend-comparisons",
-    );
-    if (
-      source &&
-      render &&
-      comparison &&
-      new Set([source, render, comparison]).size !== 3
-    ) {
-      failures.push(
-        `Source, render, and comparison must be distinct for ${key}`,
-      );
-    }
-    recordUnique("source", source, key);
-    recordUnique("render", render, key);
-    recordUnique("comparison", comparison, key);
+    validateEvidence(route.visualEvidence?.[viewport.name], key);
+  }
+  for (const [name, evidence] of Object.entries(
+    route.supplementalEvidence ?? {},
+  )) {
+    validateEvidence(evidence, `${route.name}/${name}`);
   }
 }
 

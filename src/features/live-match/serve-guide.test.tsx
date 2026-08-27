@@ -8,6 +8,7 @@ describe("ServeGuide", () => {
       <ServeGuide
         courtEnd="left"
         isOpeningServe={false}
+        receiver={{ name: "Blair", side: "left" }}
         server={{
           name: "Alex",
           side: "left",
@@ -18,6 +19,7 @@ describe("ServeGuide", () => {
     );
 
     expect(markup).toContain("Alex</span> is serving");
+    expect(markup).toContain("Blair</span> is receiving");
     expect(markup).toContain("Server 2");
     expect(markup).toContain("Alex / Bea");
     expect(markup).toContain(
@@ -34,9 +36,12 @@ describe("ServeGuide", () => {
     ).toHaveLength(4);
     expect(markup.match(/is-active/g)).toHaveLength(1);
     expect(markup).toContain("serve-court__service-box--far-left is-active");
-    expect(markup).toContain("serve-court__player-marker");
+    expect(markup).toContain("serve-court__player-marker--receiver");
+    expect(markup).toContain("serve-court__player-marker--near-left");
     expect(markup).toContain("serve-court__player-head");
     expect(markup).toContain("serve-court__player-torso");
+    expect(markup.match(/serve-court__player-head/g)).toHaveLength(2);
+    expect(markup.match(/serve-court__player-torso/g)).toHaveLength(2);
   });
 
   it("uses the special opening label only when told the score is 0–0", () => {

@@ -13,10 +13,12 @@ export interface ServeGuideServer {
 export function ServeGuide({
   courtEnd,
   isOpeningServe,
+  receiver,
   server,
 }: {
   courtEnd: "left" | "right";
   isOpeningServe: boolean;
+  receiver?: { name: string; side: ServiceSide };
   server: ServeGuideServer;
 }) {
   const reducedMotion = useReducedMotion();
@@ -26,7 +28,13 @@ export function ServeGuide({
     : `Server ${serverNumber}`;
   const end = courtEnd === "right" ? "near" : "far";
   const activeBox = `${end}-${server.side}`;
+  const receiverEnd = end === "near" ? "far" : "near";
+  const receiverBox = `${receiverEnd}-${receiver?.side}`;
+  const receiverCourtEnd = courtEnd === "right" ? "left" : "right";
   const boxLabel = `${server.side} service box on the ${courtEnd} end`;
+  const receiverLabel = receiver
+    ? ` ${receiver.name} receives from the ${receiver.side} service box on the ${receiverCourtEnd} end.`
+    : "";
   const teamLabel = server.team.replace(/\s+\+\s+/g, " / ");
 
   return (
@@ -40,11 +48,16 @@ export function ServeGuide({
           <strong id="serve-guide-title">
             <span>{server.name}</span> is serving
           </strong>
+          {receiver ? (
+            <span className="serve-guide__receiver">
+              <span>{receiver.name}</span> is receiving
+            </span>
+          ) : null}
           <span className="serve-guide__team">{teamLabel}</span>
           <span className="serve-guide__turn">{turn}</span>
         </div>
         <div
-          aria-label={`Full pickleball court. ${server.name} serves from the ${boxLabel}.`}
+          aria-label={`Full pickleball court. ${server.name} serves from the ${boxLabel}.${receiverLabel}`}
           className={`serve-court serve-court--${activeBox}`}
           data-motion-state={reducedMotion ? "static" : activeBox}
           role="img"
@@ -64,10 +77,22 @@ export function ServeGuide({
               />
             ))}
           </span>
-          <span aria-hidden="true" className="serve-court__player-marker">
+          <span
+            aria-hidden="true"
+            className="serve-court__player-marker serve-court__player-marker--server"
+          >
             <span className="serve-court__player-head" />
             <span className="serve-court__player-torso" />
           </span>
+          {receiver ? (
+            <span
+              aria-hidden="true"
+              className={`serve-court__player-marker serve-court__player-marker--receiver serve-court__player-marker--${receiverBox}`}
+            >
+              <span className="serve-court__player-head" />
+              <span className="serve-court__player-torso" />
+            </span>
+          ) : null}
         </div>
       </div>
     </section>

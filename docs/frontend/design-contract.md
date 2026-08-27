@@ -96,11 +96,11 @@ Last updated: 2026-08-26
 
 ## Page Rhythm Map
 
-| Region        | Entry                | Dominant cue                      | Exit               | Mobile treatment                |
-| ------------- | -------------------- | --------------------------------- | ------------------ | ------------------------------- |
-| Match top bar | navigation and clock | time and match context            | serving guide      | compact three-column header     |
-| Serve guide   | legal next serve     | named player plus highlighted box | score targets      | two-line text beside mini-court |
-| Score targets | rally winner choice  | large team score                  | pause/end controls | remains full-width half-court   |
+| Region        | Entry                 | Dominant cue                       | Exit               | Mobile treatment               |
+| ------------- | --------------------- | ---------------------------------- | ------------------ | ------------------------------ |
+| Match top bar | navigation and clock  | time and match context             | serving guide      | compact three-column header    |
+| Serve guide   | legal server/receiver | named players plus highlighted box | score targets      | compact text beside mini-court |
+| Score targets | rally winner choice   | large team score                   | pause/end controls | remains full-width half-court  |
 
 ## Geometry
 
@@ -172,7 +172,7 @@ Last updated: 2026-08-26
 | LeagueStandings   | provisional, qualified, complete         | semantic table; wins, points, differential, and deterministic rank           |
 | RoundRobinRound   | waiting, available, complete             | two match nodes per round; one-column phone fallback                         |
 | PlacementMatches  | unresolved, bronze-ready, final-ready    | third place precedes final; standings placeholders explain qualification     |
-| ServeGuide        | opening, first, second, swapped          | one legal box and one solid player marker; never a live formation map        |
+| ServeGuide        | opening, first, second, swapped          | one legal box, lime server marker, and doubles-only white receiver marker    |
 | BracketViewport   | fitted, readable, zoomed, panning        | fitted views are read-only below 100%; match controls activate at 100%+      |
 
 ## Motion
@@ -255,8 +255,9 @@ Last updated: 2026-08-26
 - The serving guide is a short court strip rather than a third score panel. Its
   horizontal court includes the net, both kitchens, and four service boxes,
   highlighting only the active legal box.
-- One solid lime head-and-torso marker identifies the server without implying
-  live doubles formation. It sits outside the active baseline without a halo.
+- One solid lime head-and-torso marker identifies the server. In doubles, a
+  solid white marker identifies the legal receiver at the diagonally opposite
+  service box. Both sit outside their baselines without implying live formation.
 - The active box softly pulses; reduced-motion renders a static fill.
 - Mobile score zones keep the team name, rally instruction, large centered
   numeral, and two 48px controls vertically separated at 320–390px widths.

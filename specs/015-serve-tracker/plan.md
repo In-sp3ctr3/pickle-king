@@ -43,6 +43,8 @@ scorekeeper tap
 ```
 
 - `src/match/service.ts` owns service transitions and derived legal positions.
+- The legal doubles receiver is derived from the same scores, right-at-zero
+  anchors, and service side; it adds no persisted state.
 - `src/match/scoring.ts` keeps match completion/timer behavior and composes the
   service transition for live rally actions.
 - `src/match/types.ts` contains serializable service and rally types.
@@ -61,6 +63,8 @@ scorekeeper tap
 - **New surface**: a short guide under the live top bar, a Start-time serve
   setup dialog, and secondary undo/fix-serve controls. The large score zones
   remain primary and use the words “won rally.”
+- **Receiver cue**: doubles adds the receiver name and a solid white marker at
+  the diagonally opposite service box; singles retains the one-marker guide.
 - **Assets/capabilities**: `dom-css` is available and selected. Existing
   `motion` is available for feedback only. No generated, remote, 3D, or
   registry asset is needed.

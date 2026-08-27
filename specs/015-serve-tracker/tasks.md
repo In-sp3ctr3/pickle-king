@@ -46,6 +46,7 @@
 - [x] T019 Capture same-viewport desktop/mobile scorer evidence and run visual comparison.
 - [x] T020 Run adversarial domain/UI review, frontend QA/release, `npm run check`, and `npm run format:check`; record results in `specs/015-serve-tracker/verification.md`.
 - [x] T021 Persist court orientation, mirror service boxes across both ends, and add the one-tap Swap sides control with reducer, persistence, and browser coverage.
+- [x] T022 Derive and display the doubles receiver with a white court marker and focused domain, component, and browser coverage.
 
 ## Dependencies
 

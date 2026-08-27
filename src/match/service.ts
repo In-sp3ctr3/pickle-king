@@ -51,6 +51,30 @@ export function activeServer(input: {
   };
 }
 
+export function activeReceiver(input: {
+  scores: Record<MatchTeam, number>;
+  service: ServiceState;
+  sides: Sides;
+}): { playerId: string; side: ServiceSide; team: MatchTeam } | null {
+  const server = activeServer(input);
+  const team = other(server.team);
+  if (!isDoubles(input.sides, team)) return null;
+  const right = playerOnRight(
+    input.sides,
+    team,
+    input.scores[team],
+    input.service,
+  );
+  return {
+    playerId:
+      server.side === "right"
+        ? right
+        : (members(input.sides, team).find((id) => id !== right) ?? right),
+    side: server.side,
+    team,
+  };
+}
+
 export function playerOnRight(
   sides: Sides,
   team: MatchTeam,

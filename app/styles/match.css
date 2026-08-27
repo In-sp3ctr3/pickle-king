@@ -132,7 +132,8 @@
   gap: 0.08rem;
 }
 
-.serve-guide__copy strong {
+.serve-guide__copy strong,
+.serve-guide__receiver {
   color: var(--chalk);
   font-size: clamp(0.9rem, 2vw, 1.05rem);
   font-weight: 900;
@@ -298,24 +299,37 @@
   border-radius: 5px 5px 3px 3px;
 }
 
-.serve-court--far-left .serve-court__player-marker,
-.serve-court--far-right .serve-court__player-marker {
+.serve-court--far-left .serve-court__player-marker--server,
+.serve-court--far-right .serve-court__player-marker--server,
+.serve-court__player-marker--far-left,
+.serve-court__player-marker--far-right {
   left: 1px;
 }
 
-.serve-court--near-left .serve-court__player-marker,
-.serve-court--near-right .serve-court__player-marker {
+.serve-court--near-left .serve-court__player-marker--server,
+.serve-court--near-right .serve-court__player-marker--server,
+.serve-court__player-marker--near-left,
+.serve-court__player-marker--near-right {
   right: 1px;
 }
 
-.serve-court--far-right .serve-court__player-marker,
-.serve-court--near-left .serve-court__player-marker {
+.serve-court--far-right .serve-court__player-marker--server,
+.serve-court--near-left .serve-court__player-marker--server,
+.serve-court__player-marker--far-right,
+.serve-court__player-marker--near-left {
   top: 75%;
 }
 
-.serve-court--far-left .serve-court__player-marker,
-.serve-court--near-right .serve-court__player-marker {
+.serve-court--far-left .serve-court__player-marker--server,
+.serve-court--near-right .serve-court__player-marker--server,
+.serve-court__player-marker--far-left,
+.serve-court__player-marker--near-right {
   top: 25%;
+}
+
+.serve-court__player-marker--receiver .serve-court__player-head,
+.serve-court__player-marker--receiver .serve-court__player-torso {
+  background: var(--chalk);
 }
 
 @keyframes serve-box-pulse {
@@ -1089,17 +1103,53 @@ html[data-visual-freeze="true"] .victory-confetti__static {
     font-size: 0.58rem;
   }
 
+  .serve-guide {
+    padding: 0.45rem 0.85rem;
+  }
+
+  .serve-guide__inner {
+    grid-template-columns: minmax(0, 1fr) 150.4px;
+    gap: 0.75rem;
+  }
+
+  .serve-court {
+    width: 150.4px;
+    height: 52px;
+  }
+
+  .serve-guide__team,
+  .serve-guide__turn {
+    font-size: 0.57rem;
+  }
+
   .score-add {
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-content: stretch;
+    align-items: start;
     padding: 0.75rem 0.75rem 3.7rem;
   }
 
   .score-number {
-    margin-block: 0.35rem;
-    font-size: clamp(6rem, 31dvh, 9rem);
+    grid-row: 3;
+    align-self: center;
+    margin: 0;
+    font-size: clamp(2.5rem, 11dvh, 3.5rem);
   }
 
   .score-player {
+    position: static;
+    grid-row: 1;
+    width: 100%;
     font-size: 0.9rem;
+    translate: none;
+  }
+
+  .score-hint {
+    position: static;
+    grid-row: 2;
+    width: 100%;
+    line-height: 1.1;
+    translate: none;
   }
 
   .score-subtract {

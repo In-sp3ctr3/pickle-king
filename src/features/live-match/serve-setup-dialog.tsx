@@ -2,17 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { MatchTeam, ScoringState, ServiceState } from "../../match/types";
-
-type Player = { id: string; name: string };
-
-function players(scorer: ScoringState, team: MatchTeam): Player[] {
-  const ids = team === "A" ? scorer.sideA.memberIds : scorer.sideB.memberIds;
-  const names =
-    team === "A"
-      ? scorer.participantNames?.sideA
-      : scorer.participantNames?.sideB;
-  return ids.map((id, index) => ({ id, name: names?.[index] ?? id }));
-}
+import { servePlayers, type ServePlayer } from "./serve-players";
 
 export function ServeSetupDialog({
   scorer,
@@ -25,8 +15,8 @@ export function ServeSetupDialog({
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
-  const teamA = players(scorer, "A");
-  const teamB = players(scorer, "B");
+  const teamA = servePlayers(scorer, "A");
+  const teamB = servePlayers(scorer, "B");
   const [startingTeam, setStartingTeam] = useState<MatchTeam>("A");
   const [rightAtZeroA, setRightAtZeroA] = useState(teamA[0]?.id ?? "");
   const [rightAtZeroB, setRightAtZeroB] = useState(teamB[0]?.id ?? "");
@@ -171,7 +161,7 @@ function PositionChoice({
   label: string;
   name: string;
   onChange: (id: string) => void;
-  players: Player[];
+  players: ServePlayer[];
   value: string;
 }) {
   if (players.length < 2) return null;

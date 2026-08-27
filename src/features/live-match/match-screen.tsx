@@ -8,8 +8,8 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { activeServer } from "../../match/service";
+import { useEffect, useRef, useState } from "react";
+import { activeReceiver, activeServer } from "../../match/service";
 import type { ScoringAction, ScoringState } from "../../match/types";
 import { prewarmShareAssets } from "../share";
 import {
@@ -22,6 +22,7 @@ import { ResultConfirmationDialog } from "./result-confirmation-dialog";
 import { MatchScoreboard } from "./match-scoreboard";
 import { ScoreSoundToggle } from "./score-sound-toggle";
 import { ServeGuide } from "./serve-guide";
+import { servePlayerName } from "./serve-players";
 import { ServeTrackerDialogs } from "./serve-tracker-dialogs";
 import { useWakeLock } from "./use-wake-lock";
 
@@ -45,10 +46,6 @@ export function MatchScreen({
   const [serveStatus, setServeStatus] = useState("");
   const startButtonRef = useRef<HTMLButtonElement>(null);
   const openExit = () => setControlMode("exit");
-  const send = useCallback(
-    (action: ScoringAction) => onAction(action),
-    [onAction],
-  );
   useEffect(() => {
     prewarmShareAssets();
   }, []);
@@ -73,31 +70,29 @@ export function MatchScreen({
   const live = ["running", "paused", "golden-point"].includes(scorer.status);
   const canScore =
     scorer.status === "editing-result" || (live && Boolean(scorer.service));
-  const server = scorer.service
-    ? activeServer({
-        scores: { A: scorer.scoreA, B: scorer.scoreB },
-        service: scorer.service,
-        sides: scorer,
-      })
-    : null;
+  const positionInput = scorer.service && {
+    scores: { A: scorer.scoreA, B: scorer.scoreB },
+    service: scorer.service,
+    sides: scorer,
+  };
+  const server = positionInput ? activeServer(positionInput) : null;
+  const receiver = positionInput ? activeReceiver(positionInput) : null;
   const serverName = server
-    ? ((server.team === "A"
-        ? scorer.participantNames?.sideA
-        : scorer.participantNames?.sideB)?.[
-        (server.team === "A" ? scorer.sideA : scorer.sideB).memberIds.indexOf(
-          server.playerId,
-        )
-      ] ?? server.playerId)
+    ? servePlayerName(scorer, server.team, server.playerId)
     : null;
-  const rightEndTeam = scorer.rightEndTeam ?? "A";
+  const receiverName = receiver
+    ? servePlayerName(scorer, receiver.team, receiver.playerId)
+    : null;
   const teamOrder =
-    rightEndTeam === "A" ? (["A", "B"] as const) : (["B", "A"] as const);
+    (scorer.rightEndTeam ?? "A") === "A"
+      ? (["A", "B"] as const)
+      : (["B", "A"] as const);
   const toggle =
     scorer.status === "complete"
       ? onExit
       : scorer.status === "running"
-        ? () => send({ type: "pause", now: Date.now() })
-        : () => send({ type: "resume", now: Date.now() });
+        ? () => onAction({ type: "pause", now: Date.now() })
+        : () => onAction({ type: "resume", now: Date.now() });
   return (
     <main className="match-screen" data-qa="live-match">
       <h1 className="sr-only">
@@ -111,7 +106,7 @@ export function MatchScreen({
           <ScoreSoundToggle scorer={scorer} />
         </div>
         <MatchClock
-          onExpire={(now) => send({ type: "tick", now })}
+          onExpire={(now) => onAction({ type: "tick", now })}
           scorer={scorer}
           sessionDeadline={sessionDeadline}
         />
@@ -137,6 +132,11 @@ export function MatchScreen({
             scorer.scoreB === 0 &&
             server.turn === "opening"
           }
+          receiver={
+            receiver && receiverName
+              ? { name: receiverName, side: receiver.side }
+              : undefined
+          }
           server={{
             name: serverName,
             side: server.side,
@@ -153,7 +153,7 @@ export function MatchScreen({
       <MatchScoreboard
         canScore={canScore}
         onRally={(team) =>
-          send(
+          onAction(
             scorer.status === "editing-result"
               ? { type: "adjust", team, delta: 1, now: Date.now() }
               : { type: "rally", team, now: Date.now() },
@@ -161,7 +161,7 @@ export function MatchScreen({
         }
         onStart={() => setServeDialog("setup")}
         onUndo={(team) =>
-          send(
+          onAction(
             scorer.status === "editing-result"
               ? { type: "adjust", team, delta: -1, now: Date.now() }
               : { type: "undo-rally", now: Date.now() },
@@ -182,7 +182,7 @@ export function MatchScreen({
                 setControlMode("end");
                 return;
               }
-              send({ type: "review-result", now: Date.now() });
+              onAction({ type: "review-result", now: Date.now() });
             }}
             type="button"
           >
@@ -238,7 +238,7 @@ export function MatchScreen({
               aria-label="Swap sides"
               className="control-button"
               data-qa="swap-court-ends"
-              onClick={() => send({ type: "swap-court-ends" })}
+              onClick={() => onAction({ type: "swap-court-ends" })}
               type="button"
             >
               <ArrowLeftRight aria-hidden="true" />
@@ -274,18 +274,18 @@ export function MatchScreen({
           onDiscard={onDiscard}
           onEnd={(winner) => {
             setControlMode(null);
-            send({ type: "end-early", now: Date.now(), winner });
+            onAction({ type: "end-early", now: Date.now(), winner });
           }}
           onRestart={() => {
             setControlMode(null);
-            send({ type: "reset" });
+            onAction({ type: "reset" });
           }}
           scorer={scorer}
         />
       ) : null}
       <ServeTrackerDialogs
         mode={serveDialog}
-        onAction={send}
+        onAction={onAction}
         onClose={() => setServeDialog(null)}
         onStatus={setServeStatus}
         scorer={scorer}
@@ -293,7 +293,7 @@ export function MatchScreen({
       {scorer.status === "awaiting-confirmation" ? (
         <ResultConfirmationDialog
           onConfirm={onConfirm}
-          onEdit={() => send({ type: "edit-result" })}
+          onEdit={() => onAction({ type: "edit-result" })}
           scorer={scorer}
         />
       ) : null}
