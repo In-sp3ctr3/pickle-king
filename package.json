@@ -1,6 +1,6 @@
 {
   "name": "pickle-king",
-  "version": "1.10.0-alpha.1",
+  "version": "1.10.0",
   "description": "An offline-first pickleball tournament and scoring PWA.",
   "private": true,
   "license": "MIT",
