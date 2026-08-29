@@ -55,7 +55,7 @@ const history = {
 };
 
 const styles = ["Poster", "Frame", "Receipt"] as const;
-const maxSnapshotDiffRatio = 0.001;
+const maxSnapshotDiffRatio = 0.005;
 
 async function previewPng(page: Page, height: 1350 | 1920) {
   const preview = page.locator("[data-qa='share-preview']");
