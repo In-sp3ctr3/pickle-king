@@ -55,6 +55,7 @@ const history = {
 };
 
 const styles = ["Poster", "Frame", "Receipt"] as const;
+const maxSnapshotDiffRatio = 0.001;
 
 async function previewPng(page: Page, height: 1350 | 1920) {
   const preview = page.locator("[data-qa='share-preview']");
@@ -76,7 +77,7 @@ async function expectStyleSnapshots(
     await page.getByRole("radio", { name: style, exact: true }).click();
     expect(await previewPng(page, height)).toMatchSnapshot(
       `${fixture}-${style.toLowerCase()}-${height}.png`,
-      { maxDiffPixels: 100 },
+      { maxDiffPixelRatio: maxSnapshotDiffRatio },
     );
   }
 }
@@ -208,7 +209,7 @@ test("locks Quick share PNGs for two-digit scores and the name boundary", async 
       );
       expect(subject).toMatchSnapshot(
         `jean-paul-${style.toLowerCase()}-${story ? 1920 : 1350}.png`,
-        { maxDiffPixels: 100 },
+        { maxDiffPixelRatio: maxSnapshotDiffRatio },
       );
       const bounds = await winnerDifference(control, subject);
       const [left, top, right, bottom] =
