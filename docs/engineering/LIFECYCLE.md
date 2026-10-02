@@ -1,0 +1,11 @@
+# Ticket and PR lifecycle
+
+Adapted from Project Harness at `5d7052e820f7a7940be86df1c234e6da16047c6d`. [SPE-189 audit](SPE-189.md) records the adoption decision. Linear owns scope/status, Git owns source, and GitHub owns PR/check/review state.
+
+1. At start or resume, read the Linear issue and latest comments, then fetch remotes, inspect branch/worktree/status/stashes/PRs, and run `scripts/repo-hygiene` read-only against the verified canonical branch. Resolve unknown overlapping work before a new branch. Use the relevant `specs/` workspace for product work; SPE-189 is repository harness work.
+2. Use `.work/active/<ticket>/STATE.md` only as an ignored cache. Reconcile its claims with Linear, Git, PR and current files. If absent, reconstruct from those authorities; a cache timestamp is not evidence. The [STATE template](STATE.md) lists useful handoff fields.
+3. Keep a bounded plan and acceptance-to-check map beside the owning ticket or feature workspace. For consequential work, obtain fresh independent plan and implementation reviews using the shared [Engineering Design Contract](https://github.com/In-sp3ctr3/codex-os/blob/5d7052e820f7a7940be86df1c234e6da16047c6d/docs/engineering/ENGINEERING_DESIGN_CONTRACT.md) and code-review owner. Record findings, fixes and rechecks; an implementer does not approve their own subjective work.
+4. Before PR, review the actual diff, run applicable verification, and record unrun checks. The PR template records acceptance, revision, reviewer and risk. Hosted checks and conversations must cover the exact current PR head; old-head green checks do not establish readiness. A merge changes the candidate and needs verification on the merged commit.
+5. Before Done, rerun read-only hygiene. Classify every dirty path, branch, worktree, stash and open PR with owner, disposition and evidence. Preserve unknown or user-owned data. Release, deployment, observation and cleanup are separate evidence gates described in [RELEASE](RELEASE.md); a merge alone does not prove them.
+
+The read-only hygiene command accepts `--canonical origin/main --github-repo In-sp3ctr3/pickle-king --fetched`; add `--phase start --ticket ID --scope PATH` for a bounded start gate. Fetch first. Its report is evidence, not permission to delete. Branches and worktrees with unique product architecture or dependency work remain under their owners.

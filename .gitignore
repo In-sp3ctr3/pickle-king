@@ -49,3 +49,4 @@ next-env.d.ts
 /.specify/
 .agents/
 /.security-snapshot/
+/.work/active/

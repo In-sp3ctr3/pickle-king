@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Compare Pickle King's pinned harness source with an explicit OS revision."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+
+
+def git(repo, *args):
+    return subprocess.check_output(["git", "-C", str(repo), *args], stderr=subprocess.PIPE).decode().strip()
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--os-repo", required=True, type=Path, help="existing codex-os checkout")
+    parser.add_argument("--target", required=True, help="fetched accepted OS commit or ref")
+    parser.add_argument("--manifest", type=Path, default=Path(__file__).resolve().parent.parent / "docs/engineering/HARNESS_PROVENANCE.json")
+    args = parser.parse_args()
+    manifest = json.loads(args.manifest.read_text())
+    root = args.manifest.resolve().parent.parent.parent
+    source = manifest["os_sha"]
+    try:
+        target = git(args.os_repo, "rev-parse", "--verify", args.target + "^{commit}")
+        git(args.os_repo, "cat-file", "-e", source + "^{commit}")
+        changed = git(
+            args.os_repo,
+            "diff",
+            "--name-only",
+            source,
+            target,
+            "--",
+            manifest["contract_path"],
+        ).splitlines()
+        drift = []
+        for item in manifest["derived"]:
+            upstream = subprocess.check_output(
+                ["git", "-C", str(args.os_repo), "show", f"{source}:{item['source']}"],
+                stderr=subprocess.PIPE,
+            )
+            if sha(upstream) != item["source_sha256"]:
+                raise ValueError("Pinned source hash mismatch: " + item["source"])
+            if git(args.os_repo, "rev-parse", f"{source}:{item['source']}") != item["source_blob"]:
+                raise ValueError("Pinned source blob mismatch: " + item["source"])
+            local = root / item["local"]
+            if not local.is_file() or sha(local.read_bytes()) != item["local_sha256"]:
+                drift.append(item["local"])
+    except (OSError, subprocess.CalledProcessError, ValueError) as exc:
+        parser.exit(1, f"harness-status: {exc}\n")
+
+    print(json.dumps({
+        "adopted_os_sha": source,
+        "target_os_sha": target,
+        "harness_stale": bool(changed),
+        "upstream_changes": changed,
+        "local_override_drift": drift,
+        "intentional_omissions": manifest["omitted"],
+    }, indent=2))
+
+
+if __name__ == "__main__":
+    main()

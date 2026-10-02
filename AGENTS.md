@@ -1,5 +1,12 @@
 # Pickle King Agent Rules
 
+Read [the engineering profile](docs/engineering/PROJECT_PROFILE.md) for observed
+commands and risks, [ticket lifecycle](docs/engineering/LIFECYCLE.md) for
+continuation/review gates, and [release evidence](docs/engineering/RELEASE.md)
+when preparing CI or delivery. Linear owns ticket state; an ignored local
+checkpoint never outranks Linear, Git, or the current PR. Run `./scripts/verify`
+for the profile's canonical checks.
+
 ## Scope boundary
 
 - This file contains Pickle King-only routing, commands, fixtures, dimensions,

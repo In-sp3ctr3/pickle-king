@@ -1,0 +1,89 @@
+{
+  "os_repo": "In-sp3ctr3/codex-os",
+  "os_sha": "5d7052e820f7a7940be86df1c234e6da16047c6d",
+  "contract_path": "templates/project-harness",
+  "contract_id": "project-harness@5d7052e820f7a7940be86df1c234e6da16047c6d",
+  "derived": [
+    {
+      "source": "templates/project-harness/AGENTS.md",
+      "source_blob": "61400ee3afe086a09eda0c133ae523e45f4ea870",
+      "source_sha256": "2a9723b1933cbcbab4d5ce84a7ff4d55c8f04957e097854580d0ac0e27622eac",
+      "local": "AGENTS.md",
+      "local_sha256": "747e25dbfbb37dfea91545478b0ab22c6d20d185b50775572264089bbef6316a",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/PROJECT_PROFILE.md",
+      "source_blob": "6e6cd542516da1be5473a4e299399602a723dfe8",
+      "source_sha256": "69f0de164d30b4441864090e778f9043e48523fab2bcefe676b2746159a5a3d9",
+      "local": "docs/engineering/PROJECT_PROFILE.md",
+      "local_sha256": "b71ed4b52fee8066b9da8e9988a50c543b5b9cfaed93133241f30062e83c0fd9",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/LIFECYCLE.md",
+      "source_blob": "d41712aba4e9df9dd363ae1dd3948db3f2821a04",
+      "source_sha256": "d3f6568cbe8092e25e9f32e66c0f13e414d2805c5bc3bfdc37f25b2b3f863837",
+      "local": "docs/engineering/LIFECYCLE.md",
+      "local_sha256": "d470b75badc7093cee6186a3046ee29c2c88652448667986e7814090194c5756",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/RELEASE.md",
+      "source_blob": "c810951f33753af01c7b59f207b6e6dcd445db15",
+      "source_sha256": "a33729c9bb05dded815d3df0b1fefdcbc20c586046526505f95bca5883a8fdd0",
+      "local": "docs/engineering/RELEASE.md",
+      "local_sha256": "e23f497d64d635f3d36eb4f54ff0f2cead3c714acedd266d80ae142da6054a52",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/STATE.md",
+      "source_blob": "7f017ccff23257a60371f751c3bd1a5757815a3d",
+      "source_sha256": "f4a0f41226f3cd333031b2010d9863b5f3b4c0a2c9981f2a8516789194c9a1f6",
+      "local": "docs/engineering/STATE.md",
+      "local_sha256": "ef60bfa10f03db3eb45d07023a50c3bdcf3451b5c0c5fe82bf34a6fb550e39f0",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/PR_TEMPLATE.md",
+      "source_blob": "c33d40ca3060f69da7872def0aa40679c96fe698",
+      "source_sha256": "f3b7ecc91c34e8d3f8f22ff349ce5ea93057ee7b7dcc24f2a9b5ad84c672331f",
+      "local": ".github/pull_request_template.md",
+      "local_sha256": "2f5f81acac85c415b9f5155e96e1fd6b5c985f2b6c5e5c008224817e13eabfff",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/scripts/verify",
+      "source_blob": "a9796711d487ab968d3b7ea86986017edf5f8f17",
+      "source_sha256": "ef722130efc917c5ef702adb5230f98825a54d47f2e1e8be93feeae7b7b28735",
+      "local": "scripts/verify",
+      "local_sha256": "156e3fb62cd0986d90aee9b1b26e337d5a62835ee2a72fbd9cd354efd42ab892",
+      "kind": "adapted"
+    },
+    {
+      "source": "templates/project-harness/scripts/repo-hygiene",
+      "source_blob": "c50ce39ec78d836d926456c6f5d8e09050e7c403",
+      "source_sha256": "a6cbda71d0b20f27e0ebab5234f979cbc57440cbaf9794eabe5f39ee47894378",
+      "local": "scripts/repo-hygiene",
+      "local_sha256": "7ff561edeeaa32169f9c353c967ed65834408151deab5560a329dd5259ced8b5",
+      "kind": "adapted: app/dependabot login fix"
+    }
+  ],
+  "repo_owned": [
+    ".github/workflows/quality.yml",
+    ".gitignore",
+    "docs/engineering/SPE-189.md",
+    "docs/architecture/",
+    "scripts/harness-status",
+    "tests/test_harness_status.py",
+    "specs/",
+    ".agents/"
+  ],
+  "omitted": {
+    ".codex configuration": "No repo-specific Codex setting observed.",
+    "scripts/smoke": "No verified preview or production target identity and safe probe.",
+    "scripts/release-check": "No verified deployment candidate/artifact or target identity.",
+    "repo-local hooks": "No repeatable Pickle King-only hook need observed."
+  },
+  "status_command": "./scripts/harness-status --os-repo <existing-codex-os-checkout> --target <fetched-accepted-commit>"
+}
