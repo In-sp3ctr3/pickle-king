@@ -1,0 +1,293 @@
+#!/usr/bin/env python3
+"""Read-only Git/PR inventory and conservative ticket hygiene gates."""
+
+import argparse
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+def command(repo, *args):
+    return subprocess.run(args, cwd=repo, text=True, capture_output=True, timeout=60)
+
+
+def git(repo, *args):
+    result = command(repo, 'git', *args)
+    if result.returncode:
+        raise RuntimeError(f"git {' '.join(args)}: {result.stderr.strip()}")
+    return result.stdout.rstrip('\n')
+
+
+def paths_overlap(paths, scope):
+    return any(p == s or p.startswith(s.rstrip('/') + '/') or
+               s.startswith(p.rstrip('/') + '/') for p in paths for s in scope)
+
+
+def evidence(known, key):
+    item = known.get(key, {})
+    required = ('owner', 'reason', 'classification', 'disposition', 'evidence')
+    if item.get('disposition') in ('retain', 'salvage'):
+        required += ('follow_up',)
+    allowed = {'ACTIVE', 'READY_TO_LAND', 'SALVAGE', 'SUPERSEDED',
+               'SAFE_DELETE', 'DEPENDABOT_REVIEW', 'UNKNOWN'}
+    return item if item.get('classification') in allowed and all(item.get(field) for field in required) else {}
+
+
+def owns(ticket, text, known=None):
+    return (bool(re.search(r'(?<![A-Z0-9])' + re.escape(ticket) + r'(?![A-Z0-9])', text, re.I)) or
+            str((known or {}).get('owner', '')).upper() == ticket.upper())
+
+
+def retained(item, phase):
+    disposition = item.get('known', {}).get('disposition')
+    return disposition == 'retain' or phase == 'direction' and disposition == 'salvage'
+
+
+def github_identity(url):
+    match = re.match(r'(?:git@|ssh://git@|https://)([^/:]+)[:/]([^/]+)/([^/]+?)(?:\.git)?$', url)
+    if not match:
+        return None
+    prefix = '' if match[1] == 'github.com' else match[1] + '/'
+    return f'{prefix}{match[2]}/{match[3]}'
+
+
+def superseded_npm_candidate(repo, title):
+    match = re.match(r'Bump (\S+) from \S+ to (\d+(?:\.\d+){1,2})\b', title, re.I)
+    lockfile = Path(repo) / 'package-lock.json'
+    if not match or not lockfile.is_file():
+        return False
+    try:
+        current = json.loads(lockfile.read_text())['packages']['node_modules/' + match[1]]['version']
+        parts = lambda value: tuple(int(x) for x in value.split('.'))
+        return parts(current) >= parts(match[2])
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
+def inventory(repo, canonical, github_repo, known):
+    canonical_ref = canonical
+    canonical_sha = git(repo, 'rev-parse', '--verify', canonical_ref + '^{commit}')
+    root = git(repo, 'rev-parse', '--show-toplevel')
+    remotes = git(repo, 'remote').splitlines()
+    status = git(repo, 'status', '--porcelain=v1', '-uall')
+    dirty = []
+    for line in status.splitlines():
+        path = line[3:]
+        if ' -> ' in path:
+            path = path.split(' -> ', 1)[1]
+        dirty.append({'path': path, 'state': line[:2], 'known': evidence(known, 'file:' + path)})
+    worktrees = []
+    for block in git(repo, 'worktree', 'list', '--porcelain').split('\n\n'):
+        fields = dict(line.split(' ', 1) if ' ' in line else (line, True)
+                      for line in block.splitlines())
+        if not fields:
+            continue
+        path = fields['worktree']
+        try:
+            state = command(path, 'git', 'status', '--porcelain=v1', '-uall')
+            dirty_state, error = (state.stdout.splitlines(), None) if state.returncode == 0 else (None, state.stderr.strip())
+        except OSError as exc:
+            dirty_state, error = None, str(exc)
+        worktrees.append({'path': path, 'head': fields.get('HEAD'),
+                          'branch': str(fields.get('branch', '')).removeprefix('refs/heads/') or None,
+                          'detached': 'detached' in fields,
+                          'dirty': dirty_state, 'error': error,
+                          'known': evidence(known, 'worktree:' + path)})
+    stashes = []
+    for line in git(repo, 'stash', 'list', '--format=%gd%x09%H%x09%gs').splitlines():
+        ref, sha, subject = line.split('\t', 2)
+        stashes.append({'ref': ref, 'sha': sha, 'subject': subject,
+                        'paths': git(repo, 'stash', 'show', '--name-only', '--format=', ref).splitlines(),
+                        'known': evidence(known, 'stash:' + sha)})
+    branches = []
+    refs = ([(ref, True) for ref in git(repo, 'for-each-ref', '--format=%(refname:short)', 'refs/heads').splitlines()] +
+            [(line.split('\t', 1)[0], False) for line in git(repo, 'for-each-ref',
+              '--format=%(refname:short)%09%(symref)', 'refs/remotes').splitlines()
+              if not line.split('\t', 1)[1]])
+    for ref, local in refs:
+        # All remote refs are preserved; no provider-specific remote name is assumed.
+        upstream = git(repo, 'for-each-ref', '--format=%(upstream:short)', 'refs/heads/' + ref) if local else ''
+        sha = git(repo, 'rev-parse', ref)
+        base_result = command(repo, 'git', 'merge-base', canonical_ref, ref)
+        base = base_result.stdout.strip() if base_result.returncode == 0 else None
+        behind, ahead = map(int, git(repo, 'rev-list', '--left-right', '--count', canonical_ref + '...' + ref).split())
+        reachable = command(repo, 'git', 'merge-base', '--is-ancestor', ref, canonical_ref).returncode == 0
+        changed = git(repo, 'diff', '--name-only', base or canonical_ref, ref).splitlines() if ahead else []
+        cherry = git(repo, 'cherry', canonical_ref, ref).splitlines() if ahead and base else []
+        branches.append({'ref': ref, 'sha': sha, 'upstream': upstream or None,
+                         'merge_base': base, 'behind': behind, 'ahead': ahead,
+                         'reachable': reachable, 'unrelated_history': base is None,
+                         'paths': changed,
+                         'patch_equivalent_candidate': bool(cherry) and all(x.startswith('- ') for x in cherry),
+                         'known': evidence(known, 'branch:' + ref)})
+    prs = None
+    pr_error = None
+    canonical_remote = canonical_ref.split('/', 1)[0] if '/' in canonical_ref else None
+    if not canonical_remote:
+        upstream = git(repo, 'for-each-ref', '--format=%(upstream:short)',
+                       'refs/heads/' + canonical_ref)
+        canonical_remote = upstream.split('/', 1)[0] if '/' in upstream else None
+    if github_repo and remotes and canonical_remote not in remotes:
+        pr_error = 'Canonical remote could not be verified'
+    if github_repo and canonical_remote in remotes:
+        actual = github_identity(git(repo, 'remote', 'get-url', canonical_remote))
+        if actual != github_repo:
+            pr_error = f'Canonical remote identity mismatch: {actual or "not GitHub"}'
+    if github_repo and not pr_error:
+        try:
+            # ponytail: bounded PR history; use paginated API if a repository reaches 10k PRs.
+            result = command(repo, 'gh', 'pr', 'list', '--repo', github_repo, '--state', 'all',
+                             '--limit', '10000', '--json',
+                             'number,title,headRefName,baseRefName,isDraft,author,reviewDecision,statusCheckRollup,state,mergedAt')
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            pr_error = str(exc)
+        else:
+            if result.returncode:
+                pr_error = result.stderr.strip() or 'GitHub query failed'
+        if not pr_error:
+            try:
+                raw = json.loads(result.stdout)
+                if len(raw) >= 10000:
+                    pr_error = 'Open PR query reached limit; completeness unproven'
+                else:
+                    prs = [{'number': p['number'], 'title': p['title'],
+                            'head': p['headRefName'], 'base': p['baseRefName'],
+                            'draft': p['isDraft'], 'state': p['state'],
+                            'merged_at': p.get('mergedAt'),
+                            'dependabot': p['author']['login'].removeprefix('app/').startswith('dependabot'),
+                            'superseded_npm_candidate': (p['author']['login'].removeprefix('app/').startswith('dependabot') and
+                                                         superseded_npm_candidate(repo, p['title'])),
+                            'review': p.get('reviewDecision'),
+                            'checks': [c.get('conclusion') or c.get('status')
+                                       for c in p.get('statusCheckRollup') or []],
+                            'known': evidence(known, 'pr:' + str(p['number']))} for p in raw]
+            except (ValueError, KeyError, TypeError) as exc:
+                pr_error = f'Invalid GitHub response: {exc}'
+    elif not github_repo:
+        pr_error = 'Canonical GitHub repository not supplied'
+    baseline_names = {'main', 'master', 'dev', 'stg'}
+    baseline = baseline_names | {canonical_ref}
+    baseline.update(f'{remote}/{name}' for remote in remotes for name in baseline_names)
+    if '/' in canonical_ref:
+        baseline.add(canonical_ref.split('/', 1)[1])
+    unknown = (['file:' + x['path'] for x in dirty if not x['known']] +
+               ['worktree:' + x['path'] for x in worktrees if (x['dirty'] or x['error']) and not x['known']] +
+               ['stash:' + x['sha'] for x in stashes if not x['known']] +
+               ['branch:' + x['ref'] for x in branches if x['ahead'] and not x['reachable'] and
+                not x['patch_equivalent_candidate'] and x['ref'] not in baseline and not x['known']])
+    stale = ['branch:' + x['ref'] for x in branches if x['ref'] not in baseline and
+             (x['reachable'] or x['patch_equivalent_candidate'])]
+    canonical_sync = None
+    if '/' in canonical_ref:
+        local_name = canonical_ref.split('/', 1)[1]
+        if any(x['ref'] == local_name for x in branches):
+            behind, ahead = map(int, git(repo, 'rev-list', '--left-right', '--count',
+                                         canonical_ref + '...' + local_name).split())
+            canonical_sync = {'local_branch': local_name, 'behind': behind, 'ahead': ahead}
+    return {'root': root, 'canonical': canonical_ref, 'canonical_sha': canonical_sha,
+            'canonical_sync': canonical_sync, 'unknown_items': sorted(set(unknown)),
+            'stale_candidates': sorted(set(stale)),
+            'remotes': remotes, 'dirty': dirty, 'worktrees': worktrees, 'stashes': stashes,
+            'branches': branches, 'open_prs': [p for p in prs if p['state'] == 'OPEN'] if prs is not None else None,
+            'all_prs': prs, 'pr_error': pr_error}
+
+
+def gate(report, phase, ticket, scope, fetched, no_remote):
+    if phase == 'report':
+        return []
+    blockers = []
+    if not ticket:
+        blockers.append('ticket ID required for lifecycle gate')
+    if report['remotes'] and not fetched:
+        blockers.append('fresh fetch for every remote not confirmed')
+    if not report['remotes'] and not no_remote:
+        blockers.append('no-remote exception not recorded')
+    if report['pr_error'] and report['remotes']:
+        blockers.append('open PR evidence unavailable: ' + report['pr_error'])
+    if phase == 'start' and not scope:
+        blockers.append('scope paths absent; manual overlap assessment required')
+    for item in report['dirty']:
+        current_ticket = any(w['path'] == report['root'] and
+                             owns(ticket, str(w['branch'] or ''), w['known'])
+                             for w in report['worktrees'])
+        if (phase == 'start' and paths_overlap([item['path']], scope) or
+            phase in ('done', 'direction') and (current_ticket or
+                owns(ticket, '', item['known']))):
+            if not retained(item, phase):
+                blockers.append('unexplained dirty file: ' + item['path'])
+    for item in report['branches']:
+        ref = item['ref']
+        if item['reachable'] or ref == report['canonical'] or ref in ('main', 'master', 'dev', 'stg'):
+            continue
+        same_ticket = owns(ticket, ref, item['known'])
+        if (phase == 'start' and item['ahead'] and not item['patch_equivalent_candidate'] and
+            paths_overlap(item['paths'], scope) and not item['known']):
+            blockers.append('unknown overlapping branch: ' + ref)
+        if phase in ('done', 'direction') and same_ticket and not retained(item, phase):
+            blockers.append('unexplained ticket branch: ' + ref)
+    for item in report['worktrees']:
+        if item['error']:
+            blockers.append('worktree inspection failed: ' + item['path'])
+        if (phase == 'start' and item['dirty'] and
+            paths_overlap([line[3:] for line in item['dirty']], scope) and not item['known']):
+            blockers.append('unknown overlapping dirty worktree: ' + item['path'])
+        if (phase in ('done', 'direction') and
+            owns(ticket, str(item['branch'] or ''), item['known']) and not retained(item, phase)):
+            blockers.append('unexplained ticket worktree: ' + item['path'])
+    for item in report['stashes']:
+        if phase == 'start' and paths_overlap(item['paths'], scope) and not item['known']:
+            blockers.append('unknown overlapping stash: ' + item['ref'])
+        if (phase in ('done', 'direction') and owns(ticket, item['subject'], item['known']) and
+            not retained(item, phase)):
+            blockers.append('unexplained ticket stash: ' + item['ref'])
+    ticket_prs = [item for item in report['all_prs'] or []
+                  if owns(ticket, item['title'] + ' ' + item['head'], item['known'])]
+    for item in ticket_prs:
+        if phase == 'start' and item['state'] == 'OPEN':
+            blockers.append('existing ticket PR; resume/reconcile #' + str(item['number']))
+        if phase in ('done', 'direction') and item['state'] == 'OPEN':
+            blockers.append('unexplained open ticket PR: #' + str(item['number']))
+        if (phase == 'done' and item['state'] == 'CLOSED' and
+            item['known'].get('disposition') not in ('non_merge', 'supersede')):
+            blockers.append('closed unmerged PR lacks non-merge disposition: #' + str(item['number']))
+    if phase == 'done' and not any(p['state'] == 'MERGED' for p in ticket_prs) and not any(
+        p['state'] == 'CLOSED' and p['known'].get('disposition') in ('non_merge', 'supersede')
+        for p in ticket_prs):
+        outcome = report.get('ticket_outcome', {})
+        if outcome.get('disposition') != 'non_merge':
+            blockers.append('merged PR or explicit non-merge outcome required')
+    return sorted(set(blockers))
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--repo', type=Path, default=Path.cwd())
+    parser.add_argument('--canonical', required=True, help='canonical commit-ish, e.g. origin/dev')
+    parser.add_argument('--github-repo', help='verified owner/repo for canonical GitHub remote')
+    parser.add_argument('--ticket')
+    parser.add_argument('--scope', action='append', default=[], help='repository-relative path; repeatable')
+    parser.add_argument('--phase', choices=('report', 'start', 'direction', 'done'), default='report')
+    parser.add_argument('--known', type=Path, help='JSON map of explicit owner/reason/disposition exceptions')
+    parser.add_argument('--fetched', action='store_true', help='operator confirmed fresh fetch of every remote')
+    parser.add_argument('--no-remote', action='store_true', help='documented local-only repository exception')
+    args = parser.parse_args()
+    try:
+        known = json.loads(args.known.read_text()) if args.known else {}
+        report = inventory(args.repo, args.canonical, args.github_repo, known)
+        report['ticket_outcome'] = evidence(known, 'ticket:' + args.ticket) if args.ticket else {}
+        report['phase'] = args.phase
+        report['ticket'] = args.ticket
+        report['scope'] = args.scope
+        report['blockers'] = gate(report, args.phase, args.ticket or '', args.scope,
+                                  args.fetched, args.no_remote)
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 2 if report['blockers'] else 0
+    except (OSError, RuntimeError, ValueError, TypeError, subprocess.TimeoutExpired) as exc:
+        print(json.dumps({'error': str(exc)}), file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
