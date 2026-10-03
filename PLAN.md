@@ -131,8 +131,9 @@ see your own history and rating, to self-report scores, and for DUPR sync.
 Storage split for Convex: the match document holds games, result, and
 signatures only. Rally snapshots go to a `rallyLogs` table in chunks, and
 a tiny `liveScores` document per match carries the current score for
-spectator subscriptions, so per-rally writes never re-run heavy queries or
-approach document size limits.
+spectator subscriptions. This keeps durable rally history, the realtime
+score projection, and the match document separate without fixing when rally
+chunks are transmitted.
 
 Keep the scorer fully offline-capable. The scoring device is authoritative
 for a match while it is in progress; the server is authoritative once a
@@ -196,7 +197,7 @@ Reality check from research (two passes, public sources only):
   not documented publicly.
 - No public evidence that the API can edit or void a submitted match; the
   club dashboard can reassign matches manually. Treat DUPR submissions as
-  append-only and only send a match once it is `verified` and past a
+  append-only and only send a match once it is `final` and past a
   correction window (e.g. 24h).
 
 Sequencing decided: the schema, outbox, eligibility rules and adapter
@@ -206,7 +207,7 @@ Design around an adapter:
 
 - `player.duprId` optional on profile. Players link it themselves.
 - Matches are eligible for DUPR only when every participant has a `duprId`
-  and the match is `verified` (see D7).
+  and the match is `final` (see D7).
 - A `duprOutbox` table with idempotency keys; a scheduled Convex action
   drains it. Failures are retried and visible to the organizer.
 - Everything DUPR-specific sits behind one adapter module so the unknown API
@@ -287,11 +288,13 @@ nothing. Signature semantics, made explicit:
 - Disputes record a resolution `{byUserId, reason, at}` on the match even
   when there is no rally log.
 
-**Rule 4: live broadcast is a bonus, not a dependency.** If the claimed
-scorer has signal, each rally can stream to the server so the bracket
-screen and spectators see the live score (Convex realtime makes this
-trivial). If they don't, the full `rallyHistory` uploads at the end. Either
-way the end result is one submission through the same gate.
+**Rule 4: live broadcast is a bonus, not a dependency.** The scorer always
+retains local `rallyHistory`. When connected, `liveScores` can carry the
+current score so the bracket screen and spectators see it. Durable server
+snapshots belong in chunked `rallyLogs`; whether those chunks are sent during
+play or materialized from the final/offline submission is deferred to later
+implementation work. Either way the end result is one submission through the
+same gate.
 
 **Rule 5: the phone cannot lie about the roster.** The server already knows
 the two sides of a scheduled match. A submission carries only match id,
@@ -299,7 +302,7 @@ scores, winner, and rally log; the server rejects any submission whose
 winner is inconsistent with the scores or whose scorer holds no claim.
 
 Casual lobbies use the same rules with the lobby host as staff. A friends'
-night where the host scores every game produces `verified` results in their
+night where the host scores every game produces `final` results in their
 personal org; a game scored by a participant needs the other side's tap.
 
 **Corrections after `final` are loud, not quiet.** Rulebook 12.P gives the
@@ -450,7 +453,7 @@ org internally, with the word "club" shown only when the user wants it.**
 | owner               | everything, transfer ownership, delete org, DUPR settings  |
 | admin               | create/edit events, manage members, correct results        |
 | director            | run a specific event: draw, schedule, courts, corrections  |
-| scorer              | live-score assigned courts, submit verified results        |
+| scorer              | live-score assigned courts, submit recorded results        |
 | member              | register for events, self-report, see club leaderboard     |
 | player (non-member) | joined one event via code; register/self-report there only |
 
@@ -581,7 +584,8 @@ Typed drafts: `docs/architecture/platform-domain.draft.ts` (every table above
 as a TypeScript type) and `platform-rules.draft.ts` (§12.L.1 team level,
 §12.C.4 tiebreak order, §12.B.1 rally-scoring restriction, eligibility).
 Both typecheck against the existing `src/tournament` and `src/match` types
-and pass lint and the 300-line gate; the rules have an assertion self-check.
+and pass lint and the 300-line gate; the rules have an executable assertion
+self-check.
 
 **F1. Sign-up.** Clerk hosted UI → webhook creates `users` row (consentAt,
 ageGateOk, leaderboardOptIn=false) → server creates personal `orgs` row
@@ -591,8 +595,9 @@ with `skillSelf` from the one-time question. Nothing else is asked.
 **F2. Casual night (host has an account, three friends don't).** Host
 creates a `lobbies` row in their personal org, gets a join code. Types
 three names → three ghost `players` in the host's org. Scores games with the
-live scorer: host is org owner → holds the scoring claim → results are
-`verified`, `weight: casual`. Rating events written for all four. Later the
+live scorer: host is org owner → holds the scoring claim → after required
+co-signing, results are `final`, `weight: casual`. Rating events written for
+all four. Later the
 host taps "send claim link" on a ghost → `invites{kind: claim}` → WhatsApp.
 Friend signs up (F1 creates their own personal org + player) → opens link →
 server sets `players.userId` on the ghost and recomputes the friend's
@@ -618,11 +623,13 @@ violations are shown to director who may override (`eligibilityOverrideBy`
 **F4. Live scoring at a court.** Scorer role opens the ready match, taps
 "score this match" → mutation sets `scorerUserId` if null (Convex mutations
 are serialisable, so two taps cannot both win). Scorer app runs the
-existing reducer offline. Online: rallies stream via a mutation appending
-to `rallyHistory`, bracket screen subscribes. Offline: local outbox holds
-the finished match; on reconnect submits `{matchId, games, winnerTeamId,
-rallyHistory}`. Server verifies caller = `scorerUserId`, games consistent
-with `scoring`, winner consistent with games → `result: recorded`. Each
+existing reducer offline and retains local `rallyHistory`. Backend durable
+rally snapshots belong in chunked `rallyLogs`, while `liveScores` carries
+only the realtime spectator projection; later implementation work owns the
+transfer cadence. The local outbox holds the finished match and on reconnect
+submits `{matchId, games, winnerTeamId, rallyHistory}`. Server verifies caller
+= `scorerUserId`, games consistent with `scoring`, winner consistent with
+games → `result: recorded`. Each
 side's linked player taps agree (or staff signs for a ghost-only side) →
 `signed` → `final` → dependent matches resolve → rating events → DUPR
 outbox item with `notBefore = now + 24h`.
@@ -646,7 +653,7 @@ other names, matches `final` with `weight: casual` and signatures of kind
    Outbox holds every completed match keyed by matchId. Drain in bracket
    order (round, ordinal) so `MatchSource` resolution never sees a child
    before its parent. Server dedupes on matchId. Result: 12 ghosts,
-   11 verified matches, ratings computed, share images unaffected because
+   11 final matches, ratings computed, share images unaffected because
    they read local state. Failure to watch: partial drain, then app closed.
    Outbox items are individually idempotent, so a re-drain is safe.
 2. **One of the 12 claims via link a week later.** `players.userId` set.

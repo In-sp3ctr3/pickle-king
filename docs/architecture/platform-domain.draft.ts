@@ -303,7 +303,7 @@ export interface RallyLog {
   snapshots: RallySnapshot[];
 }
 
-// Tiny document spectators subscribe to; one write per rally (T27).
+// Tiny document spectators subscribe to; stores only the current projection (T27).
 export interface LiveScore {
   matchId: MatchId;
   a: number;

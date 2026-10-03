@@ -208,12 +208,20 @@ export function duprEligible(
 
 // D7 Rule 2: claim only on a ready match with no live claim; staff manual
 // entry always wins (T1–T3).
+export const SCORING_CLAIM_STATUS_POLICY = {
+  pending: false,
+  ready: true,
+  live: false,
+  complete: false,
+  void: false,
+} as const satisfies Record<Match["status"], boolean>;
+
 export function canClaimScoring(
   m: Pick<Match, "status" | "scorerUserId" | "scorerClaimExpiresAt">,
   now: number,
   actor: { userId: UserId; isStaff: boolean; isParticipant: boolean },
 ): boolean {
-  if (m.status !== "ready" && m.status !== "live") return false;
+  if (!SCORING_CLAIM_STATUS_POLICY[m.status]) return false;
   if (!actor.isStaff && !actor.isParticipant) return false;
   const live =
     m.scorerUserId !== undefined &&
@@ -221,3 +229,84 @@ export function canClaimScoring(
     m.scorerUserId !== actor.userId;
   return !live || actor.isStaff;
 }
+
+// Executable design-artifact checks. Run this file directly with Node's type
+// stripping to keep the ready-only claim boundary from drifting before the
+// implementation tickets add production tests.
+function assertDesignInvariant(condition: boolean, message: string): void {
+  if (!condition) throw new Error(`Design invariant failed: ${message}`);
+}
+
+const selfCheckNow = 1_000;
+const selfCheckActor = "claim-self-check" as UserId;
+const selfCheckOther = "claim-other-self-check" as UserId;
+const participant = {
+  userId: selfCheckActor,
+  isStaff: false,
+  isParticipant: true,
+};
+
+assertDesignInvariant(
+  canClaimScoring({ status: "ready" }, selfCheckNow, participant),
+  "an eligible participant may claim an unclaimed ready match",
+);
+
+for (const status of ["pending", "live", "complete", "void"] as const) {
+  assertDesignInvariant(
+    !canClaimScoring(
+      {
+        status,
+        scorerUserId: selfCheckActor,
+        scorerClaimExpiresAt: selfCheckNow - 1,
+      },
+      selfCheckNow,
+      { ...participant, isStaff: true },
+    ),
+    `${status} matches cannot be claimed, even by staff or the prior claimant`,
+  );
+}
+
+assertDesignInvariant(
+  !canClaimScoring({ status: "ready" }, selfCheckNow, {
+    userId: selfCheckActor,
+    isStaff: false,
+    isParticipant: false,
+  }),
+  "a spectator cannot claim a ready match",
+);
+assertDesignInvariant(
+  !canClaimScoring(
+    {
+      status: "ready",
+      scorerUserId: selfCheckOther,
+      scorerClaimExpiresAt: selfCheckNow + 1,
+    },
+    selfCheckNow,
+    participant,
+  ),
+  "a participant cannot take over another active claim",
+);
+assertDesignInvariant(
+  canClaimScoring(
+    {
+      status: "ready",
+      scorerUserId: selfCheckOther,
+      scorerClaimExpiresAt: selfCheckNow + 1,
+    },
+    selfCheckNow,
+    { ...participant, isStaff: true },
+  ),
+  "staff may take over another active claim on a ready match",
+);
+assertDesignInvariant(
+  canClaimScoring(
+    {
+      status: "ready",
+      scorerUserId: selfCheckOther,
+      scorerClaimExpiresAt: selfCheckNow - 1,
+    },
+    selfCheckNow,
+    participant,
+  ),
+  "an eligible participant may claim after another claim expires",
+);
