@@ -35,6 +35,12 @@ def evidence(known, key):
     return item if item.get('classification') in allowed and all(item.get(field) for field in required) else {}
 
 
+def is_dependabot_actor(login):
+    if not isinstance(login, str) or not login:
+        raise ValueError('Invalid GitHub actor login')
+    return login in ('dependabot', 'dependabot[bot]', 'app/dependabot')
+
+
 def owns(ticket, text, known=None):
     return (bool(re.search(r'(?<![A-Z0-9])' + re.escape(ticket) + r'(?![A-Z0-9])', text, re.I)) or
             str((known or {}).get('owner', '')).upper() == ticket.upper())
@@ -156,8 +162,10 @@ def inventory(repo, canonical, github_repo, known):
                             'head': p['headRefName'], 'base': p['baseRefName'],
                             'draft': p['isDraft'], 'state': p['state'],
                             'merged_at': p.get('mergedAt'),
-                            'dependabot': p['author']['login'].removeprefix('app/').startswith('dependabot'),
-                            'superseded_npm_candidate': (p['author']['login'].removeprefix('app/').startswith('dependabot') and
+                            'classification': ('DEPENDABOT_REVIEW' if is_dependabot_actor(p['author']['login'])
+                                               else 'UNKNOWN'),
+                            'dependabot': is_dependabot_actor(p['author']['login']),
+                            'superseded_npm_candidate': (is_dependabot_actor(p['author']['login']) and
                                                          superseded_npm_candidate(repo, p['title'])),
                             'review': p.get('reviewDecision'),
                             'checks': [c.get('conclusion') or c.get('status')

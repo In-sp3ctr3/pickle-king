@@ -1,6 +1,6 @@
 # Pickle King engineering profile
 
-Verified 2026-10-02 for [SPE-189](https://linear.app/spectreos/issue/SPE-189/audit-pickle-king-and-adopt-the-current-project-harness). Product facts remain in [README](../../README.md), [AGENTS](../../AGENTS.md), [specs router](../../specs/README.md), and [ADRs](../architecture). This profile records the harness interface and observed gaps.
+Verified 2026-10-02 for [SPE-189](https://linear.app/spectreos/issue/SPE-189/audit-pickle-king-and-adopt-the-current-project-harness); the harness baseline was updated 2026-10-03 for [SPE-215](https://linear.app/spectreos/issue/SPE-215/update-pickle-king-harness-to-the-spe-214-steward-baseline). Product facts remain in [README](../../README.md), [AGENTS](../../AGENTS.md), [specs router](../../specs/README.md), and [ADRs](../architecture). This profile records the harness interface and observed gaps.
 
 ## Product and boundaries
 
@@ -19,6 +19,10 @@ Node is `>=22.13.0`; CI uses 22.13. Python 3.9+ is needed for harness checks and
 | Dependency/security   | GitHub dependency review, CodeQL, targeted `npm audit --audit-level=high`                                             | Separate from verify; review current results, especially for dependency PRs.                                                                                                                                                                            |
 
 CI Quality runs `./scripts/verify --full` on PRs and `main`; CodeQL and Dependency Review remain separate workflows. A passing check covers its recorded commit and mode only. Match the exact current PR head before merge and the exact merged commit afterward. Record skipped checks. [Lifecycle](LIFECYCLE.md) owns continuation and review; [release evidence](RELEASE.md) owns readiness; the [provenance manifest](HARNESS_PROVENANCE.json) owns the adopted OS revision.
+
+Normal ticket prompts are generated with `scripts/eng-ticket-prompt TICKET pickle-king`. Feedback is appended through `scripts/eng-os-feedback` to an explicitly supplied existing private Engineering OS ledger using the exact OS runtime pinned by the provenance manifest and a verified Steward registry that authorizes the ticket, run, and reporter. Pickle King owns neither the ledger schema nor Steward policy, and the adapter fails closed instead of creating a repository-local fallback.
+
+`scripts/harness-status --gate` is a direct lifecycle gate in addition to Steward stocktake. It exits nonzero unless the action is `no_action_required`; the accepted SPE-214 stocktake does not independently surface local drift when the adopted SHA already equals the accepted SHA.
 
 ## Environments and release limits
 
