@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Append feedback through the exact OS-owned runtime pinned by this harness."""
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+DEFAULT_MANIFEST = Path(__file__).resolve().parents[1] / "docs/engineering/HARNESS_PROVENANCE.json"
+REQUIRED_REFERENCES = ("assessment_id", "repo", "ticket", "run_id", "reporter_ref", "at")
+SAFE_REFERENCE = re.compile(r"[A-Za-z0-9_.-]{1,128}\Z")
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git(repo, *args):
+    return subprocess.check_output(
+        ["git", "-C", str(repo), *args], stderr=subprocess.PIPE
+    ).decode().strip()
+
+
+def load_assessment(stream):
+    payload = json.load(stream)
+    if not isinstance(payload, dict):
+        raise ValueError("feedback assessment must be a JSON object")
+    missing = [name for name in REQUIRED_REFERENCES if not isinstance(payload.get(name), str) or not payload[name]]
+    if missing:
+        raise ValueError("feedback assessment missing required references: " + ", ".join(missing))
+    return payload
+
+
+def verify_runtime(os_repo, manifest):
+    adopted = manifest["os_sha"]
+    if git(os_repo, "rev-parse", "--verify", "HEAD^{commit}") != adopted:
+        raise ValueError("OS checkout HEAD does not match the adopted harness revision")
+    for item in manifest["os_runtime"]:
+        source = item["source"]
+        if git(os_repo, "rev-parse", f"{adopted}:{source}") != item["source_blob"]:
+            raise ValueError("Pinned OS runtime blob mismatch: " + source)
+        upstream = subprocess.check_output(
+            ["git", "-C", str(os_repo), "show", f"{adopted}:{source}"],
+            stderr=subprocess.PIPE,
+        )
+        local = os_repo / source
+        if digest(upstream) != item["source_sha256"] or not local.is_file() or digest(local.read_bytes()) != item["source_sha256"]:
+            raise ValueError("OS runtime content mismatch: " + source)
+
+
+def verify_identity(payload, registry, manifest):
+    repo = manifest["repo_id"]
+    if not isinstance(registry, dict) or payload["repo"] != repo or registry.get("accepted_os_sha") != manifest["os_sha"]:
+        raise ValueError("feedback registry does not authorize this repository and OS revision")
+    repos = registry.get("repos")
+    entry = repos.get(repo) if isinstance(repos, dict) else None
+    tickets = entry.get("tickets") if isinstance(entry, dict) else None
+    ticket = tickets.get(payload["ticket"]) if isinstance(tickets, dict) else None
+    if not entry or entry.get("authority_verified") is not True or not isinstance(ticket, dict):
+        raise ValueError("feedback registry does not authorize this ticket")
+    reporters, runs = ticket.get("reporters"), ticket.get("runs")
+    for name, values in (("reporters", reporters), ("runs", runs)):
+        if (not isinstance(values, list) or not 1 <= len(values) <= 256 or len(set(values)) != len(values)
+                or any(not isinstance(value, str) or not SAFE_REFERENCE.fullmatch(value) for value in values)):
+            raise ValueError("feedback registry has invalid " + name)
+    if payload["reporter_ref"] not in reporters or payload["run_id"] not in runs:
+        raise ValueError("feedback registry does not authorize this reporter and run")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--os-repo", required=True, type=Path, help="codex-os checkout at the adopted revision")
+    parser.add_argument("--ledger", required=True, type=Path, help="existing private Engineering OS run ledger")
+    parser.add_argument("--registry", required=True, type=Path, help="verified Steward repository/ticket inventory")
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST, help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    try:
+        payload = load_assessment(sys.stdin)
+        manifest = json.loads(args.manifest.read_text())
+        if not args.ledger.is_file() or args.ledger.is_symlink():
+            raise ValueError("an existing regular private ledger is required; no fallback is created")
+        if not args.registry.is_file() or args.registry.is_symlink():
+            raise ValueError("an existing regular verified Steward registry is required")
+        registry = json.loads(args.registry.read_text())
+        verify_identity(payload, registry, manifest)
+        verify_runtime(args.os_repo, manifest)
+        result = subprocess.run(
+            [sys.executable, "-B", str(args.os_repo / "scripts/eng-os-feedback"), "--ledger", str(args.ledger)],
+            input=json.dumps(payload),
+            text=True,
+            capture_output=True,
+        )
+        if result.returncode:
+            raise RuntimeError(result.stderr.strip() or "shared feedback command failed")
+        print(result.stdout, end="")
+    except (OSError, KeyError, ValueError, RuntimeError, json.JSONDecodeError, subprocess.CalledProcessError) as exc:
+        parser.exit(1, f"eng-os-feedback: {exc}\n")
+
+
+if __name__ == "__main__":
+    main()

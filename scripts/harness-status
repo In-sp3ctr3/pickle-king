@@ -16,11 +16,16 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def relevant(path, watched):
+    return any(path == item.rstrip("/") or path.startswith(item.rstrip("/") + "/") for item in watched)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--os-repo", required=True, type=Path, help="existing codex-os checkout")
     parser.add_argument("--target", required=True, help="fetched accepted OS commit or ref")
     parser.add_argument("--manifest", type=Path, default=Path(__file__).resolve().parent.parent / "docs/engineering/HARNESS_PROVENANCE.json")
+    parser.add_argument("--gate", action="store_true", help="exit nonzero when review or drift resolution is required")
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text())
     root = args.manifest.resolve().parent.parent.parent
@@ -28,17 +33,11 @@ def main():
     try:
         target = git(args.os_repo, "rev-parse", "--verify", args.target + "^{commit}")
         git(args.os_repo, "cat-file", "-e", source + "^{commit}")
-        changed = git(
-            args.os_repo,
-            "diff",
-            "--name-only",
-            source,
-            target,
-            "--",
-            manifest["contract_path"],
-        ).splitlines()
+        changed = git(args.os_repo, "diff", "--name-only", source, target).splitlines()
+        watched = manifest["relevant_upstream_paths"]
+        relevant_changes = [path for path in changed if relevant(path, watched)]
         drift = []
-        for item in manifest["derived"]:
+        for item in manifest["derived"] + manifest.get("reviewed_upstream", []) + manifest.get("os_runtime", []):
             upstream = subprocess.check_output(
                 ["git", "-C", str(args.os_repo), "show", f"{source}:{item['source']}"],
                 stderr=subprocess.PIPE,
@@ -47,20 +46,41 @@ def main():
                 raise ValueError("Pinned source hash mismatch: " + item["source"])
             if git(args.os_repo, "rev-parse", f"{source}:{item['source']}") != item["source_blob"]:
                 raise ValueError("Pinned source blob mismatch: " + item["source"])
-            local = root / item["local"]
-            if not local.is_file() or sha(local.read_bytes()) != item["local_sha256"]:
-                drift.append(item["local"])
+            if item.get("local"):
+                local = root / item["local"]
+                if not local.is_file() or sha(local.read_bytes()) != item["local_sha256"]:
+                    drift.append(item["local"])
+        overrides = manifest.get("intentional_overrides", [])
+        required_override_fields = {"id", "source", "local", "reason", "status"}
+        if any(not required_override_fields <= set(item) for item in overrides):
+            raise ValueError("Invalid intentional override record")
     except (OSError, subprocess.CalledProcessError, ValueError) as exc:
         parser.exit(1, f"harness-status: {exc}\n")
 
+    if drift:
+        action = "resolve_local_drift"
+    elif relevant_changes:
+        action = "review_shared_delta"
+    else:
+        action = "no_action_required"
     print(json.dumps({
+        "status_contract_version": 2,
         "adopted_os_sha": source,
         "target_os_sha": target,
-        "harness_stale": bool(changed),
-        "upstream_changes": changed,
+        "upstream_os_moved": source != target,
+        "harness_stale": bool(relevant_changes),
+        "upstream_changes": relevant_changes,
+        "relevant_shared_delta": relevant_changes,
+        "unrelated_upstream_change_count": len(changed) - len(relevant_changes),
         "local_override_drift": drift,
+        "intentional_overrides": overrides,
+        "action": action,
+        "no_action_required": action == "no_action_required",
+        "steward_stocktake_gate": "direct_status_required",
         "intentional_omissions": manifest["omitted"],
     }, indent=2))
+    if args.gate and action != "no_action_required":
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":

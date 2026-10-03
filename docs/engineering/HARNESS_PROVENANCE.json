@@ -1,8 +1,16 @@
 {
   "os_repo": "In-sp3ctr3/codex-os",
-  "os_sha": "5d7052e820f7a7940be86df1c234e6da16047c6d",
+  "repo_id": "pickle-king",
+  "os_sha": "e566213e527802f6ab305486bde26a10dfb07975",
   "contract_path": "templates/project-harness",
-  "contract_id": "project-harness@5d7052e820f7a7940be86df1c234e6da16047c6d",
+  "contract_id": "project-harness@e566213e527802f6ab305486bde26a10dfb07975",
+  "relevant_upstream_paths": [
+    "templates/project-harness",
+    "os_feedback.py",
+    "run_ledger.py",
+    "scripts/eng-os-feedback",
+    "scripts/eng-os-stocktake"
+  ],
   "derived": [
     {
       "source": "templates/project-harness/AGENTS.md",
@@ -17,15 +25,15 @@
       "source_blob": "6e6cd542516da1be5473a4e299399602a723dfe8",
       "source_sha256": "69f0de164d30b4441864090e778f9043e48523fab2bcefe676b2746159a5a3d9",
       "local": "docs/engineering/PROJECT_PROFILE.md",
-      "local_sha256": "b71ed4b52fee8066b9da8e9988a50c543b5b9cfaed93133241f30062e83c0fd9",
+      "local_sha256": "ac316ce3a1b536576864b090f1006a0a14490bfac4759aeec4157f57862a8c0b",
       "kind": "adapted"
     },
     {
       "source": "templates/project-harness/LIFECYCLE.md",
-      "source_blob": "d41712aba4e9df9dd363ae1dd3948db3f2821a04",
-      "source_sha256": "d3f6568cbe8092e25e9f32e66c0f13e414d2805c5bc3bfdc37f25b2b3f863837",
+      "source_blob": "d36537ed20be8097591cc6982489aae8fd3810ec",
+      "source_sha256": "98a68d0927f49742b28e53c4c448f91fd2923fc04d781b548923708a4023b78c",
       "local": "docs/engineering/LIFECYCLE.md",
-      "local_sha256": "d470b75badc7093cee6186a3046ee29c2c88652448667986e7814090194c5756",
+      "local_sha256": "8d692a7dd3d87b05eee408376d43305055557c71b53662a6c877a228281ded7d",
       "kind": "adapted"
     },
     {
@@ -38,10 +46,10 @@
     },
     {
       "source": "templates/project-harness/STATE.md",
-      "source_blob": "7f017ccff23257a60371f751c3bd1a5757815a3d",
-      "source_sha256": "f4a0f41226f3cd333031b2010d9863b5f3b4c0a2c9981f2a8516789194c9a1f6",
+      "source_blob": "20d2222c91c291366b7c6a5a40e537335f05dcbd",
+      "source_sha256": "eac8ce7d9db07fb1c4bbb7fecef0a6bcce98560154acb7267d15a4c6102ba6ce",
       "local": "docs/engineering/STATE.md",
-      "local_sha256": "ef60bfa10f03db3eb45d07023a50c3bdcf3451b5c0c5fe82bf34a6fb550e39f0",
+      "local_sha256": "a1360fa1d4756c43049a3539527226d51bfe87a5a2591f08c44fce9a48a85c57",
       "kind": "adapted"
     },
     {
@@ -62,17 +70,88 @@
     },
     {
       "source": "templates/project-harness/scripts/repo-hygiene",
-      "source_blob": "c50ce39ec78d836d926456c6f5d8e09050e7c403",
-      "source_sha256": "a6cbda71d0b20f27e0ebab5234f979cbc57440cbaf9794eabe5f39ee47894378",
+      "source_blob": "5dd7d8edc95ff813f3d1e532971cdab142de2acd",
+      "source_sha256": "06e038bb37e92efe39015816b134fe14e4f7eed78fd8cbd78f78e26f36b75ac1",
       "local": "scripts/repo-hygiene",
-      "local_sha256": "7ff561edeeaa32169f9c353c967ed65834408151deab5560a329dd5259ced8b5",
-      "kind": "adapted: app/dependabot login fix"
+      "local_sha256": "06e038bb37e92efe39015816b134fe14e4f7eed78fd8cbd78f78e26f36b75ac1",
+      "kind": "adapted: Pickle King inventory contract with shared exact actor classifier"
+    },
+    {
+      "source": "templates/project-harness/OS_FEEDBACK_FOOTER.md",
+      "source_blob": "672b7661a38d63d31779caf6636f0529e5ea02c9",
+      "source_sha256": "863b91bd5c8850a5612de1b206f75db49b9b06218641a0130e12001a768d9391",
+      "local": "docs/engineering/OS_FEEDBACK_FOOTER.md",
+      "local_sha256": "e6860c7408e3767f4543d54b92d184be3426937f7f70a4a8b6c0f754669acdb2",
+      "kind": "adapted: repository Markdown formatting"
+    },
+    {
+      "source": "templates/project-harness/scripts/eng-ticket-prompt",
+      "source_blob": "1c55b6cb061a9eb71a30fe3ef05542b771b0a050",
+      "source_sha256": "6fd247612c697878e2c154862b96a80d5b8eee6522e5aa9d915a45009488cad8",
+      "local": "scripts/eng-ticket-prompt",
+      "local_sha256": "f3c015b4f1c579c4f76e8b210f8d6814357484821cc507040a8eea0494c23692",
+      "kind": "adapted: repository footer path"
+    },
+    {
+      "source": "scripts/eng-os-feedback",
+      "source_blob": "6993f1a61e9674160e687809cbd093d2c4232fc5",
+      "source_sha256": "18411dcfe8e5528e295e6f7cc931cbbf0aaa5a21dddf886c9f6fc5abbe0766c0",
+      "local": "scripts/eng-os-feedback",
+      "local_sha256": "9788a01dba61f5651f85f8aff3c3b99e9b29ad3af7f499aba41d0c18f5f202c2",
+      "kind": "adapted: fail-closed external runtime adapter"
+    }
+  ],
+  "reviewed_upstream": [
+    {
+      "source": "templates/project-harness/README.md",
+      "source_blob": "d874ad87d5d528029a2ef7aea1c77205c1a5a504",
+      "source_sha256": "ba3888886289661596b033b5dce9bab5ff192f7fb0cb3d7152885e6fb4fda811",
+      "disposition": "adapted into PROJECT_PROFILE.md and LIFECYCLE.md"
+    }
+  ],
+  "os_runtime": [
+    {
+      "source": "os_feedback.py",
+      "source_blob": "75d89d8758a803706d3c03009c2893ab835746a3",
+      "source_sha256": "22856ef30bb25ab9721922a00131f502d0e3f187f595aa5a623a438190253a9d"
+    },
+    {
+      "source": "run_ledger.py",
+      "source_blob": "1352e1affa1e33cc273f0bf1c77f29af0b43d7d2",
+      "source_sha256": "7e3c0a27c378f86014551cb26b9881c8712eb1e2ca5d67fff1d652287f32144f"
+    },
+    {
+      "source": "scripts/eng-os-feedback",
+      "source_blob": "6993f1a61e9674160e687809cbd093d2c4232fc5",
+      "source_sha256": "18411dcfe8e5528e295e6f7cc931cbbf0aaa5a21dddf886c9f6fc5abbe0766c0"
+    },
+    {
+      "source": "scripts/eng-os-stocktake",
+      "source_blob": "4c053077ba9b7672bfafbba709a8aff1b5d6485a",
+      "source_sha256": "6a729430ccc171438b26e9c4f505da3a6e13b09b1ee5ef125b19166368f20d72"
+    }
+  ],
+  "intentional_overrides": [
+    {
+      "id": "pickle-king-repository-hygiene",
+      "source": "templates/project-harness/scripts/repo-hygiene",
+      "local": "scripts/repo-hygiene",
+      "reason": "Preserve Pickle King repository inventory and lifecycle behavior around the shared exact Dependabot actor classifier.",
+      "status": "active"
+    },
+    {
+      "id": "direct-same-sha-drift-gate",
+      "source": "os_feedback.py",
+      "local": "docs/engineering/LIFECYCLE.md",
+      "reason": "Require direct harness-status because the accepted Steward consumer omits local drift when adopted and accepted OS SHAs match.",
+      "status": "active"
     }
   ],
   "repo_owned": [
     ".github/workflows/quality.yml",
     ".gitignore",
     "docs/engineering/SPE-189.md",
+    "docs/engineering/SPE-215.md",
     "docs/architecture/",
     "scripts/harness-status",
     "tests/test_harness_status.py",
@@ -83,7 +162,7 @@
     ".codex configuration": "No repo-specific Codex setting observed.",
     "scripts/smoke": "No verified preview or production target identity and safe probe.",
     "scripts/release-check": "No verified deployment candidate/artifact or target identity.",
-    "repo-local hooks": "No repeatable Pickle King-only hook need observed."
+    "repo-local feedback database": "The Engineering OS private run ledger is the single feedback store."
   },
   "status_command": "./scripts/harness-status --os-repo <existing-codex-os-checkout> --target <fetched-accepted-commit>"
 }

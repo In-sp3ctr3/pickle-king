@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+"""Print a Pickle King ticket prompt with the mandatory OS feedback footer."""
+import argparse
+from pathlib import Path
+import re
+
+
+def render(ticket, repo):
+    if not re.fullmatch(r"[A-Z][A-Z0-9]{1,9}-[0-9]{1,8}", ticket) or not re.fullmatch(r"[a-z][a-z0-9-]{1,63}", repo):
+        raise ValueError("ticket/repository ID required")
+    footer = (Path(__file__).resolve().parents[1] / "docs/engineering/OS_FEEDBACK_FOOTER.md").read_text()
+    return f"Execute {ticket} in {repo} using the Project Harness lifecycle, Linear contract, and current Git/PR truth.\n\n{footer}"
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("ticket")
+    parser.add_argument("repo")
+    args = parser.parse_args()
+    print(render(args.ticket, args.repo), end="")
