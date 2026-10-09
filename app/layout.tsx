@@ -9,6 +9,7 @@ import "@fontsource/roboto-condensed/latin-700.css";
 import "@fontsource/roboto-condensed/latin-900.css";
 import "@fontsource/roboto-slab/latin-900.css";
 import "./globals.css";
+import { ConvexClientProvider } from "@/src/application/convex-provider";
 import { siteUrl } from "./site-url";
 
 export const metadata: Metadata = {
@@ -64,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <ConvexClientProvider>{children}</ConvexClientProvider>
         <span
           aria-hidden="true"
           data-share-font-preload=""

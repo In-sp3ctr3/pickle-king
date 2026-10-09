@@ -13,6 +13,8 @@ does not promise complete Next.js compatibility.
 
 Use the starter and only supported static/client APIs. No server actions,
 middleware, image optimization, database, or runtime API routes are required.
+Convex is a separate browser-reached service; its provider does not add a
+Worker-side proxy, database binding, server action, middleware, or API route.
 `vinext check` and a production build are blocking on every release.
 
 ## Alternatives

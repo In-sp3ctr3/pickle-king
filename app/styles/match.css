@@ -1040,7 +1040,7 @@ html[data-visual-freeze="true"] .victory-confetti__static {
 
 @media (min-width: 701px) and (max-height: 850px) {
   .score-number {
-    font-size: clamp(10rem, 31dvh, 20rem);
+    font-size: clamp(10rem, 29dvh, 20rem);
   }
 }
 

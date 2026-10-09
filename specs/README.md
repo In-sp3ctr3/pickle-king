@@ -29,6 +29,7 @@ order but are not unique (`015-serve-tracker` and
 | Small-field round robin and finals             | [015-small-field-round-robin](./015-small-field-round-robin/spec.md)                       |
 | Session recap and share images                 | [016-session-recap](./016-session-recap/spec.md)                                           |
 | Premium share composer and tournament identity | [017-share-composer-tournament-identity](./017-share-composer-tournament-identity/spec.md) |
+| Convex backend foundation                      | [018-convex-foundation](./018-convex-foundation/spec.md)                                   |
 
 Each workspace uses the same handoff:
 

@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     ".vinext/**",
     "coverage/**",
+    "convex/_generated/**",
     "dist/**",
     "node_modules/**",
     "out/**",
