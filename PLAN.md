@@ -240,12 +240,12 @@ rally log attached to the submission and, when online, a live scoreboard.
 
 **Rule 2: one scoring claim per match, server-enforced, and it expires.**
 When a match is `ready` (both teams resolved), an eligible user taps
-"score this match". The server records
-`matches.scorerUserId` and `scorerClaimedAt`. A second eligible user sees
+"score this match". The server records one `matches.scorerClaim` with holder,
+claim/expiry times, and a server-issued revision. A second eligible user sees
 "being scored by Jadan" and can only watch. Eligible means: event staff
 (director, scorer, admin, owner of the owning org) **or a participant in
 that specific match**. A random spectator is never eligible. Claims expire after 3 hours
-(`scorerClaimExpiresAt`); staff can revoke sooner; and **staff manual
+(`scorerClaim.expiresAt`); staff can revoke sooner; and **staff manual
 entry is always allowed regardless of any claim**, taking the claim over.
 So a dead phone, a sulking loser holding the claim, or a spectator's stale
 device can delay a match but never block it. A stale submission from a
@@ -535,7 +535,7 @@ test; the artifacts above cover it anyway.
 ## 3. Draft schema (Convex tables, condensed)
 
 ```
-users            { clerkId, email, createdAt, consentAt, ageGateOk,
+users            { clerkId?, email?, displayName?, createdAt, consentAt, ageGateOk,
                    leaderboardOptIn, skillSelf, skillLockedAt?,
                    deletedAt? }                                      ← auth identity; anonymised, never hard-deleted
 orgs             { name, kind: personal|club, ownerUserId, duprClubId?,
@@ -548,7 +548,7 @@ ratings          { subjectId: userId|playerId, discipline: singles|doubles,
                    rating, deviation, volatility, updatedAt }       ← current value (derived)
 ratingEvents     { playerId, matchId, discipline, before, after, weight, at } ← subject resolved at read time
 events           { orgId, createdByUserId, name, venue?, startsAt, status,
-                   joinCode, joinCodeExpiresAt, visibility }
+                   joinCodeDigest, joinCodeExpiresAt, visibility }
 divisions        { eventId, name, discipline, format, scoring, eligibility,
                    teamCap, courts, status }
 teams            { divisionId, playerIds[1..2], seed?, checkedIn, registeredBy }
@@ -559,15 +559,15 @@ matches          { divisionId?, poolId?, lobbyId?, kind, round, ordinal,
                    outcome: played|forfeit|retired|withdrawn,
                    result: recorded|signed|final|disputed,
                    signatures: [{side, userId, kind, at}], corrections[], resolution?,
-                   scorerUserId?, scorerClaimedAt?, scorerClaimExpiresAt?, ← one claim, 3h TTL
+                   scorerClaim?: { userId, claimedAt, expiresAt, revision }, ← one claim + replay guard
                    finalAt?,
                    submittedByUserId }
 rallyLogs        { matchId, chunk, snapshots[] }                     ← heavy, separate
 liveScores       { matchId, a, b, updatedAt }                        ← tiny, subscribed
 eventRoles       { eventId, userId, role: director|scorer|player }  ← per-event overrides/joins
-lobbies          { orgId, hostUserId, name, joinCode, format, status } ← casual mode, personal org
-invites          { kind: claim|team|scorer|org, role?, token, targetId, expiresAt,
-                   claimantUserId?, confirmedAt?, usedAt? }          ← role fixed at creation
+lobbies          { orgId, hostUserId, name, joinCodeDigest, discipline, scoring, status }
+invites          { kind-specific typed target/fixed role, tokenDigest, issuedByUserId,
+                   expiresAt, revokedAt?, usedAt?, claimantUserId?, confirmedAt? }
 duprOutbox       { matchId, idempotencyKey = matchId:finalAt, status:
                    queued|sent|failed|ineligible|correction-needed, attempts,
                    notBefore, lastError? }
@@ -621,14 +621,14 @@ violations are shown to director who may override (`eligibilityOverrideBy`
   `scheduledAt` respecting `minRestMs`.
 
 **F4. Live scoring at a court.** Scorer role opens the ready match, taps
-"score this match" → mutation sets `scorerUserId` if null (Convex mutations
+"score this match" → mutation sets `scorerClaim` if null (Convex mutations
 are serialisable, so two taps cannot both win). Scorer app runs the
 existing reducer offline and retains local `rallyHistory`. Backend durable
 rally snapshots belong in chunked `rallyLogs`, while `liveScores` carries
 only the realtime spectator projection; later implementation work owns the
 transfer cadence. The local outbox holds the finished match and on reconnect
 submits `{matchId, games, winnerTeamId, rallyHistory}`. Server verifies caller
-= `scorerUserId`, games consistent with `scoring`, winner consistent with
+= `scorerClaim.userId` with its current revision, games consistent with `scoring`, winner consistent with
 games → `result: recorded`. Each
 side's linked player taps agree (or staff signs for a ghost-only side) →
 `signed` → `final` → dependent matches resolve → rating events → DUPR
@@ -668,10 +668,10 @@ other names, matches `final` with `weight: casual` and signatures of kind
    is derived. One leaderboard row because the leaderboard groups by
    subject.
 4. **Two devices score court 3.** Second "score this match" tap fails
-   because `scorerUserId` is set; UI shows who holds it. If the first
+   because `scorerClaim` is set; UI shows who holds it. If the first
    phone dies, a director revokes and the second claims. A stale
    submission from the first phone after revoke is rejected because
-   caller ≠ `scorerUserId`. Nothing double-counts.
+   caller/revision does not match `scorerClaim`. Nothing double-counts.
 5. **Lobby self-report, one player leaves before signing.** Match sits
    `recorded`. After 24h the host is nudged; host is staff of their
    personal org so can sign for that side or void, with an audit row. No

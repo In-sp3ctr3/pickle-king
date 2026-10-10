@@ -8,6 +8,11 @@
  * @module
  */
 
+import type * as schema_identity from "../schema_identity.js";
+import type * as schema_match from "../schema_match.js";
+import type * as schema_operations from "../schema_operations.js";
+import type * as schema_tournament from "../schema_tournament.js";
+import type * as schema_values from "../schema_values.js";
 import type * as status from "../status.js";
 
 import type {
@@ -17,6 +22,11 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  schema_identity: typeof schema_identity;
+  schema_match: typeof schema_match;
+  schema_operations: typeof schema_operations;
+  schema_tournament: typeof schema_tournament;
+  schema_values: typeof schema_values;
   status: typeof status;
 }>;
 
