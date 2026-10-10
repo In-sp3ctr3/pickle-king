@@ -1,6 +1,6 @@
 # ADR 0009: Hosted platform, accounts, and claimable player identity
 
-Status: proposed
+Status: accepted for the Convex/Cloudflare boundary; proposed for accounts and identity
 Date: 2026-09-17
 Supersedes: ADR-0001 (local-first, no backend) for cloud features. Guest
 mode keeps ADR-0001 behaviour.
@@ -17,7 +17,8 @@ Full reasoning, research, and the reviewed schema live in `PLAN.md`
 ## Decision
 
 - Backend: Convex (data, functions, realtime). Auth: Clerk. The Next app
-  stays on Cloudflare; Convex is reached from the browser.
+  stays on Cloudflare; Convex is reached from a client-only provider in the
+  browser, without routing requests through the Worker runtime.
 - Domain logic in `src/tournament` and `src/match` stays pure TypeScript
   and runs unchanged inside Convex functions as the authoritative
   validator.

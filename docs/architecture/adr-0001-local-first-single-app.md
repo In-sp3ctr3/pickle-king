@@ -1,6 +1,6 @@
 # ADR 0001: Local-first single application
 
-Status: accepted  
+Status: accepted for guest data; cloud features superseded by ADR-0009
 Date: 2026-07-30
 
 ## Context
@@ -10,9 +10,10 @@ data is ephemeral and personal, and the first release has no collaboration need.
 
 ## Decision
 
-Use one React/Vinext application with no backend. Keep tournament data in a
-versioned, schema-validated localStorage snapshot. Use one URL route and hash
-screen identifiers so player names never appear in URLs or server logs.
+Keep guest tournament data in a versioned, schema-validated localStorage
+snapshot. Use one URL route and hash screen identifiers so player names never
+appear in URLs or server logs. ADR-0009 owns the separate browser-reached
+Convex backend; connecting to it must not make guest scoring network-dependent.
 
 ## Consequences
 

@@ -3,5 +3,6 @@ dist
 .vinext
 coverage
 node_modules
+.convex
 package-lock.json
 test-results

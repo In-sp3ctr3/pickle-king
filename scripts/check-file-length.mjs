@@ -27,7 +27,8 @@ async function walk(directory) {
       continue;
     }
     if (!extensions.has(path.extname(entry.name))) continue;
-    if (generatedExceptions.has(path.relative(root, absolute))) continue;
+    const relative = path.relative(root, absolute);
+    if (generatedExceptions.has(relative)) continue;
     const source = await readFile(absolute, "utf8");
     const logicalLines = source
       .split(/\r?\n/)
@@ -35,7 +36,7 @@ async function walk(directory) {
         (line) => line.trim() && !line.trimStart().startsWith("//"),
       ).length;
     if (logicalLines > 300) {
-      violations.push(`${path.relative(root, absolute)}: ${logicalLines}`);
+      violations.push(`${relative}: ${logicalLines}`);
     }
   }
 }

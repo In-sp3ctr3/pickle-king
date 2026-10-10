@@ -16,6 +16,7 @@
   --clay: #ff7a4d;
   --mist: #9da494;
   --line: #2b3227;
+  --cloud-status-lane: calc(24px + env(safe-area-inset-top));
   --font-display: "Archivo Black", "Arial Black", sans-serif;
 }
 
@@ -60,6 +61,37 @@ button:disabled {
 ::selection {
   background: var(--lime);
   color: var(--court);
+}
+
+.backend-status {
+  display: flex;
+  min-height: var(--cloud-status-lane);
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+  background: var(--baseline);
+  padding: env(safe-area-inset-top) 0.75rem 0;
+  color: var(--mist);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.backend-status ~ .app-shell {
+  min-height: calc(100vh - var(--cloud-status-lane));
+}
+
+.backend-status ~ .app-shell .match-screen {
+  height: calc(100dvh - var(--cloud-status-lane));
+  min-height: calc(100dvh - var(--cloud-status-lane));
+}
+
+@media (max-width: 340px) {
+  :root {
+    --cloud-status-lane: calc(30px + env(safe-area-inset-top));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

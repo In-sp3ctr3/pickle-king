@@ -57,6 +57,7 @@ npm run dev
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000). For a deployed instance,
 copy `.env.example` and set `NEXT_PUBLIC_SITE_URL` to its canonical public URL.
+Run `npm run convex:dev` when developing the optional connectivity integration.
 
 ## Quality
 
@@ -90,11 +91,12 @@ and deployment.
 
 ## Privacy
 
-Pickle King is local-first by design. Player names, scores, and recent history
-stay in browser storage; the app has no accounts, analytics, cloud database,
-or server API. Share images are generated locally and leave the device only
-when someone chooses to share or download them. Clearing site data removes the
-saved local sessions and history.
+Pickle King is local-first by design. Guest player names, scores, and recent
+history stay in browser storage; the app has no accounts, analytics, or cloud
+persistence. Its optional Convex integration currently exposes only a public,
+data-free connectivity query. Share images are generated locally and leave the
+device only when someone chooses to share or download them. Clearing site data
+removes the saved local sessions and history.
 
 ## Project structure
 
@@ -104,6 +106,7 @@ saved local sessions and history.
 - `src/features/` — user-facing tournament, scoring, sharing, and history
   flows.
 - `src/persistence/` — validated browser-storage boundary.
+- `convex/` — external backend functions and generated client bindings.
 - `tests/` — integration, browser, rendered-output, and PWA checks.
 
 Architecture decisions and feature specifications live in
