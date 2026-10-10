@@ -1,6 +1,6 @@
 # Verification
 
-Status: implementation review
+Status: PR delivery
 
 ## Baseline
 
@@ -80,3 +80,19 @@ closes the matrix. Independent re-review returned GO with no unresolved
 in-scope findings after independently confirming the generated API exclusions,
 schema-bound data model, 12 focused tests, `npm run check`, and the canonical
 full verification result.
+
+## Development deployment
+
+- Reviewed source commit: `7d88aafa04373c91c9253f3488fd988ad9a701e0`.
+- Target: `[Development] developer-account-9ec35:pickle-king:dev/developer-account`
+  at `dev:bold-mandrill-86` / `https://bold-mandrill-86.convex.cloud`.
+- Pre-deploy data: all 18 domain tables present and individually confirmed
+  empty; no backfill or destructive migration was needed.
+- Command mode: one-shot development push with generated-code mutation disabled
+  and Convex typechecking enabled. Convex reported all functions ready on
+  2026-10-10 America/Jamaica. Tracked source remained at the exact commit.
+- Post-deploy probe: `status:health` returned `"ready"` from
+  `bold-mandrill-86`. No test or personal data was written.
+- Recovery: because all domain tables remain empty, forward correction is
+  preferred; the prior SPE-103 function set can be redeployed before any domain
+  writes if rollback is required.
