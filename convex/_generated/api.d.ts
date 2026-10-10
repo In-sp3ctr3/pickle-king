@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as lib_authz from "../lib/authz.js";
+import type * as lib_authz_policy from "../lib/authz_policy.js";
 import type * as schema_identity from "../schema_identity.js";
 import type * as schema_match from "../schema_match.js";
 import type * as schema_operations from "../schema_operations.js";
@@ -22,6 +24,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "lib/authz": typeof lib_authz;
+  "lib/authz_policy": typeof lib_authz_policy;
   schema_identity: typeof schema_identity;
   schema_match: typeof schema_match;
   schema_operations: typeof schema_operations;

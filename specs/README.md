@@ -31,6 +31,7 @@ order but are not unique (`015-serve-tracker` and
 | Premium share composer and tournament identity | [017-share-composer-tournament-identity](./017-share-composer-tournament-identity/spec.md) |
 | Convex platform schema                         | [019-convex-schema](./019-convex-schema/spec.md)                                           |
 | Convex backend foundation                      | [018-convex-foundation](./018-convex-foundation/spec.md)                                   |
+| Convex authorization kernel                    | [020-authorization-kernel](./020-authorization-kernel/spec.md)                             |
 
 Each workspace uses the same handoff:
 
