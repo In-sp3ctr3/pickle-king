@@ -217,16 +217,16 @@ export const SCORING_CLAIM_STATUS_POLICY = {
 } as const satisfies Record<Match["status"], boolean>;
 
 export function canClaimScoring(
-  m: Pick<Match, "status" | "scorerUserId" | "scorerClaimExpiresAt">,
+  m: Pick<Match, "status" | "scorerClaim">,
   now: number,
   actor: { userId: UserId; isStaff: boolean; isParticipant: boolean },
 ): boolean {
   if (!SCORING_CLAIM_STATUS_POLICY[m.status]) return false;
   if (!actor.isStaff && !actor.isParticipant) return false;
   const live =
-    m.scorerUserId !== undefined &&
-    (m.scorerClaimExpiresAt ?? 0) > now &&
-    m.scorerUserId !== actor.userId;
+    m.scorerClaim !== undefined &&
+    m.scorerClaim.expiresAt > now &&
+    m.scorerClaim.userId !== actor.userId;
   return !live || actor.isStaff;
 }
 
@@ -256,8 +256,12 @@ for (const status of ["pending", "live", "complete", "void"] as const) {
     !canClaimScoring(
       {
         status,
-        scorerUserId: selfCheckActor,
-        scorerClaimExpiresAt: selfCheckNow - 1,
+        scorerClaim: {
+          userId: selfCheckActor,
+          claimedAt: 0,
+          expiresAt: selfCheckNow - 1,
+          revision: 1,
+        },
       },
       selfCheckNow,
       { ...participant, isStaff: true },
@@ -278,8 +282,12 @@ assertDesignInvariant(
   !canClaimScoring(
     {
       status: "ready",
-      scorerUserId: selfCheckOther,
-      scorerClaimExpiresAt: selfCheckNow + 1,
+      scorerClaim: {
+        userId: selfCheckOther,
+        claimedAt: 0,
+        expiresAt: selfCheckNow + 1,
+        revision: 1,
+      },
     },
     selfCheckNow,
     participant,
@@ -290,8 +298,12 @@ assertDesignInvariant(
   canClaimScoring(
     {
       status: "ready",
-      scorerUserId: selfCheckOther,
-      scorerClaimExpiresAt: selfCheckNow + 1,
+      scorerClaim: {
+        userId: selfCheckOther,
+        claimedAt: 0,
+        expiresAt: selfCheckNow + 1,
+        revision: 1,
+      },
     },
     selfCheckNow,
     { ...participant, isStaff: true },
@@ -302,8 +314,12 @@ assertDesignInvariant(
   canClaimScoring(
     {
       status: "ready",
-      scorerUserId: selfCheckOther,
-      scorerClaimExpiresAt: selfCheckNow - 1,
+      scorerClaim: {
+        userId: selfCheckOther,
+        claimedAt: 0,
+        expiresAt: selfCheckNow - 1,
+        revision: 1,
+      },
     },
     selfCheckNow,
     participant,

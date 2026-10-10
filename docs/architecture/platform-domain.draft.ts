@@ -24,8 +24,10 @@ export type LobbyId = Id<"lobby">;
 // Never hard-deleted: deletion scrubs email/name and sets deletedAt (D11, I8).
 export interface User {
   id: UserId;
-  clerkId: string;
-  email: string;
+  // Active rows require these identity fields; deletion scrubs them (D11, I8).
+  clerkId?: string;
+  email?: string;
+  displayName?: string;
   createdAt: number;
   consentAt: number; // ToS + privacy accepted (D11)
   ageGateOk: true; // 13+ attested at sign-up; under-13 never creates a row
@@ -80,11 +82,9 @@ export interface Player {
 }
 
 export type Discipline = "singles" | "doubles";
-// Resolved at read time: userId when the row is linked, else playerId (T15).
-export type SubjectId = UserId | PlayerId;
 
 export interface Rating {
-  subjectId: SubjectId;
+  subjectId: UserId | PlayerId; // resolved at read time (T15)
   discipline: Discipline;
   rating: number; // Glicko-2 μ, displayed on the 2.0–8.0 scale
   deviation: number; // Glicko-2 φ; drives the "provisional" indicator
@@ -130,17 +130,14 @@ export interface ScoringOption {
   timeCapMs: number | null;
 }
 
-export type DivisionGender = "men" | "women" | "mixed" | "open";
-export type RatingSource = "self" | "pickle-king" | "dupr";
-
 // Conventions, not rulebook text (D8). Evaluated by `checkEligibility`.
 export interface Eligibility {
-  gender?: DivisionGender;
+  gender?: "men" | "women" | "mixed" | "open";
   minAge?: AgeBracket;
   minRating?: number;
   maxRating?: number; // e.g. 3.5 division = [3.5, 4.0)
   maxCombinedRating?: number; // e.g. "under 7.0" doubles
-  ratingSource: RatingSource;
+  ratingSource: "self" | "pickle-king" | "dupr";
   allowProvisional: boolean; // default true; provisional players get a warning (T21)
 }
 
@@ -165,8 +162,6 @@ export interface Division {
   status: "registration" | "locked" | "in-progress" | "complete";
 }
 
-export type EventVisibility = "private" | "code" | "public";
-
 export interface Event {
   id: EventId;
   orgId: OrgId; // every event belongs to exactly one org (D9)
@@ -176,9 +171,9 @@ export interface Event {
   startsAt: number;
   endsAt?: number;
   courtCount: number;
-  joinCode: string; // ≥ 8 chars, 32-symbol alphabet, rotatable
+  joinCodeDigest: string; // scoped digest; raw ≥8-char code is returned only at rotation
   joinCodeExpiresAt: number;
-  visibility: EventVisibility;
+  visibility: "private" | "code" | "public";
   status: "draft" | "open" | "live" | "complete" | "cancelled";
 }
 
@@ -286,11 +281,13 @@ export interface Match {
   signatures: Signature[];
   corrections: Correction[];
   resolution?: Resolution;
-  // One live-scoring claim; only on status "ready"; 3h TTL; staff manual
-  // entry always takes it over (T1–T3).
-  scorerUserId?: UserId;
-  scorerClaimedAt?: number;
-  scorerClaimExpiresAt?: number;
+  // One live-scoring claim; only on "ready"; revision rejects replay (T1–T4, T10).
+  scorerClaim?: {
+    userId: UserId;
+    claimedAt: number;
+    expiresAt: number;
+    revision: number;
+  };
   submittedByUserId?: UserId;
   finalAt?: number; // rating replay order and DUPR idempotency key
   weight: MatchWeight;
@@ -316,7 +313,7 @@ export interface Lobby {
   orgId: OrgId; // host's personal org
   hostUserId: UserId;
   name: string;
-  joinCode: string;
+  joinCodeDigest: string; // scoped digest; raw code is never persisted
   discipline: Discipline;
   scoring: ScoringOption;
   status: "open" | "closed";
@@ -324,21 +321,29 @@ export interface Lobby {
 
 // ------------------------------------------------------------- side tables
 
-// Role is fixed by the issuer at creation; "owner" is never grantable (I4).
-export interface Invite {
-  kind: "claim" | "team" | "scorer" | "org";
-  role?: Exclude<OrgRole, "owner"> | EventRole["role"];
-  token: string; // single use, 7 days
-  targetId: string;
+interface InviteBase {
+  tokenDigest: string; // scoped digest; raw single-use value is never persisted
+  issuedByUserId: UserId;
   expiresAt: number;
-  claimantUserId?: UserId; // claim: who opened the link (I1)
-  confirmedAt?: number; // claim: organizer confirmed or contact matched (I1)
+  revokedAt?: number;
   usedAt?: number;
 }
 
-// Local outbox item states; drain re-checks match state (T4, T10).
-export type OutboxState =
-  "queued" | "sending" | "sent" | "superseded" | "failed";
+// Target and role are fixed by the issuer; "owner" is never grantable (I4).
+export type Invite =
+  | (InviteBase & {
+      kind: "claim";
+      targetPlayerId: PlayerId;
+      claimantUserId?: UserId; // who opened the link (I1)
+      confirmedAt?: number; // organizer confirmed or contact matched (I1)
+    })
+  | (InviteBase & { kind: "team"; targetTeamId: TeamId; role: "player" })
+  | (InviteBase & { kind: "scorer"; targetEventId: EventId; role: "scorer" })
+  | (InviteBase & {
+      kind: "org";
+      targetOrgId: OrgId;
+      role: Exclude<OrgRole, "owner">;
+    });
 
 export interface DuprOutboxItem {
   matchId: MatchId;
@@ -360,9 +365,5 @@ export interface AuditEntry {
 }
 
 // Convex crons (T28). Named here so none is forgotten.
-export type ScheduledJob =
-  | "dupr-outbox-drain"
-  | "ghost-purge-90d"
-  | "scoring-claim-expiry-3h"
-  | "unsigned-result-nudge-24h"
-  | "dupr-outbox-purge-90d";
+// prettier-ignore
+export type ScheduledJob = "dupr-outbox-drain" | "ghost-purge-90d" | "scoring-claim-expiry-3h" | "unsigned-result-nudge-24h" | "dupr-outbox-purge-90d";
